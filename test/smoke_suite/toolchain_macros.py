@@ -26,10 +26,9 @@ def run():
 				'rvct2_2':   ['ARMCC', 'ARMCC_2', 'ARMCC_2_2', '__ARMCC__', '__ARMCC_2__',  '__ARMCC_2_2__'],
 				'rvct3_1':   ['ARMCC', 'ARMCC_3', 'ARMCC_3_1', '__ARMCC__', '__ARMCC_3__' , '__ARMCC_3_1__'],
 				'rvct4_0':   ['ARMCC', 'ARMCC_4', 'ARMCC_4_0', '__ARMCC__', '__ARMCC_4__' , '__ARMCC_4_0__'],
-				'gcce4_3_2': ['GCCE',  'GCCE_4',  'GCCE_4_3',  '__GCCE__',  '__GCCE_4__' ,  '__GCCE_4_3__']
-# The following are awaiting easily configurable GCCE version support
-#				'gcce4_3_3': ['GCCE', 'GCCE_4', 'GCCE_4_3', '__GCCE__', '__GCCE_4__' , '__GCCE_4_3__'],
-#				'gcce4_4_0': ['GCCE', 'GCCE_4', 'GCCE_4_4', '__GCCE__', '__GCCE_4__' , '__GCCE_4_4__']
+				'gcce4_3_2': ['GCCE',  'GCCE_4',  'GCCE_4_3',  '__GCCE__',  '__GCCE_4__' ,  '__GCCE_4_3__'],
+				'gcce4_3_3': ['GCCE', 'GCCE_4', 'GCCE_4_3', '__GCCE__', '__GCCE_4__' , '__GCCE_4_3__'],
+				'gcce4_4_1': ['GCCE', 'GCCE_4', 'GCCE_4_4', '__GCCE__', '__GCCE_4__' , '__GCCE_4_4__']
 				}
 	
 	rootname = "toolchain_macros_armv5_%s_%s"
