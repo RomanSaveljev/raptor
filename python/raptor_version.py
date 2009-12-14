@@ -15,7 +15,7 @@
 # raptor version information module
 #
 
-version=(2,11,0,"2009-11-23","symbian build system")
+version=(2,11,2,"2009-12-11","symbian build system")
 
 def numericversion():
 	"""Raptor version string"""
