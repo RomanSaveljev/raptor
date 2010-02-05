@@ -7,6 +7,7 @@ Defect Fixes:
 - SF Bug 1494 - sbs --what does not report Trace Compiler output
 - sbs -c winscw.tracecompiler uses wrong UID and doesn't generate traces
 - SF Bug 1519 - Raptor output files may contain unescaped left angle brackets as XML character data
+- SF Bug 1569 - excessive recompilation in incremental tracecompiler builds
 
 
 version 2.12.0
