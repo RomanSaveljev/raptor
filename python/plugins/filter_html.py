@@ -396,6 +396,7 @@ class HTML(filter_interface.FilterSAX):
 	# reporting of "errors" to separate files
 	
 	def record(self, taggedtext, type):
+		print "record", type, self.totals.get(type, 'N')
 		if self.totals.isempty(type):
 			self.createoverallfile(type)
 		self.appendoverallfile(type, taggedtext)
@@ -504,7 +505,7 @@ class HTML(filter_interface.FilterSAX):
 			# we don't want to show successes, just count them
 			return
 		
-		linkname = os.path.join(Records.SUBDIRS[type], "comp_" + component.replace("/","_") + ".html")
+		linkname = os.path.join(Records.SUBDIRS[type], "comp_" + re.sub("[/:]","_",component) + ".html")
 		filename = os.path.join(self.dirname, linkname)
 		title = Records.TITLES[type] + " for component " + component
 		try:
