@@ -16,7 +16,10 @@
 #
 
 import os
+import re
+import csv
 import sys
+import shutil
 import tempfile
 import filter_interface
 
@@ -30,7 +33,21 @@ class HTML(filter_interface.FilterSAX):
 	
 	def startDocument(self):
 		
-		self.dirname = "html" # use self.params
+		if self.params.logFileName:
+			self.dirname = str(self.params.logFileName).replace("%TIME", self.params.timestring)
+		else:
+			self.dirname = "html" # writing to stdout doesn't make sense
+		
+		# read regular expressions from the first file on the config path
+		self.regex = []
+		for p in self.params.configPath:
+			if not p.isAbsolute():
+				p = self.params.home.Append(p)
+				
+			csv = p.Append("logfile_regex.csv")
+			if csv.isFile():
+				self.regex = self.readregex(str(csv))
+				break
 		
 		self.elements = []
 		self.recipe_tag = None
@@ -66,6 +83,15 @@ class HTML(filter_interface.FilterSAX):
 		except:
 			return self.err("could not create file '%s'" % indexname)
 		
+		# copy over a style file if none exists in the output already
+		css = os.path.join(self.dirname, "style.css")
+		if not os.path.isfile(css):
+			try:
+				style = str(self.params.home.Append("style/filter_html.css"))
+				shutil.copyfile(style, css)
+			except:
+				self.moan("could not copy '%s' to '%s'" % (style, css))
+				
 		# create a temporary file to record all the "what" files in. We can
 		# only test the files for existence after "make" has finished running.
 		try:
@@ -186,7 +212,7 @@ class HTML(filter_interface.FilterSAX):
 		if self.ok:
 			sys.stderr.write(self.formatWarning("HTML filter " + str(exception)))
 	
-	# our error handling function
+	# our error handling functions
 	
 	def err(self, text):
 		"""only print the first error, then go quiet.
@@ -196,6 +222,12 @@ class HTML(filter_interface.FilterSAX):
 		if self.ok:
 			sys.stderr.write(self.formatError("HTML filter " + text))
 		self.ok = False
+		return self.ok
+	
+	def moan(self, text):
+		"""print a warning about something that is annoying but not fatal."""
+		if self.ok:
+			sys.stderr.write(self.formatWarning("HTML filter " + text))
 		return self.ok
 	
 	# our content handling functions
@@ -354,17 +386,10 @@ class HTML(filter_interface.FilterSAX):
 		# out there which don't set an error code when they fail, so
 		# we should look out for those cases.
 		
-		# TODO get the list of regexes from the Helium csv file
-		
-		# stupidly naive implementation for initial testing only
-		lc = text.lower()
-		
-		if "error" in lc:
-			return Records.ERROR
-		elif "warn" in lc:
-			return Records.WARNING
-		elif "remark" in lc:
-			return Records.REMARK
+		# the first expression that matches wins
+		for r in self.regex:
+			if r[0].search(text):
+				return r[1]
 		
 		return Records.OK
 	
@@ -431,9 +456,9 @@ class HTML(filter_interface.FilterSAX):
 		filename = self.totals.get(type, 'filename')
 		try:
 			file = open(filename, "a")
-			file.write("<pre>component: %s\n" % taggedtext.bldinf)
-			file.write("   config: %s\n" % taggedtext.config)
-			file.write(taggedtext.text.strip() + "</pre>")
+			file.write("<p>component: %s " % taggedtext.bldinf)
+			file.write("config: %s\n" % taggedtext.config)
+			file.write("<pre>" + taggedtext.text.strip() + "</pre>")
 			file.close()
 		except:
 			return self.err("cannot append to file '%s'" % filename)
@@ -468,6 +493,7 @@ class HTML(filter_interface.FilterSAX):
 		filename = self.configurations[configuration].get(type, 'filename')
 		try:
 			file = open(filename, "a")
+			file.write("<p>component: %s\n" % taggedtext.bldinf)
 			file.write("<pre>" + taggedtext.text.strip() + "</pre>")
 			file.close()
 		except:
@@ -503,6 +529,7 @@ class HTML(filter_interface.FilterSAX):
 		filename = self.components[component].get(type, 'filename')
 		try:
 			file = open(filename, "a")
+			file.write("<p>config: %s\n" % taggedtext.config)
 			file.write("<pre>" + taggedtext.text.strip() + "</pre>")
 			file.close()
 		except:
@@ -532,7 +559,39 @@ class HTML(filter_interface.FilterSAX):
 			self.tmp.close()	# this also deletes the temporary file
 		except Exception,e:
 			return self.err("could not close temporary file " + str(e))
+	
+	def readregex(self, csvfile):
+		"""read the list of regular expressions from a csv file.
 		
+		the file format is TYPE,REGEX,DESCRIPTION
+		"""
+		regexlist = []
+		try:
+			reader = csv.reader(open(csvfile, "rb"))
+			for row in reader:
+				try:
+					regex = re.compile(row[1])
+					type = None
+					
+					if row[0] == "CRITICAL" or row[0] == "ERROR":
+						type = Records.ERROR
+					elif row[0] == "WARNING":
+						type = Records.WARNING
+					elif row[0] == "REMARK":
+						type = Records.REMARK
+						
+					# there are other types like INFO that we don't
+					# care about so silently ignore them.
+					if type:	
+						regexlist.append((regex, type))
+				except:
+					self.moan("ignored bad regex '%s' in file '%s'" % (row[1], csvfile))
+		except:
+			self.err("cannot read regex file '%s'" % csvfile)
+			return []
+		
+		return regexlist
+	
 class Records(object):
 	"a group of related records e.g. errors, warnings and remarks."
 	
@@ -594,5 +653,4 @@ class TaggedText(object):
 
 		self.text = ""
 		
-# the end				
-
+# the end
