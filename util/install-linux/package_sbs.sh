@@ -74,7 +74,7 @@ echo "FULLVERSION=\"$FULLVERSION\"" > $TMPSBS/.version
 echo "VERSION=\"$VERSION\"" >> $TMPSBS/.version
 
 if [[ "$packtype" == "binary" ]]; then
-chmod a+x $TMPSBS/bin/* $TMPSBS/util/$HOSTPLATFORM_DIR/bin/* $TMPSBS/util/$HOSTPLATFORM_DIR/python262/bin/* 
+chmod a+x $TMPSBS/bin/* $TMPSBS/util/$HOSTPLATFORM_DIR/bin/* $TMPSBS/util/$HOSTPLATFORM_DIR/python265/bin/* 
 chmod a+x $TMPSBS/util/pvm3/bin/LINUX/*
 chmod a+x $TMPSBS/util/$HOSTPLATFORM_DIR/cw_build470msl19/release/Symbian_Tools/Command_Line_Tools/*
 fi
