@@ -69,6 +69,10 @@ class Alias(Reply):
 		super(Alias,self).__init__()
 		self.name = name
 		self.meaning = meaning
+	
+	def __cmp__(self, other):
+		""" Add __cmp__ to enable comparisons between two Alias objects based upon name."""
+		return cmp(self.name, other.name)
 
 class Config(Reply):
 	def __init__(self, fullname, outputpath):
@@ -141,7 +145,8 @@ class Context(object):
 			if type == ALL or a.type == type:
 				# copy the members we want to expose
 				aliases.append( Alias(a.name, a.meaning) )
-			
+		# Sort the aliases
+		aliases.sort()	
 		return aliases
 	
 	def getconfig(self, name):
