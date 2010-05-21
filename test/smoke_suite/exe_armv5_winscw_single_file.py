@@ -28,7 +28,7 @@ def run():
 	t.addbuildtargets('smoke_suite/test_resources/simple_gui/Bld.inf', [
 		"helloworld_exe/helloworld.mbm_bmconvcommands",
 		"helloworld_exe/helloworld_HelloWorld_sc.rpp",
-		"helloworld_exe/helloworld_HelloWorld_sc.rpp.d",
+		"helloworld_exe/helloworld_HelloWorld.rsc.d",
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o",
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o.d",
 		"helloworld_exe/armv5/udeb/HelloWorld_AppUi.o",
@@ -92,7 +92,7 @@ def run():
 		"helloworld_exe/winscw/urel/helloworld_UID_.o.d",
 		"helloworld_exe/winscw/urel/helloworld_urel_objects.lrf",
 		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg_sc.rpp",
-		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg_sc.rpp.d"
+		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.d"
 	])
 
 	t.run()
@@ -113,7 +113,7 @@ def run():
 		touch smoke_suite/test_resources/simple_gui/HelloWorld.rss
 		sbs -f - --source-target=smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp --source-target=smoke_suite/test_resources/simple_gui/HelloWorld.rss -b smoke_suite/test_resources/simple_gui/Bld.inf"""
 	t.countmatch = [
-		[".*recipe name='resource(preprocess|header|compile)'", 3],
+		[".*recipe name='resource(dependencies|compile)'", 2],
 		[".*recipe name='compile'.*", 2],
 		[".*recipe name='win32compile2object'.*", 2]
 	]
@@ -134,7 +134,7 @@ def run():
 		[".*make.*Nothing to be done for.*SOURCETARGET_.*", 10]
 	]
 	t.mustnotmatch = [
-		".*recipe name='(resourcepreprocess|win32compile2object|compile|win32simplelink|postlink|link)'.*"
+		".*recipe name='(resourcecompile|win32compile2object|compile|win32simplelink|postlink|link)'.*"
 	]
 
 	t.run()

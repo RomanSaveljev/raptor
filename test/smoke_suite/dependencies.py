@@ -133,7 +133,7 @@ def run():
 		echo INVALIDATE_ARMV5_DEPENDENCY_FILE >> """+buildLocation+"""/armv5/urel/dependency.o.d
 		echo INVALIDATE_WINSCW_DEPENDENCY_FILE >> """+buildLocation+"""/winscw/urel/dependency.o.d
 		echo INVALIDATE_TOOLS2_DEPENDENCY_FILE >> """+buildLocation+"""/dependency_exe/tools2/rel/"""+hostPlatformOffset+"""dependency.o.d
-		echo INVALIDATE_RESOURCE_DEPENDENCY_FILE >> """+buildLocation+"""/dependency__resource_apps_sc.rpp.d
+		echo INVALIDATE_RESOURCE_DEPENDENCY_FILE >> """+buildLocation+"""/dependency__resource_apps.rsc.d
 		sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel
 		sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel clean
 		sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel"""
