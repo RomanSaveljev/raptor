@@ -75,9 +75,9 @@ class Alias(Reply):
 		return cmp(self.name, other.name)
 
 class Config(Reply):
-	def __init__(self, fullname, outputpath):
+	def __init__(self, meaning, outputpath):
 		super(Config,self).__init__()
-		self.fullname = fullname
+		self.meaning = meaning
 		self.outputpath = outputpath
 
 class Product(Reply):
@@ -161,19 +161,19 @@ class Context(object):
 			x = self.__raptor.cache.FindNamedAlias(names[0])
 			
 			if len(names) > 1:
-				fullname = x.meaning + "." + ".".join(names[1:])
+				meaning = x.meaning + "." + ".".join(names[1:])
 			else:
-				fullname = x.meaning
+				meaning = x.meaning
 				
 		elif names[0] in self.__raptor.cache.variants:
-			fullname = name
+			meaning = name
 			
 		else:
 			raise BadQuery("'%s' is not an alias or a variant" % names[0])
 		
 		# create an evaluator for the named configuration
 		tmp = raptor_data.Alias("tmp")
-		tmp.SetProperty("meaning", fullname)
+		tmp.SetProperty("meaning", meaning)
 		
 		units = tmp.GenerateBuildUnits(self.__raptor.cache)
 		evaluator = self.__raptor.GetEvaluator(None, units[0])
@@ -206,7 +206,7 @@ class Context(object):
 			
 			outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
 		
-		return Config(fullname, outputpath)
+		return Config(meaning, outputpath)
 		
 	def getproducts(self):
 		"""extract all product variants."""
