@@ -93,14 +93,12 @@ CREATABLEPATHS:=$(CREATABLEPATHS) $(RSCCOPYDIRS)
 ###############################################################################
 
 
-define buildresourcedeps
+define resource.deps
 # $(1) is the name of the intermediate RESOURCEFILE or HEADERFILE that is to be produced
 # $(2) is the RPPFILE		(eg. /epoc32/build/xxx/b_sc.rpp)
 # $(3) is the LANGUAGE		(eg. sc or 01 or 02 ...)
 # $(4) is the "primary" language on which all the others depend
 
-  ifeq ($(TARGET_$(call sanitise,$(1).d)),)
-    TARGET_$(call sanitise,$(1).d):=1
     $(if $(FLMDEBUG),$$(info <debug>buildresourcedeps: $(1) for $(2) LANG:$(3) dep $(4) $5</debug>))
 
 
@@ -142,7 +140,6 @@ define buildresourcedeps
         SOURCETARGET_$(call sanitise,$(SOURCE)): $4.d
 
     endif
-  endif
 endef
 
 # $(1) is the name of the intermediate RESOURCEFILE
@@ -150,64 +147,40 @@ endef
 # $(3) is the LANGUAGE		(eg. sc or 01 or 02 ...)
 # $(4) is the "primary" language on which all the others depend
 # $(5) is the target name (without path) of the final resource file
-define buildresource
-
-  ifeq ($(TARGET_$(call sanitise,$1)),)
-    TARGET_$(call sanitise,$1):=1
+define resource.build
     $(if $(FLMDEBUG),$$(info <debug>buildresource: $(1) for $(2) LANG:$(3) dep $(4)</debug>))
 
+      $(eval DOHEADER:=)
+      ifeq ($(HEADLANG),$3)
+        ifneq ($(RESOURCEHEADER),)
+          $(eval DOHEADER:=-h$(RESOURCEHEADER))
+          RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
 
-    ifeq ($(HEADERONLY),)
-
-      RESOURCE:: $1 $(RESOURCEHEADER)
-
-      $1:
-	  $(call startrule,resourcecompile,FORCESUCCESS) \
-	  $(GNUCPP) -C -DLANGUAGE_$3 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
-	  $(CPPOPT) $(SOURCE) -o $2 && \
-	  $(RCOMP) -m045,046,047 -u $(if $(RESOURCEHEADER),-h$(RESOURCEHEADER),) -o$$@ -s$2 \
-	  $(call endrule,resourcecompile)
-
-
-      SOURCETARGET_$(call sanitise,$(SOURCE)): $1
-
-      ifneq ($(RESOURCEHEADER),)
-        RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
-
-
-	# In a very odd situation, one MMP can generate a resource and the other can generate the header
-	# for it.  In these circumstances one may need to generate the header file even if the resource
-	# is already there.  This rule makes it possible.  It's undesirably complicated but does
-	# deal with a situation that can happen in incremental builds.
-        $(RESOURCEHEADER): $1
+          # In an odd situation, one MMP can generate a resource and the other can generate the header
+          # for it.  In these circumstances one may need to generate the header file even if the resource
+          # is already there.  This rule makes it possible.  It's undesirably complicated but does
+          # deal with a situation that can happen in incremental builds.
+          $(RESOURCEHEADER): $1
 	    $(call startrule,resourceheader,FORCESUCCESS) \
 	    if [ ! -e "$(RESOURCEHEADER)" ]; then  \
 	      $(GNUCPP) -C -DLANGUAGE_$3 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
 	      $(CPPOPT) $(SOURCE) -o $2 && \
-	      $(RCOMP) -m045,046,047 -u $(if $(RESOURCEHEADER),-h$(RESOURCEHEADER),) -s$2 ; \
+	      $(RCOMP) -m045,046,047 -u $(DOHEADER) -s$2 ; \
 	    fi \
 	    $(call endrule,resourceheader)
+	endif
       endif
 
+      RESOURCE:: $1
 
-    else
-      RESOURCE:: $(RESOURCEHEADER)
-
-      $(RESOURCEHEADER): $(SOURCE)
-	  $(call startrule,resourceheader,FORCESUCCESS) \
+      $1: $(SOURCE)
+	  $(call startrule,resourcecompile,FORCESUCCESS) \
 	  $(GNUCPP) -C -DLANGUAGE_$3 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
 	  $(CPPOPT) $(SOURCE) -o $2 && \
-	  $(RCOMP) -m045,046,047 -u -h$$@ -s$2 \
-	  $(call endrule,resourceheader)
+	  $(RCOMP) -m045,046,047 -u $(DOHEADER) -o$$@ -s$2 \
+	  $(call endrule,resourcecompile)
 
-      RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
-      # individual source file compilation
-
-      SOURCETARGET_$(call sanitise,$(SOURCE)): $(RESOURCEHEADER)
-    endif
-
-
-
+      SOURCETARGET_$(call sanitise,$(SOURCE)): $1
     CLEANTARGETS:=$$(CLEANTARGETS) $1 $2 $(RESOURCEHEADER)
 
     ifeq "$1" "$4"
@@ -222,8 +195,45 @@ define buildresource
       endif
     else
          $1 : $4
-     
     endif
+endef
+
+
+# $(1) is the name of the RESOURCEHEADER
+# $(2) is the RPPFILE		(eg. /epoc32/build/xxx/b_sc.rpp)
+# $(3) is the LANGUAGE		(eg. sc or 01 or 02 ...)
+# $(5) is the target name (without path) of the final resource file
+define resource.headeronly
+      RESOURCE:: $(RESOURCEHEADER)
+
+      $(RESOURCEHEADER): $(SOURCE)
+	  $(call startrule,resourceheader,FORCESUCCESS) \
+	  $(GNUCPP) -C -DLANGUAGE_$3 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
+	  $(CPPOPT) $(SOURCE) -o $2 && \
+	  $(RCOMP) -m045,046,047 -u -h$$@ -s$2 \
+	  $(call endrule,resourceheader)
+
+      RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
+      # individual source file compilation
+
+      SOURCETARGET_$(call sanitise,$(SOURCE)): $(RESOURCEHEADER)
+
+      CLEANTARGETS:=$$(CLEANTARGETS) $(RESOURCEHEADER)
+
+
+      $(eval DEPENDFILENAME:=$1.d)
+      $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
+      
+      CLEANTARGETS:=$$(CLEANTARGETS) $(DEPENDFILENAME)
+      ifneq "$(DEPENDFILE)" ""
+        ifeq "$(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS)))" ""
+           -include $(DEPENDFILE)
+        endif
+      endif
+endef
+
+
+
   endif
 
   # Whether or not we have generated this resource for some other variant, check if there
@@ -258,18 +268,39 @@ endef # copyresource #
 # the other languages will benefit from the dependency file
 # belonging to this language.
 ifeq ($(HEADERONLY),)
-PRIMARYFILE:=$(INTERBASE_TMP).r$(HEADLANG)
-else
-PRIMARYFILE:=$(RESOURCEHEADER)
+  ifeq ($(TARGET_$(call sanitise,$INTERBASE_TMP)),)
+    TARGET_$(call sanitise,$INTERBASE_TMP):=1
+
+    PRIMARYFILE:=$(INTERBASE_TMP).r$(HEADLANG)
+    RESOURCE:: $(PRIMARYFILE)
+  
+    ifeq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
+      $(foreach L,$(LANGUAGES:SC=sc),$(eval $(call resource.deps,$(INTERBASE_TMP).r$(L),$(INTERBASE_TMP)_$(L).rpp,$(L),$(PRIMARYFILE))))
+    else
+      ifeq ($(TARGET_$(call sanitise,$INTERBASE_TMP)),)
+        TARGET_$(call sanitise,$INTERBASE_TMP):=1
+        $(foreach L,$(LANGUAGES:SC=sc),$(eval $(call resource.build,$(INTERBASE_TMP).r$(L),$(INTERBASE_TMP)_$(L).rpp,$(L),$(PRIMARYFILE),$(notdir $(INTERBASE).r$(L)))))
+      endif
+    endif
+  
+  else
+    INTERBASE_TMP:=$(INTERBASE_TMP)_h 
+    ifeq ($(TARGET_$(call sanitise,$INTERBASE_TMP)),)
+      TARGET_$(call sanitise,$INTERBASE_TMP):=1
+  
+      RESOURCE:: $$(RESOURCEHEADER)
+      PRIMARYFILE:=$(RESOURCEHEADER)
+      ifeq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
+        $(eval $(call resource.deps,$(INTERBASE_TMP).r$(HEADLANG),$(INTERBASE_TMP)_$(HEADLANG).rpp,$(HEADLANG),$(PRIMARYFILE)))
+      else
+        $(eval $(call resource.headeronly,$(INTERBASE_TMP).r$(HEADLANG),$(INTERBASE_TMP)_$(HEADLANG).rpp,$(HEADLANG),$(PRIMARYFILE),$(notdir $(INTERBASE).r$(HEADLANG))))
+      endif
+  endif
 endif
+
 # generate a resource file for each language
 # For sc we generate $(RESBASE).rsc and define LANGUAGE_SC and LANGUAGE_sc.
 
-ifeq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
-$(foreach L,$(LANGUAGES:SC=sc),$(eval $(call buildresourcedeps,$(INTERBASE_TMP).r$(L),$(INTERBASE_TMP)_$(L).rpp,$(L),$(PRIMARYFILE))))
-else
-$(foreach L,$(LANGUAGES:SC=sc),$(eval $(call buildresource,$(INTERBASE_TMP).r$(L),$(INTERBASE_TMP)_$(L).rpp,$(L),$(PRIMARYFILE),$(notdir $(INTERBASE).r$(L)))))
-endif
 
 ###############################################################################
 ## .rfi generation in support of the gccxml build
