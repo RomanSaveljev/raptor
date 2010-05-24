@@ -84,6 +84,11 @@ class Product(Reply):
 	def __init__(self, name):
 		super(Product,self).__init__()
 		self.name = name
+	
+	def __cmp__(self, other):
+		""" Add __cmp__ to enable comparisons between two Product objects based upon name."""
+		return cmp(self.name, other.name)
+
 
 import generic_path
 import raptor
@@ -217,7 +222,8 @@ class Context(object):
 			if v.type == "product":
 				# copy the members we want to expose
 				variants.append( Product(v.name) )
-			
+		# Sort the variants
+		variant.sort()	
 		return variants
 	
 class BadQuery(Exception):
