@@ -233,7 +233,7 @@ class Context(object):
 				# copy the members we want to expose
 				variants.append( Product(v.name) )
 		# Sort the variants
-		variant.sort()	
+		variants.sort()	
 		return variants
 	
 class BadQuery(Exception):
