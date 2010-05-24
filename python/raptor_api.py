@@ -42,7 +42,8 @@ class Reply(object):
 				if isinstance(value, Reply):
 					children.append(value)
 				else:
-					string += " %s='%s'" % (attribute, value)
+					if value != None: # skip attributes whose value is None
+						string += " %s='%s'" % (attribute, value)
 		
 		if children or self.text:
 			string += ">"
@@ -75,8 +76,8 @@ class Alias(Reply):
 		return cmp(self.name, other.name)
 
 class Config(Reply):
-	def __init__(self, meaning, outputpath):
-		super(Config,self).__init__()
+	def __init__(self, meaning, outputpath, text = None):
+		super(Config,self).__init__(text)
 		self.meaning = meaning
 		self.outputpath = outputpath
 
@@ -181,37 +182,46 @@ class Context(object):
 		tmp.SetProperty("meaning", meaning)
 		
 		units = tmp.GenerateBuildUnits(self.__raptor.cache)
-		evaluator = self.__raptor.GetEvaluator(None, units[0])
 		
-		# get the outputpath
-		# this is messy as some configs construct the path inside the FLM
-		# rather than talking it from the XML: usually because of some
-		# conditional logic... but maybe some refactoring could avoid that.
-		releasepath = evaluator.Get("RELEASEPATH")
-		if not releasepath:
-			raise BadQuery("could not get RELEASEPATH for config '%s'" % name)
-		
-		variantplatform = evaluator.Get("VARIANTPLATFORM")
-		varianttype = evaluator.Get("VARIANTTYPE")
-		featurevariantname = evaluator.Get("FEATUREVARIANTNAME")
-		
-		platform = evaluator.Get("TRADITIONAL_PLATFORM")
-		
-		if platform == "TOOLS2":
-			outputpath = releasepath
-		else:
-			if not variantplatform:
-				raise BadQuery("could not get VARIANTPLATFORM for config '%s'" % name)
+		# catch exceptions from creation of evaluator object	
+		try:
+			evaluator = self.__raptor.GetEvaluator(None, units[0])
 			
-			if featurevariantname:
-				variantplatform += featurevariantname
+			# get the outputpath
+			# this is messy as some configs construct the path inside the FLM
+			# rather than talking it from the XML: usually because of some
+			# conditional logic... but maybe some refactoring could avoid that.
+			releasepath = evaluator.Get("RELEASEPATH")
+			if not releasepath:
+				raise BadQuery("could not get RELEASEPATH for config '%s'" % name)
+					
+			variantplatform = evaluator.Get("VARIANTPLATFORM")
+			varianttype = evaluator.Get("VARIANTTYPE")
+			featurevariantname = evaluator.Get("FEATUREVARIANTNAME")
+			
+			platform = evaluator.Get("TRADITIONAL_PLATFORM")
+			
+			if platform == "TOOLS2":
+				outputpath = releasepath
+			else:
+				if not variantplatform:
+					raise BadQuery("could not get VARIANTPLATFORM for config '%s'" % name)
 				
-			if not varianttype:
-				raise BadQuery("could not get VARIANTTYPE for config '%s'" % name)
+				if featurevariantname:
+					variantplatform += featurevariantname
+					
+				if not varianttype:
+					raise BadQuery("could not get VARIANTTYPE for config '%s'" % name)
+				
+				outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
 			
-			outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
+			text = None # indicates that no exception occured
 		
-		return Config(meaning, outputpath)
+		except Exception, e: # unable to determine output path
+			outputpath = None
+			text = str(e)
+			
+		return Config(meaning, outputpath, text)
 		
 	def getproducts(self):
 		"""extract all product variants."""
