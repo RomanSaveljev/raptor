@@ -59,19 +59,19 @@ class TestRaptorApi(unittest.TestCase):
 			path = "C:/home/raptor/foo/bar"
 			
 		config = api.getconfig("buildme")
-		self.failUnlessEqual(config.fullname, "buildme")
+		self.failUnlessEqual(config.meaning, "buildme")
 		self.failUnlessEqual(config.outputpath, path)
 		
 		config = api.getconfig("buildme.foo")
-		self.failUnlessEqual(config.fullname, "buildme.foo")
+		self.failUnlessEqual(config.meaning, "buildme.foo")
 		self.failUnlessEqual(config.outputpath, path)
 		
 		config = api.getconfig("s1")
-		self.failUnlessEqual(config.fullname, "buildme.foo")
+		self.failUnlessEqual(config.meaning, "buildme.foo")
 		self.failUnlessEqual(config.outputpath, path)
 		
 		config = api.getconfig("s2.product_A")
-		self.failUnlessEqual(config.fullname, "buildme.foo.bar.product_A")
+		self.failUnlessEqual(config.meaning, "buildme.foo.bar.product_A")
 		self.failUnlessEqual(config.outputpath, path)
 		
 	def testProducts(self):
