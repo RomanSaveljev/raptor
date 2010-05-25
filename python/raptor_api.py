@@ -151,7 +151,6 @@ class Context(object):
 			if type == ALL or a.type == type:
 				# copy the members we want to expose
 				aliases.append( Alias(a.name, a.meaning) )
-		# Sort the aliases
 		aliases.sort()	
 		return aliases
 	
@@ -184,6 +183,7 @@ class Context(object):
 		units = tmp.GenerateBuildUnits(self.__raptor.cache)
 		
 		# catch exceptions from creation of evaluator object	
+		text = None 
 		try:
 			evaluator = self.__raptor.GetEvaluator(None, units[0])
 			
@@ -215,8 +215,6 @@ class Context(object):
 				
 				outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
 			
-			text = None # indicates that no exception occured
-		
 		except Exception, e: # unable to determine output path
 			outputpath = None
 			text = str(e)
@@ -232,7 +230,6 @@ class Context(object):
 			if v.type == "product":
 				# copy the members we want to expose
 				variants.append( Product(v.name) )
-		# Sort the variants
 		variants.sort()	
 		return variants
 	
