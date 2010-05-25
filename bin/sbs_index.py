@@ -40,11 +40,8 @@ for a in sys.argv[1:-1]:
 	else:
 		sys.stderr.write("warning: %s is not a directory\n" % a)
 
-# don't overwrite the output file if it already exists
 indexfile = sys.argv[-1]
-if os.path.isfile(indexfile):
-	sys.stderr.write("error: cannot overwrite existing index file %s\n" % indexfile)
-	sys.exit(1)
+indexdir = os.path.dirname(indexfile)
 	
 def findtotals(dirs, files):
 	"recurse directories until we find a totals.txt file."
@@ -70,7 +67,7 @@ css = "style.css"
 for t in totals:
 	c = os.path.join(os.path.dirname(t),"style.css")
 	if os.path.isfile(c):
-		css = "file://" + os.path.abspath(c)
+		css = os.path.relpath(c, indexdir)
 		break
 	
 # write the header of the index
@@ -116,7 +113,7 @@ for t in totals:
 	if len(columns) == len(filter_html.Records.TITLES):
 		try:
 			linktext = os.path.dirname(t)
-			linkname = "file://" + os.path.abspath(os.path.join(linktext, "index.html"))
+			linkname = os.path.relpath(os.path.join(linktext, "index.html"), indexdir)
 			index.write('<tr><td class="name"><a href="%s">%s</a></td>' % (linkname, linktext))
 			for (style, count) in columns:
 				index.write('<td class="%s">%d</td>' % (style, count))
@@ -127,7 +124,7 @@ for t in totals:
 	
 # finish off
 try:
-	index.write('<tr><td class="name">&nbsp;</td></tr><tr><td class="name">total</td>')
+	index.write('<tr><td>&nbsp;</td></tr><tr><td class="name">total</td>')
 	for i, count in enumerate(grandtotal):
 		if count == 0:
 			index.write('<td class="zero">0</td>')
