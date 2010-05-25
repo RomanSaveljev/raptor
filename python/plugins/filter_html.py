@@ -582,13 +582,15 @@ class HTML(filter_interface.FilterSAX):
 		"""read the list of regular expressions from a csv file.
 		
 		the file format is TYPE,REGEX,DESCRIPTION
+		
+		If the description is "ignorecase" then the regular expression is
+		compiled with re.IGNORECASE and will match case-insensitively.
 		"""
 		regexlist = []
 		try:
 			reader = csv.reader(open(csvfile, "rb"))
 			for row in reader:
 				try:
-					regex = re.compile(row[1])
 					type = None
 					
 					if row[0] == "CRITICAL" or row[0] == "ERROR":
@@ -600,7 +602,11 @@ class HTML(filter_interface.FilterSAX):
 						
 					# there are other types like INFO that we don't
 					# care about so silently ignore them.
-					if type:	
+					if type:
+						if row[2].lower() == "ignorecase":
+							regex = re.compile(row[1], re.I)
+						else:
+							regex = re.compile(row[1])
 						regexlist.append((regex, type))
 				except:
 					self.moan("ignored bad regex '%s' in file '%s'" % (row[1], csvfile))
