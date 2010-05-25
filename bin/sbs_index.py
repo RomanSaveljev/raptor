@@ -102,7 +102,7 @@ for t in totals:
 			type = int(row[0])
 			style = row[1]
 			count = int(row[2])
-			if filter_html.Records.SUBDIRS[type] == style:
+			if count == 0 or filter_html.Records.SUBDIRS[type] == style:
 				grandtotal[type] += count
 				columns.append((style,count))
 			else:
