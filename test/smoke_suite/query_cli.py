@@ -58,7 +58,7 @@ def run():
 	t.command = "sbs --query=config[armv5_urel]"
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
-		"fullname='arm\.v5\.urel\.rvct.*'",
+		"meaning='arm\.v5\.urel\.rvct.*'",
 		"outputpath='.*/epoc32/release/armv5/urel'",
 		"</sbs>"
 		]
@@ -69,7 +69,7 @@ def run():
 	t.command = "sbs --query=config[armv5_urel.test_bv_1] --configpath=test/smoke_suite/test_resources/bv"
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
-		"fullname='arm\.v5\.urel\.rvct._.\.test_bv_1'",
+		"meaning='arm\.v5\.urel\.rvct._.\.test_bv_1'",
 		"outputpath='.*/epoc32/release/armv5\.one/urel'",
 		"</sbs>"
 		]

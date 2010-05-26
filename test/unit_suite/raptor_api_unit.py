@@ -39,6 +39,9 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(set(["alias_A","alias_B","s1","s2"]),
 							 set(a.name for a in aliases))
 		
+		aliaslist = [a.name for a in aliases] # verify that the list is sorted
+		self.failUnlessEqual(["alias_A","alias_B","s1","s2"], aliaslist)
+		
 		aliases = api.getaliases(raptor_api.ALL) # ignore type
 		self.failUnlessEqual(len(aliases), 6)
 		
@@ -59,19 +62,19 @@ class TestRaptorApi(unittest.TestCase):
 			path = "C:/home/raptor/foo/bar"
 			
 		config = api.getconfig("buildme")
-		self.failUnlessEqual(config.fullname, "buildme")
+		self.failUnlessEqual(config.meaning, "buildme")
 		self.failUnlessEqual(config.outputpath, path)
 		
 		config = api.getconfig("buildme.foo")
-		self.failUnlessEqual(config.fullname, "buildme.foo")
+		self.failUnlessEqual(config.meaning, "buildme.foo")
 		self.failUnlessEqual(config.outputpath, path)
 		
 		config = api.getconfig("s1")
-		self.failUnlessEqual(config.fullname, "buildme.foo")
+		self.failUnlessEqual(config.meaning, "buildme.foo")
 		self.failUnlessEqual(config.outputpath, path)
 		
 		config = api.getconfig("s2.product_A")
-		self.failUnlessEqual(config.fullname, "buildme.foo.bar.product_A")
+		self.failUnlessEqual(config.meaning, "buildme.foo.bar.product_A")
 		self.failUnlessEqual(config.outputpath, path)
 		
 	def testProducts(self):
@@ -84,6 +87,8 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(len(products), 2)
 		self.failUnlessEqual(set(["product_A","product_C"]),
 							 set(p.name for p in products))
+		productlist = [p.name for p in products] # verify that the list is sorted
+		self.failUnlessEqual(["product_A","product_C"], productlist)
 		
 # run all the tests
 

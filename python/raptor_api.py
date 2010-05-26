@@ -42,7 +42,8 @@ class Reply(object):
 				if isinstance(value, Reply):
 					children.append(value)
 				else:
-					string += " %s='%s'" % (attribute, value)
+					if value != None: # skip attributes whose value is None
+						string += " %s='%s'" % (attribute, value)
 		
 		if children or self.text:
 			string += ">"
@@ -69,17 +70,26 @@ class Alias(Reply):
 		super(Alias,self).__init__()
 		self.name = name
 		self.meaning = meaning
+	
+	def __cmp__(self, other):
+		""" Add __cmp__ to enable comparisons between two Alias objects based upon name."""
+		return cmp(self.name, other.name)
 
 class Config(Reply):
-	def __init__(self, fullname, outputpath):
-		super(Config,self).__init__()
-		self.fullname = fullname
+	def __init__(self, meaning, outputpath, text = None):
+		super(Config,self).__init__(text)
+		self.meaning = meaning
 		self.outputpath = outputpath
 
 class Product(Reply):
 	def __init__(self, name):
 		super(Product,self).__init__()
 		self.name = name
+	
+	def __cmp__(self, other):
+		""" Add __cmp__ to enable comparisons between two Product objects based upon name."""
+		return cmp(self.name, other.name)
+
 
 import generic_path
 import raptor
@@ -141,7 +151,7 @@ class Context(object):
 			if type == ALL or a.type == type:
 				# copy the members we want to expose
 				aliases.append( Alias(a.name, a.meaning) )
-			
+		aliases.sort()	
 		return aliases
 	
 	def getconfig(self, name):
@@ -156,52 +166,60 @@ class Context(object):
 			x = self.__raptor.cache.FindNamedAlias(names[0])
 			
 			if len(names) > 1:
-				fullname = x.meaning + "." + ".".join(names[1:])
+				meaning = x.meaning + "." + ".".join(names[1:])
 			else:
-				fullname = x.meaning
+				meaning = x.meaning
 				
 		elif names[0] in self.__raptor.cache.variants:
-			fullname = name
+			meaning = name
 			
 		else:
 			raise BadQuery("'%s' is not an alias or a variant" % names[0])
 		
 		# create an evaluator for the named configuration
 		tmp = raptor_data.Alias("tmp")
-		tmp.SetProperty("meaning", fullname)
+		tmp.SetProperty("meaning", meaning)
 		
 		units = tmp.GenerateBuildUnits(self.__raptor.cache)
-		evaluator = self.__raptor.GetEvaluator(None, units[0])
 		
-		# get the outputpath
-		# this is messy as some configs construct the path inside the FLM
-		# rather than talking it from the XML: usually because of some
-		# conditional logic... but maybe some refactoring could avoid that.
-		releasepath = evaluator.Get("RELEASEPATH")
-		if not releasepath:
-			raise BadQuery("could not get RELEASEPATH for config '%s'" % name)
-		
-		variantplatform = evaluator.Get("VARIANTPLATFORM")
-		varianttype = evaluator.Get("VARIANTTYPE")
-		featurevariantname = evaluator.Get("FEATUREVARIANTNAME")
-		
-		platform = evaluator.Get("TRADITIONAL_PLATFORM")
-		
-		if platform == "TOOLS2":
-			outputpath = releasepath
-		else:
-			if not variantplatform:
-				raise BadQuery("could not get VARIANTPLATFORM for config '%s'" % name)
+		# catch exceptions from creation of evaluator object	
+		text = None 
+		try:
+			evaluator = self.__raptor.GetEvaluator(None, units[0])
 			
-			if featurevariantname:
-				variantplatform += featurevariantname
+			# get the outputpath
+			# this is messy as some configs construct the path inside the FLM
+			# rather than talking it from the XML: usually because of some
+			# conditional logic... but maybe some refactoring could avoid that.
+			releasepath = evaluator.Get("RELEASEPATH")
+			if not releasepath:
+				raise BadQuery("could not get RELEASEPATH for config '%s'" % name)
+					
+			variantplatform = evaluator.Get("VARIANTPLATFORM")
+			varianttype = evaluator.Get("VARIANTTYPE")
+			featurevariantname = evaluator.Get("FEATUREVARIANTNAME")
+			
+			platform = evaluator.Get("TRADITIONAL_PLATFORM")
+			
+			if platform == "TOOLS2":
+				outputpath = releasepath
+			else:
+				if not variantplatform:
+					raise BadQuery("could not get VARIANTPLATFORM for config '%s'" % name)
 				
-			if not varianttype:
-				raise BadQuery("could not get VARIANTTYPE for config '%s'" % name)
+				if featurevariantname:
+					variantplatform += featurevariantname
+					
+				if not varianttype:
+					raise BadQuery("could not get VARIANTTYPE for config '%s'" % name)
+				
+				outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
 			
-			outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
-		
-		return Config(fullname, outputpath)
+		except Exception, e: # unable to determine output path
+			outputpath = None
+			text = str(e)
+			
+		return Config(meaning, outputpath, text)
 		
 	def getproducts(self):
 		"""extract all product variants."""
@@ -212,7 +230,7 @@ class Context(object):
 			if v.type == "product":
 				# copy the members we want to expose
 				variants.append( Product(v.name) )
-			
+		variants.sort()	
 		return variants
 	
 class BadQuery(Exception):
