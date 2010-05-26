@@ -18,8 +18,8 @@ sbs -s sys1.xml --filters=html,bz2log -f build/part1
 sbs -s sys2.xml --filters=html,bz2log -f build/part2
 sbs -s sys3.xml --filters=html,bz2log -f build/part3
 
-Then there is a new script "bin/sbs_index.py" which can produce a single
-index linking to all the individual parts: for example,
+Then there is a new script "SBS_HOME/bin/sbs_index.py" which can produce a
+single index linking to all the individual parts: for example,
 
 sbs_index.py build/part1 build/part2 build/part3 build/index.html
 

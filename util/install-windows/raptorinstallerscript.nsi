@@ -110,6 +110,8 @@ Section "Install Raptor" INSTALLRAPTOR
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\python\*.*
     SetOutPath "$INSTDIR\schema"
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\schema\*.*
+    SetOutPath "$INSTDIR\style"
+    File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\style\*.*
     SetOutPath "$INSTDIR\win32\bin"
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\win32\bin\*.*
     SetOutPath "$INSTDIR\win32\bv"
@@ -334,6 +336,7 @@ Section "Uninstall"
     RmDir /r $INSTDIR\lib
     RmDir /r $INSTDIR\python
     RmDir /r $INSTDIR\schema
+    RmDir /r $INSTDIR\style
     RmDir /r $INSTDIR\win32
     Delete $INSTDIR\RELEASE-NOTES.html
     RmDir /r $INSTDIR\notes
