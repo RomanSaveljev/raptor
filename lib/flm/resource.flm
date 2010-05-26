@@ -90,39 +90,58 @@ ifneq ($(BINCOPYDIRS),)
 endif
 CREATABLEPATHS:=$(CREATABLEPATHS) $(RSCCOPYDIRS)
 
+################################################################################
+# Correct dependency information when a header file can't be found.
+# If the c preprocessor can't find a dependency it appears as it did in the #include statement
+# e.g. "filename.mbg" or "filename.rsg" in the dependency file.
+ifneq ($(NO_DEPEND_GENERATE),)
+  # This version minimises the size of dependency files, to contain only .mbg and .rsg deps.
+  # It allows resources to be built in the right order but doesn't impose the weight of
+  # of full dependency information which can overwhelm make in large builds.
+  # The strategy is filter lines which don't have .rsg or .mbg dependencies in them and
+  # to sift each line to leave out non-relevant things like other header files, .hrh 
+  # files etc.  In the end don't print anything at all if we did not find the target.
+
+  define  DEPENDENCY_CORRECTOR
+  { $(DEPCRUNCH) --extensions rsg,mbg --assume '$$$$(EPOCROOT)/epoc32/include' ; } 
+  endef
+  
+else
+  # This can correct the dependencies by assuming that the file will be in epoc32\include as this is the default
+  DEPENDENCY_CORRECTOR:=$(GNUSED)  -r 's% ([^ \/]+\.((rsg)|(mbg)))% $(EPOCROOT)\/epoc32\/include\/\1%ig' 
+endif
+
 ###############################################################################
 
+define resource.headeronly.deps
+# $(1) is the name of the HEADERFILE that is to be produced
+# $(2) is the RPPFILE		(eg. /epoc32/build/xxx/b_sc.rpp)
+# $(3) is the LANGUAGE		(eg. sc or 01 or 02 ...)
+
+    $(if $(FLMDEBUG),$$(info <debug>resource.headeronly.deps: $(1) for $(2) LANG:$(3) dep $(4) $5</debug>))
+
+    RESOURCE_DEPS:: $4.d
+        
+    # could  force deps to be generated always - debatable.
+    # .PHONY: $4.d 
+
+    $4.d: $(SOURCE)
+	$(call startrule,resourcedependencies,FORCESUCCESS) \
+	$(GNUCPP) -DLANGUAGE_$(3) -DLANGUAGE_$(subst sc,SC,$3) $(call makemacrodef,-D,$(MMPDEFS))\
+	$(CPPOPT) $(SOURCE) -M -MG -MT"$1" | \
+	$$(DEPENDENCY_CORRECTOR) >$(dir $2)/$(notdir $1).d \
+	$(call endrule,resourcedependencies)
+
+    SOURCETARGET_$(call sanitise,$(SOURCE)): $(dir $2)/$(notdir $1).d
+endef
 
 define resource.deps
-# $(1) is the name of the intermediate RESOURCEFILE or HEADERFILE that is to be produced
+# $(1) is the name of the intermediate RESOURCEFILE that is to be produced
 # $(2) is the RPPFILE		(eg. /epoc32/build/xxx/b_sc.rpp)
 # $(3) is the LANGUAGE		(eg. sc or 01 or 02 ...)
 # $(4) is the "primary" language on which all the others depend
 
-    $(if $(FLMDEBUG),$$(info <debug>buildresourcedeps: $(1) for $(2) LANG:$(3) dep $(4) $5</debug>))
-
-
-    # Correct dependency information when a header file can't be found.
-    # If the c preprocessor can't find a dependency it appears as it did in the #include statement
-    # e.g. "filename.mbg" or "filename.rsg" in the dependency file.
-
-    ifneq ($(NO_DEPEND_GENERATE),)
-      # This version minimises the size of dependency files, to contain only .mbg and .rsg deps.
-      # It allows resources to be built in the right order but doesn't impose the weight of
-      # of full dependency information which can overwhelm make in large builds.
-      # The strategy is filter lines which don't have .rsg or .mbg dependencies in them and
-      # to sift each line to leave out non-relevant things like other header files, .hrh 
-      # files etc.  In the end don't print anything at all if we did not find the target.
-
-      define  DEPENDENCY_CORRECTOR
-      { $(DEPCRUNCH) --extensions rsg,mbg --assume '$$$$(EPOCROOT)/epoc32/include' ; } 
-      endef
-      
-    else
-      # This can correct the dependencies by assuming that the file will be in epoc32\include as this is the default
-      DEPENDENCY_CORRECTOR:=$(GNUSED)  -r 's% ([^ \/]+\.((rsg)|(mbg)))% $(EPOCROOT)\/epoc32\/include\/\1%ig' 
-    endif
-
+    $(if $(FLMDEBUG),$$(info <debug>resource.deps: $(1) for $(2) LANG:$(3) dep $(4) $5</debug>))
 
     ifeq "$1" "$4"
         RESOURCE_DEPS:: $4.d
@@ -202,7 +221,7 @@ endef
 # $(1) is the name of the RESOURCEHEADER
 # $(2) is the RPPFILE		(eg. /epoc32/build/xxx/b_sc.rpp)
 # $(3) is the LANGUAGE		(eg. sc or 01 or 02 ...)
-# $(5) is the target name (without path) of the final resource file
+# $(4) is the target name (without path) of the final resource file
 define resource.headeronly
       RESOURCE:: $(RESOURCEHEADER)
 
@@ -221,7 +240,7 @@ define resource.headeronly
       CLEANTARGETS:=$$(CLEANTARGETS) $(RESOURCEHEADER)
 
 
-      $(eval DEPENDFILENAME:=$1.d)
+      $(eval DEPENDFILENAME:=$(dir $1)/$(notdir RESOURCEHEADER).d)
       $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
       
       CLEANTARGETS:=$$(CLEANTARGETS) $(DEPENDFILENAME)
