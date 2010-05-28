@@ -2286,6 +2286,25 @@ class MMPRaptorBackend(MMPBackend):
 		self.BuildVariant.AddOperation(raptor_data.Set("SOURCE",
 						   " ".join(self.sources)))
 
+	def validate(self):
+		"""Test that the parsed MMP file is correct.
+		
+		By "correct" we mean that all the required keywords were present
+		with acceptable and mutually consistent values.
+		
+		There should be no attempt to build anything if this method returns False."""
+		
+		# do all the checks so that we can see all the errors at once...
+		valid = True
+		
+		if not self.__TARGET:
+			self.__Raptor.Error("required keyword TARGET is missing in " + self.__currentMmpFile, bldinf=self.__bldInfFilename)
+			valid = False
+		
+		# what else could be wrong?
+			
+		return valid
+	
 	def getTargetType(self):
 		"""Target type in lower case - the standard format"""
 		return self.__targettype.lower()
@@ -3170,6 +3189,11 @@ class MetaReader(object):
 			else:
 				backend.finalise(buildPlatform)
 
+			# if the parsed MMP file is fundamentally broken then report
+			# the errors and stop processing this MMP node
+			if not backend.validate():
+				continue
+			
 			# feature variation only processes FEATUREVARIANT binaries
 			if buildPlatform["ISFEATUREVARIANT"] and not backend.featureVariant:
 				continue
