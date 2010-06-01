@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -291,7 +291,7 @@ def run():
 	# Test keyword: EPOCNESTEDEXCEPTIONS
 	t.id = "75n"
 	t.name = "epocnestedexceptions"
-	t.command = "sbs -b smoke_suite/test_resources/mmp/epocnestedexceptions/bld.inf -c armv5 -f-"
+	t.command = "sbs -b smoke_suite/test_resources/mmp/epocnestedexceptions/bld.inf -c armv5_udeb -f-"
 
 	# When EPOCNESTEDEXCEPTIONS is specified in the MMP file, a different static
 	# run-time library should be used.
@@ -302,7 +302,7 @@ def run():
 
 	# The new static run-time libraries don't yet exist.
 	t.errors = 1
-	t.warnings = 2
+	t.warnings = 1
 	t.targets = []
 
 	t.run()
