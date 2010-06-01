@@ -32,9 +32,18 @@ NOEXPORTLIBRARY
 start armcc
     armrt
     arminc
-    
+
+    #if defined(ARMCC_3_1) || defined(ARMCC_4_0)
     armlibs     c_5.l cpprt_5.l h_5.l
-    
+
+    #elif defined(ARMCC_2_2)
+    #ifdef MARM_ARMV5
+	ARMLIBS		c_t__un.l cpprt_t__u.l
+    #else
+	ARMLIBS		c_a__un.l cpprt_a__u.l
+    #endif
+
+    #endif
 end
 
 unpagedcode
