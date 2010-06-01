@@ -299,6 +299,10 @@ class PreProcessor(raptor_utilities.ExternalTool):
 		""" Override call so that we can do our own error handling."""
 		tool = self._ExternalTool__Tool
 		commandline = tool + " " + aArgs + " " + str(sourcefilename)
+		
+		if self.raptor.debugOutput:
+			self.raptor.Debug("Preprocessing command line %s", str(commandline))
+			
 		try:
 			# the actual call differs between Windows and Unix
 			if raptor_utilities.getOSFileSystem() == "unix":
@@ -403,7 +407,6 @@ class PreProcessor(raptor_utilities.ExternalTool):
 
 		return call
 
-
 class MetaDataFile(object):
 	"""A generic representation of a Symbian metadata file
 
@@ -466,34 +469,11 @@ class MetaDataFile(object):
 										'-I', '-D', '-include', self.log)
 			preProcessor.filename = self.filename
 
-			# always have the current directory on the include path
-			preProcessor.addIncludePath('.')
-
-			# the SYSTEMINCLUDE directories defined in the build config
-			# should be on the include path. This is added mainly to support
-			# Feature Variation as SYSTEMINCLUDE is usually empty at this point.
-			systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
-			if systemIncludes:
-				preProcessor.addIncludePaths(systemIncludes.split())
-
-			preInclude = aBuildPlatform['VARIANT_HRH']
-
-			# for non-Feature Variant builds, the directory containing the HRH should
-			# be on the include path
-			if not aBuildPlatform['ISFEATUREVARIANT']:
-				preProcessor.addIncludePath(preInclude.Dir())
-
-			# and EPOCROOT/epoc32/include
-			preProcessor.addIncludePath(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
-
-			# and the directory containing the bld.inf file
-			if self.__RootLocation is not None and str(self.__RootLocation) != "":
-				preProcessor.addIncludePath(self.__RootLocation)
-
-			# and the directory containing the file we are processing
-			preProcessor.addIncludePath(self.filename.Dir())
+			# Set the preprocessor include paths
+			self.setPreProcessorIncludePaths(preProcessor, aBuildPlatform)
 
 			# there is always a pre-include file
+			preInclude = aBuildPlatform['VARIANT_HRH']
 			preProcessor.setPreIncludeFile(preInclude)
 
 			macros = ["SBSV2"]
@@ -523,6 +503,44 @@ class MetaDataFile(object):
 			self.__PreProcessedContent[key] = text
 
 		return self.__PreProcessedContent[key]
+		
+	def setPreProcessorIncludePaths(self, aPreprocessor, aBuildPlatform):
+		""" setPreProcessorIncludePaths: set the preprocessor include paths """
+		ppip = self.preparePreProcessorIncludePaths(aBuildPlatform)
+		aPreprocessor.addIncludePaths(ppip)
+		
+	def preparePreProcessorIncludePaths(self, aBuildPlatform):
+		""" Prepare a list of the include paths for use by the preprocessor. """
+		paths = []
+		
+		# always have the current directory on the include path
+		paths.append('.')
+
+		# the SYSTEMINCLUDE directories defined in the build config
+		# should be on the include path. This is added mainly to support
+		# Feature Variation as SYSTEMINCLUDE is usually empty at this point.
+		systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
+		if systemIncludes:
+			paths.extend(systemIncludes.split())
+
+		preInclude = aBuildPlatform['VARIANT_HRH']
+		
+		# for non-Feature Variant builds, the directory containing the HRH should
+		# be on the include path
+		if not aBuildPlatform['ISFEATUREVARIANT']:
+			paths.append(preInclude.Dir())
+
+		# and EPOCROOT/epoc32/include
+		paths.append(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
+
+		# and the directory containing the bld.inf file
+		if self.__RootLocation is not None and str(self.__RootLocation) != "":
+			paths.append(self.__RootLocation)
+
+		# and the directory containing the file we are processing
+		paths.append(self.filename.Dir())
+		
+		return paths
 
 class MMPFile(MetaDataFile):
 	"""A generic representation of a Symbian metadata file

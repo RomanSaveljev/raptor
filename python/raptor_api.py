@@ -41,6 +41,9 @@ class Reply(object):
 			if attribute != "text":
 				if isinstance(value, Reply):
 					children.append(value)
+				elif isinstance(value, list):
+					for item in value: 
+						children.append(item)
 				else:
 					if value != None: # skip attributes whose value is None
 						string += " %s='%s'" % (attribute, value)
@@ -90,10 +93,30 @@ class Product(Reply):
 		""" Add __cmp__ to enable comparisons between two Product objects based upon name."""
 		return cmp(self.name, other.name)
 
+class Include(Reply):
+	def __init__(self, path):
+		super(Include,self).__init__()
+		self.path = path
+
+class PreInclude(Reply):
+	def __init__(self, file):
+		super(PreInclude,self).__init__()
+		self.file = file
+
+class Macro(Reply):
+	def __init__(self, name):
+		super(Macro,self).__init__()
+		self.name = name
+
+class TargetType(Reply):
+	def __init__(self, name):
+		super(TargetType,self).__init__()
+		self.name = name
 
 import generic_path
 import raptor
 import raptor_data
+import raptor_meta
 import re
 
 class Context(object):
@@ -183,7 +206,10 @@ class Context(object):
 		units = tmp.GenerateBuildUnits(self.__raptor.cache)
 		
 		# catch exceptions from creation of evaluator object	
-		text = None 
+		text = None
+		includepaths = []
+		preincludeheader = ""
+		platmacros = ["SBSV2"]
 		try:
 			evaluator = self.__raptor.GetEvaluator(None, units[0])
 			
@@ -200,6 +226,17 @@ class Context(object):
 			featurevariantname = evaluator.Get("FEATUREVARIANTNAME")
 			
 			platform = evaluator.Get("TRADITIONAL_PLATFORM")
+			
+			# 			
+			buildunits = raptor_data.GetBuildUnits([meaning], self.__raptor.cache, self.__raptor)
+			metareader = raptor_meta.MetaReader(self.__raptor, buildunits)
+			metadatafile = raptor_meta.MetaDataFile(generic_path.Path("bld.inf"), "cpp", [], None, self.__raptor)
+			# There is only one build platform here			
+			includepaths = metadatafile.preparePreProcessorIncludePaths(metareader.BuildPlatforms[0])
+			
+			preincludeheader = metareader.BuildPlatforms[0]['VARIANT_HRH']
+			
+			platmacros.extend(metareader.BuildPlatforms[0]['PLATMACROS'].split())
 			
 			if platform == "TOOLS2":
 				outputpath = releasepath
@@ -218,8 +255,20 @@ class Context(object):
 		except Exception, e: # unable to determine output path
 			outputpath = None
 			text = str(e)
-			
-		return Config(meaning, outputpath, text)
+		
+		config = Config(meaning, outputpath, text)
+		
+		# Add child elements if they were calculated
+		if len(includepaths) > 0:
+			config.includepaths = map(lambda x: Include(str(x)), includepaths)
+		
+		if preincludeheader != "":
+			config.preincludeheader = PreInclude(str(preincludeheader))
+		
+		if len(platmacros) > 0:
+			config.platmacros = map(lambda x: Macro(x), platmacros)
+					
+		return config 
 		
 	def getproducts(self):
 		"""extract all product variants."""
