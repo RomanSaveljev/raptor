@@ -29,6 +29,7 @@
  		<set name="SBS_BUILD_DIR" value=""/>
  		<set name="FLM_EXPORT_DIR" value=""/>
  		<set name="PLATMACROS.LINUX" value=""/>
+		<set name="PLATMACROS.WINDOWS" value=""/>
  		<set name="VARIANT_CFG" value="$(EPOCROOT)/epoc32/tools/variant/variant.cfg"/>
  		<set name="SYSTEMINCLUDE" value=""/>
  		<set name="INTERFACE_TYPES" value=""/>
