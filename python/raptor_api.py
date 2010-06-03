@@ -209,7 +209,7 @@ class Context(object):
 		text = None
 		includepaths = []
 		preincludeheader = ""
-		platmacros = ["SBSV2"]
+		platmacros = []
 		try:
 			evaluator = self.__raptor.GetEvaluator(None, units[0])
 			
@@ -227,16 +227,20 @@ class Context(object):
 			
 			platform = evaluator.Get("TRADITIONAL_PLATFORM")
 			
-			# 			
+			# Initialise data and metadata objects
 			buildunits = raptor_data.GetBuildUnits([meaning], self.__raptor.cache, self.__raptor)
 			metareader = raptor_meta.MetaReader(self.__raptor, buildunits)
 			metadatafile = raptor_meta.MetaDataFile(generic_path.Path("bld.inf"), "cpp", [], None, self.__raptor)
-			# There is only one build platform here			
-			includepaths = metadatafile.preparePreProcessorIncludePaths(metareader.BuildPlatforms[0])
 			
+			# There is only one build platform here; obtain the pre-processing include paths,
+			# pre-include file, and macros.			
+			includepaths = metadatafile.preparePreProcessorIncludePaths(metareader.BuildPlatforms[0])
 			preincludeheader = metareader.BuildPlatforms[0]['VARIANT_HRH']
 			
-			platmacros.extend(metareader.BuildPlatforms[0]['PLATMACROS'].split())
+			# The macros arrive as a list of strings of the form "name=value". 
+			# This removes the equals sign and everything to the right of it.
+			macrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
+			platmacros.extend(map(lambda macrodef: macrodef[0:macrodef.find("=")], macrolist))
 			
 			if platform == "TOOLS2":
 				outputpath = releasepath

@@ -15,12 +15,23 @@
  	<var name="product_B"/>
  	<var name="product_C" type="product"/>
  	<var name="product_D"/>
- 	
- 	<var name="buildme">
+
+	<var name="api_test_base">
  		<set name="RELEASEPATH" value="/home/raptor" host="lin.*"/>
  		<set name="RELEASEPATH" value="C:/home/raptor" host="win.*"/>
  		<set name="VARIANTPLATFORM" value="foo"/>
  		<set name="VARIANTTYPE" value="bar"/>
+ 		<set name="TRADITIONAL_PLATFORM" value=""/>
+	</var>
+ 	
+ 	<var name="buildme" extends="api_test_base">
+ 		<env name="EPOCROOT"/>
+ 		<set name="SBS_BUILD_DIR" value=""/>
+ 		<set name="FLM_EXPORT_DIR" value=""/>
+ 		<set name="PLATMACROS.LINUX" value=""/>
+ 		<set name="VARIANT_CFG" value="$(EPOCROOT)/epoc32/tools/variant/variant.cfg"/>
+ 		<set name="SYSTEMINCLUDE" value=""/>
+ 		<set name="INTERFACE_TYPES" value=""/>
  	</var>
  	
  	<var name="foo"/>
@@ -28,5 +39,12 @@
  	
  	<alias name="s1" meaning="buildme.foo"/>
  	<alias name="s2" meaning="buildme.foo.bar"/>
+
+	<var name="meta" extends="api_test_base">
+ 		<set name="GNUCPP" value="cpp"/>
+ 		<set name="DEFAULT_PLATFORMS" value=""/>
+ 		<set name="BASE_DEFAULT_PLATFORMS" value=""/>
+ 		<set name="BASE_USER_DEFAULT_PLATFORMS" value=""/>
+ 	</var>
  	
 </build>

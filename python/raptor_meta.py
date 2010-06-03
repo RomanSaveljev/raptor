@@ -461,8 +461,6 @@ class MetaDataFile(object):
 			except Exception, e:
 				self.log.Debug("Couldn't make bldinf outputpath for dependency generation")
 
-		config_macros = (aBuildPlatform['PLATMACROS']).split()
-
 		if not key in self.__PreProcessedContent:
 
 			preProcessor = PreProcessor(self.__gnucpp, '-undef -nostdinc ' + generateDepsOptions + ' ',
@@ -476,23 +474,14 @@ class MetaDataFile(object):
 			preInclude = aBuildPlatform['VARIANT_HRH']
 			preProcessor.setPreIncludeFile(preInclude)
 
-			macros = ["SBSV2"]
-
-			if config_macros:
-				macros.extend(config_macros)
-
-			if macros:
-				for macro in macros:
-					preProcessor.addMacro(macro + "=_____" +macro)
-
-			# extra "raw" macros that do not need protecting
-			preProcessor.addMacro("__GNUC__=3")
+			# Set the preprocessor macros
+			self.setPreProcessorMacros(preProcessor, aBuildPlatform)
 
 			preProcessorOutput = preProcessor.preprocess()
 
 			# Resurrect preprocessing replacements
-			pattern = r'([\\|/]| |) ?_____(('+macros[0]+')'
-			for macro in macros[1:]:
+			pattern = r'([\\|/]| |) ?_____(('+self.macros[0]+')'
+			for macro in self.macros[1:]:
 				pattern += r'|('+macro+r')'
 
 			pattern += r'\s*)'
@@ -503,6 +492,32 @@ class MetaDataFile(object):
 			self.__PreProcessedContent[key] = text
 
 		return self.__PreProcessedContent[key]
+	
+	def setPreProcessorMacros(self, aPreprocessor, aBuildPlatform):
+		""" Apply the macros for aBuildPlatform to a preprocessor object. """
+		preprocessormacros = self.preparePreProcessorMacros(aBuildPlatform)
+		for macro in preprocessormacros:
+			aPreprocessor.addMacro(macro)
+			
+	def preparePreProcessorMacros(self, aBuildPlatform):
+		""" Prepare a list of macros (e.g. for use by the preprocessor) """
+		prepared_macros = []
+		config_macros = (aBuildPlatform['PLATMACROS']).split()
+		macros = ["SBSV2"]
+
+		if config_macros:
+			macros.extend(config_macros)
+
+		if macros:
+			for macro in macros:
+				prepared_macros.append(macro + "=_____" +macro)
+		
+		self.macros = macros # For later use
+		
+		# extra "raw" macros that do not need protecting
+		prepared_macros.append("__GNUC__=3")
+		
+		return prepared_macros
 		
 	def setPreProcessorIncludePaths(self, aPreprocessor, aBuildPlatform):
 		""" setPreProcessorIncludePaths: set the preprocessor include paths """

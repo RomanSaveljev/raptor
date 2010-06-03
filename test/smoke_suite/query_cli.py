@@ -60,6 +60,19 @@ def run():
 		"<sbs version='2\.\d+\.\d+'>",
 		"meaning='arm\.v5\.urel\.rvct.*'",
 		"outputpath='.*/epoc32/release/armv5/urel'",
+		"include path='.*/epoc32/include/variant'",
+		"include path='.*/epoc32/include'",
+		"preinclude file='.*/epoc32/include/variant/Symbian_OS.hrh'",
+		"macro name='SBSV2'",
+		"macro name='ARMCC'",
+		"macro name='EPOC32'",
+		"macro name='MARM'",
+		"macro name='EABI'",
+		"macro name='GENERIC_MARM'",
+		"macro name='MARM_ARMV5'",
+		"macro name='ARMCC_2'",
+		"macro name='ARMCC_2_2'",
+		"macro name='__GNUC__'",		
 		"</sbs>"
 		]
 	t.mustnotmatch_singleline = []
