@@ -31,7 +31,7 @@ class TestRaptorApi(unittest.TestCase):
 		
 	def testAliases(self):
 		r = raptor.Raptor()
-		r.cache.Load( generic_path.Join(r.home, "test", "config", "api.xml") )
+		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
 	
@@ -53,7 +53,7 @@ class TestRaptorApi(unittest.TestCase):
 	
 	def testConfig(self):
 		r = raptor.Raptor()
-		r.cache.Load( generic_path.Join(r.home, "test", "config", "api.xml") )
+		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
 		
@@ -96,7 +96,7 @@ class TestRaptorApi(unittest.TestCase):
 		
 	def testProducts(self):
 		r = raptor.Raptor()
-		r.cache.Load( generic_path.Join(r.home, "test", "config", "api.xml") )
+		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
 		
