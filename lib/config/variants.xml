@@ -237,7 +237,7 @@
 	</var>
 	
 	<var name="slimdebug">
-		<append name='DEBUG_OPTIMISATION' value="$(DEBUG_SIZE_OPTIMISATION)"/>
+		<append name='DEBUG_OPTIMISATION' value="$(DEBUGINFO_OPTIMISATION)"/>
 	</var>
 
 	<!-- OS variant mechanism is now deprecated. We retain the values for
