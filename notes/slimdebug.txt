@@ -13,5 +13,5 @@ information.
 Examples of the variant's application are as follows:
 
 sbs -c armv5.slimdebug
-sbs -c armv5_urel.slimdebug
+sbs -c armv6_udeb.slimdebug
 
