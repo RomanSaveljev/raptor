@@ -75,7 +75,6 @@ def run():
 		"macro name='ARMCC_2_2'",
 		"macro name='__GNUC__'",		
 		"</metadata>",
-		"outputpath='.*/epoc32/release/armv5/urel'",
 		"</sbs>"
 		]
 	t.mustnotmatch_singleline = []
