@@ -235,6 +235,10 @@
 	<var name="remove_freeze">
 		<set name='EFREEZE_REMOVE_OPTION' value='-Remove'/>
 	</var>
+	
+	<var name="slimdebug">
+		<append name='DEBUG_OPTIMISATION' value="$(DEBUG_SIZE_OPTIMISATION)"/>
+	</var>
 
 	<!-- OS variant mechanism is now deprecated. We retain the values for
 	     versions older than TB92sf until the mechanism is removed. -->
