@@ -300,8 +300,7 @@ class PreProcessor(raptor_utilities.ExternalTool):
 		tool = self._ExternalTool__Tool
 		commandline = tool + " " + aArgs + " " + str(sourcefilename)
 		
-		if self.raptor.debugOutput:
-			self.raptor.Debug("Preprocessing command line %s", str(commandline))
+		self.raptor.Debug("Preprocessing command line %s", str(commandline))
 			
 		try:
 			# the actual call differs between Windows and Unix
@@ -323,11 +322,10 @@ class PreProcessor(raptor_utilities.ExternalTool):
 			# run the command and wait for all the output
 			(self._ExternalTool__Output, errors) = p.communicate()
 
-			if self.raptor.debugOutput:
-				self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
-				self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
-				self.raptor.Debug("Errors:\n%s", errors)
-				self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
+			self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
+			self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
+			self.raptor.Debug("Errors:\n%s", errors)
+			self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
 
 			incRE = re.compile("In file included from")
 			fromRE = re.compile(r"\s+from")

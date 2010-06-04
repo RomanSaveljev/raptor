@@ -113,6 +113,14 @@ class TargetType(Reply):
 		super(TargetType,self).__init__()
 		self.name = name
 
+class MetaData(Reply):
+	def __init__(self):
+		super(MetaData,self).__init__()
+
+class Build(Reply):
+	def __init__(self):
+		super(Build,self).__init__()
+
 import generic_path
 import raptor
 import raptor_data
@@ -261,17 +269,18 @@ class Context(object):
 			text = str(e)
 		
 		config = Config(meaning, outputpath, text)
+		config.metadata = MetaData()
 		
 		# Add child elements if they were calculated
 		if len(includepaths) > 0:
-			config.includepaths = map(lambda x: Include(str(x)), includepaths)
+			config.metadata.includepaths = map(lambda x: Include(str(x)), includepaths)
 		
 		if preincludeheader != "":
-			config.preincludeheader = PreInclude(str(preincludeheader))
+			config.metadata.preincludeheader = PreInclude(str(preincludeheader))
 		
 		if len(platmacros) > 0:
-			config.platmacros = map(lambda x: Macro(x), platmacros)
-					
+			config.metadata.platmacros = map(lambda x: Macro(x), platmacros)
+		
 		return config 
 		
 	def getproducts(self):

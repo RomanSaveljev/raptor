@@ -66,20 +66,20 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(config.meaning, "buildme")
 		self.failUnlessEqual(config.outputpath, path)
 		
-		macros = map(lambda x: str(x.name), config.platmacros)
+		macros = map(lambda x: str(x.name), config.metadata.platmacros)
 		macros.sort()
 		results = ['SBSV2', '__GNUC__']
 		results.sort()
 		self.failUnlessEqual(macros, results)
 		
-		includepaths = map(lambda x: str(x.path), config.includepaths)
+		includepaths = map(lambda x: str(x.path), config.metadata.includepaths)
 		includepaths.sort()
 		expected_includepaths = [raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant"), 
 								raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), ".", ""]
 		expected_includepaths.sort()
 		self.failUnlessEqual(includepaths, expected_includepaths)
 		
-		preincludefile = str(config.preincludeheader.file)
+		preincludefile = str(config.metadata.preincludeheader.file)
 		self.failUnlessEqual(preincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant/Symbian_OS.hrh"))
 
 		config = api.getconfig("buildme.foo")
