@@ -150,7 +150,9 @@ define resource.build
           $(eval DOHEADER:=-h$(RESOURCEHEADER))
           $(RESOURCEHEADER) : $1
           RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
-	endif
+        endif
+      else
+        #nothing
       endif
 
       RESOURCE:: $1
