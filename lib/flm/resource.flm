@@ -66,6 +66,8 @@ endif
 # we create intermediate .rpp and .d files
 INTERBASE_TMP:=$(OUTPUTPATH)/$(TARGET_lower)_$(notdir $(basename $(SOURCE)))
 
+LANGUAGES:=$(LANGUAGES:SC=sc) # ensure that we don't ever have to worry about case consistency w.r.t languages or get confused into thinking that SC!=sc (which it is)
+
 
 # common pre-processor options
 
@@ -139,16 +141,18 @@ endef
 
 # $1 is the name of the intermediate RESOURCEFILE
 # $2 is the LANGUAGE		(eg. sc or 01 or 02 ...)
-# $3 is the target name (without path) of the final resource file
 # Uses $(RESOURCEHEADER),$(SOURCE),$(HEADLANG),$(MMPDEFS) apart from some tools
 define resource.build
-    $(if $(FLMDEBUG),$$(info <debug>resource.build: $1 LANG:$2 for $3</debug>))
+    $(if $(FLMDEBUG),$$(info <debug>resource.build: $1 LANG:$2 </debug>))
 
       $(eval DOHEADER:=)
       ifeq ($(HEADLANG),$2)
         ifneq ($(RESOURCEHEADER),)
           $(eval DOHEADER:=-h$(RESOURCEHEADER))
           $(RESOURCEHEADER) : $1
+	    $(call startrule,resourcecompile,FORCESUCCESS) \
+	    $(RCOMP) -m045,046,047 -u $(DOHEADER) -s$1.rpp \
+	    $(call endrule,resourcecompile)
           RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
         endif
       else
@@ -159,33 +163,31 @@ define resource.build
 
       $1: $(SOURCE)
 	  $(call startrule,resourcecompile,FORCESUCCESS) \
-	  $(GNUCPP) -C -DLANGUAGE_$2 -DLANGUAGE_$(subst sc,SC,$(2)) $(call makemacrodef,-D,$(MMPDEFS))\
+	  $(GNUCPP)  -DLANGUAGE_$2 -DLANGUAGE_$(subst sc,SC,$(2)) $(call makemacrodef,-D,$(MMPDEFS))\
 	  $(CPPOPT) $(SOURCE) -o $1.rpp && \
 	  $(RCOMP) -m045,046,047 -u $(DOHEADER) -o$$@ -s$1.rpp \
 	  $(call endrule,resourcecompile)
 
     SOURCETARGET_$(call sanitise,$(SOURCE)): $1
     CLEANTARGETS:=$$(CLEANTARGETS) $1 $1.rpp $(RESOURCEHEADER)
+endef
 
-  # Whether or not we have generated this resource for some other variant, check if there
-  # are any new copies to be made for this variant. e.g. winscw requires that we make
-  # some extra copies.  We tried to copy after running rcomp itself but we still need these
-  # targets for the sake of dependencies or, for example, if someone merely adds a new copy 
-  # when the resource is up-to-date
+###############################################################################
+# $1 is the name of the intermediate RESOURCEFILE
+# $2 is the target name (without path) of the final resource file
+define resource.makecopies
   
-  $(call copyresource,$1,$(sort $(addsuffix /$3,$(RSCCOPYDIRS))))
-
+  $(call copyresource,$1,$(sort $(addsuffix /$2,$(RSCCOPYDIRS))))
 endef
 
 
-# $1 is the name of the RESOURCEHEADER
-# $2 is the intermediate filename base (eg. /epoc32/build/xxx/b_)
-# $3 is the LANGUAGE		(eg. sc or 01 or 02 ...)
-# $4 is the target name (without path) of the final resource file
+###############################################################################
+# $1 is the intermediate filename base (eg. /epoc32/build/xxx/b_)
+# $2 is the LANGUAGE		(eg. sc or 01 or 02 ...)
 define resource.headeronly
   ifeq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
     # generate the resource header dependency files
-    $(eval DEPENDFILENAME:=$2_$3_h.d)
+    $(eval DEPENDFILENAME:=$1_$2.rsg.d)
 
     RESOURCE_DEPS:: $(DEPENDFILENAME)
         
@@ -193,11 +195,11 @@ define resource.headeronly
     # .PHONY: $(DEPENDFILENAME)
    
     $(DEPENDFILENAME): $(SOURCE)
-        $(call startrule,resource.headeronly.deps,FORCESUCCESS) \
-        $(GNUCPP) -DLANGUAGE_$(3) -DLANGUAGE_$(subst sc,SC,$3) $(call makemacrodef,-D,$(MMPDEFS))\
-        $(CPPOPT) $(SOURCE) -M -MG -MT"$1" | \
-        $$(DEPENDENCY_CORRECTOR) > $$@ \
-        $(call endrule,resource.headeronly.deps)
+	$(call startrule,resource.headeronly.deps,FORCESUCCESS) \
+	$(GNUCPP) -DLANGUAGE_$2 -DLANGUAGE_$(subst sc,SC,$2) $(call makemacrodef,-D,$(MMPDEFS))\
+	$(CPPOPT) $(SOURCE) -M -MG -MT"$(RESOURCEHEADER)" | \
+	$$(DEPENDENCY_CORRECTOR) > $$@ \
+	$(call endrule,resource.headeronly.deps)
    
     SOURCETARGET_$(call sanitise,$(SOURCE)): $(DEPENDFILENAME)
    
@@ -206,11 +208,11 @@ define resource.headeronly
     RESOURCE:: $(RESOURCEHEADER)
     
     $(RESOURCEHEADER): $(SOURCE)
-      $(call startrule,resourceheader,FORCESUCCESS) \
-      $(GNUCPP) -C -DLANGUAGE_$3 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
-      $(CPPOPT) $(SOURCE) -o $2_$3_h.rpp && \
-      $(RCOMP) -m045,046,047 -u -h$$@ -s$2_$3_h.rpp \
-      $(call endrule,resourceheader)
+	$(call startrule,resourceheader,FORCESUCCESS) \
+	$(GNUCPP)  -DLANGUAGE_$2 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
+	$(CPPOPT) $(SOURCE) -o $1_$2.rsg.rpp && \
+	$(RCOMP) -m045,046,047 -u -h$$@ -s$1_$2.rsg.rpp \
+	$(call endrule,resourceheader)
 
     RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
     # individual source file compilation
@@ -254,20 +256,28 @@ endef # copyresource #
 # belonging to this language.
 
 ifeq ($(HEADERONLY),)  # If we're doing the full job, not only the header
+  # the guard is based on the languages we're building so that 2 resource blocks can 
+  # create different languages if so needed (no known reason for this but someone
+  # could do it and in the past it would have worked).
   GUARD:=TARGET_$(call sanitise,$(INTERBASE_TMP))
-  $(if $(FLMDEBUG),$(info <debug>resource.flm: INTERBASE_TMP=$(INTERBASE_TMP) $(GUARD)=$($(GUARD))</debug>))
-  ifeq ($($(GUARD)),)
-    $(GUARD):=1
+  $(if $(FLMDEBUG),$(info <debug>resource.flm: $(GUARD)=$($(GUARD)) LANGUAGES:=$(LANGUAGES)</debug>))
+  # don't repeat existing languages
+  REMAINING_LANGUAGES:=$(filter-out $($(GUARD)),$(LANGUAGES))
+  $(if $(FLMDEBUG),$(info <debug>resource.flm:  REAMINING_LANGUAGES=$(REMAINING_LANGUAGES)</debug>))
+  ifneq ($(REMAINING_LANGUAGES),)
+    $(GUARD):=$($(GUARD)) $(REMAINING_LANGUAGES)
+
+    LANGUAGES:=$(REMAINING_LANGUAGES)
 
     PRIMARYFILE:=$(INTERBASE_TMP).r$(HEADLANG)
-    DEPENDFILENAME:=$(INTERBASE_TMP)_$(HEADLANG).d
+    DEPENDFILENAME:=$(INTERBASE_TMP).r$(HEADLANG).d
     RESOURCE:: $(PRIMARYFILE)
   
     ifeq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
       $(eval $(call resource.deps,$(INTERBASE_TMP).r$(HEADLANG),$(HEADLANG),$(DEPENDFILENAME)))
     else
         # Creating resources
-        $(foreach L,$(LANGUAGES:SC=sc),$(eval $(call resource.build,$(INTERBASE_TMP).r$(L),$(L),$(TARGET_lower).r$(L))))
+        $(foreach L,$(LANGUAGES),$(eval $(call resource.build,$(INTERBASE_TMP).r$(L),$(L),$(TARGET_lower).r$(L))))
 
 
         DEPENDFILE:=$(wildcard $(DEPENDFILENAME))
@@ -279,18 +289,24 @@ ifeq ($(HEADERONLY),)  # If we're doing the full job, not only the header
         endif
     endif
   endif
+  ifneq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
+    # Whether or not we have generated this resource for some other start
+    # resource block, check if there are any new copies to be made for
+    # this variant. e.g. winscw requires that we make some extra copies.
+    # We tried to copy after running rcomp itself but we still need these
+    # targets for the sake of dependencies or, for example, if someone
+    # merely adds a new copy when the resource is up-to-date
+    $(foreach L,$(LANGUAGES),$(eval $(call resource.makecopies,$(INTERBASE_TMP).r$(L),$(TARGET_lower).r$(L))))
+  endif
 else
   # Only Generating the header
   #
-  INTERBASE_TMP:=$(INTERBASE_TMP)_h 
-  GUARD:=TARGET_$(call sanitise,$(INTERBASE_TMP))
+  GUARD:=TARGET_$(call sanitise,$(INTERBASE_TMP))_rsg
+  $(if $(FLMDEBUG),$(info <debug>resource.flm: Headeronly $(INTERBASE_TMP) $(TARGET_lower).rsg LANGUAGES:=$(LANGUAGES)</debug>))
   ifeq ($($(GUARD)),)
     $(GUARD):=1
   
-    RESOURCE:: $(RESOURCEHEADER)
-    PRIMARYFILE:=$(RESOURCEHEADER)
-
-      $(eval $(call resource.headeronly,$(INTERBASE_TMP).r$(HEADLANG),$(INTERBASE_TMP)_$(HEADLANG).rpp,$(HEADLANG),$(RESOURCEHEADER),$(TARGET_lower).r$(HEADLANG)))
+      $(eval $(call resource.headeronly,$(INTERBASE_TMP),$(HEADLANG)))
       # The headeronly macro manages dependency including on it's own
   endif
 endif
@@ -307,7 +323,7 @@ ifneq ($(RFIFILE),)
   RELEASABLES:=$(RELEASABLES) $(RFIFILE)
   CREATABLEPATHS:=$(CREATABLEPATHS) $(dir $(RFIFILE))/
 
-  RPPFILES:=$(foreach L,$(LANGUAGES:SC=sc),$(INTERBASE_TMP)_$(L).rpp)
+  RPPFILES:=$(foreach L,$(LANGUAGES:SC=sc),$(INTERBASE_TMP).r$(L).rpp)
   $(eval $(call generaterfifile,$(RFIFILE),$(RPPFILES),$(PRIMARYRPPFILE).d))
 endif
 

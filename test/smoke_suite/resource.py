@@ -39,9 +39,9 @@ def run():
 
 	t.addbuildtargets('smoke_suite/test_resources/simple_gui/Bld.inf', [
 		"helloworld_exe/helloworld.mbm_bmconvcommands",
-		"helloworld_exe/helloworld_HelloWorld_sc.rpp",
+		"helloworld_exe/helloworld_HelloWorld.rsc.rpp",
 		"helloworld_exe/helloworld_HelloWorld.rsc.d",
-		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg_sc.rpp",
+		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.rpp",
 		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.d"])
 
 	t.mustnotmatch = ["HelloWorld.rss.* warning: trigraph"]
@@ -72,10 +72,11 @@ def run():
 		]
 
 	t.addbuildtargets('smoke_suite/test_resources/resource/group/bld.inf', [	
-		"testresource_/testresource_testresource_02.rpp",
-		"testresource_/testresource_testresource_01.rpp",
+		"testresource_/testresource_testresource.r02.rpp",
+		"testresource_/testresource_testresource.r01.rpp",
 		"testresource_/testresource_testresource.r01.d",
-		"testresource_/testresource_testresource_sc.rpp"])
+		"testresource_/testresource_testresource_sc.rsg.d",
+		"testresource_/testresource_testresource.rsc.rpp"])
 
 	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.testresource.rsg' %s && wc -l %s " % (res_depfile, res_depfile)
 
