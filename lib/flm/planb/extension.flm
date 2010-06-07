@@ -2,7 +2,7 @@
 # a planb python extension
 #
 # 
-GENERATED_MAKEFILE_PATH:=$(EPOCBLD)/$(VARIANTPLATFORM)-$(VARIANTTYPE)
+GENERATED_MAKEFILE_PATH:=$(EPOCBLD)/$(VARIANTPLATFORM)-$(VARIANTTYPE)-$(SCRIPT)-$(PARAMS)
 
 # the EXPORT phase generates Makefiles in parallel
 #
