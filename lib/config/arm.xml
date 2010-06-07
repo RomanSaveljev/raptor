@@ -18,6 +18,11 @@
 		<env name="SBSV1MAKE" default="$(EPOCROOT)/epoc32/tools/make$(DOTEXE)" type="tool"/>
 		<env name="STRINGTABLE" default="$(PERL) $(EPOCROOT)/epoc32/tools/stringtable.pl" type="script"/>
 		<env name="TRANASM" default="$(PERL) $(EPOCROOT)/epoc32/tools/tranasm.pl" type="script"/>
+
+		<set name="BASE_ARCH" value="arm"/>		
+		<set name="POSTLINKER" value="$(ELF2E32)"/>
+		<set name="IMPLIBTOOL" value="$(ELF2E32)"/>
+		<set name="DEFGENTOOL" value="$(ELF2E32)"/>
 			
 		<!-- interfaces -->
 		<set name="INTERFACE.extension" value="Symbian.extension"/>
@@ -38,11 +43,13 @@
 		<set name="CODE_SEGMENT_START" value=""/>
 		<set name="DEFAULT_STDCPP_NEWLIB" value="stdnew.dso"/>
 		<set name="DEFAULT_SYMBIAN_NEWLIB" value="scppnwdl.dso"/>
-		<set name="DUMPBCINFO" value=""/>
 		<set name="EPOCSTACKSIZE" value=""/>
+		<set name="FIX_EXPORTS_USING_EXP_FILE" value=""/>
 		<set name="FULLVARIANTPATH" value="$(VARIANTPLATFORM)/$(VARIANTTYPE)"/>
 		<set name="HEADER_FILES_CONTROL_OPTION" value=""/>
+		<set name="IMPLIB_EXTENSION" value="dso"/>
 		<set name="LIBRARY_DEBUG" value=""/>
+		<set name="LINKER_ENTRYPOINT_PREFIX" value="_"/>
 		<set name="MMPDEFS" value=""/>
 		<set name="NMAKE" value="nmake"/>
 		<set name="NMAKEFLAGS" value="-nologo -x - "/>
@@ -55,19 +62,18 @@
 		<set name="POSTLINKER_COMPRESSION_DEFAULT" value="inflate"/>
 		<set name="RELEASEPATH" value="$(EPOCROOT)/epoc32/release"/>
 		<set name="RESOLVED_DEFFILE" value=""/>
+		<set name="RESOLVED_DEFFILE_SECONDARY" value=""/>
 		<set name="RUNTIME_LIBS_PATH" value="$(EPOCROOT)/epoc32/release/armv5/lib"/>
 		<set name="SID" value=""/>
 		<set name="STATIC_LIBRARY_DIR" value="$(EPOCROOT)/epoc32/release/$(VARIANTPLATFORM)/$(VARIANTTYPE)"/>
 		<set name="STATIC_RUNTIME_DIR" value="$(EPOCROOT)/epoc32/release/$(VARIANTPLATFORM)/$(VARIANTTYPE)"/>
 		<set name="SYMBIAN_CC_MESSAGE_OPTION" value="$(CC_WARNINGS_CONTROL_OPTION) $(CC_ERRORS_CONTROL_OPTION)"/>
-		<set name="SYMBIAN_DLL_DEFINITION" value="__DLL__"/>
-		<set name="SYMBIAN_EXE_DEFINITION" value="__EXE__"/>
 		<set name="SYMBIAN_LINK_FLAGS" value="$(SYMBIAN_LD_MESSAGE_OPTION) $(BPABI_OPTION) $(RELOCATABLE_IMAGE_OPTION) $(UNRESOLVED_SYMBOL_REF_OPTION) $(STDLIB_OPTION) $(EXTRA_LD_OPTION) $(SYMBIAN_LINK_FLAGS.CONFIG) $(SYMBIAN_LINK_FLAGS.VAR)"/>
 		<set name="SYMBIAN_LINK_FLAGS.CONFIG" value=""/>
 		<set name="SYMBIAN_LINK_FLAGS.VAR" value=""/>
 		<set name="SYSTEMINCLUDE" value=""/>
 		<set name="TARGET" value=""/>
-		<set name="UNIX_SLASH_FOR_CC_ABS_PATHS" value="0"/>
+		<set name="TREAT_EXES_AS_SHARED" value="1"/>
 		<set name="UNRESOLVED_SYMBOL_REF_OPTION" value=""/>	
 	</var>
 	

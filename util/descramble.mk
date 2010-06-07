@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
@@ -11,17 +10,20 @@
 #
 # Contributors:
 #
-# Description: 
-# raptor version information module
+# Description:
+# Utility makefile 
+#
+#
 
-# replace CHANGESET with the Hg changeset for ANY release
+TARGET:=sbs_descramble
+SOURCES:=$(SBS_HOME:\=/)/util/descramble/descramble.cpp 
 
-version=(2,14,1,"2010-06-03","symbian build system","CHANGESET")
+ifeq ($(filter win,$(HOSTPLATFORM)),win)
+CFLAGS:=-DWIN32
+LDFLAGS:=
+else
+CFLAGS:=
+LDFLAGS:=-lpthread
+endif
 
-def numericversion():
-	"""Raptor version string"""
-	return "%d.%d.%d" % version[:3]
-
-def fullversion():
-	"""Raptor version string"""
-	return "%d.%d.%d [%s %s %s]" % version
+$(eval $(cppprogram))

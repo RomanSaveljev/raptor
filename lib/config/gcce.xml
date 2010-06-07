@@ -37,13 +37,11 @@
 		<set name="CC.SOFTVFP_MAYBE_VFPV3" value="soft"/>
 		<set name="CC_ERRORS_CONTROL_OPTION" value=""/>
 		<set name="CC_WARNINGS_CONTROL_OPTION" value="-Wall -Wno-unknown-pragmas"/>
-		<set name="CFLAGS" value=""/>
 		<set name="CIADEFS" value="__CIA__"/>
 		<set name="CODE_SEGMENT_START" value="-Ttext"/>
 		<set name="COMMANDFILE_OPTION" value="@"/>
 		<set name="COMPILE_ONLY_OPTION" value="-c"/>
-		<set name="COMPILER_CIA_FLAGS" value="-marm"/>
-		<set name="COMPILER_DEFINES" value="-D__GCCE__"/>		
+		<set name="COMPILER_CIA_FLAGS" value="-marm"/>		
 		<set name="COMPILER_FPU_OPTION" value="-mfloat-abi="/>		
 		<set name="COMPILER_INTERWORK_DEFINES" value="__MARM_INTERWORK__"/>
 		<set name="COMPILER_SYSTEM_INCLUDE_OPTION" value="-I"/>

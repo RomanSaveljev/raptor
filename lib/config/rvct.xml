@@ -27,12 +27,10 @@
 		<set name="CC.DWARF3" value="--dwarf3"/>
 		<set name="CC_ERRORS_CONTROL_OPTION" value="--diag_error 1267"/>
 		<set name="CC_WARNINGS_CONTROL_OPTION" value="--diag_suppress 161,611,654,997,1152,1300,1464,1488,2523,6318,6331"/>
-		<set name="CFLAGS" value=""/>
 		<set name="CIADEFS" value="__CIA__"/>
 		<set name="CODE_SEGMENT_START" value=""/>
 		<set name="COMMANDFILE_OPTION" value="--via "/>
 		<set name="COMPILER_CIA_FLAGS" value=""/>
-		<set name="COMPILER_DEFINES" value=""/>
 		<set name="COMPILER_FPU_OPTION" value="--fpu "/>
 		<set name="COMPILER_INTERWORK_DEFINES" value="__MARM_INTERWORK__"/>
 		<set name="COMPILER_SYSTEM_INCLUDE_OPTION" value="-J"/>
@@ -98,7 +96,6 @@
 		<set name="TRANASM_OUTPUT_OPTION" value="-o="/>
 		<set name="TRANSFORM_CIA" value="1"/>
 		<set name="UNDEFINED_SYMBOL_REF_OPTION" value=""/>
-		<set name="UNIX_SLASH_FOR_CC_ABS_PATHS" value="0"/>
 		<set name="UNRESOLVED_SYMBOL_REF_OPTION" value=""/>
 		<set name="USE_RVCT22_DELETE_WORKAROUND" value=""/>
 		<set name="USERINCLUDE" value=""/>
