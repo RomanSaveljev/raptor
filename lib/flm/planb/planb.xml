@@ -8,13 +8,19 @@
 		<param name='EPOCBLD'/>
 		<param name='EXTENSION_ROOT'/>
 		<param name='PRODUCT_INCLUDE'/>
-		<param name='VARIANTPLATFORM'/>
-		<param name='VARIANTTYPE'/>
 	</interface>
 
-	<interface name="planb.extension.py" extends="planb.base" flm="extension.flm">
+	<interface name="planb.platform.independent.extension.py" extends="planb.base" flm="pi_extension.flm">
 		<param name='SCRIPT'/>
 		<param name='PARAMS' default=''/>
+	</interface>
+	
+	<interface name="planb.variant.independent.extension.py" extends="planb.platform.independent.extension.py" flm="vi_extension.flm">
+		<param name='VARIANTPLATFORM'/>
+	</interface>
+	
+	<interface name="planb.extension.py" extends="planb.variant.independent.extension.py" flm="extension.flm">
+		<param name='VARIANTTYPE'/>
 	</interface>
 
 </build>
