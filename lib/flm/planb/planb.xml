@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<build xmlns="http://symbian.com/xml/build" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symbian.com/xml/build ../../../schema/build/2_0.xsd">
+
+	<!-- planb interfaces : a new way of doing FLMs -->
+
+	<interface name="planb.base" extends="base.flm" abstract="true">
+		<param name='EPOCROOT'/>
+		<param name='EPOCBLD'/>
+		<param name='EXTENSION_ROOT'/>
+		<param name='PRODUCT_INCLUDE'/>
+		<param name='VARIANTPLATFORM'/>
+		<param name='VARIANTTYPE'/>
+	</interface>
+
+	<interface name="planb.extension.py" extends="planb.base" flm="extension.flm">
+		<param name='SCRIPT'/>
+		<param name='PARAMS' default=''/>
+	</interface>
+
+</build>

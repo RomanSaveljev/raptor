@@ -1,0 +1,26 @@
+
+# a planb python extension
+
+GENERATED_MAKEFILE_PATH:=$(EPOCBLD)/$(VARIANTPLATFORM)/$(VARIANTTYPE)
+
+# the EXPORT phase generates Makefiles in parallel
+#
+ifeq ($(MAKEFILE_GROUP),EXPORT)
+
+COMMAND:=$(PYTHON) $(EXTENSION_ROOT)/$(SCRIPT) $(PARAMS) --planb=$(GENERATED_MAKEFILE_PATH)
+
+$(call raptor_phony_recipe,planb_extension_create,EXPORT,,$(COMMAND))
+
+else
+# the other phases "process" the generated Makefiles
+#
+MAKEFILE:=$(GENERATED_MAKEFILE_PATH)/$(MAKEFILE_GROUP)
+
+ifneq ($(PROCESS_AS_SUBMAKE),)
+$(MAKEFILE_GROUP)::
+	$(MAKE) -f $(MAKEFILE) $@
+else
+include $(MAKEFILE)
+endif
+
+endif
