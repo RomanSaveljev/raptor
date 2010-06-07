@@ -40,6 +40,7 @@
 		<set name="C_LANG_OPTION" value=""/>
 		<set name="DATA_SEGMENT_START" value="$(SPLIT_OPTION) $(RW_BASE_OPTION)"/>
 		<set name="DEBUG_OPTIMISATION" value="-O0"/>
+		<set name="DEBUGINFO_OPTIMISATION" value="--no_debug_macros --remove_unneeded_entities"/>
 		<set name="DEPEND_OPTION" value="--depend_format=unix --depend"/>
 		<set name="ENUM_OPTION" value="--enum_is_int"/>
 		<set name="EXCEPTIONS" value="--exceptions --exceptions_unwind"/>
