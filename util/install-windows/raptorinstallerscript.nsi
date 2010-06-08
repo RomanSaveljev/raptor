@@ -13,6 +13,10 @@
 # Description: 
 # Raptor installer/uninstaller script
 
+# Set compression type - the advice in the NSIS user manual 
+# is to have this at the top of the main .nsi file.
+SetCompressor /SOLID lzma
+
 # Standard NSIS Library includes 
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
