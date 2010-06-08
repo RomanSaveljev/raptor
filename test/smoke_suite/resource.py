@@ -64,9 +64,9 @@ def run():
 
 	t.targets = [
 		"$(EPOCROOT)/epoc32/include/testresource.rsg",
+		"$(EPOCROOT)/epoc32/include/testheader.rsg",
 		"$(EPOCROOT)/epoc32/include/testresource.hrh",
 		"$(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.r01",
-		"$(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/testresource.exe",
 		res_depfile
 		]
@@ -75,10 +75,11 @@ def run():
 		"testresource_/testresource_testresource.r02.rpp",
 		"testresource_/testresource_testresource.r01.rpp",
 		"testresource_/testresource_testresource.r01.d",
-		"testresource_/testresource_testresource_sc.rsg.d",
+		"testheader_/testheader_testresource_sc.rsg.d",
+		"testheader_/testheader_testresource_sc.rsg.rpp",
 		"testresource_/testresource_testresource.rsc.rpp"])
 
-	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.testresource.rsg' %s && wc -l %s " % (res_depfile, res_depfile)
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.test[^ ]*.rsg' %s && wc -l %s " % (res_depfile, res_depfile)
 
 	t.mustnotmatch = []
 
