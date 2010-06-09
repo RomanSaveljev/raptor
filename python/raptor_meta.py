@@ -2882,7 +2882,8 @@ class MetaReader(object):
 			destDir = destination.Dir()
 			if not destDir.isDir():
 				os.makedirs(str(destDir))
-				shutil.copyfile(source_str, dest_str)
+				# preserve permissions
+				shutil.copy(source_str, dest_str)
 				return exportwhatlog
 
 			sourceMTime = 0
@@ -2901,12 +2902,14 @@ class MetaReader(object):
 						self.__Raptor.Error(message, bldinf=bldInfFile)
 
 			if destMTime == 0 or destMTime < sourceMTime:
+				# remove old version
+				#	- not having ownership prevents chmod
+				#	- avoid clobbering the original if it is a hard link
 				if os.path.exists(dest_str):
-					os.chmod(dest_str,stat.S_IREAD | stat.S_IWRITE)
-				shutil.copyfile(source_str, dest_str)
+					os.unlink(dest_str)
+				# preserve permissions
+				shutil.copy(source_str, dest_str)
 
-				# Ensure that the destination file remains executable if the source was also:
-				os.chmod(dest_str,sourceStat[stat.ST_MODE] | stat.S_IREAD | stat.S_IWRITE | stat.S_IWGRP ) 
 				self.__Raptor.Info("Copied %s to %s", source_str, dest_str)
 			else:
 				self.__Raptor.Info("Up-to-date: %s", dest_str)
