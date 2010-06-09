@@ -23,15 +23,24 @@
 
 class File(object):
 	def action(self, command):
-		pass
+		self.run = command
 	
 class Bitmap(File):
-	pass
+	def __init__(self):
+		self.phase = 'BITMAP'
+		self.title = 'planb.bitmap'
+		self.run = 'true'
 
 class Resource(File):
-	pass
+	def __init__(self):
+		self.phase = 'RESOURCE'
+		self.title = 'planb.resource'
+		self.run = 'true'
 
 class Target(File):
-	pass
+	def __init__(self):
+		self.phase = 'ALL'
+		self.title = 'planb.target'
+		self.run = 'true'
 
 # end of the planb.target module
