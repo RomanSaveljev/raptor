@@ -197,6 +197,7 @@ class Interface(Model):
 		self.flm = None
 		self.abstract = False
 		self.extends = None
+		self.pickled = False
 		self.params = []
 		self.paramgroups = []
 
@@ -269,6 +270,8 @@ class Interface(Model):
 			self.abstract = (value == "true")
 		elif name == "extends":
 			self.extends = value
+		elif name == "pickled":
+			self.pickled = (value == "true")
 		else:
 			raise InvalidPropertyError()
 
