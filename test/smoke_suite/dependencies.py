@@ -140,7 +140,7 @@ sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel 
 sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel ; } > ${SBSLOGFILE} 2>&1; grep 'missing separator' ${SBSLOGFILE} " %(buildLocation, buildLocation, buildLocation, hostPlatformOffset, buildLocation)
 	# We expect an error from the first build due to the deliberate dependency file corruption
 	t.mustmatch = [
-		".*dependency.o.d:8: \*\*\* missing separator"
+		".*dependency.o.d:[0-9]+: \*\*\* missing separator"
 		]
 	t.countmatch = []
 	t.warnings = 0
