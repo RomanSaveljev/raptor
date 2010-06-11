@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -59,7 +59,7 @@ define resource.build
           # but suppose someone adds a header statement to their MMP after doing a build?
           # so here we recreate the resource header if its missing even if the intermediate resource
           # has actually been built.  The problem is: what if the rpp file is not there (oops)? 
-          # So this is not perfect but I think that the situation is failrly unlikely.
+          # So this is not perfect but I think that the situation is fairly unlikely.
           # We can afford to put in an if statement for the rsg file - it's not a race condition because
           # $1 is done and the build engine guarantees that it's there so no resource header
           # can be attempted while we're trying to test.
@@ -134,6 +134,7 @@ define resource.headeronly
 	$(RCOMP) -m045,046,047 -u -h$$@ -s$1_$2.rsg.rpp \
 	$(call endrule,resourceheader)
 
+    CLEANTARGETS:=$$(CLEANTARGETS) $1_$2.rsg.rpp
     RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
     # individual source file compilation
     

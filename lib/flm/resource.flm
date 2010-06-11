@@ -130,9 +130,9 @@ endif
 ifeq ($(HEADERONLY),)  # i.e IF NOT HEADERONLY
 
   # The resources that are not for the "HEADER language" will all depend on
-  # that "headlang resource" - they will "sit in it's dependency slipstream"
+  # that "headlang resource" - they will "sit in its dependency slipstream"
   # or in other words We only have to make one dependency file because
-  # all of the other languages will benefrom it indirectly through their
+  # all of the other languages will benefit from it indirectly through their
   # dependency on the header language.
 
   # The guard is based on the languages we're building so that 2 resource blocks can 
@@ -196,7 +196,7 @@ else
   ifeq ($($(GUARD)),)
       $(GUARD):=1  
       $(eval $(call resource.headeronly,$(INTERBASE_TMP),$(HEADLANG)))
-      # The headeronly macro manages dependency including on it's own
+      # The headeronly macro manages dependency including on its own
   endif
 
 endif
