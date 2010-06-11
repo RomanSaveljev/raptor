@@ -58,8 +58,23 @@ def run():
 	t.command = "sbs --query=config[armv5_urel]"
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
-		"fullname='arm\.v5\.urel\.rvct.*'",
+		"meaning='arm\.v5\.urel\.rvct.*'",
+		"<metadata>",
 		"outputpath='.*/epoc32/release/armv5/urel'",
+		"include path='.*/epoc32/include/variant'",
+		"include path='.*/epoc32/include'",
+		"preinclude file='.*/epoc32/include/variant/Symbian_OS.hrh'",
+		"macro name='SBSV2'",
+		"macro name='ARMCC'",
+		"macro name='EPOC32'",
+		"macro name='MARM'",
+		"macro name='EABI'",
+		"macro name='GENERIC_MARM'",
+		"macro name='MARM_ARMV5'",
+		"macro name='ARMCC_2'",
+		"macro name='ARMCC_2_2'",
+		"macro name='__GNUC__'",		
+		"</metadata>",
 		"</sbs>"
 		]
 	t.mustnotmatch_singleline = []
@@ -69,7 +84,7 @@ def run():
 	t.command = "sbs --query=config[armv5_urel.test_bv_1] --configpath=test/smoke_suite/test_resources/bv"
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
-		"fullname='arm\.v5\.urel\.rvct._.\.test_bv_1'",
+		"meaning='arm\.v5\.urel\.rvct._.\.test_bv_1'",
 		"outputpath='.*/epoc32/release/armv5\.one/urel'",
 		"</sbs>"
 		]

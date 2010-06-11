@@ -135,6 +135,7 @@ class HTML(filter_interface.FilterSAX):
 	def endDocument(self):
 		
 		self.existencechecks()
+		self.dumptotals()
 		try:
 			self.index.write("<p><table><tr><th></th>")
 			
@@ -386,10 +387,14 @@ class HTML(filter_interface.FilterSAX):
 		# out there which don't set an error code when they fail, so
 		# we should look out for those cases.
 		
-		# the first expression that matches wins
-		for r in self.regex:
-			if r[0].search(text):
-				return r[1]
+		for line in text.splitlines():
+			if not line or line.startswith("+"):
+				continue    # it is a blank line or a command, not its output
+			
+			# the first expression that matches wins
+			for r in self.regex:
+				if r[0].search(line):
+					return r[1]
 		
 		return Records.OK
 	
@@ -560,17 +565,32 @@ class HTML(filter_interface.FilterSAX):
 		except Exception,e:
 			return self.err("could not close temporary file " + str(e))
 	
+	def dumptotals(self):
+		"""write the numbers of errors, warnings etc. into a text file.
+		
+		so that a grand summariser can tie together individual log summaries
+		into one big summary page."""
+		try:
+			filename = os.path.join(self.dirname, "totals.txt")
+			file = open(filename, "w")
+			file.write(self.totals.textdump())
+			file.close()
+		except:
+			self.err("cannot write totals file '%s'" % filename)
+		
 	def readregex(self, csvfile):
 		"""read the list of regular expressions from a csv file.
 		
 		the file format is TYPE,REGEX,DESCRIPTION
+		
+		If the description is "ignorecase" then the regular expression is
+		compiled with re.IGNORECASE and will match case-insensitively.
 		"""
 		regexlist = []
 		try:
 			reader = csv.reader(open(csvfile, "rb"))
 			for row in reader:
 				try:
-					regex = re.compile(row[1])
 					type = None
 					
 					if row[0] == "CRITICAL" or row[0] == "ERROR":
@@ -582,12 +602,16 @@ class HTML(filter_interface.FilterSAX):
 						
 					# there are other types like INFO that we don't
 					# care about so silently ignore them.
-					if type:	
+					if type:
+						if row[2].lower() == "ignorecase":
+							regex = re.compile(row[1], re.I)
+						else:
+							regex = re.compile(row[1])
 						regexlist.append((regex, type))
 				except:
 					self.moan("ignored bad regex '%s' in file '%s'" % (row[1], csvfile))
-		except:
-			self.err("cannot read regex file '%s'" % csvfile)
+		except Exception, ex:
+			self.err("cannot read regex file '%s': %s" % (csvfile, str(ex)))
 			return []
 		
 		return regexlist
@@ -640,6 +664,17 @@ class Records(object):
 							
 		row += "</tr>"
 		return row
+	
+	def textdump(self):
+		text = ""
+		for i,datum in enumerate(self.data):
+			number = datum['N']
+			if number == 0:
+				style = "zero"
+			else:
+				style = Records.SUBDIRS[i]
+			text += str(i) + ',' + style + "," + str(number) + "\n"
+		return text
 				
 class TaggedText(object):
 	def __init__(self, attributes):

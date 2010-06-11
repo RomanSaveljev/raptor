@@ -1,0 +1,13 @@
+
+The --query command-line option has been extended to print more detailed
+information about a given configuration.
+
+Querying aliases, now prints the list in sorted order, by name attribute.
+Ditto for products.
+
+Querying a configuration now prints the following additional information:
+
+1. include paths used for preprocessing bld.inf's and MMP's
+2. the pre-include header file for preprocessing bld.inf's and MMP's
+3. the macros used to preprocess bld.inf's and MMP's
+

@@ -35,9 +35,10 @@ from xml.sax.saxutils import escape
 from mmpparser import *
 
 import time
+import generic_path
 
 
-PiggyBackedBuildPlatforms = {'ARMV5':['GCCXML']}
+PiggyBackedBuildPlatforms = {'ARMV5':['GCCXML', 'X86GCC']}
 
 PlatformDefaultDefFileDir = {'WINSCW':'bwins',
 				  'ARMV5' :'eabi',
@@ -45,7 +46,8 @@ PlatformDefaultDefFileDir = {'WINSCW':'bwins',
 				  'GCCXML':'eabi',
 				  'ARMV6':'eabi',
 				  'ARMV7' : 'eabi',
-				  'ARMV7SMP' : 'eabi'}
+				  'ARMV7SMP' : 'eabi',
+				  'X86GCC' : ['bx86gcc', 'eabi']}
 
 def getVariantCfgDetail(aEPOCROOT, aVariantCfgFile):
 	"""Obtain pertinent build related detail from the Symbian variant.cfg file.
@@ -299,6 +301,9 @@ class PreProcessor(raptor_utilities.ExternalTool):
 		""" Override call so that we can do our own error handling."""
 		tool = self._ExternalTool__Tool
 		commandline = tool + " " + aArgs + " " + str(sourcefilename)
+		
+		self.raptor.Debug("Preprocessing command line %s", str(commandline))
+			
 		try:
 			# the actual call differs between Windows and Unix
 			if raptor_utilities.getOSFileSystem() == "unix":
@@ -319,11 +324,10 @@ class PreProcessor(raptor_utilities.ExternalTool):
 			# run the command and wait for all the output
 			(self._ExternalTool__Output, errors) = p.communicate()
 
-			if self.raptor.debugOutput:
-				self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
-				self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
-				self.raptor.Debug("Errors:\n%s", errors)
-				self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
+			self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
+			self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
+			self.raptor.Debug("Errors:\n%s", errors)
+			self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
 
 			incRE = re.compile("In file included from")
 			fromRE = re.compile(r"\s+from")
@@ -403,7 +407,6 @@ class PreProcessor(raptor_utilities.ExternalTool):
 
 		return call
 
-
 class MetaDataFile(object):
 	"""A generic representation of a Symbian metadata file
 
@@ -458,61 +461,27 @@ class MetaDataFile(object):
 			except Exception, e:
 				self.log.Debug("Couldn't make bldinf outputpath for dependency generation")
 
-		config_macros = (aBuildPlatform['PLATMACROS']).split()
-
 		if not key in self.__PreProcessedContent:
 
 			preProcessor = PreProcessor(self.__gnucpp, '-undef -nostdinc ' + generateDepsOptions + ' ',
 										'-I', '-D', '-include', self.log)
 			preProcessor.filename = self.filename
 
-			# always have the current directory on the include path
-			preProcessor.addIncludePath('.')
-
-			# the SYSTEMINCLUDE directories defined in the build config
-			# should be on the include path. This is added mainly to support
-			# Feature Variation as SYSTEMINCLUDE is usually empty at this point.
-			systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
-			if systemIncludes:
-				preProcessor.addIncludePaths(systemIncludes.split())
-
-			preInclude = aBuildPlatform['VARIANT_HRH']
-
-			# for non-Feature Variant builds, the directory containing the HRH should
-			# be on the include path
-			if not aBuildPlatform['ISFEATUREVARIANT']:
-				preProcessor.addIncludePath(preInclude.Dir())
-
-			# and EPOCROOT/epoc32/include
-			preProcessor.addIncludePath(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
-
-			# and the directory containing the bld.inf file
-			if self.__RootLocation is not None and str(self.__RootLocation) != "":
-				preProcessor.addIncludePath(self.__RootLocation)
-
-			# and the directory containing the file we are processing
-			preProcessor.addIncludePath(self.filename.Dir())
+			# Set the preprocessor include paths
+			self.setPreProcessorIncludePaths(preProcessor, aBuildPlatform)
 
 			# there is always a pre-include file
+			preInclude = aBuildPlatform['VARIANT_HRH']
 			preProcessor.setPreIncludeFile(preInclude)
 
-			macros = ["SBSV2"]
-
-			if config_macros:
-				macros.extend(config_macros)
-
-			if macros:
-				for macro in macros:
-					preProcessor.addMacro(macro + "=_____" +macro)
-
-			# extra "raw" macros that do not need protecting
-			preProcessor.addMacro("__GNUC__=3")
+			# Set the preprocessor macros
+			self.setPreProcessorMacros(preProcessor, aBuildPlatform)
 
 			preProcessorOutput = preProcessor.preprocess()
 
 			# Resurrect preprocessing replacements
-			pattern = r'([\\|/]| |) ?_____(('+macros[0]+')'
-			for macro in macros[1:]:
+			pattern = r'([\\|/]| |) ?_____(('+self.macros[0]+')'
+			for macro in self.macros[1:]:
 				pattern += r'|('+macro+r')'
 
 			pattern += r'\s*)'
@@ -523,6 +492,70 @@ class MetaDataFile(object):
 			self.__PreProcessedContent[key] = text
 
 		return self.__PreProcessedContent[key]
+	
+	def setPreProcessorMacros(self, aPreprocessor, aBuildPlatform):
+		""" Apply the macros for aBuildPlatform to a preprocessor object. """
+		preprocessormacros = self.preparePreProcessorMacros(aBuildPlatform)
+		for macro in preprocessormacros:
+			aPreprocessor.addMacro(macro)
+			
+	def preparePreProcessorMacros(self, aBuildPlatform):
+		""" Prepare a list of macros (e.g. for use by the preprocessor) """
+		prepared_macros = []
+		config_macros = (aBuildPlatform['PLATMACROS']).split()
+		macros = ["SBSV2"]
+
+		if config_macros:
+			macros.extend(config_macros)
+
+		if macros:
+			for macro in macros:
+				prepared_macros.append(macro + "=_____" +macro)
+		
+		self.macros = macros # For later use
+		
+		# extra "raw" macros that do not need protecting
+		prepared_macros.append("__GNUC__=3")
+		
+		return prepared_macros
+		
+	def setPreProcessorIncludePaths(self, aPreprocessor, aBuildPlatform):
+		""" setPreProcessorIncludePaths: set the preprocessor include paths """
+		ppip = self.preparePreProcessorIncludePaths(aBuildPlatform)
+		aPreprocessor.addIncludePaths(ppip)
+		
+	def preparePreProcessorIncludePaths(self, aBuildPlatform):
+		""" Prepare a list of the include paths for use by the preprocessor. """
+		paths = []
+		
+		# always have the current directory on the include path
+		paths.append('.')
+
+		# the SYSTEMINCLUDE directories defined in the build config
+		# should be on the include path. This is added mainly to support
+		# Feature Variation as SYSTEMINCLUDE is usually empty at this point.
+		systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
+		if systemIncludes:
+			paths.extend(systemIncludes.split())
+
+		preInclude = aBuildPlatform['VARIANT_HRH']
+		
+		# for non-Feature Variant builds, the directory containing the HRH should
+		# be on the include path
+		if not aBuildPlatform['ISFEATUREVARIANT']:
+			paths.append(preInclude.Dir())
+
+		# and EPOCROOT/epoc32/include
+		paths.append(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
+
+		# and the directory containing the bld.inf file
+		if self.__RootLocation is not None and str(self.__RootLocation) != "":
+			paths.append(self.__RootLocation)
+
+		# and the directory containing the file we are processing
+		paths.append(self.filename.Dir())
+		
+		return paths
 
 class MMPFile(MetaDataFile):
 	"""A generic representation of a Symbian metadata file
@@ -768,9 +801,13 @@ class ExtensionmakefileEntry(object):
 			biloc="." # Someone building with a relative raptor path
 
 		self.__StandardVariables = {}
-		# Relative step-down to the root - let's try ignoring this for now, as it
-		# should amount to the same thing in a world where absolute paths are king
-		self.__StandardVariables['TO_ROOT'] = ""
+		# The source root directory is SRCROOT if set in the environment
+		# Set TO_ROOT to SRCROOT in case SBS_BUILD_DIR is on a different drive
+		if 'SRCROOT' in os.environ:
+			self.__StandardVariables['TO_ROOT'] = str(generic_path.Path(os.environ['SRCROOT']))
+		else:
+			self.__StandardVariables['TO_ROOT'] = ""
+		
 		# Top-level bld.inf location
 		self.__StandardVariables['TO_BLDINF'] = biloc
 		self.__StandardVariables['EXTENSION_ROOT'] = eiloc
@@ -838,9 +875,12 @@ class Extension(object):
 			eiloc="." # Someone building with a relative raptor path
 
 		self.__StandardVariables = {}
-		# Relative step-down to the root - let's try ignoring this for now, as it
-		# should amount to the same thing in a world where absolute paths are king
-		self.__StandardVariables['TO_ROOT'] = ""
+		# The source root directory is SRCROOT if set in the environment	
+		# Set TO_ROOT to SRCROOT in case SBS_BUILD_DIR is on a different drive
+		if 'SRCROOT' in os.environ:
+			self.__StandardVariables['TO_ROOT'] = str(generic_path.Path(os.environ['SRCROOT']))
+		else:
+			self.__StandardVariables['TO_ROOT'] = ""
 		# Top-level bld.inf location
 		self.__StandardVariables['TO_BLDINF'] = biloc
 		# Location of bld.inf file containing the current EXTENSION block
@@ -1491,9 +1531,9 @@ class MMPRaptorBackend(MMPBackend):
 
 				self.__versionhex = "%04x%04x" % (major, minor)
 				self.BuildVariant.AddOperation(raptor_data.Set(varname, "%d.%d" %(major, minor)))
-				self.BuildVariant.AddOperation(raptor_data.Set(varname+"HEX", self.__versionhex))
+				self.BuildVariant.AddOperation(raptor_data.Set("VERSIONHEX", self.__versionhex))
 				self.__debug("Set "+toks[0]+"  OPTION to " + toks[1])
-				self.__debug("Set "+toks[0]+"HEX OPTION to " + "%04x%04x" % (major,minor))
+				self.__debug("Set VERSIONHEX OPTION to " + self.__versionhex)
 
 			else:
 				self.__Raptor.Warn("Invalid version supplied to VERSION (%s), using default value" % toks[1])
@@ -2116,10 +2156,17 @@ class MMPRaptorBackend(MMPBackend):
 			if (self.__LINKAS):
 				defaultRootName = self.__LINKAS
 
-			resolvedDefFile = self.resolveDefFile(defaultRootName, aBuildPlatform)
+			(resolvedDefFile, isSecondaryDefFile) = self.resolveDefFile(defaultRootName, aBuildPlatform)
+			# We need to store the resolved .def file and location for the FREEZE target
 			self.__debug("Resolved def file:  %s" % resolvedDefFile )
-			# We need to store this resolved deffile location for the FREEZE target
 			self.BuildVariant.AddOperation(raptor_data.Set("RESOLVED_DEFFILE", resolvedDefFile))
+			# We need to store the primary/secondary status of the resolved .def file as some configurations
+			# require additional processing based on the result
+			secondaryDefFile = ""
+			if isSecondaryDefFile:
+				secondaryDefFile = "1"
+			self.__debug("Set RESOLVED_DEFFILE_SECONDARY to '%s'" % secondaryDefFile)
+			self.BuildVariant.AddOperation(raptor_data.Set("RESOLVED_DEFFILE_SECONDARY", secondaryDefFile))
 
 		# If a deffile is specified, an FLM will put in a dependency.
 		# If a deffile is specified then raptor_meta will guess a name but:
@@ -2307,14 +2354,25 @@ class MMPRaptorBackend(MMPBackend):
 		"""Returns a fully resolved DEFFILE entry depending on .mmp file location and TARGET, DEFFILE and NOSTRICTDEF
 		entries in the .mmp file itself (where appropriate).
 		Is able to deal with target names that have multiple '.' characters e.g. messageintercept.esockdebug.dll
+		Supports configurations that allow primary and secondary .def file locations.
 		"""
 
 		resolvedDefFile = ""
 		platform = aBuildPlatform['PLATFORM']
+		isSecondaryDefaultDefFile = False
 
 		# Not having a default .def file directory is a pretty strong indicator that
 		# .def files aren't supported for the particular platform
 		if PlatformDefaultDefFileDir.has_key(platform):
+			
+			# Some configurations support both primary and secondary default .def file locations - we need to take this
+			# into account in resolving .def file locations
+			primaryDefaultDefFileDir = PlatformDefaultDefFileDir[platform]
+			secondaryDefaultDefFileDir = ""
+			
+			if type(PlatformDefaultDefFileDir[platform]) == list:
+				(primaryDefaultDefFileDir, secondaryDefaultDefFileDir) = PlatformDefaultDefFileDir[platform]
+			
 			(targetname,targetext) = os.path.splitext(aTARGET)
 			(defname,defext) = os.path.splitext(self.deffile)
 			if defext=="":
@@ -2325,36 +2383,47 @@ class MMPRaptorBackend(MMPBackend):
 				targetname += defext
 
 			if not self.deffile:
+				# No DEFFILE entry - expected .def filename will be based on the target name
 				resolvedDefFile = targetname
 			else:
+				# DEFFILE listed - take into account the value, depending on what format it takes
 				if re.search('[\\|\/]$', self.deffile):
 					# If DEFFILE is *solely* a path, signified by ending in a slash, then TARGET is the
 					# basis for the default .def filename but with the specified path as prefix
 					resolvedDefFile = self.deffile + targetname
-
 				else:
 					resolvedDefFile = defname
 
-				resolvedDefFile = resolvedDefFile.replace('~', PlatformDefaultDefFileDir[platform])
+				resolvedDefFile = resolvedDefFile.replace('~', primaryDefaultDefFileDir)
 
-			if resolvedDefFile:
-				if not self.nostrictdef:
-					resolvedDefFile += 'u'
+			if not self.nostrictdef:
+				resolvedDefFile += 'u'
 
-				if self.__explicitversion:
-					resolvedDefFile += '{' + self.__versionhex + '}'
+			if self.__explicitversion:
+				resolvedDefFile += '{' + self.__versionhex + '}'
 
-				resolvedDefFile += defext
+			resolvedDefFile += defext
 
+			# If the resolved .def file we have so far doesn't include a path in any shape or form, we prepend the default,
+			# implicit, .def file location based on the configuration being built
+			if not re.search('[\\\/]+', self.deffile):
+				resolvedDefFile = '../'+primaryDefaultDefFileDir+'/'+resolvedDefFile
+				
+			# Some configurations support a secondary, "fall back", .def file location if a .def file doesn't physically
+			# exist at the primary location.
+			# We therefore check exisitance of the primary located file if a secondary location is available, and use the
+			# secondary location if required (recording the fact that the secondary file has been used, as this can influence
+			# downstream processing).
+			if secondaryDefaultDefFileDir:
+				primaryFileCheck = raptor_utilities.resolveSymbianPath(self.__defFileRoot, resolvedDefFile, 'DEFFILE', "", str(aBuildPlatform['EPOCROOT']))
+			
+				if not os.path.exists(primaryFileCheck):
+					isSecondaryDefaultDefFile = True
+					resolvedDefFile = '../'+secondaryDefaultDefFileDir+'/'+os.path.basename(resolvedDefFile)
 
-				# If a DEFFILE statement doesn't specify a path in any shape or form, prepend the default .def file
-				# location based on the platform being built
-				if not re.search('[\\\/]+', self.deffile):
-					resolvedDefFile = '../'+PlatformDefaultDefFileDir[platform]+'/'+resolvedDefFile
+			resolvedDefFile = raptor_utilities.resolveSymbianPath(self.__defFileRoot, resolvedDefFile, 'DEFFILE', "", str(aBuildPlatform['EPOCROOT']))
 
-				resolvedDefFile = raptor_utilities.resolveSymbianPath(self.__defFileRoot, resolvedDefFile, 'DEFFILE', "", str(aBuildPlatform['EPOCROOT']))
-
-		return resolvedDefFile
+		return (resolvedDefFile, isSecondaryDefaultDefFile)
 
 
 def CheckedGet(self, key, default = None):
@@ -3081,7 +3150,6 @@ class MetaReader(object):
 				self.__Raptor.Debug("Set %s=%s", option, options[option])
 				value = options[option].replace('$(EPOCROOT)', '$(EPOCROOT)/')
 				value = value.replace('$(', '$$$$(')
-				value = value.replace('$/', '/').replace('$;', ':')
 				value = value.replace('$/', '/').replace('$;', ':')
 
 				if customInterface:
