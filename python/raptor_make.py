@@ -18,6 +18,7 @@
 
 import hashlib
 import os
+import pickle
 import random
 import raptor
 import raptor_timing
@@ -400,6 +401,7 @@ include %s
 
 		parameters = []
 		dupe = True
+		pickled = False
 		iface = None
 		guard = None
 		if hasInterface:
@@ -453,7 +455,15 @@ include %s
 			dupe = hash in self.hashes
 
 			self.hashes.add(hash)
-
+			
+			# pickled interfaces need the bld.inf output directory even
+			# if it is not an FLM parameter (and it normally isn't)
+			pickled = iface.isPickled(self.raptor.cache)
+			if pickled:
+				bldinfop = evaluator.Resolve("BLDINF_OUTPUTPATH")
+				if not bldinfop:
+					self.raptor.Error("BLDINF_OUTPUTPATH is required in %s for pickled interfaces" % config.name)
+					
 		# we only create a Makefile if we have a new FLM call to contribute,
 		# OR we are not pruning duplicates (guarding instead)
 		# OR we have some child specs that need something to include them.
@@ -473,6 +483,12 @@ include %s
 
 		# generate the call to the FLM
 		if iface is not None:
+			# pickled interfaces save the parameters in a separate file
+			# and add a parameter which points at that file's location.
+			if pickled:
+				self.pickleParameters(parameters, hash, bldinfop)
+				
+			# add the FLM call to the selected makefiles
 			makefileset.addCall(spec.name, config.name, iface.name, useAllInterfaces, iface.GetFLMIncludePath(self.raptor.cache), parameters, guard)
 
 		# recursive includes
@@ -483,6 +499,30 @@ include %s
 		if self.many:
 			makefileset.close() # close child set of makefiles as we'll never see them again.
 
+	def pickleParameters(self, parameters, hash, directory):
+		"""write a pickle of the parameter dictionary to directory/hash/pickle."""
+		if not parameters or not hash or not directory:
+			return
+		
+		planbdir = os.path.join(directory, hash)
+		if not os.path.isdir(planbdir):
+			try:
+				os.makedirs(planbdir)
+			except:
+				self.raptor.Error("could not create directory " + planbdir)
+				return
+		
+		dictionary = dict(parameters)
+		filename = os.path.join(planbdir, "pickle")
+		try:
+			file = open(filename, "wb")
+			pickle.dump(dictionary, file, protocol=2)
+			file.close()
+		except:
+			self.raptor.Error("could not create file " + filename)
+			
+		parameters.append(("PLANBDIR", planbdir))
+		
 	def Make(self, makefileset):
 		"run the make command"
 

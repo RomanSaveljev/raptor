@@ -53,7 +53,6 @@
 		<set name="INTERFACE.textnotifier2" value="Emulator.textnotifier2"/>
 		<set name="INTERFACE.var" value="Emulator.var"/>
 		
-		<set name="BLDINF_OUTPUTPATH" value="$(SBS_BUILD_DIR)"/>
 		<set name="CDEFS" value="__SYMBIAN32__ __CW32__ __WINS__ __WINSCW__ __SUPPORT_CPP_EXCEPTIONS__ _UNICODE $(MMPDEFS)"/>
 		<set name="CFLAGS" value="-c -align 4 -warnings on -w nohidevirtual,nounusedexpr -msgstyle gcc -enum int -str pool -exc ms -trigraphs on -cwd source"/>
 		<set name="CW_DEFAULT_LIBS" value="gdi32.lib user32.lib kernel32.lib"/>

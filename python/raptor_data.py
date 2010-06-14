@@ -210,6 +210,14 @@ class Interface(Model):
 		except KeyError:
 			raise BadReferenceError("Cannot extend interface because it cannot be found: "+str(self.extends))
 
+	def isPickled(self, cache):
+		if self.pickled:
+			return True
+		if self.extends != None:
+			parent = self.FindParent(cache)
+			return parent.isPickled(cache)
+		return False
+	
 	def GetParams(self, cache):
 		if self.extends != None:
 			parent = self.FindParent(cache)

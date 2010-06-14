@@ -5,14 +5,14 @@
 
 	<interface name="planb.base" extends="base.flm" abstract="true" pickled="true">
 		<param name='EPOCROOT'/>
-		<param name='EPOCBLD'  pickled='false'/>
-		<param name='EXTENSION_ROOT' pickled='false'/>
+		<param name='EPOCBLD'/>
+		<param name='EXTENSION_ROOT'/>
 		<param name='PRODUCT_INCLUDE'/>
 	</interface>
 
 	<interface name="planb.platform.independent.extension.py" extends="planb.base" flm="pi_extension.flm">
-		<param name='SCRIPT' pickled='false'/>
-		<param name='PARAMS' default='' pickled='false'/>
+		<param name='SCRIPT'/>
+		<param name='PARAMS' default=''/>
 	</interface>
 	
 	<interface name="planb.variant.independent.extension.py" extends="planb.platform.independent.extension.py" flm="vi_extension.flm">

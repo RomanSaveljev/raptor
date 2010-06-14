@@ -35,7 +35,6 @@
 		<set name="PLATMACROS.VAR" value=""/>
 		<set name="PLATMACROS.TOOLCHAIN" value=""/>
 		
-		<set name="BLDINF_OUTPUTPATH" value="$(SBS_BUILD_DIR)"/>
 		<set name="CAPABILITY" value=""/>
 		<set name="CDEFS" value="__X86__ _UNICODE __SYMBIAN32__ __EPOC32__ __PRODUCT_INCLUDE__=&quot;$(PRODUCT_INCLUDE)&quot; $(MMPDEFS)"/>
 		<set name="CODE_SEGMENT_START" value=""/>

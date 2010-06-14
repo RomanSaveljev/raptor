@@ -19,6 +19,7 @@
 
 import optparse
 import os
+import pickle
 import sys
 
 # constants
@@ -39,10 +40,24 @@ class Connect(object):
 		flags = filter(lambda x: x.startswith("--planb"), sys.argv)
 
 		parser = optparse.OptionParser()
-		parser.add_option("--planb-mkdir", action="store", dest="dir")
+		parser.add_option("--planb-debug", action="store_true", dest="debug", default=False)
+		parser.add_option("--planb-dir", action="store", dest="dir")
 
 		(self.options, args) = parser.parse_args(flags)
 
+		# load a parameter dictionary if we can
+		if self.options.dir:
+			filename = os.path.join(self.options.dir, "pickle")
+			file = open(filename, "rb")
+			self.parameters = pickle.load(file)
+			file.close()
+		else:
+			self.parameters = {}
+		
+		if self.options.debug:
+			for (k,v) in self.parameters.items():
+				print k + "=" + v
+					
 		self.targets = {}
 			
 	def add_target(self, target):
@@ -54,7 +69,7 @@ class Connect(object):
 	def commit(self):
 
 		print "REMARK: dir =", self.options.dir
-
+		
 		if not os.path.isdir(self.options.dir):
 			os.makedirs(self.options.dir)
 		

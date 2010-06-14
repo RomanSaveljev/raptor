@@ -29,7 +29,8 @@
 
 		<!-- Place where intermediate files are built -->
 		<env name='SBS_BUILD_DIR' default='$(EPOCROOT)/epoc32/build' type='path'/> 
-
+		<set name='BLDINF_OUTPUTPATH' value='$(SBS_BUILD_DIR)'/>
+		
 		<!-- Configuration files and directories -->
 		<set name='PRODUCT_INCLUDE' value='$(EPOCINCLUDE)/variant/symbian_os.hrh'/>
 		<set name='VARIANT_CFG' value='$(EPOCTOOLS)/variant/variant.cfg'/>
