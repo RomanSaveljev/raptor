@@ -34,8 +34,8 @@
 		<set name="COMPILER_CIA_FLAGS" value=""/>
 		<set name="COMPILER_DEFINES" value=""/>
 		<set name="COMPILER_FPU_OPTION" value="--fpu "/>
-        <set name="COMPILER_NO_HIDE_ALL_OPTION" value="--no_hide_all"/>
 		<set name="COMPILER_INTERWORK_DEFINES" value="__MARM_INTERWORK__"/>
+        <set name="COMPILER_NO_HIDE_ALL_OPTION" value="--no_hide_all"/>
 		<set name="COMPILER_SYSTEM_INCLUDE_OPTION" value="-J"/>
 		<set name="COMPILER_THUMB_DEFINES" value="__MARM_THUMB__"/>
 		<set name="COMPILE_ONLY_OPTION" value="-c"/>

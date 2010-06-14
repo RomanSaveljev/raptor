@@ -32,7 +32,6 @@
 		<!-- There is no -gdwarf-3 option; hence CC.DWARF2 and CC.DWARF3 have the same value. -->
 		<set name="CC.DWARF2" value="-gdwarf-2"/>
 		<set name="CC.DWARF3" value="-gdwarf-2"/>
-        <set name="COMPILER_NO_HIDE_ALL_OPTION" value="-fvisibility=default"/>
 		<set name="CC.NO_UNALIGNED_ACCESS" value=""/>
 		<set name="CC.SOFTVFP_MAYBE_VFPV2" value="soft"/>
 		<set name="CC.SOFTVFP_MAYBE_VFPV3" value="soft"/>
@@ -47,6 +46,7 @@
 		<set name="COMPILER_DEFINES" value="-D__GCCE__"/>
 		<set name="COMPILER_FPU_OPTION" value="-mfloat-abi="/>
 		<set name="COMPILER_INTERWORK_DEFINES" value="__MARM_INTERWORK__"/>
+        <set name="COMPILER_NO_HIDE_ALL_OPTION" value="-fvisibility=default"/>
 		<set name="COMPILER_SYSTEM_INCLUDE_OPTION" value="-I"/>
 		<set name="COMPILER_THUMB_DEFINES" value="__MARM_THUMB__"/>
 		<set name="CPP_LANG_OPTION" value="-x c++ -Wno-ctor-dtor-privacy"/>
