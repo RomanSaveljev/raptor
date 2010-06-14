@@ -46,7 +46,7 @@ def run():
 		]
 	t.addbuildtargets('smoke_suite/test_resources/simple_gui/Bld.inf', [
 		"helloworld_exe/helloworld.mbm_bmconvcommands",
-		"helloworld_exe/helloworld_HelloWorld_sc.rpp",
+		"helloworld_exe/helloworld_HelloWorld.rsc.rpp",
 		"helloworld_exe/helloworld_HelloWorld.rsc.d",
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o",
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o.d",

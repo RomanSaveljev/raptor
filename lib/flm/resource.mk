@@ -64,9 +64,12 @@ define resource.build
           # $1 is done and the build engine guarantees that it's there so no resource header
           # can be attempted while we're trying to test.
           $(RESOURCEHEADER) : $1
-	    $(call startrule,resourcecompile,FORCESUCCESS) \
+	    $(call startrule,resourcecompile.headerfill,FORCESUCCESS) \
+	    if [ ! -f "$(RESOURCEHEADER)" ]; then $(GNUCPP)  -DLANGUAGE_$2 \
+	      -DLANGUAGE_$(subst sc,SC,$(2)) $(call makemacrodef,-D,$(MMPDEFS))\
+	      $(CPPOPT) $(SOURCE) -o $1.rpp; fi && \
 	    if [ ! -f "$(RESOURCEHEADER)" ]; then $(RCOMP) -m045,046,047 -u -h$$@ -s$1.rpp; fi \
-	    $(call endrule,resourcecompile)
+	    $(call endrule,resourcecompile.headerfill)
 
           RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
         endif
@@ -128,11 +131,11 @@ define resource.headeronly
     RESOURCE:: $(RESOURCEHEADER)
     
     $(RESOURCEHEADER): $(SOURCE)
-	$(call startrule,resourceheader,FORCESUCCESS) \
+	$(call startrule,resource.headeronly,FORCESUCCESS) \
 	$(GNUCPP)  -DLANGUAGE_$2 -DLANGUAGE_$(subst sc,SC,$(3)) $(call makemacrodef,-D,$(MMPDEFS))\
 	$(CPPOPT) $(SOURCE) -o $1_$2.rsg.rpp && \
 	$(RCOMP) -m045,046,047 -u -h$$@ -s$1_$2.rsg.rpp \
-	$(call endrule,resourceheader)
+	$(call endrule,resource.headeronly)
 
     CLEANTARGETS:=$$(CLEANTARGETS) $1_$2.rsg.rpp
     RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
