@@ -11,6 +11,7 @@
 	</interface>
 
 	<interface name="planb.platform.independent.extension.py" extends="planb.base" flm="pi_extension.flm">
+		<param name='SCRIPTDIR' default='$(EXTENSION_ROOT)'/>
 		<param name='SCRIPT'/>
 		<param name='PARAMS' default=''/>
 	</interface>
@@ -23,4 +24,15 @@
 		<param name='VARIANTTYPE'/>
 	</interface>
 
+	<!-- python replacements for standard FLMs -->
+	
+	<interface name="planb.Tools.exe.py" extends="Tools.exe" flm="extension.flm" pickled="true">
+		<param name='SCRIPTDIR' default='$(FLMHOME)'/>
+		<param name='SCRIPT' default='planb/tools2.exe.py'/>
+		<param name='PARAMS' default=''/>
+	</interface>
+	<var name="tools2_planb">
+		<set name='INTERFACE.exe' value='planb.Tools.exe.py'/>
+	</var>
+		
 </build>

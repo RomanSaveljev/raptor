@@ -512,14 +512,18 @@ include %s
 				self.raptor.Error("could not create directory " + planbdir)
 				return
 		
-		dictionary = dict(parameters)
 		filename = os.path.join(planbdir, "pickle")
-		try:
-			file = open(filename, "wb")
-			pickle.dump(dictionary, file, protocol=2)
-			file.close()
-		except:
-			self.raptor.Error("could not create file " + filename)
+		
+		# if the file already exists then it is automatically up to date
+		# because the name contains a hash of the contents.
+		if not os.path.isfile(filename):
+			dictionary = dict(parameters)
+			try:
+				file = open(filename, "wb")
+				pickle.dump(dictionary, file, protocol=2)
+				file.close()
+			except:
+				self.raptor.Error("could not create file " + filename)
 			
 		parameters.append(("PLANBDIR", planbdir))
 		

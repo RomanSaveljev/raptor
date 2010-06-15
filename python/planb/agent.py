@@ -41,25 +41,44 @@ class Connect(object):
 
 		parser = optparse.OptionParser()
 		parser.add_option("--planb-debug", action="store_true", dest="debug", default=False)
-		parser.add_option("--planb-dir", action="store", dest="dir")
+		parser.add_option("--planb-dir", action="store", dest="dir", default=".")
 
-		(self.options, args) = parser.parse_args(flags)
+		(options, []) = parser.parse_args(flags)
 
+		# save the options (writing direct into self doesn't work)
+		self.dir = options.dir
+		self.debug = options.debug
+		
 		# load a parameter dictionary if we can
-		if self.options.dir:
-			filename = os.path.join(self.options.dir, "pickle")
-			file = open(filename, "rb")
+		if self.dir:
+			self.pickle = os.path.join(self.dir, "pickle")
+			file = open(self.pickle, "rb")
 			self.parameters = pickle.load(file)
 			file.close()
 		else:
 			self.parameters = {}
 		
-		if self.options.debug:
+		if 'FLMDEBUG' in self.parameters:
+			self.debug = (self.parameters['FLMDEBUG'] == '1')
+			
+		if self.debug:
 			for (k,v) in self.parameters.items():
 				print k + "=" + v
 					
 		self.targets = {}
-			
+	
+	def __getattr__(self, name):
+		"""retrieve parameters as if they were object attributes.
+		
+		For example,
+		
+		print agent.EPOCROOT
+		"""
+		try:
+			return self.parameters[name]
+		except KeyError:
+			raise AttributeError(name + " is not a recognised attribute of planb.agent.Connect")
+				
 	def add_target(self, target):
 		if target.phase in self.targets:
 			self.targets[target.phase].append(target)
@@ -68,32 +87,52 @@ class Connect(object):
 		
 	def commit(self):
 
-		print "REMARK: dir =", self.options.dir
+		print "REMARK: dir =", self.dir
 		
-		if not os.path.isdir(self.options.dir):
-			os.makedirs(self.options.dir)
+		if not os.path.isdir(self.dir):
+			os.makedirs(self.dir)
 		
 		ok = True
 		
 		for phase in ['BITMAP', 'RESOURCE', 'ALL']:
-			try:
-				filename = os.path.join(self.options.dir, phase)
-				file = open(filename, "w")
+			if phase in self.targets:
+				try:
+					filename = os.path.join(self.dir, phase)
+					file = open(filename, "w")
 				
-				if phase in self.targets:
 					for t in self.targets[phase]:
 						file.write("$(call raptor_phony_recipe,%s,%s,,%s)" % (t.title, phase, t.run))
-				else:
-					# we create an empty file anyway
-					pass
 				
-				file.close()
-				print "REMARK: file =", filename
-			except:
-				sys.stderr.write("error: cannot create file '%s'\n" % filename)
-				ok = False
+					file.close()
+					print "REMARK: file =", filename
+				except:
+					sys.stderr.write("error: cannot create file '%s'\n" % filename)
+					ok = False
 		
-		if not ok:
+		# write out the dependency file
+		done_target = os.path.join(self.dir, "done")
+		try:
+			depends = os.path.join(self.dir, "depend.mk")
+			file = open(depends, "w")
+			file.write("%s: %s\n" % (done_target, sys.argv[0]))
+				
+			if self.pickle:
+				file.write("%s: %s\n" % (done_target, self.pickle))
+					
+			file.close()
+		except:
+			sys.stderr.write("error: cannot create file '%s'\n" % depends)
+			ok = False
+				
+		# write out the target marker file if all was well
+		if ok:
+			try:
+				file = open(done_target, "w")
+				file.close()
+			except:
+				sys.stderr.write("error: cannot create file '%s'\n" % done_target)
+				sys.exit(1)
+		else:
 			sys.exit(1)
 					
 # end of the planb.agent module
