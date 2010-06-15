@@ -168,6 +168,7 @@ ifeq ($(HEADERONLY),)  # i.e IF NOT HEADERONLY
         # For sc we generate $(INTERBASE_TMP).rsc and define LANGUAGE_SC and LANGUAGE_sc.
         $(foreach L,$(LANGUAGES),$(eval $(call resource.build,$(INTERBASE_TMP).r$(L),$(L),$(TARGET_lower).r$(L))))
 
+
         DEPENDFILE:=$(wildcard $(DEPENDFILENAME))
         ifneq "$(DEPENDFILE)" ""
           ifeq "$(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS)))" ""
@@ -185,6 +186,7 @@ ifeq ($(HEADERONLY),)  # i.e IF NOT HEADERONLY
     # targets for the sake of dependencies or, for example, if someone
     # merely adds a new copy when the resource is up-to-date
     $(foreach L,$(LANGUAGES),$(eval $(call resource.makecopies,$(INTERBASE_TMP).r$(L),$(TARGET_lower).r$(L))))
+
   endif
 else
   #
@@ -201,6 +203,14 @@ else
 
 endif
 
+ifneq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
+# Add header to releasables anyway despite guard since sone things
+# like the abldcache want to see the rsg for each platform even
+# if we only declare one rule.
+# If there's no header then it will be blank which is fine.
+RELEASABLES:=$(RELEASABLES) $(RESOURCEHEADER)
+endif
+
 
 
 ###############################################################################
@@ -211,8 +221,7 @@ ifneq ($(RFIFILE),)
   RELEASABLES:=$(RELEASABLES) $(RFIFILE)
   CREATABLEPATHS:=$(CREATABLEPATHS) $(dir $(RFIFILE))/
 
-  RPPFILES:=$(foreach L,$(LANGUAGES:SC=sc),$(INTERBASE_TMP).r$(L).rpp)
-  $(eval $(call generaterfifile,$(RFIFILE),$(RPPFILES),$(PRIMARYRPPFILE).d))
+  $(eval $(call generaterfifile,$(RFIFILE),$(PRIMARYFILE).d))
 endif
 
 

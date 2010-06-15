@@ -86,7 +86,7 @@ def run():
 		[".*recipe name='compile'", 2],
 		[".*recipe name='win32compile2object'", 2],
 		[".*recipe name='compile2object'", 1],
-		[".*recipe name='resourcecompile'", 2]
+		[".*recipe name='resourcecompile", 2]
 	]
 
 	

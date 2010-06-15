@@ -71,7 +71,7 @@ define resource.build
 	    if [ ! -f "$(RESOURCEHEADER)" ]; then $(RCOMP) -m045,046,047 -u -h$$@ -s$1.rpp; fi \
 	    $(call endrule,resourcecompile.headerfill)
 
-          RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
+          # we will add the resourceheader to RELEASABLES globally
         endif
 
       else
@@ -138,7 +138,7 @@ define resource.headeronly
 	$(call endrule,resource.headeronly)
 
     CLEANTARGETS:=$$(CLEANTARGETS) $1_$2.rsg.rpp
-    RELEASABLES:=$$(RELEASABLES) $(RESOURCEHEADER)
+    # we will add the resourceheader to RELEASABLES globally
     # individual source file compilation
     
     SOURCETARGET_$(call sanitise,$(SOURCE)): $(RESOURCEHEADER)
