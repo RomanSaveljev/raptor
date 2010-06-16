@@ -1,13 +1,15 @@
-<SystemDefinition name="MCL" schema="3.0.0" >  
-	<systemModel>
-	    <layer name="test">
-			<component name="Test Component 1">          
-				<unit unitID="TCOMP1" name="test_component_1" bldFile="simple" mrp="simple\simple.mrp"/>
-			</component>
-			<component name="Test Component 2">
-				<unit unitID="TCOMP2" name="test_component_2" bldFile="basics\helloworld" mrp="basics\helloworld.mrp"/>
-			</component>
-		</layer>
-	</systemModel>
-</SystemDefinition>
+<?xml version="1.0" encoding="UTF-8" ?> 
+	<SystemDefinition schema="3.0.0">
+		<package id="test" name="test" levels="test">
+			<collection id="test" name="test" level="test">
+				<component id="test1" name="test2" introduced="symbian^3" purpose="optional">
+					<unit bldFile="../../smoke_suite/test_resources/simple" /> 
+				</component>
+				<component id="test2" name="test2" introduced="symbian^3" purpose="optional">
+					<unit bldFile="../../smoke_suite/test_resources/basics/helloworld" /> 
+				</component>
+  			</collection>
+  		</package>
+	</SystemDefinition>
+
 

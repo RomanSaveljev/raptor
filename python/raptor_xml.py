@@ -380,8 +380,8 @@ class SystemModel(object):
 					if not group.isAbsolute() and bldInfRoot:
 						group = generic_path.Join(bldInfRoot, group)
 				else:
-					# only absolute paths are changed by root var in 3.x
-					if group.isAbsolute() and bldInfRoot:
+					# all paths are changed by root var in 3.x
+					if bldInfRoot:
 						group = generic_path.Join(bldInfRoot, group)
 
 				bldinf = generic_path.Join(group, "bld.inf").FindCaseless()
