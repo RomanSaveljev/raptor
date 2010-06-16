@@ -273,7 +273,7 @@ else
         # No resources are going to be made so unless we specifically ask for it, there will be no
         # preprocessed file from which to create the header:
 
-        $(eval $(call preprocessresource,$(INTERBASE_TMP)_$(HEADLANG).rpp,,$(HEADLANG),$(PRIMARYRPPFILE)))
+        $(eval $(call preprocessresource,$(INTERBASE_TMP)_$(HEADLANG).rpp,$(HEADLANG),$(PRIMARYRPPFILE)))
 
 endif
 

@@ -71,6 +71,7 @@ def run():
 		"$(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc",
 		"$(EPOCROOT)/epoc32/include/testresource.hrh",
 		"$(EPOCROOT)/epoc32/include/testresource.rsg",
+		"$(EPOCROOT)/epoc32/include/onelang.rsg",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/testresource.exe",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/anotherresource/testresource.r01",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/anotherresource/testresource.rsc",
@@ -88,6 +89,7 @@ def run():
 		"testresource_/testresource_testresource_01.rpp",
 		"testresource_/testresource_testresource_01.rpp.d",
 		"testresource_/testresource_testresource_02.rpp",
+                "onelang_/onelang_onelang_sc.rpp",
 		"testresource_/testresource_testresource_sc.rpp"])
 
 	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel -c winscw_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -c  winscw_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.testresource.rsg' %s && { X=`md5sum $(EPOCROOT)/epoc32/release/winscw/urel/z/resource/anotherresource/testresource.rsc` && Y=`md5sum $(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc` && [ \"${X%% *}\" != \"${Y%% *}\" ] ; }  && wc -l %s " % (res_depfile, res_depfile)
