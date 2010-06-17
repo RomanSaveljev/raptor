@@ -81,7 +81,7 @@ class TestRaptorXML(unittest.TestCase):
 				
 		del os.environ["SOURCEROOT"]
 		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_3.0.0.xml"), self.__sysDefRoot)
-		self.__compareFileLists([], systemModel.GetAllComponents())
+		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
 				
 		self.__logger.Clear()
 		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_multi_layers.xml"), self.__sysDefRoot)
