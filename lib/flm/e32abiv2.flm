@@ -553,6 +553,13 @@ define groupin10
 endef
 
 ################################################
+## ARMFPU postlinker option
+#
+LD_FPU_MAPPING:=softvfp>softvfp vfpv2>vfpv2 softvfp+vfpv2>vfpv2
+LD_FPU:=$(patsubst $(ARMFPU)>%,%,$(filter $(ARMFPU)>%,$(LD_FPU_MAPPING)))
+LD_FPU:=$(if $(LD_FPU),$(LD_FPU),$(POSTLINKER_FPU_DEFAULT)) \
+
+################################################
 
 
 ## Link-type selection:
@@ -654,7 +661,7 @@ $(E32TARGET): $(POSTLINKDEFFILE) $(ELF2E32) $(if $(MULTIFILE_ENABLED),$(MULTIFIL
 	  --version=$(VERSION) \
 	  --capability=$(FINAL_CAPABILITIES) \
 	  --linkas=$(call dblquote,$(LINKASVERSIONED)) \
-	  --fpu=$(if $(ARMFPU),$(ARMFPU),$(POSTLINKER_FPU_DEFAULT)) \
+	  --fpu=$(LD_FPU) \
 	  --targettype=$(POSTLINKTARGETTYPE) \
 	  --output=$$(call dblquote,$$@) \
 	  --elfinput=$(call dblquote,$(LINK_TARGET)) \
