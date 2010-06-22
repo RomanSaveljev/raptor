@@ -1215,6 +1215,13 @@ class MMPRaptorBackend(MMPBackend):
 		'phonenetwork':0,
 		'localnetwork':0
 	  	}
+	
+	# Valid ARMFPU options
+	armfpu_options = [
+		'softvfp',
+		'vfpv2',
+		'softvfp+vfpv2'
+		]
 
 	library_re = re.compile(r"^(?P<name>[^{]+?)(?P<version>{(?P<major>[0-9]+)\.(?P<minor>[0-9]+)})?(\.(lib|dso))?$",re.I)
 
@@ -1563,6 +1570,11 @@ class MMPRaptorBackend(MMPBackend):
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks1))
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
+		elif varname=='ARMFPU':
+			if not toks[1].lower() in self.armfpu_options:
+				self.__Raptor.Error("ARMFPU option '"+toks[1]+"' not recognised")
+			else:
+				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks[1]))
 		else:
 			self.__debug("Set "+toks[0]+" to " + str(toks[1]))
 			self.BuildVariant.AddOperation(raptor_data.Set(varname,"".join(toks[1])))
