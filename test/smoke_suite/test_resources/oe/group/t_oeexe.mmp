@@ -30,7 +30,8 @@ SOURCE			t_oeexe.cpp
 #endif
 
 LIBRARY			efsrv.lib t_oedll.lib
-SYSTEMINCLUDE	/epoc32/include ..
+OS_LAYER_SYSTEMINCLUDE_SYMBIAN
+SYSTEMINCLUDE	..
 VENDORID		0x70000001
 capability		all -TCB
 
