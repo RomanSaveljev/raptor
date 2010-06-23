@@ -514,7 +514,7 @@ endef
 # Determine what object files will be linked by using the source files.
 CPPFILES_LINKOBJECTS:=$(call mapcpp2object,$(CPPFILES))
 CFILES_LINKOBJECTS:=$(call mapc2object,$(CFILES))
-ifeq ($(TRANSFORM_CIA),1) 
+ifeq ($(TRANSFORM_CIA),1)
   CIAFILES_LINKOBJECTS:=$(patsubst %_.cpp,%_.o,$(CIA_CPPFILES))
 else
   CIAFILES_LINKOBJECTS:=$(call mapcia2object,$(CIAFILES))
@@ -779,7 +779,7 @@ $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
 # $4 is for language specific options (e.g. C++ vs C)
-$(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(if $(USE_TRACE_COMPILER),$(TRACE_MARKER),)  
+$(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(if $(USE_TRACE_COMPILER),$(TRACE_MARKER),)
 	$(call startrule,compile,,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
@@ -794,7 +794,7 @@ $(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOUR
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                      \
 			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
 			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
-			$(if $(NOHIDEALL),--no_hide_all,) \
+			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(NO_DEPEND_GENERATE),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
 			$(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
 			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $(MULTIFILEOBJECT) \
@@ -856,7 +856,7 @@ $(CPPONLYTARGET): $(1) $(PROJECT_META)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPO
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                   \
 			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
 			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
-			$(if $(NOHIDEALL),--no_hide_all,) \
+			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$$(call dblquote, $$<) $(OUTPUT_OPTION) $$(@) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,e32cpponly)
 
@@ -890,7 +890,7 @@ $(LISTINGTARGET): $(1) $(PROJECT_META)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPO
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                   \
 			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
 			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
-			$(if $(NOHIDEALL),--no_hide_all,) \
+			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(NO_DEPEND_GENERATE),,$(DEPEND_OPTION) $(call dblquote,$(DEPENDFILENAME))) \
 			$$(call dblquote, $$<) $(OUTPUT_OPTION) $$(@) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,e32listing)
