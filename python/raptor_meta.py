@@ -1572,7 +1572,7 @@ class MMPRaptorBackend(MMPBackend):
 			self.ApplyVariants.append(toks[1])
 		elif varname=='ARMFPU':
 			if not str(toks[1]).lower() in self.armfpu_options:
-				self.__Raptor.Error("ARMFPU option '"+str(toks[1])+"' not recognised")
+				self.__Raptor.Error("ARMFPU option '"+str(toks[1])+"' not recognised. See http://developer.symbian.org/wiki/index.php/MMP_keywords#ARMFPU")
 			else:
 				self.__debug("Set "+toks[0]+" to " + str(toks[1]))
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,str(toks[1])))
