@@ -1571,10 +1571,11 @@ class MMPRaptorBackend(MMPBackend):
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
 		elif varname=='ARMFPU':
-			if not toks[1].lower() in self.armfpu_options:
-				self.__Raptor.Error("ARMFPU option '"+toks[1]+"' not recognised")
+			if not str(toks[1]).lower() in self.armfpu_options:
+				self.__Raptor.Error("ARMFPU option '"+str(toks[1])+"' not recognised")
 			else:
-				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks[1]))
+				self.__debug("Set "+toks[0]+" to " + str(toks[1]))
+				self.BuildVariant.AddOperation(raptor_data.Set(varname,str(toks[1])))
 		else:
 			self.__debug("Set "+toks[0]+" to " + str(toks[1]))
 			self.BuildVariant.AddOperation(raptor_data.Set(varname,"".join(toks[1])))

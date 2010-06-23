@@ -557,7 +557,7 @@ endef
 #
 LD_FPU_MAPPING:=softvfp>softvfp vfpv2>vfpv2 softvfp+vfpv2>vfpv2
 LD_FPU:=$(patsubst $(ARMFPU)>%,%,$(filter $(ARMFPU)>%,$(LD_FPU_MAPPING)))
-LD_FPU:=$(if $(LD_FPU),$(LD_FPU),$(POSTLINKER_FPU_DEFAULT)) \
+LD_FPU:=$(if $(LD_FPU),$(LD_FPU),$(POSTLINKER_FPU_DEFAULT))
 
 ################################################
 
