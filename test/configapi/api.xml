@@ -25,11 +25,14 @@
 	</var>
  	
  	<var name="buildme" extends="api_test_base">
+ 		<set name="CDEFS" value="__BBB__ __AAA__ __DDD__=first_value __CCC__  __DDD__=second_value"/>
+ 		<set name='EPOCINCLUDE' value="$(EPOCROOT)/epoc32/include"/>
  		<env name="EPOCROOT"/>
  		<set name="SBS_BUILD_DIR" value=""/>
  		<set name="FLM_EXPORT_DIR" value=""/>
  		<set name="PLATMACROS.LINUX" value=""/>
 		<set name="PLATMACROS.WINDOWS" value=""/>
+		<set name="PREINCLUDE" value="$(EPOCINCLUDE)/preinclude.h"/>
  		<set name="VARIANT_CFG" value="$(EPOCROOT)/epoc32/tools/variant/variant.cfg"/>
  		<set name="SYSTEMINCLUDE" value=""/>
  		<set name="INTERFACE_TYPES" value=""/>

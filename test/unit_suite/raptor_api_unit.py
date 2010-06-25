@@ -66,21 +66,34 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(config.meaning, "buildme")
 		self.failUnlessEqual(config.outputpath, path)
 		
-		macros = map(lambda x: str(x.name), config.metadata.platmacros)
-		macros.sort()
+		# metadata
+				
+		metadatamacros = map(lambda x: str(x.name), config.metadata.platmacros)
+		metadatamacros.sort()
 		results = ['SBSV2', '__GNUC__']
 		results.sort()
-		self.failUnlessEqual(macros, results)
+		self.failUnlessEqual(metadatamacros, results)
 		
 		includepaths = map(lambda x: str(x.path), config.metadata.includepaths)
 		includepaths.sort()
 		expected_includepaths = [raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant"), 
-								raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), ".", ""]
+								raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), "."]
 		expected_includepaths.sort()
 		self.failUnlessEqual(includepaths, expected_includepaths)
 		
 		preincludefile = str(config.metadata.preincludeheader.file)
 		self.failUnlessEqual(preincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant/Symbian_OS.hrh"))
+		
+		# build
+		
+		sourcemacros = map(lambda x: str(x.name+"="+x.value) if x.value else str(x.name), config.build.sourcemacros)
+		results = ['__BBB__', '__AAA__', '__DDD__=first_value', '__CCC__', '__DDD__=second_value']
+		self.failUnlessEqual(sourcemacros, results)
+		
+		compilerpreincludefile = str(config.build.compilerpreincludeheader.file)
+		self.failUnlessEqual(compilerpreincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/preinclude.h"))
+
+		# general
 
 		config = api.getconfig("buildme.foo")
 		self.failUnlessEqual(config.meaning, "buildme.foo")
