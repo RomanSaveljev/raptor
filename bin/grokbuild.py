@@ -116,26 +116,59 @@ class TargetTimesLog(HeliumLog):
 			+ "\n<metric name='raptor_duration'  value='%s'>\n" % self.raptorsecs
 		return s
 
-class RaptorAnnofile(HeliumLog):
+class RaptorAnnofile(object):
 	# Examples:
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_tools_all.resource.emake.anno
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_dfs_variants.default.emake.anno
 	# 92_7952_201022_003_dfs_build_ncp_dfs_variants.resource_deps.emake.anno
-	def __init__(self, logpath, buildid, build, phase):
-		self.filenamesuffix = '_%s.%s.emake.anno' % (build, phase)
-		super(RaptorAnnofile,self).__init__(logpath, buildid)
-		self.phase = phase
-		self.build = build
+	def __init__(self, filename, buildid):
+		self.phase = ""
+		self.filename = filename
+		self.buildid = buildid
 
-		self.annofile = annofile.Annofile(self.logfilename)
+		self.annofile = annofile.Annofile(self.filename)
 
 	def __str__(self):
-		return "<annofile id='%s'\n" % self.buildid + "build='%s'" % self.build + "phase='%s'" % self.phase + "'>\n" + str(self.annofile) + "\n</build>\n"
+		return "<annofile name='%s'\n" % os.path.split(self.filename)[-1] + "phase='%s'" % self.phase + ">\n" + str(self.annofile) + "\n</build>\n"
 
 
-class DFSAnnofile(RaptorAnnofile):
-	def __init__(self, logpath, buildid, phase):
-		super(DFSAnnofile, self).__init__(logpath, buildid, "dfs_build_ncp_dfs_variants", phase)
+class RaptorBuild(HeliumLog):
+	# mcl_7901_201024_20100623181534_dfs_build_ncp_variants.build_input_compile.log
+	# mcl_7901_201024_20100623181534_dfs_build_sf_variants.build_input_compile.log
+	def __init__(self, logpath, buildid, build):
+		self.filenamesuffix = '_%s.build_input_compile.log' % build
+		super(RaptorBuild,self).__init__(os.path.join(logpath, "compile"), buildid)
+		self.build = build
+
+		self.annofile_names = []	
+		self.build_duration = None
+		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>.*")
+		
+		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+) .*")
+		with open(self.logfilename) as f:
+			for l in f:
+				m = run_time_re.match(l)
+				if m:
+					self.build_duration = m.groups()[0]
+				
+				m2 = emake_invocation_re.match(l)
+				if m2:
+					(adir, aname) = os.path.split(m2.groups()[0])
+					if aname.find("pp")==-1: # no parallel parsing ones preferably
+						print "found annotation file %s" % aname
+						self.annofile_names.append(os.path.join(logpath, "makefile", aname))
+
+		self.annofiles = []
+		for p in self.annofile_names:
+			self.annofiles.append(RaptorAnnofile(p, buildid))
+
+	def __str__(self):
+		return 	"<raptorbuild logfile='%s'>" % self.logfilename + \
+			"\n<metric name='raptor_duration_%s'  value='%s'>\n" % (self.build, self.build_duration) + \
+			"".join([str(a) for a in self.annofiles]) + \
+			"</raptorbuild>\n"
+
+		
 
 
 class HeliumBuild(object):
@@ -143,7 +176,7 @@ class HeliumBuild(object):
 		self.buildid = buildid
 		self.targettimes = 0
 		self.logpath = logpath
-		self.annofiles=[]
+		self.logfiles=[]
 
 	def __str__(self):
 		return  self.buildid + str(self.targettimes) + \
@@ -153,14 +186,25 @@ class Helium9Build(HeliumBuild):
 	def __init__(self, logpath, buildid):
 		super(Helium9Build,self).__init__(logpath, buildid)
 		self.mainantlog = MainAntLog(logpath, buildid)
-		self.targettimes = TargetTimesLog(logpath, buildid)
-		for p in ['export', 'bitmap', 'resource', 'resource_deps', 'default']:
-			self.annofiles.append(DFSAnnofile(os.path.join(logpath,"makefile"), buildid, p))
+		#self.targettimes = TargetTimesLog(logpath, buildid)
+		self.raptorbuilds = []
+
+		# mcl_7901_201024_20100623181534_dfs_build_ncp_variants.build_input_compile.log
+		# mcl_7901_201024_20100623181534_dfs_build_sf_variants.build_input_compile.log
+		#
+		# ....but the problem is that the anno files have a slightly differning convention:
+		#        92_7952_201022_003_dfs_build_ncp_dfs_variants.resource_deps.emake.anno
+		#  _dfs_build_ncp_variants
+		#  _dfs_build_ncp_dfs_variants
+		for r in ["dfs_build_ncp_variants","dfs_build_sf_variants"]:
+			self.raptorbuilds.append(RaptorBuild(logpath, buildid, r))
+
+
 
 	def __str__(self):
 		return "<heliumbuild ver='9' id='%s'>\n" % self.buildid + str(self.mainantlog) + \
 			str(self.targettimes) + \
-	 		"".join([str(a) for a in self.annofiles ]) + "</heliumbuild>\n"
+	 		"".join([str(a) for a in self.raptorbuilds ]) + "</heliumbuild>\n"
 		
 
 class HeliumLogDir(object):
@@ -175,7 +219,7 @@ class HeliumLogDir(object):
 				build = Helium9Build(self.logpath, b)
 				self.builds.append(build)
 			except IOError,e:
-				print "Buildid %s found but does not refer to a compete build " % b
+				print "Buildid %s found but does not refer to a complete build " % b
 				print e
 
 	def write(self, stream):
