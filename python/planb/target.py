@@ -22,6 +22,25 @@
 # objects
 
 class File(object):
+	def __init__(self, agent):
+		self.agent = agent
+		agent.add_target(self)
+		
+		self.inputs = []
+		self.outputs = []
+		
+	def add_input(self, input):
+		self.inputs.append(input)
+	
+	def add_inputs(self, inputs):
+		self.inputs.extend(inputs)
+			
+	def add_output(self, output, releasable=True):
+		self.outputs.append( (output, releasable) )
+	
+	def add_outputs(self, outputs, releasable=True):
+		self.outputs.extend( [ (i, releasable) for i in outputs] )
+			
 	def action(self, command):
 		self.run = command
 	
@@ -38,7 +57,8 @@ class Resource(File):
 		self.run = 'true'
 
 class Target(File):
-	def __init__(self):
+	def __init__(self, agent):
+		File.__init__(self, agent)
 		self.phase = 'ALL'
 		self.title = 'planb.target'
 		self.run = 'true'

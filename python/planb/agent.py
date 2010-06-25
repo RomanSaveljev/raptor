@@ -62,22 +62,29 @@ class Connect(object):
 			self.debug = (self.parameters['FLMDEBUG'] == '1')
 			
 		if self.debug:
+			print "parameter values"
 			for (k,v) in self.parameters.items():
-				print k + "=" + v
+				print "\t", k, "=", v
 					
 		self.targets = {}
 	
-	def __getattr__(self, name):
-		"""retrieve parameters as if they were object attributes.
+	def __getitem__(self, name):
+		"""retrieve parameters as if this were a dictionary.
 		
 		For example,
 		
-		print agent.EPOCROOT
+		print agent['EPOCROOT']
 		"""
-		try:
-			return self.parameters[name]
-		except KeyError:
-			raise AttributeError(name + " is not a recognised attribute of planb.agent.Connect")
+		# in future we may have multiple private dictionaries or even
+		# a connection to some other process.
+		
+		# and we may convert the bare strings into lists or some other
+		# useful python types.
+		
+		# for now though we'll just return the same text string that the
+		# FLM would get.
+		
+		return self.parameters[name]
 				
 	def add_target(self, target):
 		if target.phase in self.targets:
