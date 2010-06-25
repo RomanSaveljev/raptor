@@ -1408,7 +1408,7 @@ class MMPRaptorBackend(MMPBackend):
 		
 		elif varname in ['COMPRESSTARGET', 'NOCOMPRESSTARGET', 'INFLATECOMPRESSTARGET', 'BYTEPAIRCOMPRESSTARGET']:
 			self.resolveCompressionKeyword(varname)
-		
+			
 		else:
 			self.__debug( "Set switch "+toks[0]+" ON")
 			self.BuildVariant.AddOperation(raptor_data.Set(prefix+varname, "1"))
@@ -1593,6 +1593,17 @@ class MMPRaptorBackend(MMPBackend):
 					toks1 = re.sub("[,'\[\]]", "", toks1).replace("//","/")
 				self.__debug("Set "+toks[0]+" to " + toks1)
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks1))
+		elif varname == 'TRACEON':
+			self.BuildVariant.AddOperation(raptor_data.Append('MMPDEFS', 'OST_TRACE_COMPILER_IN_USE', ' '))
+			self.__debug("Set " + toks[0] + " to 1" )
+			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
+			
+			path = toks[1][0] + "traces/" + self.__TARGET + "_" + self.__TARGETEXT
+			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
+			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
+			self.__userinclude += ' ' + resolved
+			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
+		
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
 		else:

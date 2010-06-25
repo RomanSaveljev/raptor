@@ -693,6 +693,11 @@ endif # if TARGETTYPE lib
 
 
 ## Run trace compiler ##############################################
+# TraceOn mmpkeyword
+ifneq ($(TRACEON),)
+USE_TRACE_COMPILER:=1
+endif
+# UID2 or UID3 is needed to run trace compiler
 ifeq ($(UID3),)
  ifeq ($(UID2),)
   USE_TRACE_COMPILER:=
@@ -710,7 +715,10 @@ ifneq ($(USE_TRACE_COMPILER),)
   include $(FLMHOME)/tracecompiler.mk
   WHATRELEASE:=$(WHATRELEASE) $(TRACE_DICTIONARY) $(AUTOGEN_HEADER)
 endif
+###################################################################
 
+
+##
 CC_CPPONLY_ARGS:=$(SYMBIAN_CCFLAGS) $(if $(DEBUG_INFO),-g) $(DEBUG_FORMAT) \
   $(RUNTIME_SYMBOL_VISIBILITY_OPTION) $(EXCEPTIONS) \
   $(CC_WARNINGS_CONTROL_OPTION) $(CC_ERRORS_CONTROL_OPTION) \
