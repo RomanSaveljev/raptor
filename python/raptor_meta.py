@@ -1598,7 +1598,10 @@ class MMPRaptorBackend(MMPBackend):
 			self.__debug("Set " + toks[0] + " to 1" )
 			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
 			
-			path = toks[1][0] + "traces/" + self.__TARGET + "_" + self.__TARGETEXT
+			if len(toks) == 1:
+				path = "traces/" + self.__TARGET + "_" + self.__TARGETEXT
+			else:
+				path = toks[1][0] + "traces/" + self.__TARGET + "_" + self.__TARGETEXT
 			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
 			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
 			self.__userinclude += ' ' + resolved
