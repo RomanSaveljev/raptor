@@ -555,7 +555,7 @@ class MetaDataFile(object):
 		# and the directory containing the file we are processing.
 		# This won't always be applicable - if the client is a front-end query for preprocessing
 		# include paths then there's no bld.inf path to take into account
-		if self.filename.isDir():
+		if self.filename.Dir().Exists():
 			paths.append(self.filename.Dir())
 		
 		return paths
