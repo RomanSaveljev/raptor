@@ -150,6 +150,7 @@
 		<param name='PERTURBMSECS' default='500'/>
 		<param name='POSTLINKER_COMPRESSION_DEFAULT'/>
 		<param name='POSTLINKER_FPU_DEFAULT'/>
+		<param name='POSTLINKER_FPU_MAPPING'/>
 		<param name='PREPDEF'/>
 		<param name='PREINCLUDE'/>
 		<param name='PREINCLUDE_OPTION'/>
