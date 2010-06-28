@@ -68,9 +68,9 @@ class TestRaptorApi(unittest.TestCase):
 		
 		# metadata
 				
-		metadatamacros = map(lambda x: str(x.name), config.metadata.platmacros)
+		metadatamacros = map(lambda x: str(x.name+"="+x.value) if x.value else str(x.name), config.metadata.platmacros)
 		metadatamacros.sort()
-		results = ['SBSV2', '__GNUC__']
+		results = ['SBSV2=_____SBSV2', '__GNUC__=3']
 		results.sort()
 		self.failUnlessEqual(metadatamacros, results)
 		

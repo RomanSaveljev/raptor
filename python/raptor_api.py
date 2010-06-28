@@ -252,13 +252,11 @@ class Context(object):
 			if evaluator.Get("PREINCLUDE"):
 				compilerpreincludeheader = generic_path.Path(evaluator.Get("PREINCLUDE"))
 			
-			# Metadata macros arrive as a list of strings of the form "name=value". 
-			# This removes the equals sign and everything to the right of it.
-			platmacroslist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
-			platmacros.extend(map(lambda macrodef: macrodef[0:macrodef.find("=")], platmacroslist))
-			
-			# Source macros arrive as a string of, potentially, "name" and "name=value" combinations.
-			# We split the string and then deal with each item depending on format - meaningful values are recorded.
+			# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
+			# If required, we split to a list, and then processes the constituent parts of the macro.
+			platmacrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
+			platmacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], platmacrolist))
+
 			sourcemacrolist = evaluator.Get("CDEFS").split()
 			sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
 			
@@ -299,8 +297,8 @@ class Context(object):
 		if preincludeheader != "":
 			config.metadata.preincludeheader = PreInclude(str(preincludeheader))
 		
-		if len(platmacros) > 0:
-			config.metadata.platmacros = map(lambda x: Macro(x), platmacros)
+		if len(platmacros):
+			config.metadata.platmacros = map(lambda x: Macro(x[0],x[1]) if x[1] else Macro(x[0]), platmacros)
 			
 		config.build = Build()
 		
