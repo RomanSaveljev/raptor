@@ -28,9 +28,9 @@ endef
 $(if $(FLMDEBUG),$(info <debug>INCLUDES=$(USERINCLUDE) $(SYSTEMINCLUDE)</debug>))
 $(if $(FLMDEBUG),$(info <debug>TARGET=$(TARGET) TARGETEXT=$(TARGETEXT)</debug>))
 
-# Find out TRACE_PATH  by looking for the trace folder in SYSTEMINCLUDE and USERINCLUDES
-# traces/traces_<target_name>_<target_extension>
-TRACE_PATH:=$(call get_trace_path,/traces/traces_$(TRACE_RELEASABLE_ID))
+# Find out TRACE_PATH by looking for the trace folder in SYSTEMINCLUDE and USERINCLUDES
+# traces/<target_name>_<target_extension>
+TRACE_PATH:=$(call get_trace_path,/traces/$(TRACE_RELEASABLE_ID))
 ifneq ($(TRACE_PATH),)
   TRACE_PRJNAME:=$(TRACE_RELEASABLE_ID)
 else # obsolete forms for compatibility
