@@ -13,11 +13,14 @@
 # Contributors:
 #
 # Description: 
-# fixmeta
+# grokbuild
 #
 
 """
+Gathers performance metrics from the logs of a complex multi-step build.
+Supports Helium 9 at the moment but is adaptible.
 
+Can read from emake annotation files.  
 """
 
 import sys
@@ -28,14 +31,6 @@ import annofile
 import datetime
 
 
-def checkconvert(dirname, filename):
-	fromfilename = dirname + "/" + filename
-
-def visit(arg, dirname, names):
-	#print "dir: %s\n" % (dirname)
-	for f in names:
-		pass
-
 class UndeterminedBuildID(Exception):
 	pass
 
@@ -43,20 +38,13 @@ class LogfileNotFound(Exception):
 	pass
 
 class HeliumLog(object):
+	""" Some common properties of any log file in a helium build """
 	filenamesuffix = None
 
 	def __init__(self, logpath, buildid):
 
 		self.logfilename = os.path.join(logpath, buildid + self.filenamesuffix)
 		self.buildid = buildid
-
-#		else:
-#			raise LogfileNotFound("logpath = %s, match=%s" %  (logpath, str(filename_re)))
-
-#		if self.buildid == None:
-#			raise UndeterminedBuildID("logpath = %s, match=%s" %  (logpath, str(filename_re)))
-#
-#		if self.logfilename is None:
 
 	@classmethod
 	def findall(c, logpath):
@@ -66,7 +54,6 @@ class HeliumLog(object):
 		logs = {}
 		for f in os.listdir(logpath):
 			m = filename_re.match(f)
-			# print f
 			if m:
 				file_buildid = m.groupdict()['buildid']
 				logs[file_buildid] = os.path.join(logpath,f)
@@ -77,6 +64,7 @@ class HeliumLog(object):
 		return "<metric name='buildid'  value='%s'>\n" % self.buildid
 
 class MainAntLog(HeliumLog):
+	""" This is the promary log of the helium build.  Useful for obtaining the total build time. Not good for this if the build failed. """
 	# output/logs/92_7952_201020_003_main.ant.log
 	filenamesuffix = "_main.ant.log"
 	timeformat = "%Y/%m/%d %H:%M:%S:%f" # e.g. Thu 2010/06/24 09:15:42:625 AM
@@ -120,6 +108,7 @@ class AntEnvLog(HeliumLog):
 		super(AntEnvLog,self).__init__(logpath, buildid)
 
 class TargetTimesLog(HeliumLog):
+	"""Very useful timing data from Ant but does not get created in all builds by default (must be configured"""
 	# output/logs/92_7952_custom_dilbert_201022_dilbert_targetTimesLog.csv
 	filenamesuffix = "_targetTimesLog.csv"
 
@@ -146,6 +135,7 @@ class TargetTimesLog(HeliumLog):
 		return s
 
 class RaptorAnnofile(object):
+	"""Thin wrapper around the annofile class to make it relevant to this utility."""
 	# Examples:
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_tools_all.resource.emake.anno
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_dfs_variants.default.emake.anno
@@ -158,10 +148,14 @@ class RaptorAnnofile(object):
 		self.annofile = annofile.Annofile(self.filename)
 
 	def __str__(self):
-		return "<annofile name='%s'\n" % os.path.split(self.filename)[-1] + "phase='%s'" % self.phase + ">\n" + str(self.annofile) + "\n</build>\n"
+		return "<annofile name='%s'\n" % os.path.split(self.filename)[-1] + "phase='%s'" % self.phase + ">\n" + str(self.annofile).replace("\n","\n    ") + "\n</annofile>\n"
 
 
 class RaptorBuild(HeliumLog):
+	"""Any Raptor logfile.  Mainly used for getting the names of the 
+	annotation files which the annofile parser will use. Also gets
+	the version of raptor and the total time taken by this particular
+	invocation of Raptor"""
 	def __init__(self, logpath, buildid, build):
 		self.filenamesuffix = '_%s' % build
 		super(RaptorBuild,self).__init__(os.path.join(logpath, "compile"), buildid)
@@ -174,6 +168,7 @@ class RaptorBuild(HeliumLog):
 		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+) .*")
 		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*).*")
 		with open(self.logfilename) as f:
+			sys.stderr.write("      parsing build log %s\n" % os.path.split(self.logfilename)[1])
 			for l in f:
 				m = run_time_re.match(l)
 				if m:
@@ -183,7 +178,7 @@ class RaptorBuild(HeliumLog):
 				if m:
 					(adir, aname) = os.path.split(m.groups()[0])
 					if aname.find("pp")==-1: # no parallel parsing ones preferably
-						sys.stderr.write("found annotation file %s\n" % aname)
+						sys.stderr.write("        found annotation file %s\n" % aname)
 						self.annofile_names.append(os.path.join(logpath, "makefile", aname))
 
 				m = sbs_version_re.match(l)
@@ -196,14 +191,15 @@ class RaptorBuild(HeliumLog):
 
 	def __str__(self):
 		return 	"<raptorbuild logfile='%s'>\n" % os.path.split(self.logfilename)[-1] + \
-			" <metric name='raptor_version'  value='%s'>\n" % (self.version) + \
-			" <metric name='raptor_duration_%s'  value='%d'>\n" % (self.build, self.build_duration) + \
+			" <metric name='raptor_version'  value='%s' />\n" % (self.version) + \
+			" <metric name='raptor_duration_%s'  value='%d' />\n" % (self.build, self.build_duration) + \
 			"".join([str(a) for a in self.annofiles]) + \
 			"</raptorbuild>\n"
 		
 
 
 class HeliumBuild(object):
+	"""A build with any version of Helium"""
 	def __init__(self, logpath, buildid):
 		self.buildid = buildid
 		self.logpath = logpath
@@ -214,6 +210,7 @@ class HeliumBuild(object):
 			"\n"+[str(a) for a in self.annofiles] + "\n"
 
 class Helium9Build(HeliumBuild):
+	""" Filenames, structure etc conform to Helium 9 """
 	def __init__(self, logpath, buildid):
 		super(Helium9Build,self).__init__(logpath, buildid)
 		self.mainantlog = MainAntLog(logpath, buildid)
@@ -236,13 +233,17 @@ class Helium9Build(HeliumBuild):
 
 		raptor_duration = reduce(lambda x, y: x + y,[y.build_duration for y in self.raptorbuilds],0)
 		return "<heliumbuild ver='9' id='%s'>\n" % (self.buildid) + \
-			"<metric name='total_duration'  value='%d'>\n" % (self.mainantlog.build_duration) + \
-			"<metric name='raptor_duration'  value='%d'>\n" % (raptor_duration) + \
+			"<metric name='total_duration'  value='%d' />\n" % (self.mainantlog.build_duration) + \
+			"<metric name='raptor_duration'  value='%d' />\n" % (raptor_duration) + \
 	 		"".join([str(a) for a in self.raptorbuilds ]) + \
 	 		"</heliumbuild>\n"
 		
 
 class HeliumLogDir(object):
+	"""Multiple builds can be done one after another (usually when rebuilding 
+	   things that failed, apparently) and their logs left in the output dir.
+	   The naming convention ensures that they don't overwrite each other.
+	   This class identifies each build and tries to analyse them one by one."""
 	def __init__(self, epocroot):
 		self.logpath = os.path.join(epocroot, "output/logs")
 		logs = MainAntLog.findall(self.logpath)
@@ -250,12 +251,12 @@ class HeliumLogDir(object):
 		
 		for b in logs.keys():
 			try:
-				print "found build with id %s" % b
+				sys.stderr.write("  Found build with id %s\n" % b)
 				build = Helium9Build(self.logpath, b)
 				self.builds.append(build)
 			except IOError,e:
-				print "Buildid %s found but does not refer to a complete build " % b
-				print e
+				sys.stderr.write("  Buildid %s found but does not refer to a complete build\n" % b)
+				sys.stderr.write(str(e)+"\n")
 
 	def write(self, stream):
 		for b in self.builds:
@@ -268,12 +269,11 @@ parser = OptionParser(prog = "grokbuild",
 (options, args) = parser.parse_args()
 
 if len(args) == 0:
-	print "Need at least one argument: a path to the logs."
+	sys.stderr.write("Need at least one argument: a path to the logs.")
 	sys.exit(-1)
 
-sys.stderr.write("Gathering\n")
-#os.path.walk(args[0],visit,None)
 epocroot = args[0]
+sys.stderr.write("Gathering Performance Metrics for %s\n" % epocroot)
 
 b = HeliumLogDir(epocroot)
 b.write(sys.stdout)
