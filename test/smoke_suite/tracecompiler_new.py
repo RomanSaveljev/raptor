@@ -19,8 +19,8 @@ from raptor_tests import SmokeTest
 def run():
 	t = SmokeTest()
 	t.description = "test mmpkeyword: traceon"
-	t.id = "108"
-	t.name = "TraceOn_mmpkeyword"
+	t.id = "108a"
+	t.name = "traceon_mmpkeyword"
 	t.command = "sbs -b smoke_suite/test_resources/tracecompiler/traceon/group/bld.inf -c armv5.tracecompiler"	
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/traceon.exe",
@@ -36,5 +36,7 @@ def run():
 	])
 	t.run()
 	
+	t.id = "108"
+	t.name = "tracecompiler_new"
 	return t
 

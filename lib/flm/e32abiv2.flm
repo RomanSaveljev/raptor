@@ -693,11 +693,6 @@ endif # if TARGETTYPE lib
 
 
 ## Run trace compiler ##############################################
-# TraceOn mmpkeyword
-ifneq ($(TRACEON),)
-USE_TRACE_COMPILER:=1
-endif
-# UID2 or UID3 is needed to run trace compiler
 ifeq ($(UID3),)
  ifeq ($(UID2),)
   USE_TRACE_COMPILER:=

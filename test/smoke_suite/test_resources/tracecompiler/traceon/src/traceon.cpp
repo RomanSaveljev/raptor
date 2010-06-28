@@ -6,7 +6,7 @@
 
 #include "e32def.h"
 
-char test[] = "Child 1";
+char test[] = "test traceon keyword";
 
 TInt E32Main()
 {

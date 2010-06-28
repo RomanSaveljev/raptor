@@ -10,7 +10,7 @@ SYSTEMINCLUDE		/epoc32/include/platform
 SOURCEPATH		../src
 SOURCE			traceon.cpp
 
-TRACEON			../
+TRACEON	
 // the above equals below:
 // USERINCLUDE		../traces/traceon_exe
 //

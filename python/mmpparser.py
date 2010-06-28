@@ -83,7 +83,6 @@ class MMPParser(object):
 			Line(CaselessKeyword('RAMTARGET') + String()) ^ \
 			Line(CaselessKeyword('TARGETTYPE') + String()) ^ \
 			Line(CaselessKeyword('TARGETPATH') + String()) ^ \
-			Line(CaselessKeyword('TRACEON') + Optional(StringList())) ^ \
 			Line(CaselessKeyword('SYSTEMINCLUDE') + StringList()) ^ \
 			Line(CaselessKeyword('USERINCLUDE') + StringList()) ^ \
 			Line(CaselessKeyword('DEFFILE') + String()) ^ \
@@ -160,6 +159,7 @@ class MMPParser(object):
 			CaselessKeyword('STDCPP') ^ \
 			CaselessKeyword('NOSTDCPP') ^ \
 			CaselessKeyword('SMPSAFE') ^ \
+			CaselessKeyword('TRACEON') ^ \
 			CaselessKeyword('PAGED') ^ \
 			CaselessKeyword('PAGEDCODE') ^ \
 			CaselessKeyword('PAGEDDATA') ^ \

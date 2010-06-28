@@ -206,11 +206,6 @@ BINTARGET:=$(BINDIR)/$(TARGET).$(TARGETEXT)
 # Run trace compiler #####################################
 TRACE_MARKER_PATH:=$(OUTPUTPATH)
 
-# TraceOn mmpkeyword
-ifneq ($(TRACEON),)
-USE_TRACE_COMPILER:=1
-endif
-# UID2 or UID3 is needed to run trace compiler
 ifeq ($(subst 0,,$(UID3)),)
   ifeq ($(UID2),)
     USE_TRACE_COMPILER:=
