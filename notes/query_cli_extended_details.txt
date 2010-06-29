@@ -8,6 +8,11 @@ Ditto for products.
 Querying a configuration now prints the following additional information:
 
 1. include paths used for preprocessing bld.inf's and MMP's
-2. the pre-include header file for preprocessing bld.inf's and MMP's
-3. the macros used to preprocess bld.inf's and MMP's
+2. pre-include header file for preprocessing bld.inf's and MMP's
+3. pre-include header file passed to the compiler in a build (if used)
+4. macros used to preprocess bld.inf's and MMP's (with values, if explicitly set)
+5. core macros used in compilation preprocessing (with values, if explicitly set)
 
+Further documentation can be found here:
+
+http://developer.symbian.org/wiki/index.php/Raptor_Query_Reference

@@ -104,9 +104,10 @@ class PreInclude(Reply):
 		self.file = file
 
 class Macro(Reply):
-	def __init__(self, name):
+	def __init__(self, name, value=None):
 		super(Macro,self).__init__()
 		self.name = name
+		self.value = value
 
 class TargetType(Reply):
 	def __init__(self, name):
@@ -217,7 +218,9 @@ class Context(object):
 		text = None
 		includepaths = []
 		preincludeheader = ""
+		compilerpreincludeheader = ""
 		platmacros = []
+		sourcemacros = []
 		try:
 			evaluator = self.__raptor.GetEvaluator(None, units[0])
 			
@@ -241,17 +244,32 @@ class Context(object):
 			metadatafile = raptor_meta.MetaDataFile(generic_path.Path("bld.inf"), "cpp", [], None, self.__raptor)
 			
 			# There is only one build platform here; obtain the pre-processing include paths,
-			# pre-include file, and macros.			
+			# OS pre-include file, compiler pre-include file and macros.			
 			includepaths = metadatafile.preparePreProcessorIncludePaths(metareader.BuildPlatforms[0])
 			preincludeheader = metareader.BuildPlatforms[0]['VARIANT_HRH']
 			
-			# The macros arrive as a list of strings of the form "name=value". 
-			# This removes the equals sign and everything to the right of it.
-			macrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
-			platmacros.extend(map(lambda macrodef: macrodef[0:macrodef.find("=")], macrolist))
+			# Compiler preinclude files may or may not be present, depending on the configuration.
+			if evaluator.Get("PREINCLUDE"):
+				compilerpreincludeheader = generic_path.Path(evaluator.Get("PREINCLUDE"))
+			
+			# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
+			# If required, we split to a list, and then processes the constituent parts of the macro.
+			platmacrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
+			platmacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], platmacrolist))
+
+			sourcemacrolist = evaluator.Get("CDEFS").split()
+			sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
 			
 			if platform == "TOOLS2":
 				outputpath = releasepath
+				
+				# Source macros are determined in the FLM for tools2 builds, therefore we have to
+				# mimic the logic here
+				if 'win' in raptor.hostplatform or 'win32' in names:
+					sourcemacrolist = evaluator.Get("CDEFS.WIN32").split()
+				else:
+					sourcemacrolist = evaluator.Get("CDEFS.LINUX").split()
+				sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
 			else:
 				if not variantplatform:
 					raise BadQuery("could not get VARIANTPLATFORM for config '%s'" % name)
@@ -269,19 +287,28 @@ class Context(object):
 			text = str(e)
 		
 		config = Config(meaning, outputpath, text)
+		
 		config.metadata = MetaData()
 		
-		# Add child elements if they were calculated
+		# Add child elements to appropriate areas if they were calculated
 		if len(includepaths) > 0:
 			config.metadata.includepaths = map(lambda x: Include(str(x)), includepaths)
 		
 		if preincludeheader != "":
 			config.metadata.preincludeheader = PreInclude(str(preincludeheader))
 		
-		if len(platmacros) > 0:
-			config.metadata.platmacros = map(lambda x: Macro(x), platmacros)
+		if len(platmacros):
+			config.metadata.platmacros = map(lambda x: Macro(x[0],x[1]) if x[1] else Macro(x[0]), platmacros)
+			
+		config.build = Build()
 		
-		return config 
+		if len(sourcemacros):
+			config.build.sourcemacros = map(lambda x: Macro(x[0],x[1]) if x[1] else Macro(x[0]), sourcemacros)
+			
+		if compilerpreincludeheader:
+			config.build.compilerpreincludeheader = PreInclude(str(compilerpreincludeheader))
+		
+		return config
 		
 	def getproducts(self):
 		"""extract all product variants."""

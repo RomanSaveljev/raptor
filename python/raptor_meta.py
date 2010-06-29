@@ -552,8 +552,11 @@ class MetaDataFile(object):
 		if self.__RootLocation is not None and str(self.__RootLocation) != "":
 			paths.append(self.__RootLocation)
 
-		# and the directory containing the file we are processing
-		paths.append(self.filename.Dir())
+		# and the directory containing the file we are processing.
+		# This won't always be applicable - if the client is a front-end query for preprocessing
+		# include paths then there's no bld.inf path to take into account
+		if self.filename.Dir().Exists():
+			paths.append(self.filename.Dir())
 		
 		return paths
 

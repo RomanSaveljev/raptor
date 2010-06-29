@@ -43,7 +43,7 @@
 		<set name='CDEFS.WIN32' value='$(CDEFS.DEFAULT) _WIN32 WIN32 _WINDOWS __TOOLS2_WINDOWS__'/>
 		<set name='CDEFS.LINUX' value='$(CDEFS.DEFAULT) __LINUX__ __TOOLS2_LINUX__'/>
 
-		<set name='INC.COMPILER' value='$(EPOCINCLUDE)/gcc_mingw/gcc_mingw_3_4_2.h'/>
+		<set name='PREINCLUDE' value='$(EPOCINCLUDE)/gcc_mingw/gcc_mingw_3_4_2.h'/>
 
 		<set name='OPT.D' value='-D'/>
 		<set name='OPT.L' value='-L'/>
