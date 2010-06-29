@@ -19,6 +19,7 @@ TARGETTYPE		dll
 SOURCEPATH		.
 SOURCE			diagsuppress.cpp
 
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 SYSTEMINCLUDE		../../include
 
 capability		all

@@ -2310,7 +2310,8 @@ class MMPRaptorBackend(MMPBackend):
 		# do all the checks so that we can see all the errors at once...
 		valid = True
 		
-		if not self.__TARGET:
+		# for "TARGETTYPE none", it is permitted to omit the "TARGET" keyword
+		if not self.__TARGET and not self.getTargetType() == "none":
 			self.__Raptor.Error("required keyword TARGET is missing in " + self.__currentMmpFile, bldinf=self.__bldInfFilename)
 			valid = False
 		

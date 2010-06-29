@@ -101,6 +101,41 @@ def run():
 		      ]
 
 	t.run()
+	
+	t.id="30b"
+	t.name =  "resource_corner_cases_reallyclean"
+	t.usebash = True
+	t.description =  """ Additional corner cases for resources:
+						 1) Use of "TARGETTYPE none" but not "TARGET" mmp keyword.
+						 2) Use of a resource with no LANG. """
+
+	t.targets = []
+
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld2.inf -c armv5_urel -c winscw_urel reallyclean"
+	t.mustnotmatch = []
+	t.mustmatch = []
+	t.run()
+	
+	t.id="30c"
+	t.name =  "resource_corner_cases"
+	t.usebash = True
+	t.description =  """ Additional corner cases for resources:
+						 1) Use of "TARGETTYPE none" but not "TARGET" mmp keyword.
+						 2) Use of a resource with no LANG. """
+	
+	buildLocation = ReplaceEnvs("$(EPOCROOT)/epoc32/build/") + BldInfFile.outputPathFragment('smoke_suite/test_resources/resource/group/bld2.inf')
+	rsc_file= buildLocation+"/testresource_/testresource_testresource.rsc"
+	
+
+	t.targets = ["$(EPOCROOT)/epoc32/data/z/resource/apps/notargetkeyword.mbm",
+				 "$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/apps/notargetkeyword.mbm",
+				 "$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/apps/notargetkeyword.mbm",
+				 rsc_file ]
+
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld2.inf -c armv5_urel -c winscw_urel"
+	t.mustnotmatch = []
+	t.mustmatch = []
+	t.run()
 
 	t.name = 'resource'
 	t.print_result()
