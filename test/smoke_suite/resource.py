@@ -88,7 +88,7 @@ def run():
 		"testheader_/testheader_testresource_sc.rsg.d",
 		"testheader_/testheader_testresource_sc.rsg.rpp",
 		"testresource_/testresource_testresource.r02.rpp",
-        "onelang_/onelang_onelang_sc.rpp",
+		"onelang_/onelang_onelang_sc.rsg.rpp",
 		"testresource_/testresource_testresource.rsc.rpp"])
 
 	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel -c winscw_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -c  winscw_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.test[^ ]*.rsg' %s && { X=`md5sum $(EPOCROOT)/epoc32/release/winscw/urel/z/resource/anotherresource/testresource.rsc` && Y=`md5sum $(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc` && [ \"${X%% *}\" != \"${Y%% *}\" ] ; }  && wc -l %s " % (res_depfile, res_depfile)
