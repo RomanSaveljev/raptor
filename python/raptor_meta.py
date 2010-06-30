@@ -2967,7 +2967,9 @@ class MetaReader(object):
 				os.makedirs(str(markerfiledir))
 
 			# Form the marker file name and convert to Python string
-			markerfilename = str(generic_path.Join(markerfiledir, sanitisedSource + sanitisedDestination + ".unzipped"))
+			combinedPath = sanitisedSource + sanitisedDestination
+			sanitisedPath = self.unzippedPathFragment(combinedPath)
+			markerfilename = str(generic_path.Join(markerfiledir, sanitisedPath + ".unzipped"))
 
 			# Don't unzip if the marker file is already there or more uptodate
 			sourceMTime = 0
@@ -3399,4 +3401,10 @@ class MetaReader(object):
 			aBuildUnit.variants.append(self.__Raptor.cache.variants[osVersion])
 		else:
 			self.__Raptor.Info("no OS variant for the configuration \"%s\"." % aBuildUnit.name)
+			
+	@classmethod		
+	def unzippedPathFragment(self, sanitisedPath):
+		fragment = hashlib.md5(sanitisedPath).hexdigest()[:16]
+		return fragment
+
 
