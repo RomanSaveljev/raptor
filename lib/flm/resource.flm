@@ -207,7 +207,6 @@ ifneq "$(MAKEFILE_GROUP)" "RESOURCE_DEPS"
 # Add header to releasables anyway despite guard since sone things
 # like the abldcache want to see the rsg for each platform even
 # if we only declare one rule.
-# If there's no header then it will be blank which is fine.
 RELEASABLES:=$(RELEASABLES) $(RESOURCEHEADER)
 endif
 

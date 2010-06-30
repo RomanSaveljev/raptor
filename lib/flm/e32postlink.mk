@@ -21,7 +21,7 @@ define e32postlink_arm
 	  --version=$(VERSION) \
 	  --capability=$(FINAL_CAPABILITIES) \
 	  --linkas=$(call dblquote,$(LINKASVERSIONED)) \
-	  --fpu=$(if $(ARMFPU),$(ARMFPU),$(POSTLINKER_FPU_DEFAULT)) \
+	  --fpu=$(POSTLINKER_FPU) \
 	  --targettype=$(POSTLINKTARGETTYPE) \
 	  --output=$$(call dblquote,$$@) \
 	  --elfinput=$(call dblquote,$(LINK_TARGET)) \

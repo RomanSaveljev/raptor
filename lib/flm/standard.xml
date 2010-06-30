@@ -98,6 +98,7 @@
 		<param name='COMPILE_ONLY_OPTION'/>
 		<param name='COMPILER_FPU_DEFAULT'/>
 		<param name='COMPILER_FPU_OPTION'/>
+		<param name='COMPILER_NO_HIDE_ALL_OPTION'/>
 		<param name='COMPILER_CIA_FLAGS'/>
 		<param name='COMPILER_INTERWORK_DEFINES'/>
 		<param name='COMPILER_SYSTEM_INCLUDE_OPTION'/>
@@ -157,6 +158,7 @@
 		<param name='POSTLINKER'/>
 		<param name='POSTLINKER_COMPRESSION_DEFAULT'/>
 		<param name='POSTLINKER_FPU_DEFAULT'/>
+		<param name='POSTLINKER_FPU_MAPPING'/>
 		<param name='PREPDEF'/>
 		<param name='PREPDEF_ENTRYPOINT_PREFIX' default='_'/>
 		<param name='PREINCLUDE'/>

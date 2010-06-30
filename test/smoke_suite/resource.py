@@ -70,6 +70,7 @@ def run():
 		"$(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.r01",
 		"$(EPOCROOT)/epoc32/include/testresource.hrh",
 		"$(EPOCROOT)/epoc32/include/testresource.rsg",
+		"$(EPOCROOT)/epoc32/include/onelang.rsg",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/testresource.exe",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/anotherresource/testresource.r01",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/anotherresource/testresource.rsc",
@@ -87,6 +88,7 @@ def run():
 		"testheader_/testheader_testresource_sc.rsg.d",
 		"testheader_/testheader_testresource_sc.rsg.rpp",
 		"testresource_/testresource_testresource.r02.rpp",
+        "onelang_/onelang_onelang_sc.rpp",
 		"testresource_/testresource_testresource.rsc.rpp"])
 
 	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel -c winscw_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -c  winscw_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.test[^ ]*.rsg' %s && { X=`md5sum $(EPOCROOT)/epoc32/release/winscw/urel/z/resource/anotherresource/testresource.rsc` && Y=`md5sum $(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc` && [ \"${X%% *}\" != \"${Y%% *}\" ] ; }  && wc -l %s " % (res_depfile, res_depfile)
@@ -98,6 +100,41 @@ def run():
 			"[23] .*.dependentresource_.dependentresource_dependentresource.rsc.d"
 		      ]
 
+	t.run()
+	
+	t.id="30b"
+	t.name =  "resource_corner_cases_reallyclean"
+	t.usebash = True
+	t.description =  """ Additional corner cases for resources:
+						 1) Use of "TARGETTYPE none" but not "TARGET" mmp keyword.
+						 2) Use of a resource with no LANG. """
+
+	t.targets = []
+
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld2.inf -c armv5_urel -c winscw_urel reallyclean"
+	t.mustnotmatch = []
+	t.mustmatch = []
+	t.run()
+	
+	t.id="30c"
+	t.name =  "resource_corner_cases"
+	t.usebash = True
+	t.description =  """ Additional corner cases for resources:
+						 1) Use of "TARGETTYPE none" but not "TARGET" mmp keyword.
+						 2) Use of a resource with no LANG. """
+	
+	buildLocation = ReplaceEnvs("$(EPOCROOT)/epoc32/build/") + BldInfFile.outputPathFragment('smoke_suite/test_resources/resource/group/bld2.inf')
+	rsc_file= buildLocation+"/testresource_/testresource_testresource.rsc"
+	
+
+	t.targets = ["$(EPOCROOT)/epoc32/data/z/resource/apps/notargetkeyword.mbm",
+				 "$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/apps/notargetkeyword.mbm",
+				 "$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/apps/notargetkeyword.mbm",
+				 rsc_file ]
+
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld2.inf -c armv5_urel -c winscw_urel"
+	t.mustnotmatch = []
+	t.mustmatch = []
 	t.run()
 
 	t.name = 'resource'

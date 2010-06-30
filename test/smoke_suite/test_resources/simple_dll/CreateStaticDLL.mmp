@@ -35,7 +35,7 @@ SOURCE        armv7_specific.cpp
 #endif
 
 USERINCLUDE   .
-SYSTEMINCLUDE /epoc32/include
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 LIBRARY       euser.lib
 

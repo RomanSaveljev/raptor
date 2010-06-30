@@ -1250,6 +1250,13 @@ class MMPRaptorBackend(MMPBackend):
 		'phonenetwork':0,
 		'localnetwork':0
 	  	}
+	
+	# Valid ARMFPU options
+	armfpu_options = [
+		'softvfp',
+		'vfpv2',
+		'softvfp+vfpv2'
+		]
 
 	library_re = re.compile(r"^(?P<name>[^{]+?)(?P<version>{(?P<major>[0-9]+)\.(?P<minor>[0-9]+)})?(\.(lib|dso))?$",re.I)
 
@@ -1609,6 +1616,12 @@ class MMPRaptorBackend(MMPBackend):
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks1))
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
+		elif varname=='ARMFPU':
+			if not str(toks[1]).lower() in self.armfpu_options:
+				self.__Raptor.Error("ARMFPU option '"+str(toks[1])+"' not recognised - should be one of "+", ".join(self.armfpu_options))
+			else:
+				self.__debug("Set "+toks[0]+" to " + str(toks[1]))
+				self.BuildVariant.AddOperation(raptor_data.Set(varname,str(toks[1])))
 		else:
 			self.__debug("Set "+toks[0]+" to " + str(toks[1]))
 			self.BuildVariant.AddOperation(raptor_data.Set(varname,"".join(toks[1])))
@@ -2339,6 +2352,26 @@ class MMPRaptorBackend(MMPBackend):
 		self.BuildVariant.AddOperation(raptor_data.Set("SOURCE",
 						   " ".join(self.sources)))
 
+	def validate(self):
+		"""Test that the parsed MMP file is correct.
+		
+		By "correct" we mean that all the required keywords were present
+		with acceptable and mutually consistent values.
+		
+		There should be no attempt to build anything if this method returns False."""
+		
+		# do all the checks so that we can see all the errors at once...
+		valid = True
+		
+		# for "TARGETTYPE none", it is permitted to omit the "TARGET" keyword
+		if not self.__TARGET and not self.getTargetType() == "none":
+			self.__Raptor.Error("required keyword TARGET is missing in " + self.__currentMmpFile, bldinf=self.__bldInfFilename)
+			valid = False
+		
+		# what else could be wrong?
+			
+		return valid
+	
 	def getTargetType(self):
 		"""Target type in lower case - the standard format"""
 		return self.__targettype.lower()
@@ -2938,7 +2971,8 @@ class MetaReader(object):
 			destDir = destination.Dir()
 			if not destDir.isDir():
 				os.makedirs(str(destDir))
-				shutil.copyfile(source_str, dest_str)
+				# preserve permissions
+				shutil.copy(source_str, dest_str)
 				return exportwhatlog
 
 			sourceMTime = 0
@@ -2957,12 +2991,14 @@ class MetaReader(object):
 						self.__Raptor.Error(message, bldinf=bldInfFile)
 
 			if destMTime == 0 or destMTime < sourceMTime:
+				# remove old version
+				#	- not having ownership prevents chmod
+				#	- avoid clobbering the original if it is a hard link
 				if os.path.exists(dest_str):
-					os.chmod(dest_str,stat.S_IREAD | stat.S_IWRITE)
-				shutil.copyfile(source_str, dest_str)
+					os.unlink(dest_str)
+				# preserve permissions
+				shutil.copy(source_str, dest_str)
 
-				# Ensure that the destination file remains executable if the source was also:
-				os.chmod(dest_str,sourceStat[stat.ST_MODE] | stat.S_IREAD | stat.S_IWRITE | stat.S_IWGRP ) 
 				self.__Raptor.Info("Copied %s to %s", source_str, dest_str)
 			else:
 				self.__Raptor.Info("Up-to-date: %s", dest_str)
@@ -3245,6 +3281,11 @@ class MetaReader(object):
 			else:
 				backend.finalise(buildPlatform)
 
+			# if the parsed MMP file is fundamentally broken then report
+			# the errors and stop processing this MMP node
+			if not backend.validate():
+				continue
+			
 			# feature variation only processes FEATUREVARIANT binaries
 			if buildPlatform["ISFEATUREVARIANT"] and not backend.featureVariant:
 				continue

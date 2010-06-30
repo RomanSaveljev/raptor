@@ -23,7 +23,7 @@ def run():
 
 	t.id = "0110"
 	t.name = "qt_helloworld"
-	t.command = "cd smoke_suite/test_resources/qt && qmake -spec symbian-sbsv2 && sbs"
+	t.command = "cd smoke_suite/test_resources/qt && $(EPOCROOT)/epoc32/tools/qmake -spec symbian-sbsv2 && sbs"
 	t.targets = [
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/bld.inf",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworldqt.loc",
