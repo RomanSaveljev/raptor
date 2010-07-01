@@ -18,7 +18,7 @@
 
 """
 Gathers performance metrics from the logs of a complex multi-step build.
-Supports Helium 9 at the moment but is adaptible.
+Supports Helium 9 at the moment but is adaptable.
 
 Can read from emake annotation files.  
 """
@@ -161,6 +161,9 @@ class RaptorBuild(HeliumLog):
 		super(RaptorBuild,self).__init__(os.path.join(logpath, "compile"), buildid)
 		self.build = build
 
+		if not os.path.isfile(self.logfilename):
+			raise LogfileNotFound("missing log file: " + self.logfilename)
+		
 		self.annofile_names = []	
 		self.build_duration = None
 		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>.*")
@@ -220,14 +223,16 @@ class Helium9Build(HeliumBuild):
 		# mcl_7901_201024_20100623181534_dfs_build_sf_variants.build_input_compile.log
 		# mcl_7901_201024_20100623181534_dfs_build_winscw_dfs_build_winscw_input_compile.log
 		#
-		# ....but the problem is that the anno files have a slightly differning convention:
+		# ....but the problem is that the anno files have a slightly differing convention:
 		#        92_7952_201022_003_dfs_build_ncp_dfs_variants.resource_deps.emake.anno
 		#  _dfs_build_ncp_variants
 		#  _dfs_build_ncp_dfs_variants
                 # read the annofile names from inside the raptor log output
 		for r in ["dfs_build_ncp_variants.build_input_compile.log","dfs_build_sf_variants.build_input_compile.log","dfs_build_winscw_dfs_build_winscw_input_compile.log", "ncp_symbian_build_symtb_input_compile.log"]:
-			self.raptorbuilds.append(RaptorBuild(logpath, buildid, r))
-
+			try:
+				self.raptorbuilds.append(RaptorBuild(logpath, buildid, r))
+			except LogfileNotFound, ex:
+				sys.stderr.write(str(ex))
 
 	def __str__(self):
 
