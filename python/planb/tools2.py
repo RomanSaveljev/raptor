@@ -17,7 +17,9 @@
 #
 # Python API for setting up TOOLS2 build actions in Raptor.
 
+import os
 import planb.target
+import sys
 
 linux = sys.platform.lower().startswith("linux")
 
@@ -62,47 +64,63 @@ class Common(planb.target.Target):
 		self.agent.add_directory(self.agent['RELEASEPATH'])
 		self.agent.add_directory(self.agent['TOOLSPATH'])
 
-## Pre-Include directories
-ifneq ($(INC.COMPILER),)
-PINCLUDE:=$(patsubst %,$(OPT.PREINCLUDE)%,$(INC.COMPILER))
-endif
+		# assemble the pre-include file and include search path
+		include_flags = "".join([" " + self.agent['OPT.PREINCLUDE'] + i for i in self.agent['INC.COMPILER'].split()])
 
-## User and System Include directories
-ifneq ($(USERINCLUDE),)
-UINCLUDE:=$(patsubst %,$(OPT.USERINCLUDE)%,$(USERINCLUDE))
-endif
-ifneq ($(SYSTEMINCLUDE),)
-SINCLUDE:=$(patsubst %,$(OPT.SYSTEMINCLUDE)%,$(SYSTEMINCLUDE))
-endif
+		include_flags += "".join([" " + self.agent['OPT.USERINCLUDE'] + i for i in self.user_includes])
+		include_flags += "".join([" " + self.agent['OPT.SYSTEMINCLUDE'] + i for i in self.system_includes])
+		
+		# compose the common parts of the command-line
+		command = ''
+		
+		if self.compiler_path:
+			command += 'COMPILER_PATH="%s" ' % self.compiler_path
 
-INCLUDES:=$(PINCLUDE) $(UINCLUDE) $(SINCLUDE)
-
-## Source files
-CPPFILES:=$(filter %.CPP,$(SOURCE))
-cppFILES:=$(filter %.cpp,$(SOURCE))
-CFILES:=$(filter %.C,$(SOURCE))
-cFILES:=$(filter %.c,$(SOURCE))
-
-## Object files
-CPPOBJFILES:=$(patsubst %,$(OUTPUTPATH)/%,$(notdir $(patsubst %.CPP,%.o,$(CPPFILES))))
-cppOBJFILES:=$(patsubst %,$(OUTPUTPATH)/%,$(notdir $(patsubst %.cpp,%.o,$(cppFILES))))
-COBJFILES:=$(patsubst %,$(OUTPUTPATH)/%,$(notdir $(patsubst %.C,%.o,$(CFILES))))
-cOBJFILES:=$(patsubst %,$(OUTPUTPATH)/%,$(notdir $(patsubst %.c,%.o,$(cFILES))))
-OBJECTFILES:=$(CPPOBJFILES) $(cppOBJFILES) $(cOBJFILES) $(COBJFILES)
-
-CLEANTARGETS:=
-## Compile CPP and cpp files
-define compile2object
-$(eval compile2object_TARGET:=$(OUTPUTPATH)/$(patsubst %.$(2),%.o,$(notdir $(1))))
-$(eval DEPENDFILENAME:=$(compile2object_TARGET).d)
-$(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
-$(compile2object_TARGET): $(1) $(if (DEPENDFILE),,EXPORT)
-	$(call startrule,compile2object,,$(1)) \
-	$(if $(COMPILER_PATH),COMPILER_PATH="$(COMPILER_PATH)",) \
+		command += ' ' + self.agent['COMPILER'] + ' ' + self.cflags
+		command += ' ' + ''.join([' ' + self.agent['OPT.D'] + "'" + i + "'" for x in self.cdefs.split()])
+		
 	$(COMPILER) $(CFLAGS) $(CDEFS.TOOLS2) \
 	$(if $(NO_DEPEND_GENERATE),,-MD -MT"$$@" -MF"$(DEPENDFILENAME)") \
 	$(INCLUDES) $(OPT.O)"$$@" "$(1)" \
 	$(call endrule,compile2object)
+	
+		# save  the list of object files as they are the inputs for EXE
+		# and LIB targets that extend this general collection of .o files.
+		self.object_files = []
+		
+		# create an object file target for each source file
+		for src in self.source_files:
+			base = os.path.basename(src)
+			s = base.lower()
+			if s.endswith(".cpp"):
+				chop = -3
+			elif s.endswith(".c"):
+				chop = -1
+			else:
+				sys.stderr.write("warning: unknown SOURCE extension on '%s'\n" % s)
+				continue
+		
+			obj = self.outputpath + "/" + base[0:chop] + "o"
+			self.object_files.append(obj)
+
+			object_target = planb.target.Target(self.agent)
+			object_target.title = "compile2object"
+			object_target.add_input(src)
+			object_target.add_output(obj, False)    # not releasable
+			
+			# is there a generated dependency file?
+			if self.agent.generate_dependencies:
+				dep = obj + ".d"
+				object_target.generated_dependencies(dep)
+				
+				command += ' -MD -MT"%s" -MF"%s"' % (obj, dep)
+
+			# complete the command-line
+			command += ' %s"%s" "%s"' % (self.agent['OPT.o'], obj, src)
+			
+			object_target.action(command) 
+			
+
 
 ifeq ($(NO_DEPEND_GENERATE),)
   CLEANTARGETS:=$$(CLEANTARGETS) $(DEPENDFILENAME)
