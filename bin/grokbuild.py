@@ -166,16 +166,28 @@ class RaptorBuild(HeliumLog):
 		
 		self.annofile_names = []	
 		self.build_duration = None
-		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>.*")
 		
+		status_re = re.compile("<status exit='([a-z]+)'.*")
 		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+) .*")
 		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*).*")
+		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>.*")
+		
+		self.recipes = { 'TOTAL':0, 'ok':0, 'failed':0, 'retry':0 }
+		
 		with open(self.logfilename) as f:
 			sys.stderr.write("      parsing build log %s\n" % os.path.split(self.logfilename)[1])
 			for l in f:
-				m = run_time_re.match(l)
+				# match in order of likelihood (most probable first)
+				
+				m = status_re.match(l)
 				if m:
-					self.build_duration = int(m.groups()[0])
+					self.recipes['TOTAL'] += 1
+					status = m.groups()[0]
+					try:
+						self.recipes[status] += 1
+					except KeyError:
+						sys.stderr.write("unknown recipe status '%s'" % status)
+					continue
 				
 				m = emake_invocation_re.match(l)
 				if m:
@@ -183,7 +195,13 @@ class RaptorBuild(HeliumLog):
 					if aname.find("pp")==-1: # no parallel parsing ones preferably
 						sys.stderr.write("        found annotation file %s\n" % aname)
 						self.annofile_names.append(os.path.join(logpath, "makefile", aname))
-
+					continue
+				
+				m = run_time_re.match(l)
+				if m:
+					self.build_duration = int(m.groups()[0])
+					continue
+					
 				m = sbs_version_re.match(l)
 				if m:
 					self.version = m.groups()[0]
@@ -193,9 +211,12 @@ class RaptorBuild(HeliumLog):
 			self.annofiles.append(RaptorAnnofile(p, buildid))
 
 	def __str__(self):
+		recipes = [" <metric name='raptor_%s_recipes' value='%d'/>\n" % x for x in self.recipes.items()]
+		
 		return 	"<raptorbuild logfile='%s'>\n" % os.path.split(self.logfilename)[-1] + \
 			" <metric name='raptor_version'  value='%s' />\n" % (self.version) + \
 			" <metric name='raptor_duration_%s'  value='%d' />\n" % (self.build, self.build_duration) + \
+			"".join(recipes) + \
 			"".join([str(a) for a in self.annofiles]) + \
 			"</raptorbuild>\n"
 		
@@ -269,12 +290,14 @@ class HeliumLogDir(object):
  
 
 parser = OptionParser(prog = "grokbuild",
-        usage = "%prog [-h | options] path to $EPOCROOT (logs usually are in $EPOCROOT/output/logs)")
+                      usage = """%prog [-h | options] path_to_EPOCROOT 
+
+The build logs are usually in $EPOCROOT/output/logs""")
 
 (options, args) = parser.parse_args()
 
 if len(args) == 0:
-	sys.stderr.write("Need at least one argument: a path to the logs.")
+	sys.stderr.write("Need at least one argument: a path to the logs.\n")
 	sys.exit(-1)
 
 epocroot = args[0]
