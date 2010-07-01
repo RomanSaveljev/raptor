@@ -77,18 +77,21 @@ class TestRaptorXML(unittest.TestCase):
 		os.environ["SOURCEROOT"] = 'i_am_not_a_valid_path_at_all'
 		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__sysDefRoot)
 		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
-
 				
 		del os.environ["SOURCEROOT"]
 		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_3.0.0.xml"), self.__sysDefRoot)
 		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
+				
+		# Additionally confirm that layers are returned correctly in a v3 context (where <meta/> and <api/> tags are also present)
+		layers = systemModel.GetLayerNames()
+		self.assertTrue(len(layers) == 1)
+		self.assertEqual("testlayer", layers[0])
 				
 		self.__logger.Clear()
 		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_multi_layers.xml"), self.__sysDefRoot)
 		self.assertTrue(len(self.__logger.errors) == 0)
 
 		# Confirm components returned from layers are correct
-
 		expectedBldInfs = [ generic_path.Join(self.__sysDefRoot, "simple/bld.inf"),\
 							generic_path.Join(self.__sysDefRoot, "simple_dll/bld.inf"),\
 						    generic_path.Join(self.__sysDefRoot, "simple_export/bld.inf"),\
