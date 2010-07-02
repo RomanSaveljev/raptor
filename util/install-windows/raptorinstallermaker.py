@@ -25,6 +25,7 @@ import optparse
 import sys
 import tempfile
 import shutil
+import stat
 import unzip
 
 tempdir = ""
@@ -46,6 +47,8 @@ parser.add_option("-p", "--python", dest="python", help="Path to Python \"root\"
 parser.add_option("--prefix", dest="versionprefix", help="A string to use as a prefix to the Raptor version string. This will be present in the Raptor installer's file name, the installer's pages as well as the in output from sbs -v.", type="string", default="")
 
 parser.add_option("--postfix", dest="versionpostfix", help="A string to use as a postfix to the Raptor version string. This will be present in the Raptor installer's file name, the installer's pages as well as the in output from sbs -v.", type="string", default="")
+
+parser.add_option("--noclean", dest="noclean", help="Do not clean up the temporary directory created during the run.", action="store_true" , default=False)
 
 (options, args) = parser.parse_args()
 
@@ -140,15 +143,25 @@ def generateinstallerversion(sbshome = None):
 	return raptorversion
 	
 def unzipnsis(pathtozip):
-    global tempdir
-    tempdir = tempfile.mkdtemp()
-    un = unzip.unzip()
-    print "Unzipping NSIS to %s..." % tempdir
-    un.extract(pathtozip, tempdir)
-    print "Done."
-    
-    return os.path.join(tempdir, "NSIS", "makensis.exe")
-    
+	global tempdir
+	tempdir = tempfile.mkdtemp()
+	un = unzip.unzip()
+	print "Unzipping NSIS to %s..." % tempdir
+	un.extract(pathtozip, tempdir)
+	print "Done."
+
+	# Ensure the correct executable is called	
+	dotexe=""
+	if "win" in sys.platform.lower():
+		dotexe=".exe"
+	
+	makensispath = os.path.join(tempdir, "NSIS", "makensis" + dotexe)
+	
+	if not "win" in sys.platform.lower():
+		os.chmod(makensispath, stat.S_IRWXU)
+
+	return makensispath
+	
 def runmakensis(nsiscommand):
 	# Create makensis subprocess
 	print "Running NSIS command\n%s" % nsiscommand
@@ -160,17 +173,17 @@ def cleanup():
 	global tempdir
 	print "Cleaning up temporary directory %s" % tempdir
 	shutil.rmtree(tempdir,True)
-	try:
-		os.remove("raptorversion.nsh")
-		print "Successfully deleted raptorversion.nsh."
-	except:
-		print "ERROR: failed to remove raptorversion.nsh - remove manually if needed."
 	print "Done."
 
-makensispath = unzipnsis(".\\NSIS.zip")
+makensispath = unzipnsis("." + os.sep + "NSIS.zip")
+if "win" in sys.platform.lower():
+	switch="/"
+else:
+	switch="-"
+
 # generateinstallerversionheader(options.sbshome)
 raptorversion = options.versionprefix + generateinstallerversion(options.sbshome) + options.versionpostfix
-nsiscommand = makensispath + " /DRAPTOR_LOCATION=%s /DBV_LOCATION=%s /DCYGWIN_LOCATION=%s /DMINGW_LOCATION=%s /DPYTHON_LOCATION=%s /DRAPTOR_VERSION=%s raptorinstallerscript.nsi" % (options.sbshome, 
+nsiscommand = (makensispath + " " + switch + "DRAPTOR_LOCATION=%s "  + switch + "DBV_LOCATION=%s "  + switch + "DCYGWIN_LOCATION=%s "  + switch + "DMINGW_LOCATION=%s "  + switch + "DPYTHON_LOCATION=%s "  + switch + "DRAPTOR_VERSION=%s raptorinstallerscript.nsi" ) % (options.sbshome, 
 				win32supportdirs["bv"],
 				win32supportdirs["cygwin"],
 				win32supportdirs["mingw"],
@@ -178,5 +191,10 @@ nsiscommand = makensispath + " /DRAPTOR_LOCATION=%s /DBV_LOCATION=%s /DCYGWIN_LO
 				raptorversion)
 print "nsiscommand = %s" % nsiscommand
 runmakensis(nsiscommand)
-cleanup()
+
+# Only clean if requested
+if not options.noclean:
+	cleanup()
+else:
+	print "Not cleaning makensis in %s" % makensispath
 
