@@ -389,7 +389,7 @@ class SystemModel(object):
 				if bldinf == None:
 					# recording layers containing non existent bld.infs
 					bldinfname = group.GetLocalString()
-					bldinfname = os.path.join(bldinfname,'bld.inf')
+					bldinfname = bldinfname+'/'+'bld.inf'
 					layer = self.__GetEffectiveLayer(aElement)
 					if not layer in self.__MissingBldInfs:
 						self.__MissingBldInfs[layer]=[]
