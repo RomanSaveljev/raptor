@@ -1,7 +1,7 @@
 This change causes trace compilation to be performed for all source files in a 
 component before any of those files is compiled.
 
-This should reduce the impact of clashes where the tracecompiler end up writing the same
+This should reduce the impact of clashes where the tracecompiler ends up writing the same
 trace headers twice if two mmps in a component share source code.  The reduced impact is 
 that the clash can be detected before any dependent object files are built thus the
 rebuilding that normally happens after a clash detection is not necessary.
