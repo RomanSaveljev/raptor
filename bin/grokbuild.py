@@ -41,10 +41,11 @@ class HeliumLog(object):
 	""" Some common properties of any log file in a helium build """
 	filenamesuffix = None
 
-	def __init__(self, logpath, buildid):
+	def __init__(self, logpath, buildid, options=None):
 
 		self.logfilename = os.path.join(logpath, buildid + self.filenamesuffix)
 		self.buildid = buildid
+		self.options = options
 
 	@classmethod
 	def findall(c, logpath):
@@ -64,13 +65,13 @@ class HeliumLog(object):
 		return "<metric name='buildid'  value='%s'>\n" % self.buildid
 
 class MainAntLog(HeliumLog):
-	""" This is the promary log of the helium build.  Useful for obtaining the total build time. Not good for this if the build failed. """
+	""" This is the primary log of the helium build.  Useful for obtaining the total build time. Not good for this if the build failed. """
 	# output/logs/92_7952_201020_003_main.ant.log
 	filenamesuffix = "_main.ant.log"
 	timeformat = "%Y/%m/%d %H:%M:%S:%f" # e.g. Thu 2010/06/24 09:15:42:625 AM
 
-	def __init__(self, logpath, buildid):
-		super(MainAntLog,self).__init__(logpath, buildid)
+	def __init__(self, logpath, buildid, options=None):
+		super(MainAntLog,self).__init__(logpath, buildid, options)
 
 		# Starting logging into y:\output\logs\mcl_7901_201024_20100623181534_main.ant.log at Wed 2010/06/23 21:16:12:972 PM
 		# Stopping logging into y:\output\logs\mcl_7901_201024_20100623181534_main.ant.log from hlm:record task at Thu 2010/06/24 09:15:42:625 AM
@@ -140,12 +141,12 @@ class RaptorAnnofile(object):
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_tools_all.resource.emake.anno
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_dfs_variants.default.emake.anno
 	# 92_7952_201022_003_dfs_build_ncp_dfs_variants.resource_deps.emake.anno
-	def __init__(self, filename, buildid):
+	def __init__(self, filename, buildid, maxagents):
 		self.phase = ""
 		self.filename = filename
 		self.buildid = buildid
 
-		self.annofile = annofile.Annofile(self.filename)
+		self.annofile = annofile.Annofile(self.filename, maxagents)
 
 	def __str__(self):
 		return "<annofile name='%s'\n" % os.path.split(self.filename)[-1] + "phase='%s'" % self.phase + ">\n" + str(self.annofile).replace("\n","\n    ") + "\n</annofile>\n"
@@ -156,21 +157,22 @@ class RaptorBuild(HeliumLog):
 	annotation files which the annofile parser will use. Also gets
 	the version of raptor and the total time taken by this particular
 	invocation of Raptor"""
-	def __init__(self, logpath, buildid, build):
+	def __init__(self, logpath, buildid, build, options=None):
 		self.filenamesuffix = '_%s' % build
-		super(RaptorBuild,self).__init__(os.path.join(logpath, "compile"), buildid)
+		super(RaptorBuild,self).__init__(os.path.join(logpath, "compile"), buildid, options)
 		self.build = build
 
 		if not os.path.isfile(self.logfilename):
-			raise LogfileNotFound("missing log file: " + self.logfilename)
+			raise LogfileNotFound("missing log file: %s\n" % self.logfilename)
 		
 		self.annofile_names = []	
 		self.build_duration = None
 		
-		status_re = re.compile("<status exit='([a-z]+)'.*")
-		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+) .*")
-		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*).*")
-		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>.*")
+		status_re = re.compile("<status exit='([a-z]+)'")
+		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+)")
+		emake_maxagents_re = re.compile("--emake-maxagents=(\d+)")
+		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*)")
+		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>")
 		
 		self.recipes = { 'TOTAL':0, 'ok':0, 'failed':0, 'retry':0 }
 		
@@ -182,7 +184,7 @@ class RaptorBuild(HeliumLog):
 				m = status_re.match(l)
 				if m:
 					self.recipes['TOTAL'] += 1
-					status = m.groups()[0]
+					status = m.group(0)
 					try:
 						self.recipes[status] += 1
 					except KeyError:
@@ -191,24 +193,36 @@ class RaptorBuild(HeliumLog):
 				
 				m = emake_invocation_re.match(l)
 				if m:
-					(adir, aname) = os.path.split(m.groups()[0])
+					(adir, aname) = os.path.split(m.group(0))
 					if aname.find("pp")==-1: # no parallel parsing ones preferably
 						sys.stderr.write("        found annotation file %s\n" % aname)
 						self.annofile_names.append(os.path.join(logpath, "makefile", aname))
+						
+						# if --emake-maxagents is present then use that, otherwise use
+						# the value passed in through the options.
+						m = emake_maxagents_re.match(l)
+						if m:
+							maxagents = int(m.group(0))
+							sys.stderr.write("        using maxagents %d from the log\n" % maxagents)
+						else:
+							maxagents = options.maxagents
+							sys.stderr.write("        using maxagents %d as there is no record in the log\n" % maxagents)
+							
+						self.annofile_names.append( (os.path.join(logpath, "makefile", aname), maxagents) )
 					continue
 				
 				m = run_time_re.match(l)
 				if m:
-					self.build_duration = int(m.groups()[0])
+					self.build_duration = int(m.group(0))
 					continue
 					
 				m = sbs_version_re.match(l)
 				if m:
-					self.version = m.groups()[0]
+					self.version = m.group(0)
 
 		self.annofiles = []
 		for p in self.annofile_names:
-			self.annofiles.append(RaptorAnnofile(p, buildid))
+			self.annofiles.append(RaptorAnnofile(p[0], buildid, p[1]))
 
 	def __str__(self):
 		recipes = [" <metric name='raptor_%s_recipes' value='%d'/>\n" % x for x in self.recipes.items()]
@@ -224,7 +238,8 @@ class RaptorBuild(HeliumLog):
 
 class HeliumBuild(object):
 	"""A build with any version of Helium"""
-	def __init__(self, logpath, buildid):
+	def __init__(self, logpath, buildid, options=None):
+		self.options = options
 		self.buildid = buildid
 		self.logpath = logpath
 		self.logfiles=[]
@@ -235,9 +250,9 @@ class HeliumBuild(object):
 
 class Helium9Build(HeliumBuild):
 	""" Filenames, structure etc conform to Helium 9 """
-	def __init__(self, logpath, buildid):
-		super(Helium9Build,self).__init__(logpath, buildid)
-		self.mainantlog = MainAntLog(logpath, buildid)
+	def __init__(self, logpath, buildid, options=None):
+		super(Helium9Build,self).__init__(logpath, buildid, options)
+		self.mainantlog = MainAntLog(logpath, buildid, options)
 		self.raptorbuilds = []
 
 		# mcl_7901_201024_20100623181534_dfs_build_ncp_variants.build_input_compile.log
@@ -251,7 +266,7 @@ class Helium9Build(HeliumBuild):
                 # read the annofile names from inside the raptor log output
 		for r in ["dfs_build_ncp_variants.build_input_compile.log","dfs_build_sf_variants.build_input_compile.log","dfs_build_winscw_dfs_build_winscw_input_compile.log", "ncp_symbian_build_symtb_input_compile.log"]:
 			try:
-				self.raptorbuilds.append(RaptorBuild(logpath, buildid, r))
+				self.raptorbuilds.append(RaptorBuild(logpath, buildid, r, options))
 			except LogfileNotFound, ex:
 				sys.stderr.write(str(ex))
 
@@ -270,7 +285,7 @@ class HeliumLogDir(object):
 	   things that failed, apparently) and their logs left in the output dir.
 	   The naming convention ensures that they don't overwrite each other.
 	   This class identifies each build and tries to analyse them one by one."""
-	def __init__(self, epocroot):
+	def __init__(self, epocroot, options=None):
 		self.logpath = os.path.join(epocroot, "output/logs")
 		logs = MainAntLog.findall(self.logpath)
 		self.builds = []
@@ -278,7 +293,7 @@ class HeliumLogDir(object):
 		for b in logs.keys():
 			try:
 				sys.stderr.write("  Found build with id %s\n" % b)
-				build = Helium9Build(self.logpath, b)
+				build = Helium9Build(self.logpath, b, options)
 				self.builds.append(build)
 			except IOError,e:
 				sys.stderr.write("  Buildid %s found but does not refer to a complete build\n" % b)
@@ -294,6 +309,9 @@ parser = OptionParser(prog = "grokbuild",
 
 The build logs are usually in $EPOCROOT/output/logs""")
 
+parser.add_option("--maxagents", action="store", dest="maxagents", default=30,
+				 help="The number of simultaneous agents used in the build. You need to supply this if --emake-class was used rather than --emake-maxagents since this is then a property of the build cluster and is not usually recorded in the logs. The default is 30."
+				 )
 (options, args) = parser.parse_args()
 
 if len(args) == 0:
@@ -303,5 +321,5 @@ if len(args) == 0:
 epocroot = args[0]
 sys.stderr.write("Gathering Performance Metrics for %s\n" % epocroot)
 
-b = HeliumLogDir(epocroot)
+b = HeliumLogDir(epocroot, options)
 b.write(sys.stdout)
