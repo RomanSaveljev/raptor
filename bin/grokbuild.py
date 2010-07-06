@@ -184,7 +184,7 @@ class RaptorBuild(HeliumLog):
 				m = status_re.match(l)
 				if m:
 					self.recipes['TOTAL'] += 1
-					status = m.group(0)
+					status = m.group(1)
 					try:
 						self.recipes[status] += 1
 					except KeyError:
@@ -193,7 +193,7 @@ class RaptorBuild(HeliumLog):
 				
 				m = emake_invocation_re.match(l)
 				if m:
-					(adir, aname) = os.path.split(m.group(0))
+					(adir, aname) = os.path.split(m.group(1))
 					if aname.find("pp")==-1: # no parallel parsing ones preferably
 						sys.stderr.write("        found annotation file %s\n" % aname)
 						self.annofile_names.append(os.path.join(logpath, "makefile", aname))
@@ -202,7 +202,7 @@ class RaptorBuild(HeliumLog):
 						# the value passed in through the options.
 						m = emake_maxagents_re.match(l)
 						if m:
-							maxagents = int(m.group(0))
+							maxagents = int(m.group(1))
 							sys.stderr.write("        using maxagents %d from the log\n" % maxagents)
 						else:
 							maxagents = options.maxagents
@@ -213,12 +213,12 @@ class RaptorBuild(HeliumLog):
 				
 				m = run_time_re.match(l)
 				if m:
-					self.build_duration = int(m.group(0))
+					self.build_duration = int(m.group(1))
 					continue
 					
 				m = sbs_version_re.match(l)
 				if m:
-					self.version = m.group(0)
+					self.version = m.group(1)
 
 		self.annofiles = []
 		for p in self.annofile_names:
