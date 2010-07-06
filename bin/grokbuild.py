@@ -149,7 +149,8 @@ class RaptorAnnofile(object):
 		self.annofile = annofile.Annofile(self.filename, maxagents)
 
 	def __str__(self):
-		return "<annofile name='%s'\n" % os.path.split(self.filename)[-1] + "phase='%s'" % self.phase + ">\n" + str(self.annofile).replace("\n","\n    ") + "\n</annofile>\n"
+		return "<annofile name='%s' phase='%s'>\n%s</annofile>\n" \
+	         % (os.path.basename(self.filename), self.phase, str(self.annofile))
 
 
 class RaptorBuild(HeliumLog):
@@ -165,7 +166,7 @@ class RaptorBuild(HeliumLog):
 		if not os.path.isfile(self.logfilename):
 			raise LogfileNotFound("missing log file: %s\n" % self.logfilename)
 		
-		self.annofile_names = []	
+		self.annofile_refs = []	
 		self.build_duration = None
 		
 		status_re = re.compile("<status exit='([a-z]+)'")
@@ -196,19 +197,17 @@ class RaptorBuild(HeliumLog):
 					(adir, aname) = os.path.split(m.group(1))
 					if aname.find("pp")==-1: # no parallel parsing ones preferably
 						sys.stderr.write("        found annotation file %s\n" % aname)
-						self.annofile_names.append(os.path.join(logpath, "makefile", aname))
 						
 						# if --emake-maxagents is present then use that, otherwise use
 						# the value passed in through the options.
 						m = emake_maxagents_re.match(l)
 						if m:
 							maxagents = int(m.group(1))
-							sys.stderr.write("        using maxagents %d from the log\n" % maxagents)
 						else:
 							maxagents = options.maxagents
-							sys.stderr.write("        using maxagents %d as there is no record in the log\n" % maxagents)
+							sys.stderr.write("          using maxagents %d as there is no record in the logs\n" % maxagents)
 							
-						self.annofile_names.append( (os.path.join(logpath, "makefile", aname), maxagents) )
+						self.annofile_refs.append( (os.path.join(logpath, "makefile", aname), maxagents) )
 					continue
 				
 				m = run_time_re.match(l)
@@ -221,7 +220,7 @@ class RaptorBuild(HeliumLog):
 					self.version = m.group(1)
 
 		self.annofiles = []
-		for p in self.annofile_names:
+		for p in self.annofile_refs:
 			self.annofiles.append(RaptorAnnofile(p[0], buildid, p[1]))
 
 	def __str__(self):
@@ -309,7 +308,7 @@ parser = OptionParser(prog = "grokbuild",
 
 The build logs are usually in $EPOCROOT/output/logs""")
 
-parser.add_option("--maxagents", action="store", dest="maxagents", default=30,
+parser.add_option("--maxagents", type="int", dest="maxagents", default=30,
 				 help="The number of simultaneous agents used in the build. You need to supply this if --emake-class was used rather than --emake-maxagents since this is then a property of the build cluster and is not usually recorded in the logs. The default is 30."
 				 )
 (options, args) = parser.parse_args()
