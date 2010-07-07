@@ -309,7 +309,7 @@ parser = OptionParser(prog = "grokbuild",
 The build logs are usually in $EPOCROOT/output/logs""")
 
 parser.add_option("--maxagents", type="int", dest="maxagents", default=30,
-				 help="The number of simultaneous agents used in the build. You need to supply this if --emake-class was used rather than --emake-maxagents since this is then a property of the build cluster and is not usually recorded in the logs. The default is 30."
+				 help="The number of simultaneous agents used in the build. You need to supply this if --emake-class was used rather than --emake-maxagents since this is then a property of the build cluster and is not usually recorded in the logs. The default is %default."
 				 )
 (options, args) = parser.parse_args()
 
