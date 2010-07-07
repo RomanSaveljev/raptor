@@ -58,8 +58,38 @@ def run():
 	t.command = "sbs --query=config[armv5_urel]"
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
-		"fullname='arm\.v5\.urel\.rvct.*'",
+		"meaning='arm\.v5\.urel\.rvct.*'",
+		"<build>",
+		"<macro name='__SUPPORT_CPP_EXCEPTIONS__'/>",
+		"<macro name='_UNICODE'/>",
+		"<macro name='__SYMBIAN32__'/>",
+		"<macro name='__EPOC32__'/>",
+		"<macro name='__MARM__'/>",
+		"<macro name='__EABI__'/>",
+		"<macro name='__PRODUCT_INCLUDE__' value='\".*epoc32/include/variant/symbian_os.hrh\"'/>",
+		"<macro name='__MARM_ARMV5__'/>",
+		"<macro name='__ARMCC_2__'/>",
+		"<macro name='__ARMCC_2_2__'/>",
+		"<macro name='NDEBUG'/>",
+		"<macro name='__ARMCC__'/>",
+		"<preinclude file='.*/epoc32/include/rvct/rvct.h'/>",
+		"</build>",
+		"<metadata>",
 		"outputpath='.*/epoc32/release/armv5/urel'",
+		"include path='.*/epoc32/include/variant'",
+		"include path='.*/epoc32/include'",
+		"preinclude file='.*/epoc32/include/variant/Symbian_OS.hrh'",
+		"macro name='SBSV2' value='_____SBSV2'/>",
+		"macro name='ARMCC' value='_____ARMCC'/>",
+		"macro name='EPOC32' value='_____EPOC32'/>",
+		"macro name='MARM' value='_____MARM'/>",
+		"macro name='EABI' value='_____EABI'/>",
+		"macro name='GENERIC_MARM' value='_____GENERIC_MARM'/>",
+		"macro name='MARM_ARMV5' value='_____MARM_ARMV5'/>",
+		"macro name='ARMCC_2' value='_____ARMCC_2'/>",
+		"macro name='ARMCC_2_2' value='_____ARMCC_2_2'/>",
+		"macro name='__GNUC__' value='3'/>",		
+		"</metadata>",
 		"</sbs>"
 		]
 	t.mustnotmatch_singleline = []
@@ -69,7 +99,7 @@ def run():
 	t.command = "sbs --query=config[armv5_urel.test_bv_1] --configpath=test/smoke_suite/test_resources/bv"
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
-		"fullname='arm\.v5\.urel\.rvct._.\.test_bv_1'",
+		"meaning='arm\.v5\.urel\.rvct._.\.test_bv_1'",
 		"outputpath='.*/epoc32/release/armv5\.one/urel'",
 		"</sbs>"
 		]

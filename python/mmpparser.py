@@ -159,6 +159,7 @@ class MMPParser(object):
 			CaselessKeyword('STDCPP') ^ \
 			CaselessKeyword('NOSTDCPP') ^ \
 			CaselessKeyword('SMPSAFE') ^ \
+			CaselessKeyword('TRACEON') ^ \
 			CaselessKeyword('PAGED') ^ \
 			CaselessKeyword('PAGEDCODE') ^ \
 			CaselessKeyword('PAGEDDATA') ^ \
