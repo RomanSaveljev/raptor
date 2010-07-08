@@ -1420,7 +1420,6 @@ class MMPRaptorBackend(MMPBackend):
 			self.resolveCompressionKeyword(varname)
 			
 		elif varname == 'TRACEON':
-			self.BuildVariant.AddOperation(raptor_data.Append('MMPDEFS', 'OST_TRACE_COMPILER_IN_USE', ' '))
 			self.__debug("Set " + toks[0] + " to 1" )
 			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
 			
