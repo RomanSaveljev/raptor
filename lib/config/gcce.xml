@@ -14,7 +14,7 @@
 
 		<set name="CC" value="$(GCCECC)"/>
 		<set name="LD" value="$(GCCELD)"/>
-		<set name="ASM" value="$(GCCEASM)"/>
+		<set name="ASM" value="$(GCCECC)"/>
 		<set name="AR" value="$(GCCEAR)"/>
 
 		<set name="AAPCS_OPTION" value="-mapcs -mthumb-interwork"/>
@@ -90,6 +90,7 @@
 		<set name="OWN_LIBRARY_OPTION" value=""/>
 		<set name="PL.SOFTVFP_MAYBE_VFPV2" value="softvfp"/>
 		<set name="PL.SOFTVFP_MAYBE_VFPV3" value="softvfp"/>
+		<set name='POSTLINKER_ASM_OPTION' value="--asm=gas"/>
 		<set name="PREINCLUDE" value="$(EPOCINCLUDE)/gcce/gcce.h"/>
 		<set name="PREINCLUDE_OPTION" value="-include"/>
 		<set name="PREPROCESSOR_OPTION" value="-E"/>

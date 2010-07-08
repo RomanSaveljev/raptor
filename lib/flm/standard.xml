@@ -26,6 +26,7 @@
 		<param name='LISTING_OPTION' default='-S'/>
 		<param name='MMPDEFS' default=''/>
 		<param name='NOCOMPRESSTARGET' default=''/>
+		<param name='POSTLINKER_SUPPORTS_ASMTYPE' default=''/>
 		<param name='POSTLINKER_SUPPORTS_WDP' default=''/>
 		<param name='PAGED' default=''/>
 		<param name='PAGEDCODE_OPTION' default='default'/>
@@ -149,6 +150,7 @@
 		<param name='PERL'/>
 		<param name='PERTURBSTARTTIME'/>
 		<param name='PERTURBMSECS' default='500'/>
+		<param name='POSTLINKER_ASM_OPTION' default='' />
 		<param name='POSTLINKER_COMPRESSION_DEFAULT'/>
 		<param name='POSTLINKER_FPU_DEFAULT'/>
 		<param name='POSTLINKER_FPU_MAPPING'/>
