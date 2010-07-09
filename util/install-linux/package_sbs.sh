@@ -61,7 +61,7 @@ BINARIES=""
 fi
 
 
-   cd $SBS_HOME && find license.txt RELEASE-NOTES.html bin lib notes $BINARIES python test schema util |
+   cd $SBS_HOME && find license.txt RELEASE-NOTES.html bin lib notes $BINARIES python test schema style util |
 	grep -v "$TMPSBS"'/python/\.py$' |
 	grep -v 'flm/test'  |
 	grep -v 'util/build'  | 

@@ -2,6 +2,9 @@
 # hudson runs this from the raptor/util/install-linux directory
 
 import datetime
+import os
+import re
+import shutil
 import subprocess
 import sys
 
@@ -44,16 +47,16 @@ finally:
 # ... and write the modified raptor_version.py file
 
 try:
-	#file = open(filename, "w")
+	file = open(filename, "w")
 	for line in lines:
-		sys.stdout.write(line)
+		file.write(line)
 except IOError, ex:
 	sys.stderr.write("error: failed to write file '%s'\n%s" % (filename, str(ex)))
 	sys.exit(1)
 finally:
-	pass #file.close()
+	file.close()
 
-# check the raptor version string
+# check that we really did change the raptor version string
 
 sbs_v = subprocess.Popen(["../../bin/sbs", "-v"], stdout=subprocess.PIPE)
 version = sbs_v.communicate()[0]
@@ -67,3 +70,40 @@ else:
 	sys.stderr.write("error: failed to get sbs version.\n")
 	sys.exit(1)
 
+# run the Linux installer maker script
+
+package_sbs = subprocess.Popen(["./package_sbs.sh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+(stdout, stderr) = package_sbs.communicate()
+
+if package_sbs.returncode != 0:
+	sys.stderr.write("error: failed to create linux package of sbs.\n")
+	sys.exit(1)
+
+# find the name of the archive in /tmp
+
+match = re.search('archive "([^"]+)" successfully created', stdout)
+if match:
+	tmp_archive = "/tmp/" + match.group(1)
+	print "TMP ARCHIVE", tmp_archive
+else:
+	sys.stderr.write("error: failed to find linux archive file.\n")
+	sys.exit(1)
+
+# move it to the WORKSPACE root
+
+if 'WORKSPACE' in os.environ:
+	name = re.sub(r'/tmp/(sbs-\d+\.\d+\.\d+-).*', r'\1', tmp_archive)
+	fullname = name + changeset + ".run"
+	final_archive = os.path.join(os.environ['WORKSPACE'], fullname)
+	print "WORKSPACE ARCHIVE", final_archive
+else:
+	sys.stderr.write("error: no WORKSPACE is set.\n")
+	sys.exit(1)
+
+try:
+	shutil.move(tmp_archive, final_archive)
+except Error, err:
+	sys.stderr.write("error: could not rename '%s' as '%s'.\n" % (tmp_archive, final_archive))
+	sys.exit(1)
+
+# the end
