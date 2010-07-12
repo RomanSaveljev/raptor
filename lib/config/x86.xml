@@ -25,7 +25,13 @@
 		<set name="IMPLIBTOOL" value="$(DLLTOOL)"/>
 		<set name="DEFGENTOOL" value="$(GENDEF)"/>
 		
+		<!-- targettypes -->
+		<set name="TARGET_TYPES" value="ani dll exe exexp implib fsy kdll kext klib ldd lib pdd pdl pdll plugin plugin3 stdexe stddll stdlib textnotifier2 var var2 none"/>
+		
 		<!-- interfaces -->
+		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
+
+		<!-- START block interfaces -->
 		<set name="INTERFACE.extension" value="Symbian.extension"/>
 		
 		<!-- macros -->

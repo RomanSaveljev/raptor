@@ -81,10 +81,8 @@ class Reply(object):
 			string += "\n"
 				
 			for c in children:
-				#string += "\n".join(map(lambda l:"  "+l,str(c).rstrip().split("\n")))+"\n"
 				clines = str(c).rstrip().split("\n")
 				string += "".join(map(lambda l:"  "+l+"\n",clines))
-				#string += map(lambda l:"  "+l+"\n",str(c).rstrip().split("\n"))
 			
 		if longend:
 			string += "</%s>\n" % name
@@ -211,7 +209,6 @@ class MetaData(Reply):
 			preincludeheader = metareader.BuildPlatforms[0]['VARIANT_HRH']
 			
 			# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
-			# If required, we split to a list, and then processes the constituent parts of the macro.
 			platmacrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
 			platmacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], platmacrolist))
 		except Exception, e:
@@ -245,6 +242,8 @@ class Build(Reply):
 			if evaluator.Get("PREINCLUDE"):
 				compilerpreincludeheader = generic_path.Path(evaluator.Get("PREINCLUDE"))
 			
+			# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
+			# If required, we split to a list, and then processes the constituent parts of the macro.
 			sourcemacrolist = evaluator.Get("CDEFS").split()
 			sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
 

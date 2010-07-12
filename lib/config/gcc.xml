@@ -16,9 +16,10 @@
 		<!-- tools and scripts -->
 		<env name='JAVATC' default='$(JAVA_HOME)/bin/java' type='tool'/> <!-- Java used by Trace Compiler -->
 
-		<!-- interfaces -->
 		<!-- targettypes -->
 		<set name="TARGET_TYPES" value="exe lib"/>
+
+		<!-- interfaces -->
 		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
 
 		<set name="INTERFACE.exe" value="Tools.exe"/>
