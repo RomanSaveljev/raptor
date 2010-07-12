@@ -20,6 +20,10 @@
 		<set name='TRADITIONAL_PLATFORM' value='GCCXML'/>
 
 		<!-- interfaces -->
+		<!-- targettypes -->
+		<set name="TARGET_TYPES" value="ani dll exe exexp implib fsy kdll kext klib ldd lib pdd pdl plugin stddll stdexe stdlib textnotifier2 var var2 none"/>
+		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
+
 		<set name="INTERFACE.ani" value="analysis.ani"/>
 		<set name="INTERFACE.dll" value="analysis.dll"/>
 		<set name="INTERFACE.exe" value="analysis.exe"/>

@@ -93,6 +93,12 @@ class TestRaptorApi(unittest.TestCase):
 		compilerpreincludefile = str(config.build.compilerpreincludeheader.file)
 		self.failUnlessEqual(compilerpreincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/preinclude.h"))
 
+		expectedtypes = ["one", "two"]
+		expectedtypes.sort()
+		types = map(lambda t:t.name, config.build.targettypes)
+		types.sort()
+		self.failUnlessEqual(types, expectedtypes)
+
 		# general
 
 		config = api.getconfig("buildme.foo")

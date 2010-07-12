@@ -53,7 +53,35 @@ def run():
 		"<product.*name='root'.*/>"
 		]
 	t.run()
-	
+
+	winscwtargets =[ "<targettype name='ani'/>",
+				"<targettype name='dll'/>",
+				"<targettype name='exe'/>",
+				"<targettype name='exexp'/>",
+				"<targettype name='fsy'/>",
+				"<targettype name='implib'/>",
+				"<targettype name='kdll'/>",
+				"<targettype name='kext'/>",
+				"<targettype name='klib'/>",
+				"<targettype name='ldd'/>",
+				"<targettype name='lib'/>",
+				"<targettype name='none'/>",
+				"<targettype name='pdd'/>",
+				"<targettype name='pdl'/>",
+				"<targettype name='pdll'/>",
+				"<targettype name='plugin'/>",
+				"<targettype name='plugin3'/>",
+				"<targettype name='stddll'/>",
+				"<targettype name='stdexe'/>",
+				"<targettype name='stdlib'/>",
+				"<targettype name='textnotifier2'/>",
+				"<targettype name='var'/>"]
+	armtargets = winscwtargets + [
+				"<targettype name='kexe'/>",
+				"<targettype name='var2'/>" ]
+	tools2targets = [ "<targettype name='exe'/>",
+					"<targettype name='lib'/>"]
+
 	t.name = "query_cli_config"
 	t.command = "sbs --query=config[armv5_urel]"
 	t.mustmatch_singleline = [
@@ -72,7 +100,8 @@ def run():
 		"<macro name='__ARMCC_2_2__'/>",
 		"<macro name='NDEBUG'/>",
 		"<macro name='__ARMCC__'/>",
-		"<preinclude file='.*/epoc32/include/rvct/rvct.h'/>",
+		"<preinclude file='.*/epoc32/include/rvct/rvct.h'/>"
+		] + armtargets + [
 		"</build>",
 		"<metadata>",
 		"outputpath='.*/epoc32/release/armv5/urel'",
@@ -117,7 +146,8 @@ def run():
 	t.mustmatch_singleline = [
 		"<sbs version='2\.\d+\.\d+'>",
 		"outputpath='.*/epoc32/release/winscw/urel'",
-		"outputpath='.*/epoc32/release/%s/rel'" % t2,
+		"outputpath='.*/epoc32/release/%s/rel'" % t2
+		] + winscwtargets + tools2targets + [
 		"</sbs>"
 		]
 	t.mustnotmatch_singleline = []

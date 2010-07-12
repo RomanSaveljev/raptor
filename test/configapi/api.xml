@@ -22,6 +22,9 @@
  		<set name="VARIANTPLATFORM" value="foo"/>
  		<set name="VARIANTTYPE" value="bar"/>
  		<set name="TRADITIONAL_PLATFORM" value=""/>
+ 		<set name="INTERFACE_TYPES" value="foo bar"/>
+ 		<set name="INTERFACE.foo" value="foo.flm"/>
+ 		<set name="INTERFACE.bar" value="bar.flm"/>
 	</var>
  	
  	<var name="buildme" extends="api_test_base">
@@ -36,6 +39,10 @@
  		<set name="VARIANT_CFG" value="$(EPOCROOT)/epoc32/tools/variant/variant.cfg"/>
  		<set name="SYSTEMINCLUDE" value=""/>
  		<set name="INTERFACE_TYPES" value=""/>
+ 		<set name="TARGET_TYPES" value="one two"/>
+ 		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
+ 		<set name="INTERFACE.one" value="one.flm"/>
+ 		<set name="INTERFACE.two" value="two.flm"/>
  	</var>
  	
  	<var name="foo"/>
@@ -49,6 +56,8 @@
  		<set name="DEFAULT_PLATFORMS" value=""/>
  		<set name="BASE_DEFAULT_PLATFORMS" value=""/>
  		<set name="BASE_USER_DEFAULT_PLATFORMS" value=""/>
+ 		<set name="TARGET_TYPES" value=""/>
+ 		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
  	</var>
  	
 </build>

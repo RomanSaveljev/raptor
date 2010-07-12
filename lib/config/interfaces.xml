@@ -4,8 +4,7 @@
 
 	<var name="default.interfaces">
 		<!-- interfaces corresponding to target types -->
-
-		<set name="INTERFACE_TYPES" value="exe stdexe ext_makefile dll stddll lib stdlib export extension ani plugin plugin3 textnotifier2 implib var var2 exexp kexe kdll kext klib pdll ldd pdd pdl fsy resource none stringtable bitmap"/>
+		<set name="INTERFACE_TYPES" value="extension ext_makefile export resource stringtable bitmap"/>
 		<set name="INTERFACE.exe" value="Symbian.exe"/>
 		<set name="INTERFACE.stdexe" value="Symbian.stdexe"/>
 		<set name="INTERFACE.stddll" value="Symbian.stddll"/>
@@ -21,7 +20,6 @@
 		<set name="INTERFACE.var" value="Symbian.var"/>
 		<set name="INTERFACE.var2" value="Symbian.var2"/>
 		<set name="INTERFACE.exexp" value="Symbian.exexp"/>
-		<set name="INTERFACE.kexe" value="Symbian.kexe"/>
 		<set name="INTERFACE.kdll" value="Symbian.kdll"/>
 		<set name="INTERFACE.kext" value="Symbian.kext"/>
 		<set name="INTERFACE.klib" value="Symbian.klib"/>

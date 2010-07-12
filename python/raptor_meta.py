@@ -2597,7 +2597,8 @@ class MetaReader(object):
 			detail['VARIANT_HRH'] = variantHRH
 			self.__Raptor.Info("'%s' uses variant hrh file '%s'", buildConfig.name, variantHRH)
 			detail['SYSTEMINCLUDE'] = evaluator.CheckedGet("SYSTEMINCLUDE")
-
+            
+			detail['TARGET_TYPES'] = evaluator.CheckedGet("TARGET_TYPES")
 
 			# find all the interface names we need
 			ifaceTypes = evaluator.CheckedGet("INTERFACE_TYPES")
@@ -3316,12 +3317,28 @@ class MetaReader(object):
 
 			# what interface builds this node?
 			try:
-				interfaceName = buildPlatform[backend.getTargetType()]
-				mmpSpec.SetInterface(interfaceName)
+				targettype = backend.getTargetType()
+				validtargettypes = buildPlatform['TARGET_TYPES'].split()
 			except KeyError:
-				self.__Raptor.Error("Unsupported target type '%s' in %s",
-								    backend.getTargetType(),
-								    str(mmpFileEntry.filename),
+				# Shouldn't get this since it should have been CheckedGetted already
+				self.__Raptor.Error("TARGET_TYPES not defined in platform %s",
+									buildPlatform['PLATFORM'])
+
+			try:
+				if not targettype in validtargettypes:
+					self.__Raptor.Error("Unsupported target type '%s' in %s - should be one of %s",
+										targettype,
+										str(mmpFileEntry.filename),
+										", ".join(validtargettypes),
+										bldinf=str(bldInfFile))
+				else:
+					interfaceName = buildPlatform[targettype]
+					mmpSpec.SetInterface(interfaceName)
+			except KeyError:
+				# Shouldn't get this far unless INTERFACE_TYPES doesn't contain TARGET_TYPES
+				self.__Raptor.Error("%s interface not defined for %s (invalid configuration?)",
+								    targettype,
+									buildPlatform['PLATFORM'],
 								    bldinf=str(bldInfFile))
 				continue
 

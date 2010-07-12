@@ -23,9 +23,15 @@
 		<set name="POSTLINKER" value="$(ELF2E32)"/>
 		<set name="IMPLIBTOOL" value="$(ELF2E32)"/>
 		<set name="DEFGENTOOL" value="$(ELF2E32)"/>
-			
+
+		<!-- targettypes -->
+		<set name="TARGET_TYPES" value="exe stdexe dll stddll lib stdlib ani plugin plugin3 textnotifier2 implib var var2 exexp kdll kext klib pdll ldd pdd pdl fsy kexe none"/>
+		
 		<!-- interfaces -->
+		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
+
 		<set name="INTERFACE.extension" value="Symbian.extension"/>
+		<set name="INTERFACE.kexe" value="Symbian.kexe"/>
 		
 		<!-- macros -->
 		<set name="ARMMACROS.CONFIG" value=""/>
