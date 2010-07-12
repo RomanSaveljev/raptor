@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 
-# run "hg id" to get the current branch's tip changeset
+# run "hg id" to get the current branch name and tip changeset
 
 hgid = subprocess.Popen(["hg", "id"], stdout=subprocess.PIPE)
 stdout = hgid.communicate()[0]
@@ -16,6 +16,9 @@ stdout = hgid.communicate()[0]
 if hgid.returncode == 0 and len(stdout) >= 12:
 	changeset = stdout[0:12]
 	print "CHANGESET", changeset
+
+	prototype = ("wip" in stdout or "fix" in stdout)
+	print "PROTOTYPE", prototype
 else:
 	sys.stderr.write("error: failed to get tip mercurial changeset.\n")
 	sys.exit(1)
@@ -35,6 +38,8 @@ try:
 		if "ISODATE" in line and "CHANGESET" in line:
 			line = line.replace("ISODATE", today)
 			line = line.replace("CHANGESET", changeset)
+			if prototype:
+				line = line.replace("system", "system PROTOTYPE")
 			lines.append(line)
 		else:
 			lines.append(line)
@@ -66,6 +71,9 @@ if sbs_v.returncode == 0:
 	if not today in version or not changeset in version:
 		sys.stderr.write("error: date or changeset does not match the sbs version.\n")
 		sys.exit(1)
+        if prototype and not "PROTOTYPE" in version:
+		sys.stderr.write("error: the sbs version should be marked PROTOTYPE.\n")
+		sys.exit(1)
 else:
 	sys.stderr.write("error: failed to get sbs version.\n")
 	sys.exit(1)
@@ -93,7 +101,10 @@ else:
 
 if 'WORKSPACE' in os.environ:
 	name = re.sub(r'/tmp/(sbs-\d+\.\d+\.\d+-).*', r'\1', tmp_archive)
-	fullname = name + changeset + ".run"
+	if prototype:
+		fullname = name + "PROTOTYPE-" + changeset + ".run"
+	else:
+		fullname = name + changeset + ".run"
 	final_archive = os.path.join(os.environ['WORKSPACE'], fullname)
 	print "WORKSPACE ARCHIVE", final_archive
 else:
