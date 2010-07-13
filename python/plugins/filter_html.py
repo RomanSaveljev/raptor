@@ -34,7 +34,7 @@ class HTML(filter_interface.FilterSAX):
 	def startDocument(self):
 		
 		if self.params.logFileName:
-			self.dirname = str(self.params.logFileName).replace("%TIME", self.params.timestring)
+			self.dirname = str(self.params.logFileName).replace("%TIME", self.params.timestring) + "_html"
 		else:
 			self.dirname = "html" # writing to stdout doesn't make sense
 		

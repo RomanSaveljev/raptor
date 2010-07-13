@@ -1420,7 +1420,6 @@ class MMPRaptorBackend(MMPBackend):
 			self.resolveCompressionKeyword(varname)
 			
 		elif varname == 'TRACEON':
-			self.BuildVariant.AddOperation(raptor_data.Append('MMPDEFS', 'OST_TRACE_COMPILER_IN_USE', ' '))
 			self.__debug("Set " + toks[0] + " to 1" )
 			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
 			
@@ -3042,7 +3041,9 @@ class MetaReader(object):
 				os.makedirs(str(markerfiledir))
 
 			# Form the marker file name and convert to Python string
-			markerfilename = str(generic_path.Join(markerfiledir, sanitisedSource + sanitisedDestination + ".unzipped"))
+			combinedPath = sanitisedSource + sanitisedDestination
+			sanitisedPath = self.unzippedPathFragment(combinedPath)
+			markerfilename = str(generic_path.Join(markerfiledir, sanitisedPath + ".unzipped"))
 
 			# Don't unzip if the marker file is already there or more uptodate
 			sourceMTime = 0
@@ -3474,4 +3475,10 @@ class MetaReader(object):
 			aBuildUnit.variants.append(self.__Raptor.cache.variants[osVersion])
 		else:
 			self.__Raptor.Info("no OS variant for the configuration \"%s\"." % aBuildUnit.name)
+			
+	@classmethod		
+	def unzippedPathFragment(self, sanitisedPath):
+		fragment = hashlib.md5(sanitisedPath).hexdigest()[:16]
+		return fragment
+
 

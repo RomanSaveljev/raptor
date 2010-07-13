@@ -6,7 +6,7 @@
 
 <h1>Release Notes for Symbian Build System v2</h1>
 
-<h2>next version</h2>
+<h2>version 2.15.0</h2>
 
 <h3>New Features</h3>
 <ul>
@@ -17,6 +17,8 @@
 <li><a href="notes/query_cli_extended_details.txt">           Extended details for --query option  </a></li>
 <li><a href="notes/traceon_mmpkeyword.txt">New mmp keyword: traceon</a></li>
 </ul>
+
+<h2>version 2.14.2</h2>
 
 <h3>Defect Fixes</h3>
 <ul>
@@ -30,6 +32,11 @@
 <li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2735">SF Bug 2735</a> - [Raptor] Relative unit paths in pkgdefs are not handled correctly</li>
 <li>Fix: resources with headeronly can fail because of an invalid dependency</li>
 <li>Fix: ARMFPU softvfp+vfpv2 for postlinker and RVCT only</li>
+<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2276">SF Bug 2276</a> - [Raptor] ZIP exports from deep directory hierarchies fail</li>
+<li><a href="notes/emulatorstacksize.txt"> Reduction of emulator stack size to 512KB </a>; see also the enhancement <a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2605"> SF Bug 2606 </a> - [Raptor] Can we use a smaller stack size for the emulator </li>
+<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3091">SF Bug 3091</a> - [Raptor] When reporting missing bld.inf's from a Sys def a / can be missing</li>
+<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2825">SF Bug 2825</a> - [Raptor] Meta elements should be ignored when processing a sysdef</li>
+<li><a href="notes/tcom_allbefore.txt">Trace all source files in a component before compiling any file</a>. Helps prevent build breaks in some situations where an asset change is really needed.</li>
 </ul>
 
 <h2>version 2.14.1</h2>

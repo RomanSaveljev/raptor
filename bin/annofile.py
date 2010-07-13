@@ -21,13 +21,14 @@ import os
 class Annofile(xml.sax.handler.ContentHandler):
 	"""A class to represent an emake anno file"""
 
-	def __init__(self, name):
+	def __init__(self, name, maxagents=30):
 		self.name = name
 		self.overallAggregateTime = 0
 		self.inJob = False
 		self.inMetricDuration = False
 		self.jobType = ''
 		self.nodes = set()
+		self.maxagents = maxagents
 
 		parser = xml.sax.make_parser()
 		parser.setContentHandler(self)
@@ -114,7 +115,7 @@ class Annofile(xml.sax.handler.ContentHandler):
 		"""100% means all nodes are busy from start to finish.
 		"""
 		at = self.getAggregateTime()
-		num = len(self.nodes)
+		num = self.maxagents
 		d = self.getOverallDuration()
 		
 		idealDuration = at / num
@@ -153,12 +154,13 @@ class Annofile(xml.sax.handler.ContentHandler):
 		report.close()
 
 	def __str__(self):
-		s = "<metric name='agentcount' value='%s' />" % len(self.nodes) + \
-			"\n<metric name='parsetimesecs' value='%s' />" % self.getParseTime() + \
-			"\n<metric name='overallduration' value='%s' />" % self.getOverallDuration() + \
-			"\n<metric name='aggregatetime' value='%s' />" % self.getAggregateTime() + \
-			"\n<metric name='efficiency' value='%s' />" % self.getEfficiency()[0] + \
-			"\n<metric name='efficiency_nomake' value='%s' />" % self.getEfficiency()[1] 
+		s = " <metric name='agentcount' value='%d' />\n" % len(self.nodes) + \
+			" <metric name='maxagents' value='%d' />\n" % self.maxagents + \
+			" <metric name='parsetimesecs' value='%s' />\n" % self.getParseTime() + \
+			" <metric name='overallduration' value='%s' />\n" % self.getOverallDuration() + \
+			" <metric name='aggregatetime' value='%s' />\n" % self.getAggregateTime() + \
+			" <metric name='efficiency' value='%s' />\n" % self.getEfficiency()[0] + \
+			" <metric name='efficiency_nomake' value='%s' />\n" % self.getEfficiency()[1] 
 
 		return s
 	

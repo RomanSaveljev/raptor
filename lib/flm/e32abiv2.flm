@@ -699,6 +699,14 @@ endif # if TARGETTYPE lib
 
 
 ## Run trace compiler ##############################################
+# The following variable defines a prereq that source code will 
+# depend on so that tracing happens before compilation.  Must be 
+# blank by default so that if tracing is off then there will be
+# no dependency.  The tracecompiler code will set it if this
+# project actually does depend on trace-generated headers:
+TRACE_THISCOMPONENT_ALLRULE:=
+
+# Tracing requires a UID to make uniquely numbered trace points
 ifeq ($(UID3),)
  ifeq ($(UID2),)
   USE_TRACE_COMPILER:=
@@ -777,7 +785,7 @@ $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
 # $4 is for language specific options (e.g. C++ vs C)
-$(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(if $(USE_TRACE_COMPILER),$(TRACE_MARKER),)
+$(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(TRACE_THISCOMPONENT_ALLRULE) 
 	$(call startrule,compile,,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
