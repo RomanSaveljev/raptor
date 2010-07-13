@@ -25,7 +25,7 @@
 		<set name="DEFGENTOOL" value="$(ELF2E32)"/>
 
 		<!-- targettypes -->
-		<set name="TARGET_TYPES" value="exe stdexe dll stddll lib stdlib ani plugin plugin3 textnotifier2 implib var var2 exexp kdll kext klib pdll ldd pdd pdl fsy kexe none"/>
+		<set name="TARGET_TYPES" value="ani dll exe exexp fsy implib kdll kexe kext klib ldd lib pdd pdl pdll plugin plugin3 stddll stdexe stdlib textnotifier2 var var2 none"/>
 		
 		<!-- interfaces -->
 		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
