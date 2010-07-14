@@ -149,6 +149,7 @@ def writeZip(filename, sbshome, sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondi
 		print "Writing win32 support directories to the archive is complete."
 		
 		zip.close()
+		print "Zipoutput: \"" + os.path.join(os.getcwd(), filename) + "\""
 		print "Zip file creation successful."
 	except Exception, e:
 		print "Error: failed to create zip file: %s" % str(e)
@@ -174,6 +175,8 @@ parser.add_option("--prefix", dest="versionprefix", help="A string to use as a p
 parser.add_option("--postfix", dest="versionpostfix", help="A string to use as a postfix to the Raptor version string. This will be present in the Raptor installer's file name, the installer's pages as well as the in output from sbs -v.", type="string", default="")
 
 parser.add_option("--noclean", dest="noclean", help="Do not clean up the temporary directory created during the run.", action="store_true" , default=False)
+
+parser.add_option("--noexe", dest="noexe", help="Do not create a Windows .exe installer of the Raptor installation.", action="store_true" , default=False)
 
 parser.add_option("--nozip", dest="nozip", help="Do not create a zip archive of the Raptor installation.", action="store_true" , default=False)
 
@@ -220,14 +223,19 @@ else:
 			print "ERROR: directory %s does not exist. Cannot build installer. Exiting..." % dir
 			sys.exit(2)
 
-makensispath = unzipnsis("." + os.sep + "NSIS.zip")
-if "win" in sys.platform.lower():
-	switch="/"
-else:
-	switch="-"
 
 raptorversion = options.versionprefix + generateinstallerversion(options.sbshome) + options.versionpostfix
-nsiscommand = (makensispath + " " + 
+
+print "Using Raptor version %s ..." % raptorversion
+
+if not options.noexe:
+	makensispath = unzipnsis("." + os.sep + "NSIS.zip")
+	if "win" in sys.platform.lower():
+		switch="/"
+	else:
+		switch="-"
+
+	nsiscommand = (makensispath + " " + 
 				switch + "DRAPTOR_LOCATION=%s "  + 
 				switch + "DBV_LOCATION=%s "  + 
 				switch + "DCYGWIN_LOCATION=%s "  + 
@@ -243,16 +251,18 @@ nsiscommand = (makensispath + " " +
 				raptorversion,
 				os.path.join(options.sbshome, "util", "install-windows", "raptorinstallerscript.nsi")
 			)
+	
+	# On Linux, we need to run makensis via Bash, so that is can find all its
+	# internal libraries and header files etc. Makensis fails unless it 
+	# is executed this way on Linux.
+	if "lin" in sys.platform.lower():
+		nsiscommand = "bash -c \"%s\"" % nsiscommand
+	
+	runmakensis(nsiscommand)
+else:
+	print "Not creating .exe as requested."
 
-# On Linux, we need to run makensis via Bash, so that is can find all its
-# internal libraries and header files etc. Makensis fails unless it 
-# is executed this way on Linux.
-if "lin" in sys.platform.lower():
-	nsiscommand = "bash -c \"%s\"" % nsiscommand
-
-runmakensis(nsiscommand)
-
-# Only clean if requested
+# Only clean NSIS installation in the temporary directory if requested
 if not options.noclean:
 	cleanup()
 else:
@@ -263,7 +273,7 @@ if not options.nozip:
 	filename = "sbs-" + raptorversion + ".zip"
 	writeZip(filename, options.sbshome, win32supportdirs["bv"], win32supportdirs["cygwin"], win32supportdirs["mingw"], win32supportdirs["python"])
 else:
-	print "Not creating zip archive."
+	print "Not creating zip archive as requested."
 
 print "Finished."
 

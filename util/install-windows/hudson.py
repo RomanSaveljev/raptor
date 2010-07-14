@@ -68,11 +68,19 @@ package_sbs = subprocess.Popen(["python", "raptorinstallermaker.py",
 
 if package_sbs.returncode == 0:
 	match = re.search('Output: "([^"]+)"', stdout)
+	zip_match = re.search('Zipoutput: "([^"]+)"', stdout)
 	if match:
 		tmp_archive = match.group(1)
 		print "TMP ARCHIVE", tmp_archive
 	else:
 		sys.stderr.write("error: failed to find packaged filename.\n")
+		sys.exit(1)
+	
+	if zip_match:
+		tmp_zip_archive = zip_match.group(1)
+		print "TMP ZIP ARCHIVE", tmp_zip_archive
+	else:
+		sys.stderr.write("error: failed to find zip filename.\n")
 		sys.exit(1)
 else:
 	sys.stderr.write("error: failed to create windows package of sbs.\n")
@@ -82,7 +90,9 @@ else:
 
 if 'WORKSPACE' in os.environ:
 	final_archive = os.path.join(os.environ['WORKSPACE'], os.path.basename(tmp_archive))
+	final_zip_archive = os.path.join(os.environ['WORKSPACE'], os.path.basename(tmp_zip_archive))
 	print "WORKSPACE ARCHIVE", final_archive
+	print "WORKSPACE ZIP ARCHIVE", final_zip_archive
 else:
 	sys.stderr.write("error: no WORKSPACE is set.\n")
 	sys.exit(1)
@@ -91,6 +101,12 @@ try:
 	shutil.move(tmp_archive, final_archive)
 except Error, err:
 	sys.stderr.write("error: could not rename '%s' as '%s'.\n" % (tmp_archive, final_archive))
+	sys.exit(1)
+
+try:
+	shutil.move(tmp_zip_archive, final_zip_archive)
+except Error, err:
+	sys.stderr.write("error: could not rename '%s' as '%s'.\n" % (tmp_zip_archive, final_zip_archive))
 	sys.exit(1)
 
 # the end
