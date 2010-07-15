@@ -75,6 +75,7 @@
 		<param name='CC.VAL.SOFTVFP_MAYBE_VFPV2' default=''/>
 		<param name='CODE_SEGMENT_START' default=''/>
 		<param name='TOOLCHAIN' default=''/>
+		<param name='TRACEON' default=''/>
 		<param name='USE_RVCT22_DELETE_WORKAROUND' default=''/>
 	</interface>
 	<interface name="Symbian.e32abiv2" extends="Symbian.mmp" flm="e32abiv2.flm">
@@ -97,6 +98,7 @@
 		<param name='COMPILE_ONLY_OPTION'/>
 		<param name='COMPILER_FPU_DEFAULT'/>
 		<param name='COMPILER_FPU_OPTION'/>
+		<param name='COMPILER_NO_HIDE_ALL_OPTION'/>
 		<param name='COMPILER_CIA_FLAGS'/>
 		<param name='COMPILER_INTERWORK_DEFINES'/>
 		<param name='COMPILER_SYSTEM_INCLUDE_OPTION'/>
@@ -156,6 +158,7 @@
 		<param name='POSTLINKER'/>
 		<param name='POSTLINKER_COMPRESSION_DEFAULT'/>
 		<param name='POSTLINKER_FPU_DEFAULT'/>
+		<param name='POSTLINKER_FPU_MAPPING'/>
 		<param name='PREPDEF'/>
 		<param name='PREPDEF_ENTRYPOINT_PREFIX' default='_'/>
 		<param name='PREINCLUDE'/>

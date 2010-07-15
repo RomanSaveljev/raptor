@@ -301,6 +301,9 @@ class PreProcessor(raptor_utilities.ExternalTool):
 		""" Override call so that we can do our own error handling."""
 		tool = self._ExternalTool__Tool
 		commandline = tool + " " + aArgs + " " + str(sourcefilename)
+		
+		self.raptor.Debug("Preprocessing command line %s", str(commandline))
+			
 		try:
 			# the actual call differs between Windows and Unix
 			if raptor_utilities.getOSFileSystem() == "unix":
@@ -321,11 +324,10 @@ class PreProcessor(raptor_utilities.ExternalTool):
 			# run the command and wait for all the output
 			(self._ExternalTool__Output, errors) = p.communicate()
 
-			if self.raptor.debugOutput:
-				self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
-				self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
-				self.raptor.Debug("Errors:\n%s", errors)
-				self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
+			self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
+			self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
+			self.raptor.Debug("Errors:\n%s", errors)
+			self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
 
 			incRE = re.compile("In file included from")
 			fromRE = re.compile(r"\s+from")
@@ -405,7 +407,6 @@ class PreProcessor(raptor_utilities.ExternalTool):
 
 		return call
 
-
 class MetaDataFile(object):
 	"""A generic representation of a Symbian metadata file
 
@@ -460,61 +461,27 @@ class MetaDataFile(object):
 			except Exception, e:
 				self.log.Debug("Couldn't make bldinf outputpath for dependency generation")
 
-		config_macros = (aBuildPlatform['PLATMACROS']).split()
-
 		if not key in self.__PreProcessedContent:
 
 			preProcessor = PreProcessor(self.__gnucpp, '-undef -nostdinc ' + generateDepsOptions + ' ',
 										'-I', '-D', '-include', self.log)
 			preProcessor.filename = self.filename
 
-			# always have the current directory on the include path
-			preProcessor.addIncludePath('.')
-
-			# the SYSTEMINCLUDE directories defined in the build config
-			# should be on the include path. This is added mainly to support
-			# Feature Variation as SYSTEMINCLUDE is usually empty at this point.
-			systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
-			if systemIncludes:
-				preProcessor.addIncludePaths(systemIncludes.split())
-
-			preInclude = aBuildPlatform['VARIANT_HRH']
-
-			# for non-Feature Variant builds, the directory containing the HRH should
-			# be on the include path
-			if not aBuildPlatform['ISFEATUREVARIANT']:
-				preProcessor.addIncludePath(preInclude.Dir())
-
-			# and EPOCROOT/epoc32/include
-			preProcessor.addIncludePath(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
-
-			# and the directory containing the bld.inf file
-			if self.__RootLocation is not None and str(self.__RootLocation) != "":
-				preProcessor.addIncludePath(self.__RootLocation)
-
-			# and the directory containing the file we are processing
-			preProcessor.addIncludePath(self.filename.Dir())
+			# Set the preprocessor include paths
+			self.setPreProcessorIncludePaths(preProcessor, aBuildPlatform)
 
 			# there is always a pre-include file
+			preInclude = aBuildPlatform['VARIANT_HRH']
 			preProcessor.setPreIncludeFile(preInclude)
 
-			macros = ["SBSV2"]
-
-			if config_macros:
-				macros.extend(config_macros)
-
-			if macros:
-				for macro in macros:
-					preProcessor.addMacro(macro + "=_____" +macro)
-
-			# extra "raw" macros that do not need protecting
-			preProcessor.addMacro("__GNUC__=3")
+			# Set the preprocessor macros
+			self.setPreProcessorMacros(preProcessor, aBuildPlatform)
 
 			preProcessorOutput = preProcessor.preprocess()
 
 			# Resurrect preprocessing replacements
-			pattern = r'([\\|/]| |) ?_____(('+macros[0]+')'
-			for macro in macros[1:]:
+			pattern = r'([\\|/]| |) ?_____(('+self.macros[0]+')'
+			for macro in self.macros[1:]:
 				pattern += r'|('+macro+r')'
 
 			pattern += r'\s*)'
@@ -525,6 +492,73 @@ class MetaDataFile(object):
 			self.__PreProcessedContent[key] = text
 
 		return self.__PreProcessedContent[key]
+	
+	def setPreProcessorMacros(self, aPreprocessor, aBuildPlatform):
+		""" Apply the macros for aBuildPlatform to a preprocessor object. """
+		preprocessormacros = self.preparePreProcessorMacros(aBuildPlatform)
+		for macro in preprocessormacros:
+			aPreprocessor.addMacro(macro)
+			
+	def preparePreProcessorMacros(self, aBuildPlatform):
+		""" Prepare a list of macros (e.g. for use by the preprocessor) """
+		prepared_macros = []
+		config_macros = (aBuildPlatform['PLATMACROS']).split()
+		macros = ["SBSV2"]
+
+		if config_macros:
+			macros.extend(config_macros)
+
+		if macros:
+			for macro in macros:
+				prepared_macros.append(macro + "=_____" +macro)
+		
+		self.macros = macros # For later use
+		
+		# extra "raw" macros that do not need protecting
+		prepared_macros.append("__GNUC__=3")
+		
+		return prepared_macros
+		
+	def setPreProcessorIncludePaths(self, aPreprocessor, aBuildPlatform):
+		""" setPreProcessorIncludePaths: set the preprocessor include paths """
+		ppip = self.preparePreProcessorIncludePaths(aBuildPlatform)
+		aPreprocessor.addIncludePaths(ppip)
+		
+	def preparePreProcessorIncludePaths(self, aBuildPlatform):
+		""" Prepare a list of the include paths for use by the preprocessor. """
+		paths = []
+		
+		# always have the current directory on the include path
+		paths.append('.')
+
+		# the SYSTEMINCLUDE directories defined in the build config
+		# should be on the include path. This is added mainly to support
+		# Feature Variation as SYSTEMINCLUDE is usually empty at this point.
+		systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
+		if systemIncludes:
+			paths.extend(systemIncludes.split())
+
+		preInclude = aBuildPlatform['VARIANT_HRH']
+		
+		# for non-Feature Variant builds, the directory containing the HRH should
+		# be on the include path
+		if not aBuildPlatform['ISFEATUREVARIANT']:
+			paths.append(preInclude.Dir())
+
+		# and EPOCROOT/epoc32/include
+		paths.append(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
+
+		# and the directory containing the bld.inf file
+		if self.__RootLocation is not None and str(self.__RootLocation) != "":
+			paths.append(self.__RootLocation)
+
+		# and the directory containing the file we are processing.
+		# This won't always be applicable - if the client is a front-end query for preprocessing
+		# include paths then there's no bld.inf path to take into account
+		if self.filename.Dir().Exists():
+			paths.append(self.filename.Dir())
+		
+		return paths
 
 class MMPFile(MetaDataFile):
 	"""A generic representation of a Symbian metadata file
@@ -1216,6 +1250,13 @@ class MMPRaptorBackend(MMPBackend):
 		'phonenetwork':0,
 		'localnetwork':0
 	  	}
+	
+	# Valid ARMFPU options
+	armfpu_options = [
+		'softvfp',
+		'vfpv2',
+		'softvfp+vfpv2'
+		]
 
 	library_re = re.compile(r"^(?P<name>[^{]+?)(?P<version>{(?P<major>[0-9]+)\.(?P<minor>[0-9]+)})?(\.(lib|dso))?$",re.I)
 
@@ -1377,6 +1418,16 @@ class MMPRaptorBackend(MMPBackend):
 		
 		elif varname in ['COMPRESSTARGET', 'NOCOMPRESSTARGET', 'INFLATECOMPRESSTARGET', 'BYTEPAIRCOMPRESSTARGET']:
 			self.resolveCompressionKeyword(varname)
+			
+		elif varname == 'TRACEON':
+			self.__debug("Set " + toks[0] + " to 1" )
+			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
+			
+			path = "../traces/" + self.__TARGET + "_" + self.__TARGETEXT
+			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
+			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
+			self.__userinclude += ' ' + resolved
+			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
 		
 		else:
 			self.__debug( "Set switch "+toks[0]+" ON")
@@ -1564,6 +1615,12 @@ class MMPRaptorBackend(MMPBackend):
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks1))
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
+		elif varname=='ARMFPU':
+			if not str(toks[1]).lower() in self.armfpu_options:
+				self.__Raptor.Error("ARMFPU option '"+str(toks[1])+"' not recognised - should be one of "+", ".join(self.armfpu_options))
+			else:
+				self.__debug("Set "+toks[0]+" to " + str(toks[1]))
+				self.BuildVariant.AddOperation(raptor_data.Set(varname,str(toks[1])))
 		else:
 			self.__debug("Set "+toks[0]+" to " + str(toks[1]))
 			self.BuildVariant.AddOperation(raptor_data.Set(varname,"".join(toks[1])))
@@ -2294,6 +2351,26 @@ class MMPRaptorBackend(MMPBackend):
 		self.BuildVariant.AddOperation(raptor_data.Set("SOURCE",
 						   " ".join(self.sources)))
 
+	def validate(self):
+		"""Test that the parsed MMP file is correct.
+		
+		By "correct" we mean that all the required keywords were present
+		with acceptable and mutually consistent values.
+		
+		There should be no attempt to build anything if this method returns False."""
+		
+		# do all the checks so that we can see all the errors at once...
+		valid = True
+		
+		# for "TARGETTYPE none", it is permitted to omit the "TARGET" keyword
+		if not self.__TARGET and not self.getTargetType() == "none":
+			self.__Raptor.Error("required keyword TARGET is missing in " + self.__currentMmpFile, bldinf=self.__bldInfFilename)
+			valid = False
+		
+		# what else could be wrong?
+			
+		return valid
+	
 	def getTargetType(self):
 		"""Target type in lower case - the standard format"""
 		return self.__targettype.lower()
@@ -2519,7 +2596,8 @@ class MetaReader(object):
 			detail['VARIANT_HRH'] = variantHRH
 			self.__Raptor.Info("'%s' uses variant hrh file '%s'", buildConfig.name, variantHRH)
 			detail['SYSTEMINCLUDE'] = evaluator.CheckedGet("SYSTEMINCLUDE")
-
+            
+			detail['TARGET_TYPES'] = evaluator.CheckedGet("TARGET_TYPES")
 
 			# find all the interface names we need
 			ifaceTypes = evaluator.CheckedGet("INTERFACE_TYPES")
@@ -2893,7 +2971,8 @@ class MetaReader(object):
 			destDir = destination.Dir()
 			if not destDir.isDir():
 				os.makedirs(str(destDir))
-				shutil.copyfile(source_str, dest_str)
+				# preserve permissions
+				shutil.copy(source_str, dest_str)
 				return exportwhatlog
 
 			sourceMTime = 0
@@ -2912,12 +2991,14 @@ class MetaReader(object):
 						self.__Raptor.Error(message, bldinf=bldInfFile)
 
 			if destMTime == 0 or destMTime < sourceMTime:
+				# remove old version
+				#	- not having ownership prevents chmod
+				#	- avoid clobbering the original if it is a hard link
 				if os.path.exists(dest_str):
-					os.chmod(dest_str,stat.S_IREAD | stat.S_IWRITE)
-				shutil.copyfile(source_str, dest_str)
+					os.unlink(dest_str)
+				# preserve permissions
+				shutil.copy(source_str, dest_str)
 
-				# Ensure that the destination file remains executable if the source was also:
-				os.chmod(dest_str,sourceStat[stat.ST_MODE] | stat.S_IREAD | stat.S_IWRITE | stat.S_IWGRP ) 
 				self.__Raptor.Info("Copied %s to %s", source_str, dest_str)
 			else:
 				self.__Raptor.Info("Up-to-date: %s", dest_str)
@@ -2961,7 +3042,9 @@ class MetaReader(object):
 				os.makedirs(str(markerfiledir))
 
 			# Form the marker file name and convert to Python string
-			markerfilename = str(generic_path.Join(markerfiledir, sanitisedSource + sanitisedDestination + ".unzipped"))
+			combinedPath = sanitisedSource + sanitisedDestination
+			sanitisedPath = self.unzippedPathFragment(combinedPath)
+			markerfilename = str(generic_path.Join(markerfiledir, sanitisedPath + ".unzipped"))
 
 			# Don't unzip if the marker file is already there or more uptodate
 			sourceMTime = 0
@@ -3200,6 +3283,11 @@ class MetaReader(object):
 			else:
 				backend.finalise(buildPlatform)
 
+			# if the parsed MMP file is fundamentally broken then report
+			# the errors and stop processing this MMP node
+			if not backend.validate():
+				continue
+			
 			# feature variation only processes FEATUREVARIANT binaries
 			if buildPlatform["ISFEATUREVARIANT"] and not backend.featureVariant:
 				continue
@@ -3230,12 +3318,28 @@ class MetaReader(object):
 
 			# what interface builds this node?
 			try:
-				interfaceName = buildPlatform[backend.getTargetType()]
-				mmpSpec.SetInterface(interfaceName)
+				targettype = backend.getTargetType()
+				validtargettypes = buildPlatform['TARGET_TYPES'].split()
 			except KeyError:
-				self.__Raptor.Error("Unsupported target type '%s' in %s",
-								    backend.getTargetType(),
-								    str(mmpFileEntry.filename),
+				# Shouldn't get this since it should have been CheckedGetted already
+				self.__Raptor.Error("TARGET_TYPES not defined in platform %s",
+									buildPlatform['PLATFORM'])
+
+			try:
+				if not targettype in validtargettypes:
+					self.__Raptor.Error("Unsupported target type '%s' in %s - should be one of %s",
+										targettype,
+										str(mmpFileEntry.filename),
+										", ".join(validtargettypes),
+										bldinf=str(bldInfFile))
+				else:
+					interfaceName = buildPlatform[targettype]
+					mmpSpec.SetInterface(interfaceName)
+			except KeyError:
+				# Shouldn't get this far unless INTERFACE_TYPES doesn't contain TARGET_TYPES
+				self.__Raptor.Error("%s interface not defined for %s (invalid configuration?)",
+								    targettype,
+									buildPlatform['PLATFORM'],
 								    bldinf=str(bldInfFile))
 				continue
 
@@ -3388,4 +3492,10 @@ class MetaReader(object):
 			aBuildUnit.variants.append(self.__Raptor.cache.variants[osVersion])
 		else:
 			self.__Raptor.Info("no OS variant for the configuration \"%s\"." % aBuildUnit.name)
+			
+	@classmethod		
+	def unzippedPathFragment(self, sanitisedPath):
+		fragment = hashlib.md5(sanitisedPath).hexdigest()[:16]
+		return fragment
+
 

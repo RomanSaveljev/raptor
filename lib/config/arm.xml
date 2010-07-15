@@ -23,9 +23,15 @@
 		<set name="POSTLINKER" value="$(ELF2E32)"/>
 		<set name="IMPLIBTOOL" value="$(ELF2E32)"/>
 		<set name="DEFGENTOOL" value="$(ELF2E32)"/>
-			
+
+		<!-- targettypes -->
+		<set name="TARGET_TYPES" value="ani dll exe exexp fsy implib kdll kexe kext klib ldd lib pdd pdl pdll plugin plugin3 stddll stdexe stdlib textnotifier2 var var2 none"/>
+		
 		<!-- interfaces -->
+		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
+
 		<set name="INTERFACE.extension" value="Symbian.extension"/>
+		<set name="INTERFACE.kexe" value="Symbian.kexe"/>
 		
 		<!-- macros -->
 		<set name="ARMMACROS.CONFIG" value=""/>
@@ -59,6 +65,7 @@
 		<set name="PERTURBMSECS" value="500"/>
 		<!-- the maximum time to delay in milliseconds -->
 		<set name="POSTLINKER_COMPRESSION_DEFAULT" value="inflate"/>
+		<set name="POSTLINKER_FPU_MAPPING" value="softvfp>softvfp vfpv2>vfpv2 softvfp+vfpv2>vfpv2"/>
 		<set name="RELEASEPATH" value="$(EPOCROOT)/epoc32/release"/>
 		<set name="RESOLVED_DEFFILE" value=""/>
 		<set name="RESOLVED_DEFFILE_SECONDARY" value=""/>

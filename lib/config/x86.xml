@@ -25,7 +25,13 @@
 		<set name="IMPLIBTOOL" value="$(DLLTOOL)"/>
 		<set name="DEFGENTOOL" value="$(GENDEF)"/>
 		
+		<!-- targettypes -->
+		<set name="TARGET_TYPES" value="ani dll exe exexp implib fsy kdll kext klib ldd lib pdd pdl pdll plugin plugin3 stdexe stddll stdlib textnotifier2 var var2 none"/>
+		
 		<!-- interfaces -->
+		<append name="INTERFACE_TYPES" value="$(TARGET_TYPES)"/>
+
+		<!-- START block interfaces -->
 		<set name="INTERFACE.extension" value="Symbian.extension"/>
 		
 		<!-- macros -->
@@ -39,6 +45,7 @@
 		<set name="CDEFS" value="__X86__ _UNICODE __SYMBIAN32__ __EPOC32__ __PRODUCT_INCLUDE__=&quot;$(PRODUCT_INCLUDE)&quot; $(MMPDEFS)"/>
 		<set name="CODE_SEGMENT_START" value=""/>
 		<set name="COMPILER_FPU_DEFAULT" value=""/>
+		<set name="COMPILER_NO_HIDE_ALL_OPTION" value=""/>
 		<set name="DEBUG_FORMAT" value=""/>
 		<set name="DEFAULT_STDCPP_NEWLIB" value="stdnew.dso"/>
 		<set name="DEFAULT_SYMBIAN_NEWLIB" value=""/>
@@ -61,6 +68,7 @@
 		<!-- the maximum time to delay in milliseconds -->
 		<set name="POSTLINKER_COMPRESSION_DEFAULT" value="none"/>
 		<set name="POSTLINKER_FPU_DEFAULT" value="$(PL.SOFTVFP_MAYBE_VFPV2)"/>
+		<set name="POSTLINKER_FPU_MAPPING" value=""/>
 		<set name="RELEASEPATH" value="$(EPOCROOT)/epoc32/release"/>
 		<set name="RESOLVED_DEFFILE" value=""/>
 		<set name="RESOLVED_DEFFILE_SECONDARY" value=""/>

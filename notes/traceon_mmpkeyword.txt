@@ -1,0 +1,7 @@
+The traceon mmpkeyword is used to explicitly indicate Raptor to run trace compiler. It is designed to replace the implicit way, which is specifying trace folder in userinclude.  However, the old way is still supported for compatibility reason.
+
+The best way to use the keyword is still under discussion with trace compiler team. For now we just use it as a swtich, and it will automatically set trace folder directory to be:
+
+../traces/<target>_<targetext>
+
+The trace folder directory is relative to the directory of the mmp file where traceon keyword is used.

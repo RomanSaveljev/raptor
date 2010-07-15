@@ -18,6 +18,7 @@ import generic_path
 import raptor
 import raptor_api
 import unittest
+import raptor_tests
 
 class TestRaptorApi(unittest.TestCase):
 			
@@ -30,7 +31,7 @@ class TestRaptorApi(unittest.TestCase):
 		
 	def testAliases(self):
 		r = raptor.Raptor()
-		r.cache.Load( generic_path.Join(r.home, "test", "config", "api.xml") )
+		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
 	
@@ -52,7 +53,7 @@ class TestRaptorApi(unittest.TestCase):
 	
 	def testConfig(self):
 		r = raptor.Raptor()
-		r.cache.Load( generic_path.Join(r.home, "test", "config", "api.xml") )
+		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
 		
@@ -65,6 +66,41 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(config.meaning, "buildme")
 		self.failUnlessEqual(config.outputpath, path)
 		
+		# metadata
+				
+		metadatamacros = map(lambda x: str(x.name+"="+x.value) if x.value else str(x.name), config.metadata.platmacros)
+		metadatamacros.sort()
+		results = ['SBSV2=_____SBSV2', '__GNUC__=3']
+		results.sort()
+		self.failUnlessEqual(metadatamacros, results)
+		
+		includepaths = map(lambda x: str(x.path), config.metadata.includepaths)
+		includepaths.sort()
+		expected_includepaths = [raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant"), 
+								raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), "."]
+		expected_includepaths.sort()
+		self.failUnlessEqual(includepaths, expected_includepaths)
+		
+		preincludefile = str(config.metadata.preincludeheader.file)
+		self.failUnlessEqual(preincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant/Symbian_OS.hrh"))
+		
+		# build
+		
+		sourcemacros = map(lambda x: str(x.name+"="+x.value) if x.value else str(x.name), config.build.sourcemacros)
+		results = ['__BBB__', '__AAA__', '__DDD__=first_value', '__CCC__', '__DDD__=second_value']
+		self.failUnlessEqual(sourcemacros, results)
+		
+		compilerpreincludefile = str(config.build.compilerpreincludeheader.file)
+		self.failUnlessEqual(compilerpreincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/preinclude.h"))
+
+		expectedtypes = ["one", "two"]
+		expectedtypes.sort()
+		types = map(lambda t:t.name, config.build.targettypes)
+		types.sort()
+		self.failUnlessEqual(types, expectedtypes)
+
+		# general
+
 		config = api.getconfig("buildme.foo")
 		self.failUnlessEqual(config.meaning, "buildme.foo")
 		self.failUnlessEqual(config.outputpath, path)
@@ -79,7 +115,7 @@ class TestRaptorApi(unittest.TestCase):
 		
 	def testProducts(self):
 		r = raptor.Raptor()
-		r.cache.Load( generic_path.Join(r.home, "test", "config", "api.xml") )
+		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
 		
