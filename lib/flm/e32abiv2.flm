@@ -1109,8 +1109,8 @@ TOBLDINF:=$(dir $(subst :,,$(subst $(EPOC_ROOT)/,,$(COMPONENT_META))))
 
 # Only build ROMFILE if asked
 ifneq ($(filter ROMFILE,$(call uppercase,$(MAKECMDGOALS))),)
-    ifeq ($(ROMFILE_$(call sanitise,$(TARGET).$(REQUESTEDTARGETEXT))),)
-        ROMFILE_$(call sanitise,$(TARGET).$(REQUESTEDTARGETEXT)):=1
+    ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
+        ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT)):=1
         ROMDIR:=$(EPOC_ROOT)/epoc32/rom/$(TOBLDINF)
 
         # Default values
