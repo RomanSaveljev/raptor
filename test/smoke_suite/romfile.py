@@ -92,7 +92,6 @@ def run():
 
 	t.id = "55b"
 	t.name = "romfile_mmp_include_twice"
-	t.usebash = False
 	t.command = "sbs -b $(EPOCROOT)/src/e32test/group/bld.inf " \
 	        + "-b $(EPOCROOT)/src/falcon/test/bld.inf " \
 			+ "-c armv5.test ROMFILE " \
