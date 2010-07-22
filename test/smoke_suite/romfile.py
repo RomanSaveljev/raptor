@@ -94,7 +94,7 @@ def run():
 	t.name = "romfile_mmp_include_twice"
 	t.command = "sbs -b $(EPOCROOT)/src/e32test/group/bld.inf " \
 	        + "-b $(EPOCROOT)/src/falcon/test/bld.inf " \
-			+ "-c armv5.test ROMFILE " \
+			+ "-c armv5.test ROMFILE -m ${SBSMAKEFILE} -f ${SBSLOGFILE} " \
 			+ "&& cat $(EPOCROOT)/epoc32/rom/src/e32test/group/armv5test.iby"
 	
 	t.targets = [
