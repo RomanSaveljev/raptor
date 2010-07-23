@@ -25,14 +25,22 @@ def run():
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/traceon.exe",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/traceon.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/traces_keyword.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/traces_keyword.exe",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/tracecompiler/traceon/traces/traceon_exe/traceonTraces.h",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/tracecompiler/traceon/traces/traces_keyword_exe/traces_keywordTraces.h",
 		"$(EPOCROOT)/epoc32/ost_dictionaries/traceon_exe_0x11100010_Dictionary.xml",
-		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/traceon_exe_0x11100010_TraceDefinitions.h"
+		"$(EPOCROOT)/epoc32/ost_dictionaries/traces_keyword_exe_0x11100011_Dictionary.xml",
+		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/traceon_exe_0x11100010_TraceDefinitions.h",
+		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/traces_keyword_exe_0x11100011_TraceDefinitions.h"
 		]
 	t.addbuildtargets('smoke_suite/test_resources/tracecompiler/traceon/group/bld.inf', [
 		"traceon_exe/armv5/udeb/traceon.o",
 		"traceon_exe/armv5/urel/traceon.o",
 		"traceon_exe/tracecompile_traceon_exe_11100010.done",
+		"traces_keyword_exe/armv5/udeb/traces_keyword.o",
+		"traces_keyword_exe/armv5/urel/traces_keyword.o",
+		"traces_keyword_exe/tracecompile_traces_keyword_exe_11100011.done",
 	])
 	t.run()
 	
