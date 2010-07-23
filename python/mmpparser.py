@@ -83,7 +83,7 @@ class MMPParser(object):
 			Line(CaselessKeyword('RAMTARGET') + String()) ^ \
 			Line(CaselessKeyword('TARGETTYPE') + String()) ^ \
 			Line(CaselessKeyword('TARGETPATH') + String()) ^ \
-			Line(CaselessKeyword('TRACES') + Optional(StringList())) ^ \
+			Line(CaselessKeyword('TRACES') + Optional(String())) ^ \
 			Line(CaselessKeyword('SYSTEMINCLUDE') + StringList()) ^ \
 			Line(CaselessKeyword('USERINCLUDE') + StringList()) ^ \
 			Line(CaselessKeyword('DEFFILE') + String()) ^ \
