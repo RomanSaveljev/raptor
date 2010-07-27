@@ -1252,6 +1252,7 @@ class MMPRaptorBackend(MMPBackend):
 		self.__compressionKeyword = ""
 		self.sources = []
 		self.capabilities = []
+		self.documents = []
 
 		self.__TARGET = ""
 		self.__TARGETEXT = ""
@@ -1703,6 +1704,37 @@ class MMPRaptorBackend(MMPBackend):
 
 		self.__debug("		sourcepath: " + self.__sourcepath)
 		return "OK"
+
+
+	def doDocumentAssignment(self,s,loc,toks):
+		self.__currentLineNumber += 1
+		self.__debug( "Setting "+toks[0]+" to " + str(toks[1]))
+		for doc in toks[1]:
+			# document file is always relative to sourcepath but some MMP files
+			# have items that begin with a slash...
+			doc = doc.lstrip("/")
+			document = generic_path.Join(self.__sourcepath, doc)
+
+			# If the SOURCEPATH itself begins with a '/', then dont look up the caseless version, since
+			# we don't know at this time what $(EPOCROOT) will evaluate to.
+			if document.GetLocalString().startswith('$(EPOCROOT)'):
+				self.documents.append(str(document))	
+				self.__debug("Append DOCUMENT " + str(document))
+
+			else:
+				founddocument = document.FindCaseless()
+				if founddocument == None:
+					# Hope that the file will be generated later
+					self.__debug("Document file not found: %s" % document)
+					founddocument = document
+
+				self.documents.append(str(founddocument))	
+				self.__debug("Append DOCUMENT " + str(founddocument))
+
+
+		self.__debug("		sourcepath: " + self.__sourcepath)
+		return "OK"
+
 
 	# Resource
 
@@ -2298,6 +2330,12 @@ class MMPRaptorBackend(MMPBackend):
 		# and performance over using multiple Append operations.
 		self.BuildVariant.AddOperation(raptor_data.Set("SOURCE",
 						   " ".join(self.sources)))
+		
+		# Put the list of document files in with one Set operation - saves memory
+		# and performance over using multiple Append operations.
+		self.BuildVariant.AddOperation(raptor_data.Set("DOCUMENT",
+						   " ".join(self.documents)))
+
 
 	def validate(self):
 		"""Test that the parsed MMP file is correct.

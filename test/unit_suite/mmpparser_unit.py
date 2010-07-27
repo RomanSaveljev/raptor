@@ -83,7 +83,13 @@ class MMPTester(MMPBackend):
 		for i in toks[1]:
 			self.log(self.sourcepath + "\\" + i)
 		return "OK"
-
+	
+	def doDocumentAssignment(self,s,loc,toks):
+		self.log("Setting "+toks[0]+" to " + str(toks[1]))
+		for i in toks[1]:
+			self.log(self.sourcepath + "\\" + i)
+		return "OK"
+	
 	def doStartBitmap(self,s,loc,toks):
 		self.log("BITMAP Create "+toks[0]+" to " + str(toks[1]))
 		return "OK" 
