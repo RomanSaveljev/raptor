@@ -168,7 +168,7 @@ def run():
 	t.name = "query_cli_evaluator_error"
 	t.command = "sbs --query=config[arm.badenv] --configpath=test/smoke_suite/test_resources/query_cli"
 	t.mustmatch_singleline = [
-		"<config meaning='arm.badenv'>DONTSETTHISEVER is not set in the environment and has no default"
+		"<config meaning='arm.badenv' query='arm.badenv'>DONTSETTHISEVER is not set in the environment and has no default"
 		]
 	t.mustnotmatch_singleline = []
 	t.errors = 0

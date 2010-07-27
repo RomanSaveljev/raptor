@@ -112,6 +112,8 @@ class Config(Reply):
 		"""
 		super(Config,self).__init__(text, raptor)
 
+		self.query = name
+		
 		# Work out the real name
 		names = name.split(".")
 		if names[0] in self._raptor.cache.aliases:
