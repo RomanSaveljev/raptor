@@ -21,3 +21,5 @@ ARMV5 WINSCW
 
 PRJ_MMPFILES
 traceon.mmp
+../traces_keyword.mmp
+

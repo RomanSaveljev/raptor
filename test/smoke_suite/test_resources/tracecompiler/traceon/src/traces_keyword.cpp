@@ -1,12 +1,12 @@
 // Trace compile macro and header
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
-#include "traceonTraces.h"
+#include "traces_keywordTraces.h"
 #endif
 
 #include "e32def.h"
 
-char test[] = "test traces keyword";
+char test[] = "test traces keyword with a parameter";
 
 TInt E32Main()
 {

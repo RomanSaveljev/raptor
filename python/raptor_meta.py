@@ -1418,16 +1418,6 @@ class MMPRaptorBackend(MMPBackend):
 		
 		elif varname in ['COMPRESSTARGET', 'NOCOMPRESSTARGET', 'INFLATECOMPRESSTARGET', 'BYTEPAIRCOMPRESSTARGET']:
 			self.resolveCompressionKeyword(varname)
-			
-		elif varname == 'TRACEON':
-			self.__debug("Set " + toks[0] + " to 1" )
-			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
-			
-			path = "../traces/" + self.__TARGET + "_" + self.__TARGETEXT
-			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
-			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
-			self.__userinclude += ' ' + resolved
-			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
 		
 		else:
 			self.__debug( "Set switch "+toks[0]+" ON")
@@ -1613,6 +1603,21 @@ class MMPRaptorBackend(MMPBackend):
 					toks1 = re.sub("[,'\[\]]", "", toks1).replace("//","/")
 				self.__debug("Set "+toks[0]+" to " + toks1)
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks1))
+				
+		elif varname == 'TRACES':
+			self.__debug("Set " + toks[0] + " to 1" )
+			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
+			
+			if len(toks) == 1:
+				toks1 = "../traces"
+			else:
+				toks1 = os.path.join(toks[1], "traces").replace("\\","/")
+			path = toks1 + "/" + self.__TARGET + "_" + self.__TARGETEXT
+			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
+			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
+			self.__userinclude += ' ' + resolved
+			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
+		
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
 		elif varname=='ARMFPU':

@@ -80,7 +80,7 @@ else:
 
 # run the Linux installer maker script
 
-package_sbs = subprocess.Popen(["./package_sbs.sh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+package_sbs = subprocess.Popen(["./package_sbs.sh", "-s"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 (stdout, stderr) = package_sbs.communicate()
 
 if package_sbs.returncode != 0:

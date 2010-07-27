@@ -147,8 +147,8 @@
 	
 	<alias name="armv6_urel" meaning="arm.v6.urel.rvct2_2"/>
 	<alias name="armv6_udeb" meaning="arm.v6.udeb.rvct2_2"/>
-	<alias name="armv7_urel" meaning="arm.v7.urel.rvct3_1"/>
-	<alias name="armv7_udeb" meaning="arm.v7.udeb.rvct3_1"/>
+	<alias name="armv7_urel" meaning="arm.v7.urel.rvct4_0"/>
+	<alias name="armv7_udeb" meaning="arm.v7.udeb.rvct4_0"/>
 
 	<alias name="arm9e_urel" meaning="arm.9e.urel.rvct2_2"/>
 	<alias name="arm9e_udeb" meaning="arm.9e.udeb.rvct2_2"/>
