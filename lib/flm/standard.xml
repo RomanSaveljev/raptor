@@ -12,6 +12,7 @@
 		<param name='CAPABILITY'/>
 		<param name='COMPRESSTARGET' default=''/>
 		<param name='CPPONLYOPTION' default='-E'/>
+		<param name='DOCUMENT' default=''/>
 		<param name='LIBRARY'/>
 		<param name='LIBRARY_DEBUG'/>
 		<param name='LINKAS' default=''/>

@@ -1674,9 +1674,13 @@ class MMPRaptorBackend(MMPBackend):
 		self.__debug( "Remembering self.sourcepath state:  "+str(toks[0])+" is now " + self.__sourcepath)
 		self.__debug("selfcurrentMmpFile: " + self.__currentMmpFile)
 		return "OK"
-
-
-	def doSourceAssignment(self,s,loc,toks):
+	
+	def __doAssignment(self,filelist,toks):
+		""" Ancillary method factorying out the common functionality between doSourceAssignment
+		and doDocumentAssignment. Arguments are
+		filelist - list to append items to, should be self.sources or self.documents 
+		toks - toks parameter as passed from PyParsing. """
+		
 		self.__currentLineNumber += 1
 		self.__debug( "Setting "+toks[0]+" to " + str(toks[1]))
 		for file in toks[1]:
@@ -1688,53 +1692,30 @@ class MMPRaptorBackend(MMPBackend):
 			# If the SOURCEPATH itself begins with a '/', then dont look up the caseless version, since
 			# we don't know at this time what $(EPOCROOT) will evaluate to.
 			if source.GetLocalString().startswith('$(EPOCROOT)'):
-				self.sources.append(str(source))	
-				self.__debug("Append SOURCE " + str(source))
+				filelist.append(str(source))						
+				self.__debug("Append " + toks[0] + " " + str(source))
 
 			else:
 				foundsource = source.FindCaseless()
 				if foundsource == None:
 					# Hope that the file will be generated later
-					self.__debug("Sourcefile not found: %s" % source)
+					self.__debug("%s file not found: %s" % (toks[0], source))
 					foundsource = source
 
-				self.sources.append(str(foundsource))	
-				self.__debug("Append SOURCE " + str(foundsource))
+				filelist.append(str(foundsource))					
+				self.__debug("Append " + toks[0] + " " + str(foundsource))
 
 
 		self.__debug("		sourcepath: " + self.__sourcepath)
 		return "OK"
 
+	def doSourceAssignment(self,s,loc,toks):
+		""" Populate the list of source files from the MMP. """
+		self.__doAssignment(self.sources,toks)
 
 	def doDocumentAssignment(self,s,loc,toks):
-		self.__currentLineNumber += 1
-		self.__debug( "Setting "+toks[0]+" to " + str(toks[1]))
-		for doc in toks[1]:
-			# document file is always relative to sourcepath but some MMP files
-			# have items that begin with a slash...
-			doc = doc.lstrip("/")
-			document = generic_path.Join(self.__sourcepath, doc)
-
-			# If the SOURCEPATH itself begins with a '/', then dont look up the caseless version, since
-			# we don't know at this time what $(EPOCROOT) will evaluate to.
-			if document.GetLocalString().startswith('$(EPOCROOT)'):
-				self.documents.append(str(document))	
-				self.__debug("Append DOCUMENT " + str(document))
-
-			else:
-				founddocument = document.FindCaseless()
-				if founddocument == None:
-					# Hope that the file will be generated later
-					self.__debug("Document file not found: %s" % document)
-					founddocument = document
-
-				self.documents.append(str(founddocument))	
-				self.__debug("Append DOCUMENT " + str(founddocument))
-
-
-		self.__debug("		sourcepath: " + self.__sourcepath)
-		return "OK"
-
+		""" Populate the list of document files from the MMP. """
+		self.__doAssignment(self.documents,toks)
 
 	# Resource
 

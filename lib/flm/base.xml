@@ -34,7 +34,6 @@
 		<param name='GNUSED'/>
 		<param name='GNUSORT'/>
 		<param name='SBS_JAVATC' default=''/>
-		<param name='DOCUMENT' default=''/>
 		<param name='ZIP'/>
 		<param name='UNZIP'/>
 		<param name='GNUMD5SUM'/>
