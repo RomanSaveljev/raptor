@@ -1287,6 +1287,7 @@ class MMPRaptorBackend(MMPBackend):
 		self.__compressionKeyword = ""
 		self.sources = []
 		self.capabilities = []
+		self.documents = []
 
 		self.__TARGET = ""
 		self.__TARGETEXT = ""
@@ -1723,9 +1724,13 @@ class MMPRaptorBackend(MMPBackend):
 		self.__debug( "Remembering self.sourcepath state:  "+str(toks[0])+" is now " + self.__sourcepath)
 		self.__debug("selfcurrentMmpFile: " + self.__currentMmpFile)
 		return "OK"
-
-
-	def doSourceAssignment(self,s,loc,toks):
+	
+	def __doAssignment(self,filelist,toks):
+		""" Ancillary method factorying out the common functionality between doSourceAssignment
+		and doDocumentAssignment. Arguments are
+		filelist - list to append items to, should be self.sources or self.documents 
+		toks - toks parameter as passed from PyParsing. """
+		
 		self.__currentLineNumber += 1
 		self.__debug( "Setting "+toks[0]+" to " + str(toks[1]))
 		for file in toks[1]:
@@ -1737,22 +1742,30 @@ class MMPRaptorBackend(MMPBackend):
 			# If the SOURCEPATH itself begins with a '/', then dont look up the caseless version, since
 			# we don't know at this time what $(EPOCROOT) will evaluate to.
 			if source.GetLocalString().startswith('$(EPOCROOT)'):
-				self.sources.append(str(source))	
-				self.__debug("Append SOURCE " + str(source))
+				filelist.append(str(source))						
+				self.__debug("Append " + toks[0] + " " + str(source))
 
 			else:
 				foundsource = source.FindCaseless()
 				if foundsource == None:
 					# Hope that the file will be generated later
-					self.__debug("Sourcefile not found: %s" % source)
+					self.__debug("%s file not found: %s" % (toks[0], source))
 					foundsource = source
 
-				self.sources.append(str(foundsource))	
-				self.__debug("Append SOURCE " + str(foundsource))
+				filelist.append(str(foundsource))					
+				self.__debug("Append " + toks[0] + " " + str(foundsource))
 
 
 		self.__debug("		sourcepath: " + self.__sourcepath)
 		return "OK"
+
+	def doSourceAssignment(self,s,loc,toks):
+		""" Populate the list of source files from the MMP. """
+		self.__doAssignment(self.sources,toks)
+
+	def doDocumentAssignment(self,s,loc,toks):
+		""" Populate the list of document files from the MMP. """
+		self.__doAssignment(self.documents,toks)
 
 	# Resource
 
@@ -2355,6 +2368,12 @@ class MMPRaptorBackend(MMPBackend):
 		# and performance over using multiple Append operations.
 		self.BuildVariant.AddOperation(raptor_data.Set("SOURCE",
 						   " ".join(self.sources)))
+		
+		# Put the list of document files in with one Set operation - saves memory
+		# and performance over using multiple Append operations.
+		self.BuildVariant.AddOperation(raptor_data.Set("DOCUMENT",
+						   " ".join(self.documents)))
+
 
 	def validate(self):
 		"""Test that the parsed MMP file is correct.
