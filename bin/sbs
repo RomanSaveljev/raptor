@@ -62,6 +62,7 @@ EOERROR
 fi
 
 if [ "$OSTYPE" == "cygwin" ]; then
+	export OSTYPE
 	__MINGW__=${SBS_MINGW:-$SBS_HOME/$HOSTPLATFORM_DIR/mingw}
 	__CYGWIN__=${SBS_CYGWIN:-$SBS_HOME/$HOSTPLATFORM_DIR/cygwin}
 
