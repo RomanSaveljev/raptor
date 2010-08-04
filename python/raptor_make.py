@@ -431,7 +431,7 @@ include %s
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
-			self.raptor.Error("Failed to write makefile '%s': %s : %s" % (str(toplevel),str(e),tb))
+			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
 			makefileset = None
 
 		return makefileset
