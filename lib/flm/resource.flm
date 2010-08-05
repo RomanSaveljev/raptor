@@ -67,6 +67,7 @@ endif
 INTERBASE_TMP:=$(OUTPUTPATH)/$(TARGET_lower)_$(notdir $(basename $(SOURCE)))
 
 LANGUAGES:=$(LANGUAGES:SC=sc) # ensure that we don't ever have to worry about case consistency w.r.t languages or get confused into thinking that SC!=sc (which it is)
+LANGUAGES:=$(call uniq,$(LANGUAGES)) # remove any duplicates from the list (usually the result of multiple LANG lists both in and out of START RESOURCE blocks)
 
 
 # common pre-processor options
