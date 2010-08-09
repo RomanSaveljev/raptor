@@ -78,7 +78,7 @@
 		<set name='MAIN_OUTPUTPATH' value='$(EPOCROOT)/epoc32/build'/>
 		<set name='OUTPUTPATH' value='$(MAIN_OUTPUTPATH)'/>
 		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release'/>
-		<set name='SBSV1MAKE' value='$(EPOCTOOLS)/make$(DOTEXE)'/>
+		<set name='SBSV1MAKE' value='$(EPOCROOT)/epoc32/tools/make$(DOTEXE)'/>
 		<set name='SYSTEMINCLUDE' value=''/>
 		<set name='TARGET' value='TARGET_WAS_NOT_SET_PROPERLY'/>
 		<set name='TARGETPATH' value=''/>
