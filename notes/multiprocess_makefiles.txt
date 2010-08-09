@@ -1,0 +1,14 @@
+Currently Raptor parses and builds makefiles in sequential: bitmap -> resource -> default
+
+Although there are dependencies for makefile building, there are no dependencies for 
+makefiles parsing, so it's better to parse the makefiles in parallel. To do that, 
+Raptor will use multiprocess to run several make simultaneously, and use markers to 
+indicate parsing for previous stage has finished. In each makefile shell will be used 
+at the end of the makefile to check those markers:
+
+$(shell while [ ! -f $(MARKER) ] ; do sleep 1; done )
+
+So the dependencies still stand.
+
+#1 is to reorganize the way Raptor run makefiles in front-end (done)
+#2 is to use multiprocess to run makefiles and add the shell commands to makefiles. (to do)

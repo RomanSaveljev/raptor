@@ -126,6 +126,42 @@ def AnnoFileParseOutput(annofile):
 	af.close()
 
 
+def run_make(mproc):
+	makeenv=os.environ.copy()
+	makeenv['TALON_RECIPEATTRIBUTES']=mproc.talon_recipeattributes
+	makeenv['TALON_SHELL']=mproc.talon_shell
+	makeenv['TALON_BUILDID']=mproc.talon_buildid
+	makeenv['TALON_TIMEOUT']=mproc.talon_timeout
+
+	if mproc.filesystem == "unix":
+		p = subprocess.Popen([mproc.command], bufsize=65535,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT,
+			close_fds=True, env=makeenv, shell=True)
+	else:
+		p = subprocess.Popen(args = 
+			[mproc.shell, '-c', mproc.command],
+			bufsize=65535,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT,
+			shell = False,
+			universal_newlines=True, env=makeenv)
+	stream = p.stdout
+
+
+	for l in stream:
+		pass # log is redirected to stdout and stderr files anyhow 
+
+	returncode = p.wait()
+	return returncode
+
+
+
+class MakeProcess(object):
+	def __init__(self):
+		pass
+
+
 
 # raptor_make module classes
 
@@ -156,8 +192,6 @@ class MakeEngine(object):
 
 			# shell
 			self.shellpath = evaluator.Get("DEFAULT_SHELL")
-			usetalon_s = evaluator.Get("USE_TALON") 
-			self.usetalon = usetalon_s is not None and usetalon_s != ""
 			self.talonshell = str(evaluator.Get("TALON_SHELL"))
 			self.talontimeout = str(evaluator.Get("TALON_TIMEOUT"))
 			self.talonretries = str(evaluator.Get("TALON_RETRIES"))
@@ -233,8 +267,7 @@ class MakeEngine(object):
 			raise BadMakeEngineException("No build command for '%s'"% engine)
 
 
-		if self.usetalon:
-			talon_settings="""
+		talon_settings="""
 TALON_SHELL:=%s
 TALON_TIMEOUT:=%s
 TALON_RECIPEATTRIBUTES:=\
@@ -250,11 +283,6 @@ export TALON_RECIPEATTRIBUTES TALON_SHELL TALON_TIMEOUT
 USE_TALON:=%s
 
 """ % (self.talonshell, self.talontimeout, "1")
-		else:
-			talon_settings="""
-USE_TALON:=
-
-"""
 
 
 		timing_start = "$(info " + \
@@ -499,20 +527,11 @@ include %s
 		if not self.valid:
 			return False
 	
-		if self.usetalon:
-			# Always use Talon since it does the XML not
-			# just descrambling
-			if not self.StartTalon() and not self.raptor.keepGoing:
-				self.Tidy()
-				return False
-		else:
-			# use the descrambler if we are doing a parallel build on
-			# a make engine which does not buffer each agent's output
-			if self.raptor.jobs > 1 and self.scrambled:
-				self.StartDescrambler()
-				if  not self.descrambler_started and not self.raptor.keepGoing:
-					self.Tidy()
-					return False
+		# Always use Talon since it does the XML not
+		# just descrambling
+		if not self.StartTalon() and not self.raptor.keepGoing:
+			self.Tidy()
+			return False
 			
 		# run any initialisation script
 		if self.initCommand:
@@ -539,8 +558,13 @@ include %s
 		# Report number of makefiles to be built
 		self.raptor.InfoDiscovery(object_type = "makefile", count = len(fileName_list))
 
+
+		# Stores all the make processes that were executed:
+		make_processes = []
+
 		# Process each file in turn
 		for makefile in fileName_list:
+
 			if not os.path.exists(makefile):
 				self.raptor.Info("Skipping makefile %s", makefile)
 				continue
@@ -576,16 +600,11 @@ include %s
 			if self.raptor.noDependGenerate:
 				command += " NO_DEPEND_GENERATE=1"
 			
-			if self.usetalon:
-				# use the descrambler if we set it up
-				command += ' TALON_DESCRAMBLE=' 
-				if self.scrambled:
-					command += '1 '
-				else:
-					command += '0 '
+			command += ' TALON_DESCRAMBLE=' 
+			if self.scrambled:
+				command += '1 '
 			else:
-				if self.descrambler_started:
-					command += ' DESCRAMBLE="' + self.descrambler + '"'
+				command += '0 '
 			
 			# use the retry mechanism if requested
 			if self.raptor.tries > 1:
@@ -614,90 +633,91 @@ include %s
 			# annofile - so that we can trap the problem that
 			# makes the copy-log-from-annofile workaround necessary
 			# and perhaps determine when we can remove it.
-			if self.copyLogFromAnnoFile:
-				command += " >'%s' " % stdoutfilename
+			command += " >'%s' " % stdoutfilename
 
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
 			command = command.replace("#MAKEFILE#", str(makefile))
 
 			self.raptor.Info("Executing '%s'", command)
 
+
+			mproc = MakeProcess()
+			mproc.command = command
+			mproc.makefile = str(makefile)
+			mproc.talon_recipeattributes="none"
+			mproc.talon_shell=self.talonshell
+			mproc.talon_buildid=str(self.buildID)
+			mproc.talon_timeout=str(self.talontimeout)
+			mproc.filesystem = self.raptor.filesystem
+			mproc.logstream = self.raptor.out
+			mproc.copyLogFromAnnoFile = self.copyLogFromAnnoFile
+			mproc.stderrfilename = stderrfilename
+			mproc.stdoutfilename = stdoutfilename
+			mproc.shell = raptor_data.ToolSet.shell
+
+			make_processes.append(mproc)
+
+			if self.copyLogFromAnnoFile:
+				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
+			
+
 			# execute the build.
 			# the actual call differs between Windows and Unix.
 			# bufsize=1 means "line buffered"
 			#
+			returncode = 255
 			try:
 				# Time the build
 				self.raptor.InfoStartTime(object_type = "makefile",
-						task = "build", key = str(makefile))
+					task = "build", key = str(makefile))
+
+				returncode = run_make(mproc)
 				
-				makeenv=os.environ.copy()
-				if self.usetalon:
-					makeenv['TALON_RECIPEATTRIBUTES']="none"
-					makeenv['TALON_SHELL']=self.talonshell
-					makeenv['TALON_BUILDID']=str(self.buildID)
-					makeenv['TALON_TIMEOUT']=str(self.talontimeout)
-
-				if self.raptor.filesystem == "unix":
-					p = subprocess.Popen([command], bufsize=65535,
-						stdout=subprocess.PIPE,
-						stderr=subprocess.STDOUT,
-						close_fds=True, env=makeenv, shell=True)
-				else:
-					p = subprocess.Popen(args = 
-						[raptor_data.ToolSet.shell, '-c', command],
-						bufsize=65535,
-						stdout=subprocess.PIPE,
-						stderr=subprocess.STDOUT,
-						shell = False,
-						universal_newlines=True, env=makeenv)
-				stream = p.stdout
-
-				inRecipe = False
-
-				if not self.copyLogFromAnnoFile:
-					for l in XMLEscapeLog(stream):
-						self.raptor.out.write(l)
-
-					returncode = p.wait()
-				else:
-					returncode = p.wait()
-
-					annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
-					self.raptor.Info("copylogfromannofile: Copying log from annotation file %s to work around a potential problem with the console output", annofilename)
-					try:
-						for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
-							self.raptor.out.write(l)
-					except Exception,e:
-						self.raptor.Error("Couldn't complete stdout output from annofile %s for %s - '%s'", annofilename, command, str(e))
-
-
-				# Take all the stderr output that went into the .stderr file
-				# and put it back into the log, but safely so it can't mess up
-				# xml parsers.
-				try:
-					e = open(stderrfilename,"r")
-					for line in e:
-						self.raptor.out.write(escape(line))
-					e.close()
-				except Exception,e:
-					self.raptor.Error("Couldn't complete stderr output for %s - '%s'", command, str(e))
-				# Report end-time of the build
-				self.raptor.InfoEndTime(object_type = "makefile",
-						task = "build", key = str(makefile))
-
-				if returncode != 0  and not self.raptor.keepGoing:
-					self.Tidy()
-					return False
-
 			except Exception,e:
-				self.raptor.Error("Exception '%s' during '%s'", str(e), command)
+				self.raptor.Error("Exception '%s' during '%s'" % (str(e), command))
 				self.Tidy()
+				break
+			finally:
 				# Still report end-time of the build
-				self.raptor.InfoEndTime(object_type = "Building", task = "Makefile",
-						key = str(makefile))
-				return False
+				self.raptor.InfoEndTime(object_type = "makefile", task = "build",
+									    key = str(makefile))
 
+
+		# Getting all the log output copied into files
+		for mproc in make_processes:		
+			if self.copyLogFromAnnoFile:
+				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefile)
+				self.raptor.Info("copylogfromannofile: Copying log from annotation file %s to work around a potential problem with the console output", annofilename)
+				try:
+					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
+						mproc.logstream.write(l)
+				except Exception,e:
+					errorlist.append("Couldn't complete stdout output from annofile %s for %s - '%s'" % (annofilename, command, str(e)))
+			else:
+				try:
+					with open(mproc.stdoutfilename, "r") as makeoutput:
+						for l in XMLEscapeLog(makeoutput):
+							mproc.logstream.write(l)
+				except Exception,e:
+					errorlist.append("Couldn't complete stdout output %s for %s - '%s'" % (mproc.stdoutfilename, command, str(e)))			
+
+				
+			# Take all the stderr output that went into the .stderr file
+			# and put it back into the log, but safely so it can't mess up
+			# xml parsers.
+			try:
+				e = open(mproc.stderrfilename,"r")
+				for line in e:
+					self.raptor.out.write(escape(line))
+				e.close()
+			except Exception,e:
+				errorlist.append("Couldn't complete stderr output for %s - '%s'" % (mproc.command, str(e)))
+			# Report end-time of the build
+
+		if returncode != 0  and not self.raptor.keepGoing:
+			self.Tidy()
+			return False
+			
 		# run any shutdown script
 		if self.shutdownCommand != None and self.shutdownCommand != "":
 			self.raptor.Info("Running %s", self.shutdownCommand)
@@ -710,11 +730,8 @@ include %s
 		return True
 
 	def Tidy(self):
-		if self.usetalon:
-			self.StopTalon() 
-		else:
-			"clean up after the make command"
-			self.StopDescrambler()
+		"clean up after the make command"
+		self.StopTalon() 
 
 	def StartTalon(self):
 		# the talon command
