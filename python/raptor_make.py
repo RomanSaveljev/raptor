@@ -126,19 +126,19 @@ def AnnoFileParseOutput(annofile):
 	af.close()
 
 
-def runMake(mproc):
+def run_make(make_process):
 	""" A function to run make command. This is in a standalone function so
 		Raptor could easily use multiprocess to run multiple make programs
 	"""
 	makeenv = os.environ.copy()
-	makeenv['TALON_RECIPEATTRIBUTES'] = mproc.talon_recipeattributes
-	makeenv['TALON_SHELL'] = mproc.talon_shell
-	makeenv['TALON_BUILDID'] = mproc.talon_buildid
-	makeenv['TALON_TIMEOUT'] = mproc.talon_timeout
+	makeenv['TALON_RECIPEATTRIBUTES'] = make_process.talon_recipeattributes
+	makeenv['TALON_SHELL'] = make_process.talon_shell
+	makeenv['TALON_BUILDID'] = make_process.talon_buildid
+	makeenv['TALON_TIMEOUT'] = make_process.talon_timeout
 
-	if mproc.filesystem == "unix":
+	if make_process.filesystem == "unix":
 		p = subprocess.Popen(
-				args = [mproc.command], 
+				args = [make_process.command], 
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT,
@@ -147,7 +147,7 @@ def runMake(mproc):
 				env = makeenv)
 	else:
 		p = subprocess.Popen(
-				args = [mproc.shell, '-c', mproc.command],
+				args = [make_process.shell, '-c', make_process.command],
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT,
@@ -155,8 +155,14 @@ def runMake(mproc):
 				universal_newlines = True, 
 				env = makeenv)
 
+	# Log is redirected to stdout and stderr files
+	# This loop here prevents blocking of stdout pipe
+	# if redirection fails for any reason
+	stream = p.stdout
+	for l in stream:
+		pass  
+	  	       
 	returncode = p.wait()
-
 	return returncode
 
 
@@ -671,7 +677,7 @@ include %s
 				self.raptor.InfoStartTime(object_type = "makefile",
 					task = "build", key = str(makefile))
 
-				returncode = runMake(mproc)
+				returncode = run_make(mproc)
 				
 			except Exception,e:
 				self.raptor.Error("Exception '%s' during '%s'" % (str(e), command))
