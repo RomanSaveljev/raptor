@@ -126,45 +126,48 @@ def AnnoFileParseOutput(annofile):
 	af.close()
 
 
-def run_make(mproc):
-	makeenv=os.environ.copy()
-	makeenv['TALON_RECIPEATTRIBUTES']=mproc.talon_recipeattributes
-	makeenv['TALON_SHELL']=mproc.talon_shell
-	makeenv['TALON_BUILDID']=mproc.talon_buildid
-	makeenv['TALON_TIMEOUT']=mproc.talon_timeout
+def runMake(mproc):
+	""" A function to run make command. This is in a standalone function so
+		Raptor could easily use multiprocess to run multiple make programs
+	"""
+	makeenv = os.environ.copy()
+	makeenv['TALON_RECIPEATTRIBUTES'] = mproc.talon_recipeattributes
+	makeenv['TALON_SHELL'] = mproc.talon_shell
+	makeenv['TALON_BUILDID'] = mproc.talon_buildid
+	makeenv['TALON_TIMEOUT'] = mproc.talon_timeout
 
 	if mproc.filesystem == "unix":
-		p = subprocess.Popen([mproc.command], bufsize=65535,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.STDOUT,
-			close_fds=True, env=makeenv, shell=True)
+		p = subprocess.Popen(
+				args = [mproc.command], 
+				bufsize = 65535,
+				stdout = subprocess.PIPE,
+				stderr = subprocess.STDOUT,
+				close_fds = True, 
+				shell = True,
+				env = makeenv)
 	else:
-		p = subprocess.Popen(args = 
-			[mproc.shell, '-c', mproc.command],
-			bufsize=65535,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.STDOUT,
-			shell = False,
-			universal_newlines=True, env=makeenv)
-	stream = p.stdout
-
-
-	for l in stream:
-		pass # log is redirected to stdout and stderr files anyhow 
+		p = subprocess.Popen(
+				args = [mproc.shell, '-c', mproc.command],
+				bufsize = 65535,
+				stdout = subprocess.PIPE,
+				stderr = subprocess.STDOUT,
+				shell = False,
+				universal_newlines = True, 
+				env = makeenv)
 
 	returncode = p.wait()
+
 	return returncode
 
 
 
 class MakeProcess(object):
-	def __init__(self):
-		pass
-
+	""" A process of make program """
+	def __init__(self, command):
+		self.command = command
 
 
 # raptor_make module classes
-
 class MakeEngine(object):
 
 	def __init__(self, Raptor, engine="make_engine"):
@@ -640,14 +643,13 @@ include %s
 
 			self.raptor.Info("Executing '%s'", command)
 
-
-			mproc = MakeProcess()
-			mproc.command = command
+			# Create a process of make program
+			mproc = MakeProcess(command)
 			mproc.makefile = str(makefile)
-			mproc.talon_recipeattributes="none"
-			mproc.talon_shell=self.talonshell
-			mproc.talon_buildid=str(self.buildID)
-			mproc.talon_timeout=str(self.talontimeout)
+			mproc.talon_recipeattributes = "none"
+			mproc.talon_shell = self.talonshell
+			mproc.talon_buildid = str(self.buildID)
+			mproc.talon_timeout = str(self.talontimeout)
 			mproc.filesystem = self.raptor.filesystem
 			mproc.logstream = self.raptor.out
 			mproc.copyLogFromAnnoFile = self.copyLogFromAnnoFile
@@ -660,18 +662,16 @@ include %s
 			if self.copyLogFromAnnoFile:
 				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
 			
-
+			
 			# execute the build.
 			# the actual call differs between Windows and Unix.
 			# bufsize=1 means "line buffered"
-			#
-			returncode = 255
 			try:
 				# Time the build
 				self.raptor.InfoStartTime(object_type = "makefile",
 					task = "build", key = str(makefile))
 
-				returncode = run_make(mproc)
+				returncode = runMake(mproc)
 				
 			except Exception,e:
 				self.raptor.Error("Exception '%s' during '%s'" % (str(e), command))
@@ -817,10 +817,5 @@ include %s
 				self.raptor.Error("Failed in %s", command)
 				return False
 		return True
-
-
-
-# raptor_make module functions
-
 
 # end of the raptor_make module
