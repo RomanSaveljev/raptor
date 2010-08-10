@@ -1,19 +1,20 @@
-#
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
-# All rights reserved.
-# This component and the accompanying materials are made available
-# under the terms of the License "Eclipse Public License v1.0"
-# which accompanies this distribution, and is available
-# at the URL "http://www.eclipse.org/legal/epl-v10.html".
-#
-# Initial Contributors:
-# Nokia Corporation - initial contribution.
-#
-# Contributors:
-#
-# Description: 
-# Filter class for generating HTML summary pages
-#
+
+'''
+Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+All rights reserved.
+This component and the accompanying materials are made available
+under the terms of the License "Eclipse Public License v1.0"
+which accompanies this distribution, and is available
+at the URL "http://www.eclipse.org/legal/epl-v10.html".
+
+Initial Contributors:
+Nokia Corporation - initial contribution.
+
+Contributors:
+
+Description: 
+Filter class for generating HTML summary pages
+'''
 
 import os
 import re
@@ -593,8 +594,10 @@ class HTML(filter_interface.FilterSAX):
 				try:
 					type = None
 					
-					if row[0] == "CRITICAL" or row[0] == "ERROR":
+					if row[0] == "ERROR":
 						type = Records.ERROR
+					elif row[0] == "CRITICAL":
+						type = Records.CRITICAL
 					elif row[0] == "WARNING":
 						type = Records.WARNING
 					elif row[0] == "REMARK":
@@ -620,17 +623,18 @@ class Records(object):
 	"a group of related records e.g. errors, warnings and remarks."
 	
 	# the different types of record we want to group together
-	OK      = 0
-	ERROR   = 1
-	WARNING = 2
-	REMARK  = 3
-	MISSING = 4
+	OK       = 0
+	ERROR    = 1
+	CRITICAL = 2
+	WARNING  = 3
+	REMARK   = 4
+	MISSING  = 5
 	
-	SUBDIRS = [ "ok", "error", "warning", "remark", "missing" ]
-	TITLES = [ "OK", "Errors", "Warnings", "Remarks", "Missing files" ]
+	SUBDIRS = [ "ok", "error", "critical", "warning", "remark", "missing" ]
+	TITLES = [ "OK", "Errors", "Criticals", "Warnings", "Remarks", "Missing files" ]
 	
 	def __init__(self):
-		self.data = [ {'N':0}, {'N':0}, {'N':0}, {'N':0}, {'N':0} ]
+		self.data = [ {'N':0}, {'N':0}, {'N':0}, {'N':0}, {'N':0}, {'N':0} ]
 	
 	def get(self, index, item):
 		try:
