@@ -48,7 +48,7 @@ LINKER_ENTRYPOINT_DECORATION:=
 LINKER_SEPARATOR:=
 
 # For GCCE
-ifeq ($(TOOLCHAIN),GCCE)
+ifneq ($(findstring GCC,$(TOOLCHAIN)),)
 LINKER_ENTRYPOINT_DECORATION:=$(if $(call isoneof,$(TARGETTYPE),exexp exe),-Wl$(CHAR_COMMA)-u$(CHAR_COMMA)$(LINKER_ENTRYPOINT_PREFIX)$(ENTRYPOINT),-Wl$(CHAR_COMMA)-u$(CHAR_COMMA)$(LINKER_ENTRYPOINT_PREFIX)$(ENTRYPOINT))
 LINKER_SEPARATOR:=$(CHAR_COMMA)
 endif
@@ -97,6 +97,6 @@ endif
 
 # "ARMFPU" overrides for 'fpu-ness' in compiler and postlinker calls in .mmp files are currently only
 # supported for RVCT-based builds, GCCE builds always make use of the interface defined defaults.
-ifeq ($(TOOLCHAIN),GCCE)
+ifneq ($(TOOLCHAIN),RVCT)
   ARMFPU:=
 endif
