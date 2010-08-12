@@ -75,6 +75,7 @@
 		<set name="LISTING_OPTION" value="-S"/>
 		<set name="NO_EXCEPTIONS" value="--no_exceptions --no_exceptions_unwind"/>
 		<set name="NO_UNALIGNED_ACCESS" value="$(CC.NO_UNALIGNED_ACCESS)"/>
+		<set name='POSTLINKER_ASM_OPTION' value="--asm=armas"/>
 		<set name="PREINCLUDE" value="$(RVCT_PRE_INCLUDE)"/>
 		<set name="PREINCLUDE_OPTION" value="--preinclude"/>
 		<set name="PREPROCESSOR_OPTION" value="-E"/>
