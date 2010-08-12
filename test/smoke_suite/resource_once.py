@@ -23,7 +23,7 @@ def run():
 	t.id = "43562d"
 	t.name =  "resource_build_header_onlyonce"
 	t.description = "Ensure we only generate the resource header once even when there are many languages"
-	t.command = "sbs  -b smoke_suite/test_resources/resource/group/simple.inf -c winscw_udeb -m {SBSMAKEFILE} -f ${SBSLOGFILE}; XX=$?; cat ${SBSLOGFILE}; exit $XX" 
+	t.command = "sbs  -b smoke_suite/test_resources/resource/group/simple.inf -c winscw_udeb -m ${SBSMAKEFILE} -f ${SBSLOGFILE}; XX=$?; cat ${SBSLOGFILE}; exit $XX" 
 	t.usebash = True
 	t.targets = [
 		"$(EPOCROOT)/epoc32/include/testresource.hrh",
