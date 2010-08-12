@@ -1,19 +1,20 @@
-#
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
-# All rights reserved.
-# This component and the accompanying materials are made available
-# under the terms of the License "Eclipse Public License v1.0"
-# which accompanies this distribution, and is available
-# at the URL "http://www.eclipse.org/legal/epl-v10.html".
-#
-# Initial Contributors:
-# Nokia Corporation - initial contribution.
-#
-# Contributors:
-#
-# Description: 
-# Filter class for generating HTML summary pages
-#
+
+'''
+Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+All rights reserved.
+This component and the accompanying materials are made available
+under the terms of the License "Eclipse Public License v1.0"
+which accompanies this distribution, and is available
+at the URL "http://www.eclipse.org/legal/epl-v10.html".
+
+Initial Contributors:
+Nokia Corporation - initial contribution.
+
+Contributors:
+
+Description: 
+Filter class for generating HTML summary pages
+'''
 
 import os
 import re
@@ -21,6 +22,7 @@ import csv
 import sys
 import shutil
 import tempfile
+import time
 import filter_interface
 
 class HTML(filter_interface.FilterSAX):
@@ -59,7 +61,7 @@ class HTML(filter_interface.FilterSAX):
 		self.totals = Records()
 		
 		# create all the directories
-		for s in Records.SUBDIRS:
+		for s in Records.CLASSES:
 			dir = os.path.join(self.dirname, s)
 			if not os.path.isdir(dir):
 				try:
@@ -271,7 +273,16 @@ class HTML(filter_interface.FilterSAX):
 				self.err("status element not inside a recipe element")
 		except KeyError:
 			pass
-		
+	
+	def start_time(self, attributes):
+		try:
+			if self.recipe_tag:
+				self.recipe_tag.time = float(attributes['elapsed'])
+			else:
+				self.err("status element not inside a recipe element")
+		except KeyError:
+			pass
+			
 	def start_error(self, attributes):
 		self.error_tag = TaggedText(attributes)
 	
@@ -436,7 +447,7 @@ class HTML(filter_interface.FilterSAX):
 			# we don't want to show successes, just count them
 			return
 		
-		linkname = os.path.join(Records.SUBDIRS[type], "overall.html")
+		linkname = os.path.join(Records.CLASSES[type], "overall.html")
 		filename = os.path.join(self.dirname, linkname)
 		title = Records.TITLES[type] + " for all configurations"
 		try:
@@ -448,17 +459,18 @@ class HTML(filter_interface.FilterSAX):
 		except:
 			return self.err("cannot create file '%s'" % filename)
 		
-		self.totals.set(type, 'filename', filename)
-		self.totals.set(type, 'linkname', linkname)
+		self.totals.set_filename(type, filename)
+		self.totals.set_linkname(type, linkname)
 	
 	def appendoverallfile(self, type, taggedtext):
-		self.totals.inc(type, 'N')   # one more and counting
+		self.totals.inc(type)   # one more and counting
+		self.totals.inc(Records.TIME, taggedtext.time)
 		
 		if type == Records.OK:
 			# we don't want to show successes, just count them
 			return
 		
-		filename = self.totals.get(type, 'filename')
+		filename = self.totals.get_filename(type)
 		try:
 			file = open(filename, "a")
 			file.write("<p>component: %s " % taggedtext.bldinf)
@@ -473,7 +485,7 @@ class HTML(filter_interface.FilterSAX):
 			# we don't want to show successes, just count them
 			return
 		
-		linkname = os.path.join(Records.SUBDIRS[type], "cfg_" + configuration + ".html")
+		linkname = os.path.join(Records.CLASSES[type], "cfg_" + configuration + ".html")
 		filename = os.path.join(self.dirname, linkname)
 		title = Records.TITLES[type] + " for configuration " + configuration
 		try:
@@ -485,17 +497,18 @@ class HTML(filter_interface.FilterSAX):
 		except:
 			return self.err("cannot create file '%s'" % filename)
 		
-		self.configurations[configuration].set(type, 'filename', filename)
-		self.configurations[configuration].set(type, 'linkname', linkname)
+		self.configurations[configuration].set_filename(type, filename)
+		self.configurations[configuration].set_linkname(type, linkname)
 	
 	def appendconfigurationfile(self, configuration, type, taggedtext):
-		self.configurations[configuration].inc(type, 'N')   # one more and counting
+		self.configurations[configuration].inc(type)   # one more and counting
+		self.configurations[configuration].inc(Records.TIME, taggedtext.time)
 		
 		if type == Records.OK:
 			# we don't want to show successes, just count them
 			return
 		
-		filename = self.configurations[configuration].get(type, 'filename')
+		filename = self.configurations[configuration].get_filename(type)
 		try:
 			file = open(filename, "a")
 			file.write("<p>component: %s\n" % taggedtext.bldinf)
@@ -509,7 +522,7 @@ class HTML(filter_interface.FilterSAX):
 			# we don't want to show successes, just count them
 			return
 		
-		linkname = os.path.join(Records.SUBDIRS[type], "bld_" + re.sub("[/:]","_",component) + ".html")
+		linkname = os.path.join(Records.CLASSES[type], "bld_" + re.sub("[/:]","_",component) + ".html")
 		filename = os.path.join(self.dirname, linkname)
 		title = Records.TITLES[type] + " for component " + component
 		try:
@@ -521,17 +534,18 @@ class HTML(filter_interface.FilterSAX):
 		except:
 			return self.err("cannot create file '%s'" % filename)
 		
-		self.components[component].set(type, 'filename', filename)
-		self.components[component].set(type, 'linkname', linkname)
+		self.components[component].set_filename(type, filename)
+		self.components[component].set_linkname(type, linkname)
 	
 	def appendcomponentfile(self, component, type, taggedtext):
-		self.components[component].inc(type, 'N')   # one more and counting
+		self.components[component].inc(type)   # one more and counting
+		self.components[component].inc(Records.TIME, taggedtext.time)
 		
 		if type == Records.OK:
 			# we don't want to show successes, just count them
 			return
 		
-		filename = self.components[component].get(type, 'filename')
+		filename = self.components[component].get_filename(type)
 		try:
 			file = open(filename, "a")
 			file.write("<p>config: %s\n" % taggedtext.config)
@@ -593,8 +607,10 @@ class HTML(filter_interface.FilterSAX):
 				try:
 					type = None
 					
-					if row[0] == "CRITICAL" or row[0] == "ERROR":
+					if row[0] == "ERROR":
 						type = Records.ERROR
+					elif row[0] == "CRITICAL":
+						type = Records.CRITICAL
 					elif row[0] == "WARNING":
 						type = Records.WARNING
 					elif row[0] == "REMARK":
@@ -615,52 +631,65 @@ class HTML(filter_interface.FilterSAX):
 			return []
 		
 		return regexlist
+
+class CountItem(object):
+	def __init__(self):
+		self.N = 0
+		self.filename = None
+		self.linkname = None
+
+	def num_str(self):
+		return str(self.N)
 	
+class TimeItem(CountItem):
+	def num_str(self):
+		return time.strftime("%H:%M:%S", time.gmtime(self.N + 0.5))
+		
 class Records(object):
 	"a group of related records e.g. errors, warnings and remarks."
 	
 	# the different types of record we want to group together
-	OK      = 0
-	ERROR   = 1
-	WARNING = 2
-	REMARK  = 3
-	MISSING = 4
+	TIME     = 0
+	OK       = 1
+	ERROR    = 2
+	CRITICAL = 3
+	WARNING  = 4
+	REMARK   = 5
+	MISSING  = 6
 	
-	SUBDIRS = [ "ok", "error", "warning", "remark", "missing" ]
-	TITLES = [ "OK", "Errors", "Warnings", "Remarks", "Missing files" ]
+	CLASSES = [ "time", "ok", "error", "critical", "warning", "remark", "missing" ]
+	TITLES = [ "Time", "OK", "Errors", "Criticals", "Warnings", "Remarks", "Missing files" ]
 	
 	def __init__(self):
-		self.data = [ {'N':0}, {'N':0}, {'N':0}, {'N':0}, {'N':0} ]
-	
-	def get(self, index, item):
-		try:
-			return self.data[index][item]
-		except KeyError:
-			return None
+		self.data = [ TimeItem(), CountItem(), CountItem(), CountItem(), CountItem(), CountItem(), CountItem() ]
 		
-	def inc(self, index, item):
-		self.data[index][item] += 1
-	
+	def get_filename(self, index):
+		return self.data[index].filename
+		
+	def inc(self, index, increment=1):
+		self.data[index].N += increment
+
 	def isempty(self, index):
-		return (self.data[index]['N'] == 0)
+		return (self.data[index].N == 0)
 		
-	def set(self, index, item, value):
-		self.data[index][item] = value
+	def set_filename(self, index, value):
+		self.data[index].filename = value
 	
+	def set_linkname(self, index, value):
+		self.data[index].linkname = value
+		
 	def tablerow(self, name):
 		row = '<tr><td class="name">%s</td>' % name
-
+		
 		for i,datum in enumerate(self.data):
-			number = datum['N']
-			if number == 0:
+			if datum.N == 0:
 				row += '<td class="zero">0</td>'
 			else:
-				row += '<td class="' + Records.SUBDIRS[i] + '">'
-				try:
-					link = datum['linkname']
-					row += '<a href="%s">%d</a></td>' % (link,number)
-				except KeyError:
-					row += '%d</td>' % number
+				row += '<td class="' + Records.CLASSES[i] + '">'
+				if datum.linkname:
+					row += '<a href="%s">%s</a></td>' % (datum.linkname,datum.num_str())
+				else:
+					row += '%s</td>' % datum.num_str()
 							
 		row += "</tr>"
 		return row
@@ -668,12 +697,11 @@ class Records(object):
 	def textdump(self):
 		text = ""
 		for i,datum in enumerate(self.data):
-			number = datum['N']
-			if number == 0:
+			if datum.N == 0:
 				style = "zero"
 			else:
-				style = Records.SUBDIRS[i]
-			text += str(i) + ',' + style + "," + str(number) + "\n"
+				style = Records.CLASSES[i]
+			text += str(i) + ',' + style + "," + str(datum.N) + "\n"
 		return text
 				
 class TaggedText(object):
@@ -687,5 +715,6 @@ class TaggedText(object):
 					self.__dict__[attrib] = value
 
 		self.text = ""
+		self.time = 0.0
 		
 # the end
