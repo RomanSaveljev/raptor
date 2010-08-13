@@ -58,7 +58,11 @@ class HTML(filter_interface.FilterSAX):
 		
 		self.components = {}
 		self.configurations = {}
+		self.parse_start = {}
 		self.totals = Records()
+
+		self.progress_started = 0
+		self.progress_stopped = 0
 		
 		# create all the directories
 		for s in Records.CLASSES:
@@ -106,9 +110,10 @@ class HTML(filter_interface.FilterSAX):
 	def startElement(self, name, attributes):
 		"call the start handler for this element if we defined one."
 		
-		self.generic_start(name)    # tracks element nesting
+		ns_name = name.replace(":", "_")
+		self.generic_start(ns_name)    # tracks element nesting
 		
-		function_name = "start_" + name
+		function_name = "start_" + ns_name
 		try:
 			HTML.__dict__[function_name](self, attributes)
 		except KeyError:
@@ -126,7 +131,7 @@ class HTML(filter_interface.FilterSAX):
 	def endElement(self, name):
 		"call the end handler for this element if we defined one."
 		
-		function_name = "end_" + name
+		function_name = "end_" + name.replace(":", "_")
 		try:
 			HTML.__dict__[function_name](self)
 		except KeyError:
@@ -139,6 +144,11 @@ class HTML(filter_interface.FilterSAX):
 		self.existencechecks()
 		self.dumptotals()
 		try:
+			if self.progress_started > 0:
+				t_from = time.asctime(time.localtime(self.progress_started))
+				t_to = time.asctime(time.localtime(self.progress_stopped))
+				self.index.write("<p>&gt; %s<br>&lt; %s\n" % (t_from, t_to))
+				
 			self.index.write("<p><table><tr><th></th>")
 			
 			for title in Records.TITLES:
@@ -282,7 +292,38 @@ class HTML(filter_interface.FilterSAX):
 				self.err("status element not inside a recipe element")
 		except KeyError:
 			pass
-			
+	
+	def start_progress_start(self, attributes):
+		'''on progress:start note the parse starting timestamp.
+		
+		and keep track of the earliest timestamp of all as that shows
+		us when the sbs command was run.'''
+		try:
+			t = float(attributes['time'])
+			if self.progress_started == 0 or t < self.progress_started:
+				self.progress_started = t
+				
+			if attributes['task'] == 'parse':
+				self.parse_start[attributes['key']] = t
+		except KeyError:
+			pass
+		
+	def start_progress_end(self, attributes):
+		'''on progress:end add the elapsed parse time to the total time.
+		
+		also keep track of the latest timestamp of all as that shows
+		us when the sbs command finished.'''
+		try:
+			t = float(attributes['time'])
+			if t > self.progress_stopped:
+				self.progress_stopped = t
+				
+			if attributes['task'] == 'parse':
+				elapsed = t - self.parse_start[attributes['key']]
+				self.totals.inc(Records.TIME, elapsed)
+		except KeyError:
+			pass
+		
 	def start_error(self, attributes):
 		self.error_tag = TaggedText(attributes)
 	
@@ -658,7 +699,7 @@ class Records(object):
 	MISSING  = 6
 	
 	CLASSES = [ "time", "ok", "error", "critical", "warning", "remark", "missing" ]
-	TITLES = [ "Time", "OK", "Errors", "Criticals", "Warnings", "Remarks", "Missing files" ]
+	TITLES = [ "CPU Time", "OK", "Errors", "Criticals", "Warnings", "Remarks", "Missing files" ]
 	
 	def __init__(self):
 		self.data = [ TimeItem(), CountItem(), CountItem(), CountItem(), CountItem(), CountItem(), CountItem() ]
