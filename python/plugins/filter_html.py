@@ -51,6 +51,10 @@ class HTML(filter_interface.FilterSAX):
 				self.regex = self.readregex(str(csv))
 				break
 		
+		# regexes for important "make" errors
+		self.noruletomake = re.compile("No rule to make target `(.+)', needed by `(.+)'")
+		
+		# all our lists are empty
 		self.elements = []
 		self.recipe_tag = None
 		self.error_tag = None
@@ -58,6 +62,7 @@ class HTML(filter_interface.FilterSAX):
 		
 		self.components = {}
 		self.configurations = {}
+		self.missed_depends = {}
 		self.parse_start = {}
 		self.totals = Records()
 
@@ -251,6 +256,23 @@ class HTML(filter_interface.FilterSAX):
 		except KeyError:
 			pass
 	
+	def char_buildlog(self, char):
+		'''process text in the top-level element.
+		
+		ideally all text will be inside <recipe> tags, but some will not.
+		"make" errors in particular appear inside the buildlog tag itself.'''
+		
+		text = char.strip()
+		if text:
+			match = self.noruletomake.search(text)
+			if match:
+				target = match.group(2)
+				depend = match.group(1)
+				if target in self.missed_depends:
+					self.missed_depends[target].append(depend)
+				else:
+					self.missed_depends[target] = [depend]
+		
 	def end_buildlog(self):
 		pass
 		
@@ -615,6 +637,13 @@ class HTML(filter_interface.FilterSAX):
 						missing_tag.text = filename
 						self.record(missing_tag, Records.MISSING)
 						missed.add(filename)
+						
+					if filename in self.missed_depends:
+						missing_tag.text = filename + \
+						"\n\nrequired the following files which could not be found,\n\n"
+						for dep in self.missed_depends[filename]:
+							missing_tag.text += dep + "\n"
+						self.record(missing_tag, Records.ERROR)
 					
 			self.tmp.close()	# this also deletes the temporary file
 		except Exception,e:
