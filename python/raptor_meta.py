@@ -2490,7 +2490,7 @@ class MMPRaptorBackend(MMPBackend):
 			
 				if not os.path.exists(primaryFileCheck):
 					isSecondaryDefaultDefFile = True
-					resolvedDefFile = "%s/../%s/%s" % (os.path.dirname(resolvedDefFile), secondaryDefaultDefFileDir, os.path.basename(resolvedDefFile))
+					resolvedDefFile = "{0}/../{1}/{2}".format(os.path.dirname(resolvedDefFile), secondaryDefaultDefFileDir, os.path.basename(resolvedDefFile))
 
 			resolvedDefFile = raptor_utilities.resolveSymbianPath(self.__defFileRoot, resolvedDefFile, 'DEFFILE', "", str(aBuildPlatform['EPOCROOT']))
 

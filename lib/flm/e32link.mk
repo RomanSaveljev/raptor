@@ -27,7 +27,7 @@ define e32link_genlibexpfile
   #
   # 'deffile' generation takes the .def file used in the component build, for components
   # that either require a .def file or where a .def file is used to override default behaviour.
-  # The .def file will already have been predef-ed during initial .def file processing, so it's
+  # The .def file will already have been prepdef-ed during initial .def file processing, so it's
   # just a matter of running the import library generation tool on the temporary .def file to
   # create the .lib.exp
   #
