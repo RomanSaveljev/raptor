@@ -31,7 +31,7 @@ define resource.deps
 
     $3: $(SOURCE)
 	$(call startrule,resourcedependencies,FORCESUCCESS) \
-	$(GNUCPP) -DLANGUAGE_$(3) -DLANGUAGE_$(subst sc,SC,$2) $(call makemacrodef,-D,$(MMPDEFS))\
+	$(GNUCPP) -DLANGUAGE_$(2) -DLANGUAGE_$(subst sc,SC,$2) $(call makemacrodef,-D,$(MMPDEFS))\
 	$(CPPOPT) $(SOURCE) -M -MG -MT"$1" | \
 	$$(DEPENDENCY_CORRECTOR) >$3 \
 	$(call endrule,resourcedependencies)
