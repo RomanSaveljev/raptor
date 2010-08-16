@@ -73,14 +73,9 @@ def run():
 		# without flagging C++ style comments.
 		r"\w//+\w"
 		]
+	t.warnings = 0 if t.onWindows else 2
+	t.run()
 	
-	t.run("windows")
-
-	if t.result == SmokeTest.SKIP:
-		# These two warnings are because gnumakefiles are not supported on Linux
-		t.warnings = 2
-		t.run("linux")
-
 
 	t.id = "55b"
 	t.name = "romfile_mmp_include_twice"
@@ -125,13 +120,9 @@ def run():
 		r".*/epoc32/data/z/test/src/armv5.auto.bat</build>.*",
 		r".*/epoc32/data/z/test/src/armv5.manual.bat</build>.*"
 		]
+	t.warnings = 0 if t.onWindows else 2
+	t.run()
 
-	t.run("windows")
-
-	if t.result == SmokeTest.SKIP:
-		# These two warnings are because gnumakefiles are not supported on Linux
-		t.warnings = 2
-		t.run("linux")
 
 	t.id = "55"
 	t.name = "romfile"
