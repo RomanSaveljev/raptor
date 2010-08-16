@@ -78,6 +78,22 @@ def run():
 	
 
 	t.id = "55b"
+	# t.targets and t.warnings are the same as above and thus omitted
+	t.name = "romfile_whatlog"
+	t.command = "sbs -b $(EPOCROOT)/src/ongoing/group/romfile/other_name.inf " \
+			+ "-c armv5.test ROMFILE -f -"
+	
+	t.mustmatch = [
+		# Check whatlog output includes batch files and .iby file
+		r".*/epoc32/rom/src/ongoing/group/romfile/armv5test.iby</build>.*",
+		r".*/epoc32/data/z/test/src/armv5.auto.bat</build>.*",
+		r".*/epoc32/data/z/test/src/armv5.manual.bat</build>.*"
+		]
+	t.mustnotmatch = []
+	t.run()
+
+
+	t.id = "55c"
 	t.name = "romfile_mmp_include_twice"
 	t.command = "sbs -b $(EPOCROOT)/src/e32test/group/bld.inf " \
 	        + "-b $(EPOCROOT)/src/falcon/test/bld.inf " \
@@ -100,27 +116,6 @@ def run():
 		r".*/d_dma.ldd\s.*"
 		]
 	t.warnings = 0
-	t.run()
-
-
-	t.id = "55c"
-	t.name = "romfile_whatlog"
-	t.command = "sbs -b $(EPOCROOT)/src/ongoing/group/romfile/other_name.inf " \
-			+ "-c armv5.test ROMFILE -f -"
-	
-	t.targets = [
-		"$(EPOCROOT)/epoc32/rom/src/ongoing/group/romfile/armv5test.iby",
-		"$(EPOCROOT)/epoc32/data/z/test/src/armv5.auto.bat",
-		"$(EPOCROOT)/epoc32/data/z/test/src/armv5.manual.bat"
-		]
-
-	t.mustmatch = [
-		# Check whatlog output includes batch files and .iby file
-		r".*/epoc32/rom/src/ongoing/group/romfile/armv5test.iby</build>.*",
-		r".*/epoc32/data/z/test/src/armv5.auto.bat</build>.*",
-		r".*/epoc32/data/z/test/src/armv5.manual.bat</build>.*"
-		]
-	t.warnings = 0 if t.onWindows else 2
 	t.run()
 
 
