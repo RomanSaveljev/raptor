@@ -563,9 +563,11 @@ ifneq ($(ARTARGET),)
 # Runtime libraries which has no deps.
 
 define artarget_func
+
+# Ensure that, when generating .via files, that they do not start with a blank line - some versions of GCC's AR reject
+# any further content in the file if the first line is empty
+
 $(ARTARGET): $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT),$(LINKOBJECTS)) $(STDCPPTAGFILE)
-	# Ensure that generated .via files do not start with a blank line - some versions of GCC's AR reject
-	# any further content in the file if the first line is empty
 	$(if $(MULTIFILE_ENABLED),,@echo $(if $(STDCPPTAGFILE),"$(STDCPPTAGFILE)",-n "") > $(VIAFILE);
 	$(call groupin10,$(LINKOBJECTS)) ;)
 	$(call startrule,ar,FORCESUCCESS) \
