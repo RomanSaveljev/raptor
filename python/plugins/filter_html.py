@@ -152,7 +152,8 @@ class HTML(filter_interface.FilterSAX):
 			if self.progress_started > 0:
 				t_from = time.asctime(time.localtime(self.progress_started))
 				t_to = time.asctime(time.localtime(self.progress_stopped))
-				self.index.write("<p>&gt; %s<br>&lt; %s\n" % (t_from, t_to))
+				self.index.write("<p>start: " + t_from + "\n")
+				self.index.write("<br>end&nbsp;&nbsp;: " + t_to + "\n")
 				
 			self.index.write("<p><table><tr><th></th>")
 			
@@ -441,7 +442,34 @@ class HTML(filter_interface.FilterSAX):
 			self.tmp.write(self.build_tag.strip() + "\n")
 		except:
 			return self.err("could not write to temporary file")
-				
+	
+	def start_clean(self, attributes):
+		try:
+			for attrib in ['bldinf', 'config']:
+				self.tmp.write("|")
+				if attrib in attributes:
+					self.tmp.write(attributes[attrib])
+			self.tmp.write("\n")
+		except:
+			return self.err("could not write to temporary file")
+	
+	def start_file(self, attributes):
+		'''opening file tag.
+		
+		in the temporary file we need to mark the "clean" targets with a
+		leading ">" character so they can be treated differently from 
+		the "releasable" targets'''
+		self.file_tag = ">"
+		
+	def char_file(self, char):
+		self.file_tag += char
+		
+	def end_file(self):
+		try:
+			self.tmp.write(self.file_tag.strip() + "\n")
+		except:
+			return self.err("could not write to temporary file")
+						
 	# even if we ignore an element we need to mark its coming and going
 	# so that we know which element any character data belongs to.
 	
@@ -633,10 +661,16 @@ class HTML(filter_interface.FilterSAX):
 					missing_tag = TaggedText(attribs)
 				else:
 					filename = line.strip()
-					if not filename in missed and not os.path.isfile(filename):
-						missing_tag.text = filename
-						self.record(missing_tag, Records.MISSING)
-						missed.add(filename)
+					if filename.startswith(">"):
+						# a clean target, so we don't care if it exists
+						# but we care if it has a missing dependency
+						filename = filename[1:]
+					else:
+						# a releasable target so it must exist
+						if not filename in missed and not os.path.isfile(filename):
+							missing_tag.text = filename
+							self.record(missing_tag, Records.MISSING)
+							missed.add(filename)
 						
 					if filename in self.missed_depends:
 						missing_tag.text = filename + \
@@ -644,8 +678,20 @@ class HTML(filter_interface.FilterSAX):
 						for dep in self.missed_depends[filename]:
 							missing_tag.text += dep + "\n"
 						self.record(missing_tag, Records.ERROR)
+						del self.missed_depends[filename]
 					
 			self.tmp.close()	# this also deletes the temporary file
+			
+			# any missed dependencies left over are not attributable to any
+			# specific component but should still be reported
+			missing_tag = TaggedText({})
+			for filename in self.missed_depends:
+				missing_tag.text = filename + \
+				"\n\nrequired the following files which could not be found,\n\n"
+				for dep in self.missed_depends[filename]:
+					missing_tag.text += dep + "\n"
+				self.record(missing_tag, Records.ERROR)
+						
 		except Exception,e:
 			return self.err("could not close temporary file " + str(e))
 	
