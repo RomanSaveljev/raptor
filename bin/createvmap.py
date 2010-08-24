@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -197,7 +197,7 @@ def main():
 		parser.add_option("--command",action="store",
 			dest="preinclude",
 			help="""Specify a command file with more commandline options 
-				in it (for every large components)""")
+				in it (for very large components)""")
 		expanded_args = expand_command_options(sys.argv[1:])
 
 		(options, leftover_args) = parser.parse_args(expanded_args)

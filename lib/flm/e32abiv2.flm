@@ -1144,23 +1144,12 @@ VMAPCOMMANDFILE:=$(INTERMEDIATEPATH)/$(TARGET).vmap.cmdfile
 
 CLEANTARGETS:=$(CLEANTARGETS) $(VMAPCOMMANDFILE)
 
-# The groupin10vmap macro allows us to construct a commandfile for createvmap, 10 objects at a time
-# to avoid limits on argument lengths and sizes on Windows.
-# It expands to a list of commands, each of which is on a separate line.
-# This causes the shell to be invoked once for each line but each line should
-# be shorter than the maximum allowed by windows.
-define groupin10vmap
-	$(if $1,@echo -e $(foreach L,$(wordlist 1,10,$1),"-s$(L)\\n") >>$(VMAPCOMMANDFILE),) 
-	$(if $1,$(call groupin10vmap,$(wordlist 11,$(words $1),$1)),@true)
-endef
-
-
 # the script to generate our .vmap file and hash value
 define createvmap
 
 $(OUTPUTVMAP): $(VMAPNEEDS)
 	@echo -n "" > $(VMAPCOMMANDFILE);
-	$(call groupin10vmap,$(SOURCE) $(PROJECT_META)) ;
+	$(call groupin10infile,$(VMAPCOMMANDFILE),$(addprefix -s,$(SOURCE) $(PROJECT_META))) ;
 	$(call startrule,createvmap) \
 	$(CREATEVMAP) -o $(OUTPUTVMAP) $(BV_FEATURELIST) $(BV_DEFINES) -p $(PREINCLUDE) --command=$(VMAPCOMMANDFILE) $(BV_USER_INCLUDES) $(BV_SYSTEM_INCLUDES) -c $(CREATEVMAPCPP) \
 	$(call endrule,createvmap)

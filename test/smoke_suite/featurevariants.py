@@ -21,6 +21,14 @@ import os
 def run():
 	t = AntiTargetSmokeTest()
 	t.usebash = True
+
+	# create some empty source files just to test createvmaps command file handling:
+	test_cpp_files = []
+	for i in xrange(0,16):
+		tf = "smoke_suite/test_resources/bv/variant1/test_createvmap{0:02}.cpp".format(i)
+		f = open(tf,"w+")
+		f.close()
+		test_cpp_files.append(tf)
 	
 	preBuiltTargets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/dummy.lib",
@@ -315,10 +323,6 @@ def run():
 	t.addbuildtargets(bldinf,
 				invariantBuildTargets + variantBuildTargetsGeneric + variantBuildTargetsDefaultTree + variantBuildTargetsProductTrees	
 				)
-	# create some empty source files just to test createvmaps command file handling:
-	for i in xrange(0,16):
-		f = open("smoke_suite/test_resources/bv/variant1/test_createvmap{0:02}.cpp".format(i),"w+")
-		f.close()
 	
 	# Test that static libs are linked from the invariant place.
 	t.mustmatch = [
@@ -343,6 +347,8 @@ def run():
 		"\s*-s.*variant1/CreateStaticDLL_variant1.mmp"
 		]
 	t.run()
+
+
 	
 	t.id = "56b"
 	t.description = """Build variant and invariant components using an os_properties.xml that sets FEATUREVARIANTSAFE=1.
@@ -364,6 +370,7 @@ def run():
 		"armlink.*epoc32/release/armv5/udeb/bv_static_lib.lib"
 		]
 	t.run()
+
 
 	
 	# tests for the createvmap script
@@ -436,6 +443,11 @@ def run():
 	t.targets = [vmapfile]
 	t.mustmatch = ["A_1=defined", "B_1000=undefined"]
 	t.run()
+
+
+	# clean up test cpp files from the first test (do it noow after they are no longer needed)
+	for tf in test_cpp_files:
+		os.unlink(tf)
 	
 	
 	# print the overall result
