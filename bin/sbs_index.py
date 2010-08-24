@@ -6,17 +6,12 @@
 # under the terms of the License "Symbian Foundation License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.symbianfoundation.org/legal/sfl-v10.html".
-#
-# Initial Contributors:
-# Nokia Corporation - initial contribution.
-#
-# Contributors:
-#
-# Description:
-#
-# Tie together a set of HTML build summaries by creating a single index page
-# which shows the total number of Errors, Warnings etc. across all the parts
-# of the build and links to the individual summaries.
+
+'''
+Tie together a set of HTML build summaries by creating a single index page
+which shows the total number of Errors, Warnings etc. across all the parts
+of the build and links to the individual summaries.
+'''
 
 import os
 import sys
