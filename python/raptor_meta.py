@@ -3116,7 +3116,7 @@ class MetaReader(object):
 
 					try:
 						if os.path.exists(expfilename):
-							os.chmod(expfilename,stat.S_IREAD | stat.S_IWRITE)
+							os.unlink(expfilename)
 						expfile = open(expfilename, 'wb')
 						expfile.write(exportzip.read(file))
 						expfile.close()
