@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
@@ -15,6 +15,7 @@
 #
 
 from raptor_tests import AntiTargetSmokeTest, ReplaceEnvs
+from raptor_meta import BldInfFile
 import os
 
 def run():
@@ -300,24 +301,46 @@ def run():
 		"dummy_var3_exe/dummy_var3_dummy.rsc.d"
 		]
 	
-	sbscommand = "sbs -b smoke_suite/test_resources/bv/bld.inf -c armv5 " + \
-				"-c armv5.test_bv_1 -c armv5.test_bv_2 -c armv5.test_bv_3 -f- " + \
-				"--configpath=test/smoke_suite/test_resources/bv/config/variants"
+	bldinf = 'smoke_suite/test_resources/bv/bld.inf'
+	sbscommand = "sbs -b {0} -c armv5 -c armv5.test_bv_1 -c armv5.test_bv_2 -c armv5.test_bv_3 -f- --configpath=test/smoke_suite/test_resources/bv/config/variants".format(bldinf)
 	
 	t.id = "56a"
 	t.description = """Build variant and invariant components.
 		In this default mode of operation, all components build for the non-product armv5 config whereas
 		only variant components build for the armv5.* bv configs."""
 	t.name = "featurevariant_build"
-	t.command = sbscommand
+
+	t.command = "{0} && cat $(EPOCROOT)/epoc32/build/{1}/{2}".format(sbscommand, BldInfFile.outputPathFragment(bldinf), "createstaticdll_variant1_dll/armv5.three/udeb/createstaticdll_variant1.vmap.cmdfile")
 	t.targets = preBuiltTargets + invariantTargets + variantTargetsGeneric + variantTargetsDefaultTree + variantTargetsProductTrees							
-	t.addbuildtargets('smoke_suite/test_resources/bv/bld.inf',
+	t.addbuildtargets(bldinf,
 				invariantBuildTargets + variantBuildTargetsGeneric + variantBuildTargetsDefaultTree + variantBuildTargetsProductTrees	
 				)
+	# create some empty source files just to test createvmaps command file handling:
+	for i in xrange(0,16):
+		f = open("smoke_suite/test_resources/bv/variant1/test_createvmap{0:02}.cpp".format(i),"w+")
+		f.close()
+	
 	# Test that static libs are linked from the invariant place.
 	t.mustmatch = [
 		"armlink.*epoc32/release/armv5/urel/bv_static_lib.lib",
-		"armlink.*epoc32/release/armv5/udeb/bv_static_lib.lib"
+		"armlink.*epoc32/release/armv5/udeb/bv_static_lib.lib",
+		"\s*-s.*variant1/CreateStaticDLL_variant1.cpp",
+		"\s*-s.*variant1/test_createvmap01.cpp",
+		"\s*-s.*variant1/test_createvmap02.cpp",
+		"\s*-s.*variant1/test_createvmap03.cpp",
+		"\s*-s.*variant1/test_createvmap04.cpp",
+		"\s*-s.*variant1/test_createvmap05.cpp",
+		"\s*-s.*variant1/test_createvmap06.cpp",
+		"\s*-s.*variant1/test_createvmap07.cpp",
+		"\s*-s.*variant1/test_createvmap08.cpp",
+		"\s*-s.*variant1/test_createvmap09.cpp",
+		"\s*-s.*variant1/test_createvmap10.cpp",
+		"\s*-s.*variant1/test_createvmap11.cpp",
+		"\s*-s.*variant1/test_createvmap12.cpp",
+		"\s*-s.*variant1/test_createvmap13.cpp",
+		"\s*-s.*variant1/test_createvmap14.cpp",
+		"\s*-s.*variant1/test_createvmap15.cpp",
+		"\s*-s.*variant1/CreateStaticDLL_variant1.mmp"
 		]
 	t.run()
 	

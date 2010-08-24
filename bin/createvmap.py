@@ -24,6 +24,11 @@ import tempfile
 import traceback
 from optparse import OptionParser
 
+# Need to find the raptor utilities.
+sys.path.append(os.path.join(os.environ['SBS_HOME'],"python"))
+from raptor_utilities import expand_command_options
+
+
 # the script will exit with 0 if there are no errors
 global exitCode
 exitCode = 0
@@ -184,7 +189,18 @@ def main():
 		parser.add_option("-u","--userinc",action="append",dest="user_include",help="User Include Folders")
 		parser.add_option("-x","--systeminc",action="append",dest="system_include",help="System Include Folders")
 
-		(options, leftover_args) = parser.parse_args(sys.argv[1:])
+
+		# The following allows the use of the --command option.
+		# The add_option() is redundant since --command  is
+		# expanded well before it can take effect but it does
+		# allow us to print out a useful help message.
+		parser.add_option("--command",action="store",
+			dest="preinclude",
+			help="""Specify a command file with more commandline options 
+				in it (for every large components)""")
+		expanded_args = expand_command_options(sys.argv[1:])
+
+		(options, leftover_args) = parser.parse_args(expanded_args)
 
 		if leftover_args:
 			for invalids in leftover_args:
