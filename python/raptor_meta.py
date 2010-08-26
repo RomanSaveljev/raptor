@@ -2599,11 +2599,13 @@ class MetaReader(object):
 				self.__Raptor.Debug("Automatic OS detection disabled.")
 
 			# is this a feature variant config or an ordinary variant
-			fv = evaluator.Get("FEATUREVARIANTNAME")
-			if fv:
-				variantHdr = evaluator.CheckedGet("VARIANT_HRH")
+			detail['ISFEATUREVARIANT'] = (evaluator.Get("FEATUREVARIANTNAME") != None)
+			
+			# get the .hrh name from VARIANT_HRH if it is set, otherwise read
+			# the name from the contents of the file named in VARIANT_CFG
+			variantHdr = evaluator.Get("VARIANT_HRH")
+			if variantHdr:
 				variantHRH = generic_path.Path(variantHdr)
-				detail['ISFEATUREVARIANT'] = True
 			else:
 				variantCfg = evaluator.CheckedGet("VARIANT_CFG")
 				variantCfg = generic_path.Path(variantCfg)
@@ -2616,12 +2618,11 @@ class MetaReader(object):
 						self.__Raptor.Warn("missing flag ENABLE_ABIV2_MODE in %s file. ABIV1 builds are not supported.",
 										   str(variantCfg))
 				variantHRH = variantCfgs[variantCfg]
-				detail['ISFEATUREVARIANT'] = False
 
 			detail['VARIANT_HRH'] = variantHRH
 			self.__Raptor.Info("'%s' uses variant hrh file '%s'", buildConfig.name, variantHRH)
 			detail['SYSTEMINCLUDE'] = evaluator.CheckedGet("SYSTEMINCLUDE")
-            
+
 			detail['TARGET_TYPES'] = evaluator.CheckedGet("TARGET_TYPES")
 
 			# find all the interface names we need
