@@ -1,3 +1,9 @@
+/*
 
-/* for when you need a pre-include file but can't find one */
+There is a general assumption that there is always a pre-include file
+in every build. So for the cases where there is no .hrh file in the
+epoc32 tree, yet, you can use this file.
 
+The "nohrh" variant points VARIANT_HRH at this file.
+
+*/
