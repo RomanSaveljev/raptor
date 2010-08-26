@@ -2599,8 +2599,9 @@ class MetaReader(object):
 				self.__Raptor.Debug("Automatic OS detection disabled.")
 
 			# is this a feature variant config or an ordinary variant
-			detail['ISFEATUREVARIANT'] = (evaluator.Get("FEATUREVARIANTNAME") != None)
-			
+			fvn = evaluator.Get("FEATUREVARIANTNAME")
+			detail['ISFEATUREVARIANT'] = (fvn != None and fvn != '')
+
 			# get the .hrh name from VARIANT_HRH if it is set, otherwise read
 			# the name from the contents of the file named in VARIANT_CFG
 			variantHdr = evaluator.Get("VARIANT_HRH")
