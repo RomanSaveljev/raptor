@@ -499,6 +499,7 @@ class Raptor(object):
 		self.layers = []
 		self.orderLayers = False
 		self.commandlineComponents = []
+		self.commandlineQtProFiles = []
 
 		self.systemModel = None
 		self.systemDefinitionFile = None
@@ -604,6 +605,11 @@ class Raptor(object):
 	def AddBuildInfoFile(self, filename):
 		bldinf = generic_path.Path(filename).Absolute()
 		self.commandlineComponents.append(bldinf)
+		return True
+	
+	def AddQtProFile(self, filename):
+		qt_pro_file = generic_path.Path(filename).Absolute()
+		self.commandlineQtProFiles.append(qt_pro_file)
 		return True
 
 	def SetTopMakefile(self, filename):

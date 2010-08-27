@@ -127,6 +127,9 @@ parser.add_option("-p","--project",action="append",dest="project_name",
 parser.add_option("-q","--quiet",action="store_true",dest="quiet",
 				help="Run quietly, not generating output messages.")
 
+parser.add_option("--qtpro",action="append",dest="qt_pro_file",
+				help="Qt project (.pro) file name. Multiple --qtpro options can be given.")
+
 parser.add_option("--query",action="append",dest="query",
 				help="""Access various build settings and options using a basic API. The current options are:
 				
@@ -269,6 +272,7 @@ def DoRaptor(Raptor, args):
 				 'bld_inf_file' : Raptor.AddBuildInfoFile,
 				 'logfile' : Raptor.SetLogFileName,
 				 'makefile' : Raptor.SetTopMakefile,
+				 'qt_pro_file' : Raptor.AddQtProFile,
 				 'quiet' : Raptor.RunQuietly,
 				 'debugoutput' : Raptor.SetDebugOutput,
 				 'doExportOnly' : Raptor.SetExportOnly,
