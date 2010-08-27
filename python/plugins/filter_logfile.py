@@ -64,7 +64,7 @@ class FilterLogfile(filter_interface.Filter):
 	def summary(self):
 		"""Write Summary"""
 		if self.logFileName and not self.raptor.quiet:
-			sys.stdout.write("sbs: build log in %s\n" % str(self.logFileName))
+			sys.stdout.write("sbs: build log in {0}\n".format( self.logFileName.GetShellPath() ))
 		return False
 
 	def close(self):

@@ -282,4 +282,9 @@
 		<set name="VARIANTPLATFORM" value="gccev7" />
 	</var>
 
+	<!-- Variant to permit a workaround for an armlink 2.2 crash with very large targets -->
+	<var name="nodebug">
+		<set name="DEBUG_INFO" value=""/>
+	</var>
+
 </build>

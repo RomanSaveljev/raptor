@@ -12,6 +12,7 @@
 		<param name='CAPABILITY'/>
 		<param name='COMPRESSTARGET' default=''/>
 		<param name='CPPONLYOPTION' default='-E'/>
+		<param name='DOCUMENT' default=''/>
 		<param name='LIBRARY'/>
 		<param name='LIBRARY_DEBUG'/>
 		<param name='LINKAS' default=''/>
@@ -26,6 +27,7 @@
 		<param name='LISTING_OPTION' default='-S'/>
 		<param name='MMPDEFS' default=''/>
 		<param name='NOCOMPRESSTARGET' default=''/>
+		<param name='POSTLINKER_SUPPORTS_ASMTYPE' default=''/>
 		<param name='POSTLINKER_SUPPORTS_WDP' default=''/>
 		<param name='PAGED' default=''/>
 		<param name='PAGEDCODE_OPTION' default='default'/>
@@ -75,7 +77,7 @@
 		<param name='CC.VAL.SOFTVFP_MAYBE_VFPV2' default=''/>
 		<param name='CODE_SEGMENT_START' default=''/>
 		<param name='TOOLCHAIN' default=''/>
-		<param name='TRACEON' default=''/>
+		<param name='TRACES' default=''/>
 		<param name='USE_RVCT22_DELETE_WORKAROUND' default=''/>
 	</interface>
 	<interface name="Symbian.e32abiv2" extends="Symbian.mmp" flm="e32abiv2.flm">
@@ -156,6 +158,7 @@
 		<param name='PERTURBSTARTTIME'/>
 		<param name='PERTURBMSECS' default='500'/>
 		<param name='POSTLINKER'/>
+		<param name='POSTLINKER_ASM_OPTION' default='' />
 		<param name='POSTLINKER_COMPRESSION_DEFAULT'/>
 		<param name='POSTLINKER_FPU_DEFAULT'/>
 		<param name='POSTLINKER_FPU_MAPPING'/>

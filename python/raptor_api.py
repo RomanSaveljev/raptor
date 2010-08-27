@@ -112,6 +112,8 @@ class Config(Reply):
 		"""
 		super(Config,self).__init__(text, raptor)
 
+		self.query = name
+		
 		# Work out the real name
 		names = name.split(".")
 		if names[0] in self._raptor.cache.aliases:
@@ -159,7 +161,6 @@ class Config(Reply):
 			
 				self.outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
 		except Exception, e: # Unable to determine output path
-			self.outputpath = ""
 			self.text = str(e)
 
 	def resolveMetadata(self):
@@ -168,15 +169,25 @@ class Config(Reply):
 		except AttributeError:
 			metadata = MetaData(self.meaning, self._raptor)
 			self.metadata = metadata
-		metadata.resolve()
+			
+		try:
+			metadata.resolve()
+		except Exception:
+			# Evaluator exception hopefully - already handled
+			self.metadata = None
 
 	def resolveBuild(self):
 		try:
 			build = self.build
-		except AttributeError:	
+		except AttributeError:
 			build = Build(self.meaning, self._raptor)
 			self.build = build
-		build.resolve()
+			
+		try:
+			build.resolve()
+		except Exception:
+			# Evaluator exception, hopefully - already handled
+			self.build = None
 	
 	def resolveTargettypes(self):
 		try:
@@ -184,7 +195,12 @@ class Config(Reply):
 		except AttributeError:	
 			build = Build(self.meaning, self._raptor)
 			self.build = build
-		build.resolveTargettypes()
+		
+		try:
+			build.resolveTargettypes()
+		except Exception:
+			# Evaluator exception hopefully - already handled
+			self.build = None
 
 class MetaData(Reply):
 	def __init__(self, meaning, raptor):
@@ -195,24 +211,22 @@ class MetaData(Reply):
 		includepaths = []
 		preincludeheader = ""
 		platmacros = []
-		try:
-			evaluator = self._getEvaluator(self.__meaning)
 
-			# Initialise data and metadata objects
-			buildunits = raptor_data.GetBuildUnits([self.__meaning], self._raptor.cache, self._raptor)
-			metareader = raptor_meta.MetaReader(self._raptor, buildunits)
-			metadatafile = raptor_meta.MetaDataFile(generic_path.Path("bld.inf"), "cpp", [], None, self._raptor)
-			
-			# There is only one build platform here; obtain the pre-processing include paths,
-			# OS pre-include file, compiler pre-include file and macros.			
-			includepaths = metadatafile.preparePreProcessorIncludePaths(metareader.BuildPlatforms[0])
-			preincludeheader = metareader.BuildPlatforms[0]['VARIANT_HRH']
-			
-			# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
-			platmacrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
-			platmacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], platmacrolist))
-		except Exception, e:
-			self.text = str(e)
+		evaluator = self._getEvaluator(self.__meaning)
+
+		# Initialise data and metadata objects
+		buildunits = raptor_data.GetBuildUnits([self.__meaning], self._raptor.cache, self._raptor)
+		metareader = raptor_meta.MetaReader(self._raptor, buildunits)
+		metadatafile = raptor_meta.MetaDataFile(generic_path.Path("bld.inf"), "cpp", [], None, self._raptor)
+		
+		# There is only one build platform here; obtain the pre-processing include paths,
+		# OS pre-include file, compiler pre-include file and macros.			
+		includepaths = metadatafile.preparePreProcessorIncludePaths(metareader.BuildPlatforms[0])
+		preincludeheader = metareader.BuildPlatforms[0]['VARIANT_HRH']
+		
+		# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
+		platmacrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
+		platmacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], platmacrolist))
 
 		# Add child elements to appropriate areas if they were calculated
 		if len(includepaths) > 0:
@@ -233,31 +247,27 @@ class Build(Reply):
 		compilerpreincludeheader = ""
 		sourcemacros = []
 
-		try:
-			evaluator = self._getEvaluator(self.__meaning)
+		evaluator = self._getEvaluator(self.__meaning)
 
-			platform = evaluator.Get("TRADITIONAL_PLATFORM")
+		platform = evaluator.Get("TRADITIONAL_PLATFORM")
 			
-			# Compiler preinclude files may or may not be present, depending on the configuration.
-			if evaluator.Get("PREINCLUDE"):
-				compilerpreincludeheader = generic_path.Path(evaluator.Get("PREINCLUDE"))
+		# Compiler preinclude files may or may not be present, depending on the configuration.
+		if evaluator.Get("PREINCLUDE"):
+			compilerpreincludeheader = generic_path.Path(evaluator.Get("PREINCLUDE"))
 			
-			# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
-			# If required, we split to a list, and then processes the constituent parts of the macro.
-			sourcemacrolist = evaluator.Get("CDEFS").split()
+		# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
+		# If required, we split to a list, and then processes the constituent parts of the macro.
+		sourcemacrolist = evaluator.Get("CDEFS").split()
+		sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
+
+		if platform == "TOOLS2":
+			# Source macros are determined in the FLM for tools2 builds, therefore we have to
+			# mimic the logic here
+			if 'win' in raptor.hostplatform or 'win32' in self.__meaning:
+				sourcemacrolist = evaluator.Get("CDEFS.WIN32").split()
+			else:
+				sourcemacrolist = evaluator.Get("CDEFS.LINUX").split()
 			sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
-
-			if platform == "TOOLS2":
-				# Source macros are determined in the FLM for tools2 builds, therefore we have to
-				# mimic the logic here
-				if 'win' in raptor.hostplatform or 'win32' in self.__meaning:
-					sourcemacrolist = evaluator.Get("CDEFS.WIN32").split()
-				else:
-					sourcemacrolist = evaluator.Get("CDEFS.LINUX").split()
-				sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
-
-		except Exception, e:
-			self.text = str(e)
 
 		if len(sourcemacros):
 			self.sourcemacros = map(lambda x: Macro(x[0],x[1]) if x[1] else Macro(x[0]), sourcemacros)

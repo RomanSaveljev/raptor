@@ -38,7 +38,7 @@ import time
 import generic_path
 
 
-PiggyBackedBuildPlatforms = {'ARMV5':['GCCXML', 'X86GCC']}
+PiggyBackedBuildPlatforms = {'ARMV5':['GCCXML']}
 
 PlatformDefaultDefFileDir = {'WINSCW':'bwins',
 				  'ARMV5' :'eabi',
@@ -47,7 +47,7 @@ PlatformDefaultDefFileDir = {'WINSCW':'bwins',
 				  'ARMV6':'eabi',
 				  'ARMV7' : 'eabi',
 				  'ARMV7SMP' : 'eabi',
-				  'X86GCC' : ['bx86gcc', 'eabi']}
+				  'X86' : ['bx86gcc', 'eabi']}
 
 def getVariantCfgDetail(aEPOCROOT, aVariantCfgFile):
 	"""Obtain pertinent build related detail from the Symbian variant.cfg file.
@@ -1287,6 +1287,7 @@ class MMPRaptorBackend(MMPBackend):
 		self.__compressionKeyword = ""
 		self.sources = []
 		self.capabilities = []
+		self.documents = []
 
 		self.__TARGET = ""
 		self.__TARGETEXT = ""
@@ -1418,16 +1419,6 @@ class MMPRaptorBackend(MMPBackend):
 		
 		elif varname in ['COMPRESSTARGET', 'NOCOMPRESSTARGET', 'INFLATECOMPRESSTARGET', 'BYTEPAIRCOMPRESSTARGET']:
 			self.resolveCompressionKeyword(varname)
-			
-		elif varname == 'TRACEON':
-			self.__debug("Set " + toks[0] + " to 1" )
-			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
-			
-			path = "../traces/" + self.__TARGET + "_" + self.__TARGETEXT
-			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
-			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
-			self.__userinclude += ' ' + resolved
-			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
 		
 		else:
 			self.__debug( "Set switch "+toks[0]+" ON")
@@ -1613,6 +1604,21 @@ class MMPRaptorBackend(MMPBackend):
 					toks1 = re.sub("[,'\[\]]", "", toks1).replace("//","/")
 				self.__debug("Set "+toks[0]+" to " + toks1)
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,toks1))
+				
+		elif varname == 'TRACES':
+			self.__debug("Set " + toks[0] + " to 1" )
+			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
+			
+			if len(toks) == 1:
+				toks1 = "../traces"
+			else:
+				toks1 = os.path.join(toks[1], "traces").replace("\\","/")
+			path = toks1 + "/" + self.__TARGET + "_" + self.__TARGETEXT
+			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
+			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
+			self.__userinclude += ' ' + resolved
+			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
+		
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
 		elif varname=='ARMFPU':
@@ -1718,9 +1724,13 @@ class MMPRaptorBackend(MMPBackend):
 		self.__debug( "Remembering self.sourcepath state:  "+str(toks[0])+" is now " + self.__sourcepath)
 		self.__debug("selfcurrentMmpFile: " + self.__currentMmpFile)
 		return "OK"
-
-
-	def doSourceAssignment(self,s,loc,toks):
+	
+	def __doAssignment(self,filelist,toks):
+		""" Ancillary method factorying out the common functionality between doSourceAssignment
+		and doDocumentAssignment. Arguments are
+		filelist - list to append items to, should be self.sources or self.documents 
+		toks - toks parameter as passed from PyParsing. """
+		
 		self.__currentLineNumber += 1
 		self.__debug( "Setting "+toks[0]+" to " + str(toks[1]))
 		for file in toks[1]:
@@ -1732,22 +1742,30 @@ class MMPRaptorBackend(MMPBackend):
 			# If the SOURCEPATH itself begins with a '/', then dont look up the caseless version, since
 			# we don't know at this time what $(EPOCROOT) will evaluate to.
 			if source.GetLocalString().startswith('$(EPOCROOT)'):
-				self.sources.append(str(source))	
-				self.__debug("Append SOURCE " + str(source))
+				filelist.append(str(source))						
+				self.__debug("Append " + toks[0] + " " + str(source))
 
 			else:
 				foundsource = source.FindCaseless()
 				if foundsource == None:
 					# Hope that the file will be generated later
-					self.__debug("Sourcefile not found: %s" % source)
+					self.__debug("%s file not found: %s" % (toks[0], source))
 					foundsource = source
 
-				self.sources.append(str(foundsource))	
-				self.__debug("Append SOURCE " + str(foundsource))
+				filelist.append(str(foundsource))					
+				self.__debug("Append " + toks[0] + " " + str(foundsource))
 
 
 		self.__debug("		sourcepath: " + self.__sourcepath)
 		return "OK"
+
+	def doSourceAssignment(self,s,loc,toks):
+		""" Populate the list of source files from the MMP. """
+		self.__doAssignment(self.sources,toks)
+
+	def doDocumentAssignment(self,s,loc,toks):
+		""" Populate the list of document files from the MMP. """
+		self.__doAssignment(self.documents,toks)
 
 	# Resource
 
@@ -2350,6 +2368,12 @@ class MMPRaptorBackend(MMPBackend):
 		# and performance over using multiple Append operations.
 		self.BuildVariant.AddOperation(raptor_data.Set("SOURCE",
 						   " ".join(self.sources)))
+		
+		# Put the list of document files in with one Set operation - saves memory
+		# and performance over using multiple Append operations.
+		self.BuildVariant.AddOperation(raptor_data.Set("DOCUMENT",
+						   " ".join(self.documents)))
+
 
 	def validate(self):
 		"""Test that the parsed MMP file is correct.
@@ -2460,12 +2484,13 @@ class MMPRaptorBackend(MMPBackend):
 			# We therefore check exisitance of the primary located file if a secondary location is available, and use the
 			# secondary location if required (recording the fact that the secondary file has been used, as this can influence
 			# downstream processing).
+			# Secondary locations are found as follows : resolvedPrimaryLocation/../secondaryLocation/resolvedDefFileName
 			if secondaryDefaultDefFileDir:
 				primaryFileCheck = raptor_utilities.resolveSymbianPath(self.__defFileRoot, resolvedDefFile, 'DEFFILE', "", str(aBuildPlatform['EPOCROOT']))
 			
 				if not os.path.exists(primaryFileCheck):
 					isSecondaryDefaultDefFile = True
-					resolvedDefFile = '../'+secondaryDefaultDefFileDir+'/'+os.path.basename(resolvedDefFile)
+					resolvedDefFile = "{0}/../{1}/{2}".format(os.path.dirname(resolvedDefFile), secondaryDefaultDefFileDir, os.path.basename(resolvedDefFile))
 
 			resolvedDefFile = raptor_utilities.resolveSymbianPath(self.__defFileRoot, resolvedDefFile, 'DEFFILE', "", str(aBuildPlatform['EPOCROOT']))
 
