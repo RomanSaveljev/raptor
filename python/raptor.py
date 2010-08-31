@@ -39,6 +39,7 @@ import raptor_utilities
 import raptor_version
 import raptor_xml
 import filter_list
+import subprocess
 import sys
 import types
 import time
@@ -51,7 +52,9 @@ if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ:
 	print "Error: HOSTPLATFORM and HOSTPLATFORM_DIR must be set in the environment (this is usually done automatically by the startup script)."
 	sys.exit(1)
 
-hostplatform = os.environ["HOSTPLATFORM"].split(" ")
+hostplatform = set(os.environ["HOSTPLATFORM"].split(" "))
+unixplatforms = set(['linux','freebsd','darwin','sunos'])
+isunix = not hostplatform.isdisjoint(unixplatforms)
 hostplatform_dir = os.environ["HOSTPLATFORM_DIR"]
 
 # defaults can use EPOCROOT
@@ -240,12 +243,9 @@ class Component(ModelNode):
 	"""
 	def __init__(self, filename, layername="", componentname=""):
 		super(Component,self).__init__(filename)
-		# Assume that components are specified in bld.inf files for now
-		# One day that tyranny might end.
-		self.bldinf = None # Slot for a bldinf object if we spot one later
-		self.bldinf_filename = generic_path.Path.Absolute(filename)
 
-		self.id = str(self.bldinf_filename)
+		self.filename = filename
+		self.id = str(filename)
 		self.exportspecs = []
 		self.depfiles = []
 		self.unfurled = False # We can parse this
@@ -257,6 +257,69 @@ class Component(ModelNode):
 	def AddMMP(self, filename):
 		self.children.add(Project(filename))
 
+class BldinfComponent(Component):
+	"""A group of projects or, in symbian-speak, a bld.inf.
+	"""
+	def __init__(self, filename, layername="", componentname=""):
+		super(BldinfComponent,self).__init__(filename)
+		# Assume that components are specified in bld.inf files for now
+		# One day that tyranny might end.
+		self.bldinf = None # Slot for a bldinf object if we spot one later
+		self.bldinf_filename = generic_path.Path(filename).Absolute()
+
+	def AddMMP(self, filename):
+		self.children.add(Project(filename))
+
+class QmakeErrorException(Exception):
+	def __init__(self, text, output = "", errorcode=1):
+		self.output = output
+		self.errorcode = errorcode
+
+class QtProComponent(BldinfComponent):
+	def __init__(self, filename, layername="", componentname=""):
+		self.qtpro_filename = generic_path.Path(filename).Absolute()
+		super(QtProComponent,self).__init__(filename)
+
+		# automatically determine the related bld.inf name by putting it in the same dir as the qt file.
+		self.bldinf_filename = generic_path.Join(self.qtpro_filename.Dir(), "bld.inf")
+		
+		# run qmake and produce the bld.inf immediately.
+		shell = "/bin/sh" # only needed on linux.
+		# should really get qmake(.exe)'s absolute location from somewhere
+		global epocroot
+		command = "qmake -spec {0} {1} -o {2}".format(os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2"), self.qtpro_filename, self.bldinf_filename)
+		global isunix
+		makeenv = os.environ.copy()
+		if isunix:
+			p = subprocess.Popen(
+					args = [shell, '-c', command],
+					bufsize = 65535,
+					stdout = subprocess.PIPE,
+					stderr = subprocess.STDOUT,
+					shell = False,
+					universal_newlines = True, 
+					env = makeenv)
+		else:
+			p = subprocess.Popen(
+					args = [make_process.command], 
+					bufsize = 65535,
+					stdout = subprocess.PIPE,
+					stderr = subprocess.STDOUT,
+					close_fds = True, 
+					shell = True,
+					env = makeenv)
+		stream = p.stdout
+		self.qmake_output = []
+		for l in stream:
+		      self.qmake_output.append(l)
+		               
+		returncode = p.wait()
+
+		if returncode != 0:
+			e = QmakeErrorException("Qmake failed for {0}".format(self.qmake_file), output = "\n".join(self.qmake_output), errorcode = returncode)
+			raise e
+
+
 
 class Layer(ModelNode):
 	""" Some components that should be built togther
@@ -266,17 +329,27 @@ class Layer(ModelNode):
 		have extra surrounding metadata that we need to pass
 		on for use in log output.
 	"""
+
 	def __init__(self, name, componentlist=[]):
+		""" componentlist may be a list of items of type Component xor type raptor_xml.SystemModelComponent
+		    @componentlist must be a list of objects that are derived from the Component class.
+		"""
 		super(Layer,self).__init__(name)
 		self.name = name
 
 		for c in componentlist:
-			if isinstance(c, raptor_xml.SystemModelComponent):
-				# this component came from a system_definition.xml
-				self.children.add(Component(c, c.GetContainerName("layer"), c.GetContainerName("component")))
-			else:
-				# this is a plain old bld.inf file from the command-line
-				self.children.add(Component(c))
+			# this is a component from the plain old command-line and we expect it to be of type "Component" already.
+			self.children.add(c)
+
+	@classmethod
+	def from_system_model(cls, name, sysmodel_componentlist):
+		""" A factory method to build a layer from a raptor_xml.SystemModelComponent
+		    this eases the process of working with a "system_definition.xml" file. """
+		l = cls(name)
+		for c in sysmodel_componentlist:
+			l.children.add(Component(c, c.GetContainerName("layer"), c.GetContainerName("component")))
+
+		return l
 
 	def unfurl(self, build):
 		"""Discover the children of this layer. This involves parsing the component MetaData (bld.infs, mmps).
@@ -343,6 +416,8 @@ class Layer(ModelNode):
 
 		if build.noDependGenerate == True:
 			cli_options += " --no-depend-generate"
+
+		self.unfurl_generated_bldinfs
 
 
 		nc = len(self.children)
@@ -498,8 +573,7 @@ class Raptor(object):
 
 		self.layers = []
 		self.orderLayers = False
-		self.commandlineComponents = []
-		self.commandlineQtProFiles = []
+		self.commandline_layer = Layer('commandline')
 
 		self.systemModel = None
 		self.systemDefinitionFile = None
@@ -604,12 +678,12 @@ class Raptor(object):
 
 	def AddBuildInfoFile(self, filename):
 		bldinf = generic_path.Path(filename).Absolute()
-		self.commandlineComponents.append(bldinf)
+		self.commandline_layer.add(BldinfComponent(bldinf))
 		return True
 	
 	def AddQtProFile(self, filename):
-		qt_pro_file = generic_path.Path(filename).Absolute()
-		self.commandlineQtProFiles.append(qt_pro_file)
+		qt_pro_file = str(generic_path.Path(filename).Absolute())
+		self.commandline_layer.add(QtProComponent(qt_pro_file))
 		return True
 
 	def SetTopMakefile(self, filename):
@@ -950,7 +1024,7 @@ class Raptor(object):
 				systemModel.DumpLayerInfo(layer)
 
 				if systemModel.IsLayerBuildable(layer):
-					layersToBuild.append(Layer(layer,
+					layersToBuild.append(Layer.from_system_model(layer,
 							systemModel.GetLayerComponents(layer)))
 
 		return layersToBuild
@@ -983,7 +1057,7 @@ class Raptor(object):
 		bldInf = dir.Append(self.buildInformation)
 
 		if bldInf.isFile():
-			return bldInf
+			return BldinfComponent(bldInf)
 
 		return None
 
@@ -1194,7 +1268,7 @@ class Raptor(object):
 		   or the current directory"""
 		layers=[]
 		# Look for bld.infs or sysdefs in the current dir if none were specified
-		if self.systemDefinitionFile == None and len(self.commandlineComponents) == 0:
+		if self.systemDefinitionFile == None and len(self.commandline_layer) == 0:
 			if not self.preferBuildInfoToSystemDefinition:
 				cwd = os.getcwd()
 				self.systemDefinitionFile = self.FindSysDefIn(cwd)
@@ -1219,8 +1293,8 @@ class Raptor(object):
 
 		# Now get components specified on a commandline - build them after any
 		# layers in the system definition.
-		if len(self.commandlineComponents) > 0:
-			layers.append(Layer('commandline',self.commandlineComponents))
+		if len(self.commandline_layer) > 0:
+			layers.append(self.commandline_layer)
 
 		# If we aren't building components in order then flatten down
 		# the groups
