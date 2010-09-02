@@ -301,11 +301,10 @@ class QtProComponent(BldinfComponent):
 					env = makeenv)
 		else:
 			p = subprocess.Popen(
-					args = [make_process.command], 
+					args = [command], 
 					bufsize = 65535,
 					stdout = subprocess.PIPE,
 					stderr = subprocess.STDOUT,
-					close_fds = True, 
 					shell = True,
 					env = makeenv)
 		stream = p.stdout
