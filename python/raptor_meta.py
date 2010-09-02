@@ -892,8 +892,10 @@ class Extension(object):
 		# If the interface exists, this means it's not a Template Extension Makefile so don't look for a .meta file for it;
 		# so do nothing if it's not a template extension makefile
 		try:
+			self.__Raptor.Debug("Searching for interface: {0}".format(str(self.interface)))
 			self.__Raptor.cache.FindNamedInterface(str(self.interface), aBuildPlatform['CACHEID'])
 		except KeyError: # This means that this Raptor doesn't have the interface self.interface, so we are in a TEM
+			self.__Raptor.Debug("Interface {0} not found - assuming there's a TEM".format(str(self.interface)))
 			# Read extension meta file and get default options from it.  The use of TEM meta file is compulsory if TEM is used
 			metaFilename = "%s/epoc32/tools/makefile_templates/%s.meta" % (aBuildPlatform['EPOCROOT'], self.__RawMakefile)
 			metaFile = None

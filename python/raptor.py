@@ -271,9 +271,12 @@ class BldinfComponent(Component):
 		self.children.add(Project(filename))
 
 class QmakeErrorException(Exception):
-	def __init__(self, text, output = "", errorcode=1):
+	def __init__(self, text, output = "", errorcode=1,command=""):
 		self.output = output
 		self.errorcode = errorcode
+		self.command=command
+	def __str__(self):
+		return "{0} - while running: {1}".format(self.output,self.command)
 
 class QtProComponent(BldinfComponent):
 	def __init__(self, filename, layername="", componentname=""):
@@ -287,7 +290,7 @@ class QtProComponent(BldinfComponent):
 		shell = "/bin/sh" # only needed on linux.
 		# should really get qmake(.exe)'s absolute location from somewhere
 		global epocroot
-		command = "qmake -spec {0} {1} -o {2}".format(os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2"), self.qtpro_filename, self.bldinf_filename)
+		command = "{0} -spec {1} {2} -o {3}".format(os.path.join(epocroot,"epoc32","tools","qmake"),os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2"), self.qtpro_filename, self.bldinf_filename)
 		global isunix
 		makeenv = os.environ.copy()
 		if isunix:
@@ -315,7 +318,7 @@ class QtProComponent(BldinfComponent):
 		returncode = p.wait()
 
 		if returncode != 0:
-			e = QmakeErrorException("Qmake failed for {0}".format(self.qmake_file), output = "\n".join(self.qmake_output), errorcode = returncode)
+			e = QmakeErrorException("Qmake failed for {0}".format(self.qtpro_filename), output = "\n".join(self.qmake_output), errorcode = returncode, command = command)
 			raise e
 
 
@@ -676,13 +679,17 @@ class Raptor(object):
 		return True
 
 	def AddBuildInfoFile(self, filename):
-		bldinf = generic_path.Path(filename).Absolute()
+		bldinf = str(generic_path.Path(filename).Absolute())
 		self.commandline_layer.add(BldinfComponent(bldinf))
 		return True
 	
 	def AddQtProFile(self, filename):
 		qt_pro_file = str(generic_path.Path(filename).Absolute())
-		self.commandline_layer.add(QtProComponent(qt_pro_file))
+		try:
+			self.commandline_layer.add(QtProComponent(qt_pro_file))
+		except QmakeErrorException, e:
+			self.Error(str(e))
+		
 		return True
 
 	def SetTopMakefile(self, filename):
