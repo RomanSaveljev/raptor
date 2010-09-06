@@ -257,6 +257,9 @@ class Component(ModelNode):
 	def AddMMP(self, filename):
 		self.children.add(Project(filename))
 
+	def render_bldinf(self, build):
+		raise Exception("Can't render a bld.inf from component {0} - don't know how".format(self.filename))
+
 class BldinfComponent(Component):
 	"""A group of projects or, in symbian-speak, a bld.inf.
 	"""
@@ -270,6 +273,9 @@ class BldinfComponent(Component):
 	def AddMMP(self, filename):
 		self.children.add(Project(filename))
 
+	def render_bldinf(self, build):
+		return self
+
 class QmakeErrorException(Exception):
 	def __init__(self, text, output = "", errorcode=1,command=""):
 		self.output = output
@@ -279,18 +285,27 @@ class QmakeErrorException(Exception):
 		return "{0} - while running: {1}".format(self.output,self.command)
 
 class QtProComponent(BldinfComponent):
+
 	def __init__(self, filename, layername="", componentname=""):
 		self.qtpro_filename = generic_path.Path(filename).Absolute()
 		super(QtProComponent,self).__init__(filename)
 
 		# automatically determine the related bld.inf name by putting it in the same dir as the qt file.
 		self.bldinf_filename = generic_path.Join(self.qtpro_filename.Dir(), "bld.inf")
-		
+		self.bldinf_produced = False
+
+	def render_bldinf(self, build):
+		self.bldinf_produced = True
+		qmake = build.metaeval.Get("QMAKE")
+		qtbin = build.metaeval.Get("SBS_QTBIN")
+
 		# run qmake and produce the bld.inf immediately.
 		shell = "/bin/sh" # only needed on linux.
 		# should really get qmake(.exe)'s absolute location from somewhere
 		global epocroot
-		command = "{0} -spec {1} {2} -o {3}".format(os.path.join(epocroot,"epoc32","tools","qmake"),os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2"), self.qtpro_filename, self.bldinf_filename)
+		specs = os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2")
+		headers = os.path.join(epocroot,"epoc32","include","mw","qt")
+		command = "{0} -spec {1} {2} -o {3} QT_INSTALL_BINS={4}  QT_INSTALL_HEADERS={5}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, qtbin,  )
 		global isunix
 		makeenv = os.environ.copy()
 		if isunix:
@@ -320,6 +335,7 @@ class QtProComponent(BldinfComponent):
 		if returncode != 0:
 			e = QmakeErrorException("Qmake failed for {0}".format(self.qtpro_filename), output = "\n".join(self.qmake_output), errorcode = returncode, command = command)
 			raise e
+		return self
 
 
 
@@ -373,6 +389,12 @@ class Layer(ModelNode):
 		metaReader = None
 		if len (self.children):
 			try:
+				# render the components down to bld.inf form (if possible)
+				# since we don't understand any other component format
+				components = []
+				for c in self.children:
+					components.append(c.render_bldinf(build))
+
 				# create a MetaReader that is aware of the list of
 				# configurations that we are trying to build.
 				metaReader = raptor_meta.MetaReader(build, build.buildUnitsToBuild)
@@ -380,7 +402,7 @@ class Layer(ModelNode):
 				# convert the list of bld.inf files into a specification
 				# hierarchy suitable for all the configurations we are using.
 				self.specs = list(build.generic_specs)
-				self.specs.extend(metaReader.ReadBldInfFiles(self.children, doexport = build.doExport, dobuild = not build.doExportOnly))
+				self.specs.extend(metaReader.ReadBldInfFiles(components, doexport = build.doExport, dobuild = not build.doExportOnly))
 
 			except raptor_meta.MetaDataError, e:
 				build.Error(e.Text)
@@ -527,13 +549,27 @@ class Raptor(object):
 	M_QUERY = 2
 	M_VERSION = 3
 
-	def __init__(self, home = None):
+	def __init__(self, home = None, commandline = [], do_check_targets = True):
 
-		self.DefaultSetUp(home)
+		self.commandline = commandline
+		self.do_check_targets = do_check_targets
+		self._default_setup(home)
+
+		# If there are any commandline arguments then apply them
+		if len(commandline) > 0:
+			self._apply_commandline(self.commandline)
+
+		if (do_check_targets):
+			self._check_and_set_build_targets()
+
+		# Make it possible to ask this instance about default tools locations without
+		# doing the evaluator creation repeatedly for no reason
+		self.metavariant =  self.cache.FindNamedVariant("meta")
+		self.metaeval    = self.GetEvaluator(None, raptor_data.BuildUnit(self.metavariant.name, [self.metavariant]) )
 
 
-	def DefaultSetUp(self, home = None):
-		"revert to the default set-up state"
+	def _default_setup(self, home = None):
+		"""the default set-up state"""
 		self.errorCode = 0
 		self.skipAll = False
 		self.summary = True
@@ -553,7 +589,7 @@ class Raptor(object):
 
 		if not self.home.isDir():
 			self.Error("%s '%s' is not a directory", env, self.home)
-			return
+			raise BuildCannotProgressException("{0} '{1}' is not a directory".format(env, str(self.home)))
 
 		# the set-up file location.
 		# use the override "env2/xml2" if it exists
@@ -598,6 +634,7 @@ class Raptor(object):
 		self.queries = []
 		
 		self.cache = raptor_cache.Cache(self)
+
 		self.override = {env: str(self.home)}
 		self.targets = []
 		self.defaultTargets = []
@@ -617,6 +654,58 @@ class Raptor(object):
 		self.timestring = time.strftime("%Y-%m-%d-%H-%M-%S")
 
 		self.fatalErrorState = False
+
+
+		# Load up the raptor defaults from XML
+		if self.raptorXML.isFile():
+			self.cache.Load(self.raptorXML)
+
+			# find the 'defaults.raptor' variant and extract the values
+			try:
+				var = self.cache.FindNamedVariant("defaults.init")
+				evaluator = self.GetEvaluator( None, raptor_data.BuildUnit(var.name,[var]) )
+
+				for key, value in defaults.items():
+					newValue = evaluator.Resolve(key)
+
+					if newValue != None:
+						# got a string for the value
+						if type(value) == types.BooleanType:
+							newValue = (newValue.lower() != "false")
+						elif type(value) == types.IntType:
+							newValue = int(newValue)
+						elif isinstance(value, generic_path.Path):
+							newValue = generic_path.Path(newValue)
+
+						self.__dict__[key] = newValue
+
+			except KeyError:
+				# it is OK to not have this but useful to say it wasn't there
+				self.Info("No 'defaults.init' configuration found in " + str(self.raptorXML))
+
+
+		# Load up the all the other XML configuration data:
+		self.configPath = generic_path.NormalisePathList(self.systemConfig.split(os.pathsep))
+
+		def mkAbsolute(aGenericPath):
+			""" internal function to make a generic_path.Path
+			absolute if required"""
+			if not aGenericPath.isAbsolute():
+				return self.home.Append(aGenericPath)
+			else:
+				return aGenericPath
+
+		# make generic paths absolute (if required)
+		self.configPath = map(mkAbsolute, self.configPath)
+
+		self.cache.Load(self.configPath)
+
+		if not self.systemFLM.isAbsolute():
+			self.systemFLM = self.home.Append(self.systemFLM)
+
+		self.cache.Load(self.systemFLM)
+
+
 
 	def AddConfigList(self, configPathList):
 		# this function converts cmd line option into a list
@@ -684,6 +773,7 @@ class Raptor(object):
 		return True
 	
 	def AddQtProFile(self, filename):
+
 		qt_pro_file = str(generic_path.Path(filename).Absolute())
 		try:
 			self.commandline_layer.add(QtProComponent(qt_pro_file))
@@ -850,37 +940,9 @@ class Raptor(object):
 			self.Debug("Target %s", t)
 
 
-	def ConfigFile(self):
-		if not self.raptorXML.isFile():
-			return
-
-		self.cache.Load(self.raptorXML)
-
-		# find the 'defaults.raptor' variant and extract the values
-		try:
-			var = self.cache.FindNamedVariant("defaults.init")
-			evaluator = self.GetEvaluator( None, raptor_data.BuildUnit(var.name,[var]) )
-
-			for key, value in defaults.items():
-				newValue = evaluator.Resolve(key)
-
-				if newValue != None:
-					# got a string for the value
-					if type(value) == types.BooleanType:
-						newValue = (newValue.lower() != "false")
-					elif type(value) == types.IntType:
-						newValue = int(newValue)
-					elif isinstance(value, generic_path.Path):
-						newValue = generic_path.Path(newValue)
-
-					self.__dict__[key] = newValue
-
-		except KeyError:
-			# it is OK to not have this but useful to say it wasn't there
-			self.Info("No 'defaults.init' configuration found in " + str(self.raptorXML))
 
 
-	def CommandLine(self, args):
+	def _apply_commandline(self, args):
 		# remember the arguments for the log
 		self.args = args
 
@@ -888,7 +950,7 @@ class Raptor(object):
 		if not raptor_cli.GetArgs(self, args):
 			self.skipAll = True		# nothing else to do
 
-	def ParseCommandLineTargets(self):
+	def _check_and_set_build_targets(self):
 		# resolve inter-argument dependencies.
 		# --what or --check implies the WHAT target and FilterWhat Filter
 		if self.doWhat or self.doCheck:
@@ -929,29 +991,6 @@ class Raptor(object):
 				self.filterList += ",filtercopyfile"
 
 
-	def ProcessConfig(self):
-		# this function will perform additional processing of config
-
-		# create list of generic paths
-		self.configPath = generic_path.NormalisePathList(self.systemConfig.split(os.pathsep))
-
-	def LoadCache(self):
-		def mkAbsolute(aGenericPath):
-			""" internal function to make a generic_path.Path
-			absolute if required"""
-			if not aGenericPath.isAbsolute():
-				return self.home.Append(aGenericPath)
-			else:
-				return aGenericPath
-
-		# make generic paths absolute (if required)
-		self.configPath = map(mkAbsolute, self.configPath)
-		self.cache.Load(self.configPath)
-
-		if not self.systemFLM.isAbsolute():
-			self.systemFLM = self.home.Append(self.systemFLM)
-
-		self.cache.Load(self.systemFLM)
 
 	def GetBuildUnitsToBuild(self, configNames):
 		"""Return a list of the configuration objects that correspond to the
@@ -1356,7 +1395,6 @@ class Raptor(object):
 			# establish an object cache
 			self.AssertBuildOK()
 
-			self.LoadCache()
 
 			# find out what configurations to build
 			self.AssertBuildOK()
@@ -1430,28 +1468,10 @@ class Raptor(object):
 		return self.errorCode
 
 	@classmethod
-	def CreateCommandlineBuild(cls, argv):
-		""" Perform a 'typical' build. """
-		# configure the framework
-
-		build = Raptor()
-		build.AssertBuildOK()
-		build.ConfigFile()
-		build.ProcessConfig()
-		build.CommandLine(argv)
-		build.ParseCommandLineTargets()
-
-		return build
-	
-	@classmethod
 	def CreateCommandlineAnalysis(cls, argv):
-		""" Perform an analysis run where a build is not performed. """
-		build = Raptor()
-		build.AssertBuildOK()
-		build.ConfigFile()
-		build.ProcessConfig()
-		build.CommandLine(argv)
-		# Don't parse command line targets - they don't make any sense if you're not doing a build
+		""" Perform an analysis run where a build is not performed. 
+		Don't parse command line targets - they don't make any sense if you're not doing a build"""
+		build = Raptor(commandline=argv,do_check_targets = False)
 
 		return build
 
@@ -1489,7 +1509,7 @@ def Main(argv):
 	DisplayBanner()
 
 	# object which represents a build
-	b = Raptor.CreateCommandlineBuild(argv)
+	b = Raptor(commandline=argv)
 
 	if b.mission == Raptor.M_QUERY:
 		return b.Query()

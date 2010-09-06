@@ -17,6 +17,8 @@
 		<env name='HOSTPLATFORM_DIR' default='linux-i386' />
 		<env name='HOSTPLATFORM' default='linux i386'/>
 		
+		<env name='SBS_QTBIN' default='$(EPOCROOT)/epoc32/tools' type='path'/>
+
 		<env name='SBS_GNUCPP' default='$(SBS_USRBIN)/cpp' type='tool'/>
 		<env name='SBS_GNUDATE' default='$(SBS_SLASHBIN)/date' type='tool'/>
 		<env name='SBS_GNUMAKE38' default='$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/make' type='tool'/>
@@ -40,6 +42,7 @@
 		<env name='SBS_BVCPP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bv/bin/cpp" type='tool'/>
 		<env name='SBS_PERL' default='perl' type='tool'/>
 		<env name='SBS_PYTHON' default='python' type='tool'/>
+		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qmake' type='tool'/>
 	</var>
 	<var name="hostplatform.locations" host='win.*' >
 		<set name='COREUTILSBINDIR' value='$(SBS_CYGWIN)/bin' type='path'/>
@@ -53,6 +56,8 @@
 		
 		<env name='SBS_CYGWIN' default='$(SBS_HOME)/$(HOSTPLATFORM_DIR)/cygwin' type='path'/>
 		<env name='SBS_MINGW' default='$(SBS_HOME)/$(HOSTPLATFORM_DIR)/mingw' type='path'/>
+		<env name='SBS_QTBIN' default='$(EPOCROOT)/epoc32/tools' type='path'/>
+
 		<env name='SBS_GNUCPP' default='$(MINGWBINDIR)/cpp.exe' type='tool'/>
 		<env name='SBS_GNUDATE' default='$(COREUTILSBINDIR)/date.exe' type='tool'/>
 		<env name='SBS_GNUMAKE38' default='$(MINGWBINDIR)/make.exe' type='tool'/>
@@ -76,6 +81,7 @@
 		<env name='SBS_BVCPP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bv/bin/cpp.exe" type='tool'/>
 		<env name='SBS_PERL' default='perl.exe' type='tool'/>
 		<env name='SBS_PYTHON' default='python.exe' type='tool'/>
+		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qmake.exe' type='tool'/>
 	</var>
 
 	<var name="default.locations" extends="hostplatform.locations">
@@ -116,6 +122,7 @@
 		<set name='CREATEVMAPCPP' value='$(SBS_BVCPP)' type='tool'/>
 		<set name='FEATURELISTFILES' value=''/>
 		<set name='FEATUREVARIANTNAME' value=''/>
+		<set name='QMAKE' value='$(SBS_QMAKE)' type='tool'/>
 	</var>
 
 </build>
