@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
@@ -14,8 +14,10 @@
 # Description: 
 #
 # planb.tools2 module
-#
-# Python API for setting up TOOLS2 build actions in Raptor.
+
+'''
+Python API for setting up TOOLS2 build actions in Raptor.
+'''
 
 import os
 import planb.target

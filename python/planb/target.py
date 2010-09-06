@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
@@ -14,8 +14,10 @@
 # Description: 
 #
 # planb.target module
-#
-# Python objects for setting up build actions in Raptor.
+
+'''
+Python objects for setting up build actions in Raptor.
+'''
 
 # constants
 
@@ -28,6 +30,7 @@ class File(object):
 		
 		self.inputs = []
 		self.outputs = []
+		self.run = 'true'    # a command that always succeeds
 		
 	def add_input(self, input):
 		self.inputs.append(input)
@@ -45,22 +48,21 @@ class File(object):
 		self.run = command
 	
 class Bitmap(File):
-	def __init__(self):
+	def __init__(self, agent):
+		File.__init__(self, agent)
 		self.phase = 'BITMAP'
 		self.title = 'planb.bitmap'
-		self.run = 'true'
 
 class Resource(File):
-	def __init__(self):
+	def __init__(self, agent):
+		File.__init__(self, agent)
 		self.phase = 'RESOURCE'
 		self.title = 'planb.resource'
-		self.run = 'true'
 
 class Target(File):
 	def __init__(self, agent):
 		File.__init__(self, agent)
 		self.phase = 'ALL'
 		self.title = 'planb.target'
-		self.run = 'true'
 
 # end of the planb.target module

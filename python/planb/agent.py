@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
@@ -14,8 +14,10 @@
 # Description: 
 #
 # planb.agent module
-#
-# Python API for setting up build actions in Raptor.
+
+'''
+Python API for setting up build actions in Raptor.
+'''
 
 import optparse
 import os
@@ -26,6 +28,9 @@ import sys
 
 # objects
 
+class PlanbException(Exception):
+	pass
+	
 class Connect(object):
 	"""object to contain state information for API calls.
 	
@@ -66,7 +71,7 @@ class Connect(object):
 			for (k,v) in self.parameters.items():
 				print "\t", k, "=", v
 					
-		self.targets = {}
+		self.targets = []
 	
 	def __getitem__(self, name):
 		"""retrieve parameters as if this were a dictionary.
@@ -87,10 +92,7 @@ class Connect(object):
 		return self.parameters[name]
 				
 	def add_target(self, target):
-		if target.phase in self.targets:
-			self.targets[target.phase].append(target)
-		else:
-			self.targets[target.phase] = [target]
+		self.targets.append(target)
 		
 	def commit(self):
 
@@ -99,47 +101,37 @@ class Connect(object):
 		if not os.path.isdir(self.dir):
 			os.makedirs(self.dir)
 		
-		ok = True
-		
+		phases = {}
+		for t in self.targets:
+			if t.phase in phases:
+				phases[t.phase].append(t)
+			else:
+				phases[t.phase] = [t]
+			
 		for phase in ['BITMAP', 'RESOURCE', 'ALL']:
-			if phase in self.targets:
-				try:
-					filename = os.path.join(self.dir, phase)
-					file = open(filename, "w")
+			if phase in phases:
+				filename = os.path.join(self.dir, phase)
+				file = open(filename, "w")
 				
-					for t in self.targets[phase]:
-						file.write("$(call raptor_phony_recipe,%s,%s,,%s)" % (t.title, phase, t.run))
+				for t in phases[phase]:
+					file.write("$(call raptor_phony_recipe,%s,%s,,%s)" % (t.title, phase, t.run))
 				
-					file.close()
-					print "REMARK: file =", filename
-				except:
-					sys.stderr.write("error: cannot create file '%s'\n" % filename)
-					ok = False
+				file.close()
+				print "REMARK: file =", filename
 		
 		# write out the dependency file
 		done_target = os.path.join(self.dir, "done")
-		try:
-			depends = os.path.join(self.dir, "depend.mk")
-			file = open(depends, "w")
-			file.write("%s: %s\n" % (done_target, sys.argv[0]))
+		depends = os.path.join(self.dir, "depend.mk")
+		file = open(depends, "w")
+		file.write("%s: %s\n" % (done_target, sys.argv[0]))
 				
-			if self.pickle:
-				file.write("%s: %s\n" % (done_target, self.pickle))
+		if self.pickle:
+			file.write("%s: %s\n" % (done_target, self.pickle))
 					
-			file.close()
-		except:
-			sys.stderr.write("error: cannot create file '%s'\n" % depends)
-			ok = False
+		file.close()
 				
 		# write out the target marker file if all was well
-		if ok:
-			try:
-				file = open(done_target, "w")
-				file.close()
-			except:
-				sys.stderr.write("error: cannot create file '%s'\n" % done_target)
-				sys.exit(1)
-		else:
-			sys.exit(1)
-					
+		file = open(done_target, "w")
+		file.close()
+
 # end of the planb.agent module
