@@ -268,7 +268,7 @@ class BldinfComponent(Component):
 		# Assume that components are specified in bld.inf files for now
 		# One day that tyranny might end.
 		self.bldinf = None # Slot for a bldinf object if we spot one later
-		self.bldinf_filename = generic_path.Path(filename).Absolute()
+		self.bldinf_filename = generic_path.Path(str(filename)).Absolute()
 
 	def AddMMP(self, filename):
 		self.children.add(Project(filename))
@@ -298,6 +298,15 @@ class QtProComponent(BldinfComponent):
 		self.bldinf_produced = True
 		qmake = build.metaeval.Get("QMAKE")
 		qtbin = build.metaeval.Get("SBS_QTBIN")
+		global isunix
+		if  isunix:
+			moc = qtbin+"/moc"
+			uic = qtbin+"/uic"
+			rcc = qtbin+"/rcc"
+		else:
+			moc = qtbin+"/moc.exe"
+			uic = qtbin+"/uic.exe"
+			rcc = qtbin+"/rcc.exe"
 
 		# run qmake and produce the bld.inf immediately.
 		shell = "/bin/sh" # only needed on linux.
@@ -305,8 +314,8 @@ class QtProComponent(BldinfComponent):
 		global epocroot
 		specs = os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2")
 		headers = os.path.join(epocroot,"epoc32","include","mw","qt")
-		command = "{0} -spec {1} {2} -o {3} QT_INSTALL_BINS={4}  QT_INSTALL_HEADERS={5}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, qtbin,  )
-		global isunix
+
+		command = "{0} -spec {1} {2} -o {3} QMAKE_MOC={4} QMAKE_UIC={5} QMAKE_RCC={6}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, moc,uic,rcc)	
 		makeenv = os.environ.copy()
 		if isunix:
 			p = subprocess.Popen(
@@ -393,7 +402,10 @@ class Layer(ModelNode):
 				# since we don't understand any other component format
 				components = []
 				for c in self.children:
-					components.append(c.render_bldinf(build))
+					try:
+						components.append(c.render_bldinf(build))
+					except QmakeErrorException, e:
+						build.Error(str(e))
 
 				# create a MetaReader that is aware of the list of
 				# configurations that we are trying to build.
