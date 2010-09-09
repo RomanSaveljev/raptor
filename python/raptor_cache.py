@@ -208,6 +208,7 @@ class Cache:
 			return
 
 		# actually this is just for information not a warning
+		
 		self.raptor.Info("Duplicate %s '%s' (the one from '%s' will override the one in '%s')",
 						 type, objOld.name, oldSource, newSource)
 

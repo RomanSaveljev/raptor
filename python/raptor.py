@@ -264,7 +264,7 @@ class BldinfComponent(Component):
 	"""A group of projects or, in symbian-speak, a bld.inf.
 	"""
 	def __init__(self, filename, layername="", componentname=""):
-		super(BldinfComponent,self).__init__(filename)
+		super(BldinfComponent,self).__init__(filename, layername = layername, componentname=componentname)
 		# Assume that components are specified in bld.inf files for now
 		# One day that tyranny might end.
 		self.bldinf = None # Slot for a bldinf object if we spot one later
@@ -291,7 +291,7 @@ class QtProComponent(BldinfComponent):
 
 	def __init__(self, filename, layername="", componentname=""):
 		self.qtpro_filename = generic_path.Path(filename).Absolute()
-		super(QtProComponent,self).__init__(filename)
+		super(QtProComponent,self).__init__(filename,layername=layername, componentname=componentname)
 
 		# automatically determine the related bld.inf name by putting it in the same dir as the qt file.
 		self.bldinf_filename = generic_path.Join(self.qtpro_filename.Dir(), "bld.inf")
@@ -320,6 +320,8 @@ class QtProComponent(BldinfComponent):
 
 		command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, os.path.join(epocroot,"epoc32","include","mw"), moc,uic,rcc)
 		makeenv = os.environ.copy()
+
+		build.Debug("qmake command: {0}".format(command))
 		if isunix:
 			p = subprocess.Popen(
 					args = [shell, '-c', command],
@@ -377,7 +379,7 @@ class Layer(ModelNode):
 		    this eases the process of working with a "system_definition.xml" file. """
 		l = cls(name)
 		for c in sysmodel_componentlist:
-			l.children.add(Component(c, c.GetContainerName("layer"), c.GetContainerName("component")))
+			l.children.add(BldinfComponent(c, c.GetContainerName("layer"), c.GetContainerName("component")))
 
 		return l
 
@@ -580,34 +582,6 @@ class Raptor(object):
 			self._check_and_set_build_targets()
 
 
-		# After checking the commandline it is ok to use whatever the final
-		# version of configPath is to load up XML
-		for c in self.configPath:
-			print ("CONFIGPATH {0:s}".format(c))
-
-		def mkAbsolute(aGenericPath):
-			""" internal function to make a generic_path.Path
-			absolute if required"""
-			if not aGenericPath.isAbsolute():
-				return self.home.Append(aGenericPath)
-			else:
-				return aGenericPath
-
-		# make generic paths absolute (if required)
-		self.configPath = map(mkAbsolute, self.configPath)
-
-		self.cache.Load(self.configPath)
-
-		if not self.systemFLM.isAbsolute():
-			self.systemFLM = self.home.Append(self.systemFLM)
-
-		self.cache.Load(self.systemFLM)
-
-
-		# Make it possible to ask this instance about default tools locations without
-		# doing the evaluator creation repeatedly for no reason
-		self.metavariant =  self.cache.FindNamedVariant("meta")
-		self.metaeval    = self.GetEvaluator(None, raptor_data.BuildUnit(self.metavariant.name, [self.metavariant]) )
 
 
 	def _default_setup(self, home = None):
@@ -725,10 +699,35 @@ class Raptor(object):
 				# it is OK to not have this but useful to say it wasn't there
 				self.Info("No 'defaults.init' configuration found in " + str(self.raptorXML))
 
+	def _load_cache(self):
+		"""Before initiating any action like a build or query, we should load up all 
+		   xml configuration. This function is not intended for use except by other
+		   members of the Raptor class.
+		"""
+
+		def mkAbsolute(aGenericPath):
+			""" internal function to make a generic_path.Path
+			absolute if required"""
+			if not aGenericPath.isAbsolute():
+				return self.home.Append(aGenericPath)
+			else:
+				return aGenericPath
+
+		# make generic paths absolute (if required)
+		self.configPath = map(mkAbsolute, self.configPath)
+
+		self.cache.Load(self.configPath)
+
+		if not self.systemFLM.isAbsolute():
+			self.systemFLM = self.home.Append(self.systemFLM)
+
+		self.cache.Load(self.systemFLM)
 
 
-
-
+		# Make it possible to ask this instance about default tools locations without
+		# doing the evaluator creation repeatedly for no reason
+		self.metavariant =  self.cache.FindNamedVariant("meta")
+		self.metaeval    = self.GetEvaluator(None, raptor_data.BuildUnit(self.metavariant.name, [self.metavariant]) )
 
 
 	def AddConfigList(self, configPathList):
@@ -1261,7 +1260,7 @@ class Raptor(object):
 		"""Send an information message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<info{0}>{1}</info>".format(self.attributeString(attributes), escape(format % extras)))
+		self.out.write("<info{0}>{1}</info>\n".format(self.attributeString(attributes), escape(format % extras)))
 
 	def InfoDiscovery(self, object_type, count):
 		if self.timing:
@@ -1382,7 +1381,7 @@ class Raptor(object):
 			return 0
 		
 		# establish an object cache based on the current settings
-		self.LoadCache()
+		self._load_cache()
 			
 		# our "self" is a valid object for initialising an API Context
 		import raptor_api
@@ -1407,6 +1406,9 @@ class Raptor(object):
 
 		# open the log file
 		self.OpenLog()
+
+		# load the cache - we now have logging if there are errors.
+		self._load_cache()
 
 
 		try:
