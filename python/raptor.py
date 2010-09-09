@@ -285,6 +285,9 @@ class QmakeErrorException(Exception):
 		return "{0} - while running: {1}".format(self.output,self.command)
 
 class QtProComponent(BldinfComponent):
+	""" represents a component that is specified in a .pro file.  The intention is that it should 
+	    be possible to translate it into a bld.inf as we don't intend to parse Qt files directly which 
+	    would be an immense and pointless effort."""
 
 	def __init__(self, filename, layername="", componentname=""):
 		self.qtpro_filename = generic_path.Path(filename).Absolute()
@@ -315,7 +318,7 @@ class QtProComponent(BldinfComponent):
 		specs = os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2")
 		headers = os.path.join(epocroot,"epoc32","include","mw","qt")
 
-		command = "{0} -spec {1} {2} -o {3} QMAKE_MOC={4} QMAKE_UIC={5} QMAKE_RCC={6}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, moc,uic,rcc)	
+		command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, os.path.join(epocroot,"epoc32","include","mw"), moc,uic,rcc)
 		makeenv = os.environ.copy()
 		if isunix:
 			p = subprocess.Popen(
@@ -394,18 +397,17 @@ class Layer(ModelNode):
 
 		self.configs = build.buildUnitsToBuild
 
-
-		metaReader = None
-		if len (self.children):
+		# render the components down to bld.inf form (if possible)
+		# since we don't understand any other component format
+		components = []
+		for c in self.children:
 			try:
-				# render the components down to bld.inf form (if possible)
-				# since we don't understand any other component format
-				components = []
-				for c in self.children:
-					try:
-						components.append(c.render_bldinf(build))
-					except QmakeErrorException, e:
-						build.Error(str(e))
+				components.append(c.render_bldinf(build))
+			except QmakeErrorException, e:
+				build.Error(str(e))
+
+		if len(components) > 0:
+			try:
 
 				# create a MetaReader that is aware of the list of
 				# configurations that we are trying to build.
@@ -567,12 +569,40 @@ class Raptor(object):
 		self.do_check_targets = do_check_targets
 		self._default_setup(home)
 
+		# Load up the all the other XML configuration data:
+		self.configPath = generic_path.NormalisePathList(self.systemConfig.split(os.pathsep))
+
 		# If there are any commandline arguments then apply them
 		if len(commandline) > 0:
 			self._apply_commandline(self.commandline)
 
 		if (do_check_targets):
 			self._check_and_set_build_targets()
+
+
+		# After checking the commandline it is ok to use whatever the final
+		# version of configPath is to load up XML
+		for c in self.configPath:
+			print ("CONFIGPATH {0:s}".format(c))
+
+		def mkAbsolute(aGenericPath):
+			""" internal function to make a generic_path.Path
+			absolute if required"""
+			if not aGenericPath.isAbsolute():
+				return self.home.Append(aGenericPath)
+			else:
+				return aGenericPath
+
+		# make generic paths absolute (if required)
+		self.configPath = map(mkAbsolute, self.configPath)
+
+		self.cache.Load(self.configPath)
+
+		if not self.systemFLM.isAbsolute():
+			self.systemFLM = self.home.Append(self.systemFLM)
+
+		self.cache.Load(self.systemFLM)
+
 
 		# Make it possible to ask this instance about default tools locations without
 		# doing the evaluator creation repeatedly for no reason
@@ -668,7 +698,7 @@ class Raptor(object):
 		self.fatalErrorState = False
 
 
-		# Load up the raptor defaults from XML
+		# Load up the raptor defaults from XML (formerly from the ConfigFile function)
 		if self.raptorXML.isFile():
 			self.cache.Load(self.raptorXML)
 
@@ -696,26 +726,8 @@ class Raptor(object):
 				self.Info("No 'defaults.init' configuration found in " + str(self.raptorXML))
 
 
-		# Load up the all the other XML configuration data:
-		self.configPath = generic_path.NormalisePathList(self.systemConfig.split(os.pathsep))
 
-		def mkAbsolute(aGenericPath):
-			""" internal function to make a generic_path.Path
-			absolute if required"""
-			if not aGenericPath.isAbsolute():
-				return self.home.Append(aGenericPath)
-			else:
-				return aGenericPath
 
-		# make generic paths absolute (if required)
-		self.configPath = map(mkAbsolute, self.configPath)
-
-		self.cache.Load(self.configPath)
-
-		if not self.systemFLM.isAbsolute():
-			self.systemFLM = self.home.Append(self.systemFLM)
-
-		self.cache.Load(self.systemFLM)
 
 
 
@@ -1249,8 +1261,7 @@ class Raptor(object):
 		"""Send an information message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<info" + self.attributeString(attributes) + ">" +
-		               escape(format % extras) + "</info>\n")
+		self.out.write("<info{0}>{1}</info>".format(self.attributeString(attributes), escape(format % extras)))
 
 	def InfoDiscovery(self, object_type, count):
 		if self.timing:
@@ -1282,15 +1293,14 @@ class Raptor(object):
 		# the debug text is out of our control so wrap it in a CDATA
 		# in case it contains characters special to XML... like <>
 		if self.debugOutput:
-			self.out.write("<debug" + self.attributeString(attributes) + ">" +
-			               "><![CDATA[\n" + (format % extras) + "\n]]></debug>\n")
+			self.out.write("<debug{0}><![CDATA[\n{1}\n]]></debug>\n".format(self.attributeString(attributes),(format % extras)))
 
 	def Warn(self, format, *extras, **attributes):
 		"""Send a warning message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<warning" + self.attributeString(attributes) + ">" +
-		               escape(format % extras) + "</warning>\n")
+		self.out.write("<warning{0}>{1}</warning>\n".format(self.attributeString(attributes),
+		               escape(format % extras)))
 
 	def FatalError(self, format, *extras, **attributes):
 		"""Send an error message to the configured channel. This implies such a serious
@@ -1300,8 +1310,7 @@ class Raptor(object):
 		   further errors are probably triggered by the first.
 		"""
 		if not self.fatalErrorState:
-			self.out.write("<error" + self.attributeString(attributes) + ">" +
-			               (format % extras) + "</error>\n")
+			self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes),(format % extras)))
 			self.errorCode = 1
 			self.fatalErrorState = True
 
@@ -1309,8 +1318,8 @@ class Raptor(object):
 		"""Send an error message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<error" + self.attributeString(attributes) + ">" +
-		               escape(format % extras) + "</error>\n")
+		self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes),
+			escape(format % extras)))
 		self.errorCode = 1
 
 

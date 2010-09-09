@@ -203,7 +203,7 @@ class Cache:
 			newSource = "unknown"
 
 		# don't warn if we are reloading the object from the same
-		# file as before: since that is quite ligitimate.
+		# file as before: since that is quite legitimate.
 		if oldSource == newSource and oldSource != "unknown":
 			return
 
