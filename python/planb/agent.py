@@ -37,7 +37,8 @@ class Connect(object):
 	For example,
 	
 	agent = planb.agent.Connect()
-	agent.add_target(x)
+	target = planb.target.Target(agent)
+	target.action("echo this makes my target")
 	agent.commit()
 	"""
 	def __init__(self):
@@ -54,6 +55,11 @@ class Connect(object):
 		self.dir = options.dir
 		self.debug = options.debug
 		
+		# load the global parameters (the values that are the same for all FLMs)
+		self.globals = { 'HOSTPLATFORM_DIR': os.environ['HOSTPLATFORM_DIR'] }
+		
+		self.generate_dependencies = True # ???
+		
 		# load a parameter dictionary if we can
 		if self.dir:
 			self.pickle = os.path.join(self.dir, "pickle")
@@ -67,6 +73,10 @@ class Connect(object):
 			self.debug = (self.parameters['FLMDEBUG'] == '1')
 			
 		if self.debug:
+			print "global values"
+			for (k,v) in self.globals.items():
+				print "\t", k, "=", v
+				
 			print "parameter values"
 			for (k,v) in self.parameters.items():
 				print "\t", k, "=", v
@@ -89,7 +99,14 @@ class Connect(object):
 		# for now though we'll just return the same text string that the
 		# FLM would get.
 		
-		return self.parameters[name]
+		try:
+			return self.parameters[name]
+		except KeyError:
+			# this must be a global parameter not an FLM-specific one
+			return self.globals[name]
+	
+	def add_directory(self, directory):
+		print "WARNING: add_directory doesn't do anything yet with", directory
 				
 	def add_target(self, target):
 		self.targets.append(target)
@@ -102,7 +119,7 @@ class Connect(object):
 			os.makedirs(self.dir)
 		
 		phases = {}
-		for t in self.targets:
+		for t in self.targets:	
 			if t.phase in phases:
 				phases[t.phase].append(t)
 			else:

@@ -14,5 +14,6 @@ target.add_user_includes(agent['USERINCLUDE'].split())
 target.add_system_includes(agent['SYSTEMINCLUDE'].split())
 target.add_source_files(agent['SOURCE'].split())
 target.add_static_libraries(agent['STATICLIBRARY'].split())
+target.finalise()
 
 agent.commit()

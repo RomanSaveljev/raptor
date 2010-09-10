@@ -28,6 +28,7 @@ class File(object):
 		self.agent = agent
 		agent.add_target(self)
 		
+		self.generated_dependency_file = None
 		self.inputs = []
 		self.outputs = []
 		self.run = 'true'    # a command that always succeeds
@@ -46,6 +47,13 @@ class File(object):
 			
 	def action(self, command):
 		self.run = command
+	
+	def generated_dependencies(self, depfile):
+		self.generated_dependency_file = depfile
+		
+	def finalise(self):
+		'''the agent calls this just before it uses the object.'''
+		pass
 	
 class Bitmap(File):
 	def __init__(self, agent):

@@ -26,6 +26,8 @@ import sys
 linux = sys.platform.lower().startswith("linux")
 
 class Common(planb.target.Target):
+	'''The commonality between all TOOLS2 targets (EXE and LIB).'''
+	
 	def __init__(self, agent):
 		planb.target.Target.__init__(self, agent)
 		
@@ -56,18 +58,18 @@ class Common(planb.target.Target):
 			self.cdefs = self.agent['CDEFS.WIN32'] + " " + self.agent['CDEFS']
 			self.cflags = self.agent['CFLAGS.WIN32'] + " " + self.agent['CFLAGS'] + " " + self.agent['OPTION_GCC']
 			self.compiler_path = self.agent['COMPILER_PATH.WIN32']
-	
-		self.outputpath = self.agent['OUTPUTPATH'] + "/" + self.agent['TARGET'] + "_" + self.agent['TARGETTYPE'] + "/tools2/" + self.agent['VARIANTTYPE'] + self.agent['TOOLPLATFORMDIR']
-
-# CDEFS_TOOLS2 = [agent['OPT.D'] + "'" + x + "'" for x in CDEFS_TOOLS2.split()]
-
+		
+		self.outputpath = self.agent['OUTPUTPATH'] + "/" + self.agent['TARGET'] + "_" + self.agent['TARGETTYPE'] + "/tools2/" + self.agent['VARIANTTYPE']
+		if linux:
+			self.outputpath += "/" + self.agent['HOSTPLATFORM_DIR']
+			
 		# tell the agent about directories we need to exist
 		self.agent.add_directory(self.outputpath)
 		self.agent.add_directory(self.agent['RELEASEPATH'])
 		self.agent.add_directory(self.agent['TOOLSPATH'])
 
 		# assemble the pre-include file and include search path
-		include_flags = "".join([" " + self.agent['OPT.PREINCLUDE'] + i for i in self.agent['INC.COMPILER'].split()])
+		include_flags = "".join([" " + self.agent['OPT.PREINCLUDE'] + i for i in self.agent['PREINCLUDE'].split()])
 
 		include_flags += "".join([" " + self.agent['OPT.USERINCLUDE'] + i for i in self.user_includes])
 		include_flags += "".join([" " + self.agent['OPT.SYSTEMINCLUDE'] + i for i in self.system_includes])
@@ -79,13 +81,8 @@ class Common(planb.target.Target):
 			command += 'COMPILER_PATH="%s" ' % self.compiler_path
 
 		command += ' ' + self.agent['COMPILER'] + ' ' + self.cflags
-		command += ' ' + ''.join([' ' + self.agent['OPT.D'] + "'" + i + "'" for x in self.cdefs.split()])
+		command += ' ' + ''.join([' ' + self.agent['OPT.D'] + "'" + i + "'" for i in self.cdefs.split()])
 		
-	$(COMPILER) $(CFLAGS) $(CDEFS.TOOLS2) \
-	$(if $(NO_DEPEND_GENERATE),,-MD -MT"$$@" -MF"$(DEPENDFILENAME)") \
-	$(INCLUDES) $(OPT.O)"$$@" "$(1)" \
-	$(call endrule,compile2object)
-	
 		# save  the list of object files as they are the inputs for EXE
 		# and LIB targets that extend this general collection of .o files.
 		self.object_files = []
@@ -118,61 +115,13 @@ class Common(planb.target.Target):
 				command += ' -MD -MT"%s" -MF"%s"' % (obj, dep)
 
 			# complete the command-line
-			command += ' %s"%s" "%s"' % (self.agent['OPT.o'], obj, src)
+			command += ' %s"%s" "%s"' % (self.agent['OPT.O'], obj, src)
 			
 			object_target.action(command) 
 			
-
-
-ifeq ($(NO_DEPEND_GENERATE),)
-  CLEANTARGETS:=$$(CLEANTARGETS) $(DEPENDFILENAME)
-endif
-
-ifneq ($(DEPENDFILE),)
-  ifeq ($(NO_DEPEND_INCLUDE),)
-    ifeq ($(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),)
-      -include $(DEPENDFILE)
-    endif
-  endif
-endif
-
-endef
-
-$(foreach SRC,$(CPPFILES),$(eval $(call compile2object,$(SRC),CPP)))
-$(foreach SRC,$(cppFILES),$(eval $(call compile2object,$(SRC),cpp)))
-$(foreach SRC,$(CFILES),$(eval $(call compile2object,$(SRC),C)))
-$(foreach SRC,$(cFILES),$(eval $(call compile2object,$(SRC),c)))
-
-### Conclusion - cleanup and introspection #######################
-
-# make the output directories while reading makefile - some build engines prefer this
-$(call makepath,$(CREATABLEPATHS))
-
-## Clean up
-$(call raptor_clean,$(CLEANTARGETS) $(OBJECTFILES))
-## for the --what option and the log file
-$(call raptor_release,$(RELEASABLES))
-
-## The End
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Exe(Common):
+	'''A TOOLS2 target type EXE.'''
+	
 	def __init__(self, exename, agent):
 		Common.__init__(self, agent)
 		
@@ -191,7 +140,7 @@ class Exe(Common):
 		self.static_libraries.extend(libs)
 		
 	def finalise(self):
-		"""this gets called by the agent after all methods are done.
+		"""this gets called after all the other methods are done.
 		
 		so we can create all the targets we need now."""
 		
