@@ -1062,8 +1062,11 @@ class Raptor(object):
 		tools_ok = True
 		for b in configs:
 			self.Debug("Tool check for %s", b.name)
-			evaluator = self.GetEvaluator(None, b, gathertools=True)
-			tools_ok = tools_ok and self.CheckToolset(evaluator, b.name)
+			try:
+				evaluator = self.GetEvaluator(None, b, gathertools=True)
+				tools_ok = tools_ok and self.CheckToolset(evaluator, b.name)
+			except raptor_data.UninitialisedVariableException,e:
+				self.FatalError("The selected configuration (-c option) '{0}' is incomplete or invalid and cannot result in a successful build: {1}".format(b.name,str(e)))
 
 		return tools_ok
 
