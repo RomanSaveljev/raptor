@@ -14,16 +14,18 @@
 # Description: 
 #
 
-from raptor_tests import SmokeTest
+from raptor_tests import AntiTargetSmokeTest
 
 def run():
-	t = SmokeTest()
-	t.id = "48"
+	command = 'sbs -f- -s smoke_suite/test_resources/sysdef/system_definition_order_layer_test.xml ' + \
+			'-l "Metadata Export" -l "Build Generated Source" -l "Component with Layer Dependencies" -o'
+
+	t = AntiTargetSmokeTest()
+	t.id = "48a"
 	t.name = "sysdef_layers"
 	t.usebash = True
 	t.description = "Test system_definition.xml layer processing and log reporting"
-	t.command = 'sbs -f- -s smoke_suite/test_resources/sysdef/system_definition_order_layer_test.xml ' + \
-			'-l "Metadata Export" -l "Build Generated Source" -l "Component with Layer Dependencies" -o'
+	t.command = command
 	t.targets = [
 		"$(SBS_HOME)/test/smoke_suite/test_resources/sysdef/build_gen_source/exported.inf",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/sysdef/build_gen_source/exported.mmh",
@@ -82,4 +84,15 @@ def run():
 		["<recipe .*layer='Build Generated Source' component='build generated source'.*>", 3]		
 		]
 	t.run()
+
+	t.clean()
+
+	t.id = "48b"
+	t.name = "sysdef_layers_pp"
+	t.description = "Test system definition layer building and logging with parallel processing on"
+	t.command = command + " --pp on"
+	t.run()
+
+	t.id = "48"
+	t.name = "sysdef_layers"
 	return t
