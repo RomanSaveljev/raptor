@@ -1482,7 +1482,10 @@ class MMPRaptorBackend(MMPBackend):
 
 		elif varname=='SYSTEMINCLUDE' or varname=='USERINCLUDE':
 			for path in toks[1]:
-				resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
+				# includes are "symbian paths" (i.e. we translate them into absolute paths according
+				# to the common conventions in symbian) but the exclusion is that we don't expect them
+				# to ever have references to emulator drives 
+				resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path, emulatordrives=False)
 				self.BuildVariant.AddOperation(raptor_data.Append(varname,resolved))
 
 				if varname=='SYSTEMINCLUDE':
