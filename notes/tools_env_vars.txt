@@ -13,7 +13,7 @@ SBS_PREPDEF         perl, followed by full path to prepdef.pl
 SBS_RCOMP           Full path to rcomp program
 SBS_TRANASM         perl, followed by full path to tranasm.pl
 SBS_MAKEDEF         perl, followed by full path to makedef.pl
-SBS_PETRAN          Full path to petran program
+SBS_PETRAN          perl, followed by full path to petran.pl
 SBS_SYMLOOKUPUTIL   perl, followed by full path to sym_lkup_util.pl
 SBS_SLASHBIN        Linux only: location of /bin, i.e. an alternative location for
                     GCC and associated tools
