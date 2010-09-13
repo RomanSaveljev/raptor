@@ -1,6 +1,6 @@
 
 TEMPLATE = app
-TARGET = helloworld
+TARGET = helloworldqt
 DEPENDPATH += .
 
 TEMPLATE = app

@@ -31,37 +31,31 @@ def run():
 	# Its using rvct4_0 because thats's also the 10.1 default now.
 	t.command = "cd smoke_suite/test_resources/qt/helloworld && sbs --qtpro helloworldqt.pro -k -c arm.v5.urel.rvct4_0 -c arm.v5.udeb.rvct4_0 -c winscw"
 	t.targets = [
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/bld.inf",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworldqt.loc",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworldqt.rss",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworldqt_reg.rss",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworldqt_template.pkg",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/Makefile",
-			"$(EPOCROOT)/epoc32/release/armv5/udeb/helloworldqt.sym",
-			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.sym"
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworld/bld.inf",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworld/helloworldqt.loc",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworld/helloworldqt.rss",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworld/helloworldqt_reg.rss",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworld/helloworldqt_template.pkg",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworld/Makefile",
+			"$(EPOCROOT)/epoc32/release/armv5/udeb/helloworldqt.exe.sym",
+			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe.sym",
 			"$(EPOCROOT)/epoc32/release/armv5/udeb/helloworldqt.exe",
 			"$(EPOCROOT)/epoc32/release/armv5/udeb/helloworldqt.exe.map",
 			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe",
-			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe.map",
+			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe.map"
 		]
-	t.addbuildtargets('smoke_suite/test_resources/qt/bld.inf', [
+	t.addbuildtargets('smoke_suite/test_resources/qt/helloworld/bld.inf', [
+		"helloworldqt_exe/helloworldqt_helloworldqt.rsc",
 		"helloworldqt_exe/armv5/udeb/helloworld.o",
 		"helloworldqt_exe/armv5/udeb/helloworld.o.d",
 		"helloworldqt_exe/armv5/urel/helloworld.o",
-		"helloworldqt_exe/armv5/urel/helloworld.o.d"
+		"helloworldqt_exe/armv5/urel/helloworld.o.d",
 		"helloworldqt_exe/winscw/udeb/helloworld.o",
 		"helloworldqt_exe/winscw/udeb/helloworld.o.d",	
 		"helloworldqt_exe/winscw/urel/helloworld.o",
 		"helloworldqt_exe/winscw/urel/helloworld.o.d"
 	])
 	t.run()
-
-	# postlinker error expected at the moment - something that may not be raptor's fault
-	#   elf2e32 : Error: E1035: Undefined Symbol _ZTISt9exception found in ELF File
-	t.returncode = 0 
-
-	# Have a linking problem with a symbol that should not appear in the output
-	# this is not something that appears to be a 
 
 	return t
 

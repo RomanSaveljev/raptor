@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -22,8 +22,8 @@ def run():
 
 	t.description = "Ensure Raptor builds Qt applications which use moc, uic and other tools"	
 
-	t.id = "0110"
-	t.name = "qt_helloworld"
+	t.id = "0110a"
+	t.name = "qt_lotto"
 	# Internal QT deliveries use a QMAKE launcher that expects EPOCROOT to end in a slash
 	# We ensure it does (doesn't matter if there are multiple slashes)
 	t.environ["EPOCROOT"] = os.environ["EPOCROOT"] + os.sep
@@ -46,7 +46,6 @@ def run():
 			"$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/apps/lottonumberpicker.rsc",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/.make.cache",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/LottoNumberPicker_0x20029F39.mmp",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/LottoNumberPicker_0xE27a23a6.mmp",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/Makefile",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/bld.inf",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/lottonumberpicker.loc",
@@ -54,17 +53,16 @@ def run():
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/lottonumberpicker_installer.pkg",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/lottonumberpicker_reg.rss",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/lottonumberpicker_template.pkg",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/moc_lottonumberpicker.cpp"
+			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/moc_lottonumberpicker.cpp",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/moc_lottonumberpicker.cpp",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/lotto/ui_lottonumberpicker.h"
 		]
-	t.addbuildtargets('smoke_suite/test_resources/qt/bld.inf', [
+	t.addbuildtargets('smoke_suite/test_resources/qt/lotto/bld.inf', [
 			"lottonumberpicker_exe/armv5/urel/integerpair.o",
 			"lottonumberpicker_exe/armv5/urel/integerpair.o.d",
 			"lottonumberpicker_exe/armv5/urel/lottonumberpicker.o",
 			"lottonumberpicker_exe/armv5/urel/lottonumberpicker.o.d",
 			"lottonumberpicker_exe/armv5/urel/lottonumberpicker_urel_objects.via",
-			"lottonumberpicker_exe/armv5/urel/lottonumberpicker{000a0000}.def",
 			"lottonumberpicker_exe/armv5/urel/main.o",
 			"lottonumberpicker_exe/armv5/urel/main.o.d",
 			"lottonumberpicker_exe/armv5/urel/moc_lottonumberpicker.o",

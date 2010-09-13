@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'lottonumberpicker.ui'
 **
-** Created: Tue Sep 7 20:19:23 2010
+** Created: Mon Sep 13 23:06:42 2010
 **      by: Qt User Interface Compiler version 4.6.4
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
