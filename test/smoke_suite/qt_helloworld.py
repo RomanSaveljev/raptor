@@ -28,10 +28,8 @@ def run():
 	# We ensure it does (doesn't matter if there are multiple slashes)
 	t.environ["EPOCROOT"] = os.environ["EPOCROOT"] + os.sep
 
-	# The winscw platform is deprecated in 10.1 which our epocroot is based on an tests on 
-	# that tend not to work so it's armv5.  Its using rvct4_0 because thats's also the 10.1
-	# default now.
-	t.command = "cd smoke_suite/test_resources/qt/helloworld && sbs --qtpro helloworldqt.pro -k -c arm.v5.urel.rvct4_0 -c winscw"
+	# Its using rvct4_0 because thats's also the 10.1 default now.
+	t.command = "cd smoke_suite/test_resources/qt/helloworld && sbs --qtpro helloworldqt.pro -k -c arm.v5.urel.rvct4_0 -c arm.v5.udeb.rvct4_0 -c winscw"
 	t.targets = [
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/bld.inf",
 			"$(SBS_HOME)/test/smoke_suite/test_resources/qt/helloworldqt.loc",
