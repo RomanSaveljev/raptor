@@ -31,8 +31,5 @@
 		<param name='SCRIPT' default='planb/tools2.exe.py'/>
 		<param name='PARAMS' default=''/>
 	</interface>
-	<var name="tools2_planb">
-		<set name='INTERFACE.exe' value='planb.Tools.exe.py'/>
-	</var>
 		
 </build>

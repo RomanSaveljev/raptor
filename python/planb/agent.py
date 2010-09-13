@@ -131,8 +131,16 @@ class Connect(object):
 				file = open(filename, "w")
 				
 				for t in phases[phase]:
-					file.write("$(call raptor_phony_recipe,%s,%s,,%s)" % (t.title, phase, t.run))
+					pre_reqs = " ".join(t.inputs)
+					if t.outputs:
+						main_target = t.outputs[0][0]
+						macro = "raptor_recipe"
+					else:
+						main_target = phase
+						macro = "raptor_phony_recipe"
 				
+					file.write("$(call {0},{1},{2},{3},{4})\n\n".format(macro, t.title, main_target, pre_reqs, t.run))
+					
 				file.close()
 				print "REMARK: file =", filename
 		
