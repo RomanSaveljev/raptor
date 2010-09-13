@@ -95,9 +95,13 @@ class MainAntLog(HeliumLog):
 						#sys.stderr.write("stop TIME: %s\n" %m.groups()[0])
 
 		#sys.stderr.write("build start/stop: %s / %s  from %s\n" % (start_time, stop_time, self.logfilename))
-		build_duration = stop_time - start_time  # returns a timedelta object
-		self.build_duration = build_duration.seconds +  86400 * build_duration.days  # seconds
-
+		if start_time and stop_time:
+			build_duration = stop_time - start_time  # returns a timedelta object
+			self.build_duration = build_duration.seconds +  86400 * build_duration.days  # seconds
+		else:
+			sys.stderr.write("start time and/or stop time not avaialable.\n")
+			self.build_duration = 0
+			
 	def __str__(self):
 		return "<metric name='build_duration'  value='%d'>\n" % self.build_duration
 		
