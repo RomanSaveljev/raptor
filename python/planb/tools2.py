@@ -108,7 +108,7 @@ class Common(planb.target.Target):
 			object_target.add_output(obj, False)    # not releasable
 			
 			# is there a generated dependency file?
-			if self.agent.generate_dependencies:
+			if not self.agent['NO_DEPEND_GENERATE']:
 				dep = obj + ".d"
 				object_target.generated_dependencies(dep)
 				

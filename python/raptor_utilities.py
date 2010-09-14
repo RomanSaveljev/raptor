@@ -52,7 +52,16 @@ def absPathFromPath(aPathRoot, aReference):
 	joined = os.path.join(pathRoot, reference)
 	
 	return os.path.abspath(joined)
-   
+
+def make_bool_string(py_boolean):
+	'''convert a python boolean value into a string "1" for True and "" for False.
+	
+	"1" is the Raptor convention for True in makefiles and
+	"" is the Raptor convention for False in makefiles.'''
+	if py_boolean:
+		return "1"
+	else:
+		return ""
 
 def absPathFromFile(aFileRoot, aReference):
 	pathRoot = os.path.dirname(aFileRoot)

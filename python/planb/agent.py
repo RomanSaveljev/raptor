@@ -55,11 +55,6 @@ class Connect(object):
 		self.dir = options.dir
 		self.debug = options.debug
 		
-		# load the global parameters (the values that are the same for all FLMs)
-		self.globals = { 'HOSTPLATFORM_DIR': os.environ['HOSTPLATFORM_DIR'] }
-		
-		self.generate_dependencies = True # ???
-		
 		# load a parameter dictionary if we can
 		if self.dir:
 			self.pickle = os.path.join(self.dir, "pickle")
@@ -73,10 +68,6 @@ class Connect(object):
 			self.debug = (self.parameters['FLMDEBUG'] == '1')
 			
 		if self.debug:
-			print "global values"
-			for (k,v) in self.globals.items():
-				print "\t", k, "=", v
-				
 			print "parameter values"
 			for (k,v) in self.parameters.items():
 				print "\t", k, "=", v
@@ -99,11 +90,7 @@ class Connect(object):
 		# for now though we'll just return the same text string that the
 		# FLM would get.
 		
-		try:
-			return self.parameters[name]
-		except KeyError:
-			# this must be a global parameter not an FLM-specific one
-			return self.globals[name]
+		return self.parameters[name]
 	
 	def add_directory(self, directory):
 		print "WARNING: add_directory doesn't do anything yet with", directory
