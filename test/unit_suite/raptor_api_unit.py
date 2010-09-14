@@ -26,11 +26,11 @@ class TestRaptorApi(unittest.TestCase):
 		api = raptor_api.Context()
 		
 	def testContextInitialiser(self):
-		r = raptor.Raptor()
+		r = raptor.Raptor(nodefaults=True)
 		api = raptor_api.Context(r)
 		
 	def testAliases(self):
-		r = raptor.Raptor()
+		r = raptor.Raptor(nodefaults=True)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
@@ -52,7 +52,7 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(aliases[0].meaning, "a.b.c.d")
 	
 	def testConfig(self):
-		r = raptor.Raptor()
+		r = raptor.Raptor(nodefaults=True)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
@@ -114,7 +114,7 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(config.outputpath, path)
 		
 	def testProducts(self):
-		r = raptor.Raptor()
+		r = raptor.Raptor(nodefaults=True)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)

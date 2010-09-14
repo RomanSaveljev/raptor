@@ -547,17 +547,31 @@ class Raptor(object):
 
 	When operated from the command-line there is a single Raptor object
 	created by the Main function. When operated by an IDE several Raptor
-	objects may be created and operated at the same time."""
+	objects may be created and operated at the same time.
+
+	
+	"""
 
 	# mission enumeration
 	M_BUILD = 1
 	M_QUERY = 2
 	M_VERSION = 3
 
-	def __init__(self, home = None, commandline = [], do_check_targets = True):
+	def __init__(self, home = None, commandline = [], do_check_targets = True, logger = None, nodefaults = False):
+		"""
+		Keyword Arguments:
+		home - where to load xml settings from (default None indicated the current working directory)
+
+		commandline - potentially a commandline full of options to set (default empty list)
+		do_check_targets - when processing a commandline this ensures 
+			that correct make targets are added e.g. "WHAT" if doing --what. (Default True)
+		logger - a class that provides Debug, Info, Warning and Error 
+			functions ( default is an internal logger )"""
 
 		self.commandline = commandline
 		self.do_check_targets = do_check_targets
+		self.logger = logger
+		self.nodefaults = nodefaults
 		self._default_setup(home)
 
 		# Load up the all the other XML configuration data:
@@ -578,10 +592,20 @@ class Raptor(object):
 		self.errorCode = 0
 		self.skipAll = False
 		self.summary = True
+
 		self.out = sys.stdout # Just until filters get started.
 
 		# Create a bootstrap output system.
 		self.out = filter_list.FilterList()
+
+		if self.logger is not None:
+			# Patching functions out here rather than putting
+			# an if statement in each function seems 
+			# a little more efficient although it may
+			# be over optimising.
+			self.Info     = self.logger.Info
+			self.Debug    = self.logger.Debug
+			self.Warn     = self.logger.Warn
 
 		if home == None:
 			try:
@@ -661,32 +685,33 @@ class Raptor(object):
 		self.fatalErrorState = False
 
 
-		# Load up the raptor defaults from XML (formerly from the ConfigFile function)
-		if self.raptorXML.isFile():
-			self.cache.Load(self.raptorXML)
+		if not self.nodefaults:
+			# Load up the raptor defaults from XML (formerly from the ConfigFile function)
+			if self.raptorXML.isFile():
+				self.cache.Load(self.raptorXML)
 
-			# find the 'defaults.raptor' variant and extract the values
-			try:
-				var = self.cache.FindNamedVariant("defaults.init")
-				evaluator = self.GetEvaluator( None, raptor_data.BuildUnit(var.name,[var]) )
+				# find the 'defaults.raptor' variant and extract the values
+				try:
+					var = self.cache.FindNamedVariant("defaults.init")
+					evaluator = self.GetEvaluator( None, raptor_data.BuildUnit(var.name,[var]) )
 
-				for key, value in defaults.items():
-					newValue = evaluator.Resolve(key)
+					for key, value in defaults.items():
+						newValue = evaluator.Resolve(key)
 
-					if newValue != None:
-						# got a string for the value
-						if type(value) == types.BooleanType:
-							newValue = (newValue.lower() != "false")
-						elif type(value) == types.IntType:
-							newValue = int(newValue)
-						elif isinstance(value, generic_path.Path):
-							newValue = generic_path.Path(newValue)
+						if newValue != None:
+							# got a string for the value
+							if type(value) == types.BooleanType:
+								newValue = (newValue.lower() != "false")
+							elif type(value) == types.IntType:
+								newValue = int(newValue)
+							elif isinstance(value, generic_path.Path):
+								newValue = generic_path.Path(newValue)
 
-						self.__dict__[key] = newValue
+							self.__dict__[key] = newValue
 
-			except KeyError:
-				# it is OK to not have this but useful to say it wasn't there
-				self.Info("No 'defaults.init' configuration found in " + str(self.raptorXML))
+				except KeyError:
+					# it is OK to not have this but useful to say it wasn't there
+					self.Info("No 'defaults.init' configuration found in " + str(self.raptorXML))
 
 	def _load_cache(self):
 		"""Before initiating any action like a build or query, we should load up all 
@@ -1480,7 +1505,7 @@ class Raptor(object):
 	def CreateCommandlineAnalysis(cls, argv):
 		""" Perform an analysis run where a build is not performed. 
 		Don't parse command line targets - they don't make any sense if you're not doing a build"""
-		build = Raptor(commandline=argv,do_check_targets = False)
+		build = Raptor(commandline=argv, notargets = true)
 
 		return build
 

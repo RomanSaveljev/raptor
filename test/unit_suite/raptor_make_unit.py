@@ -49,8 +49,7 @@ class TestRaptorMake(unittest.TestCase):
 	def testSimpleMake(self):
 		# use a bare Raptor object
 		aRaptor = raptor.Raptor()
-		aRaptor.ProcessConfig()
-		aRaptor.LoadCache()
+		aRaptor._load_cache()
 		aRaptor.pruneDuplicateMakefiles = False
 		aRaptor.writeSingleMakefile = False
 		
@@ -96,8 +95,7 @@ class TestRaptorMake(unittest.TestCase):
 	def testMultiSpecMultiConfigMake(self):
 		# use a bare Raptor object
 		aRaptor = raptor.Raptor()
-		aRaptor.ProcessConfig()
-		aRaptor.LoadCache()
+		aRaptor._load_cache()
 		aRaptor.pruneDuplicateMakefiles = False
 		aRaptor.writeSingleMakefile = False
 		
@@ -195,8 +193,7 @@ class TestRaptorMake(unittest.TestCase):
 	def testFilteredMake(self):
 		# use a bare Raptor object
 		aRaptor = raptor.Raptor()
-		aRaptor.ProcessConfig()
-		aRaptor.LoadCache()
+		aRaptor._load_cache()
 		aRaptor.pruneDuplicateMakefiles = False
 		aRaptor.writeSingleMakefile = False
 		aRaptor.debugOutput = True
@@ -320,8 +317,7 @@ class TestRaptorMake(unittest.TestCase):
 	def testPruneDuplicates(self):
 		# use a bare Raptor object
 		aRaptor = raptor.Raptor()
-		aRaptor.ProcessConfig()
-		aRaptor.LoadCache()
+		aRaptor._load_cache()
 		aRaptor.pruneDuplicateMakefiles = True
 		aRaptor.writeSingleMakefile = False
 		

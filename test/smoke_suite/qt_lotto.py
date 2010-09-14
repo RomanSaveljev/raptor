@@ -26,7 +26,7 @@ def run():
 	t.name = "qt_lotto"
 
 	# Its using rvct4_0 because that's the 10.1 default.
-	t.command = "cd smoke_suite/test_resources/qt/lotto && sbs --qtpro LottoNumberPicker.pro -k -c arm.v5.urel.rvct4_0 -c winscw"
+	t.command = "sbs --qtpro smoke_suite/test_resources/qt/lotto/LottoNumberPicker.pro -k -c arm.v5.urel.rvct4_0 -c winscw"
 	t.targets = [
 
 			"$(EPOCROOT)/epoc32/data/z/private/10003a3f/import/apps/lottonumberpicker_reg.rsc",
