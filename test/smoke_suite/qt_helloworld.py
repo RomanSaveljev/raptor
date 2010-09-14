@@ -24,9 +24,6 @@ def run():
 
 	t.id = "0110"
 	t.name = "qt_helloworld"
-	# Internal QT deliveries use a QMAKE launcher that expects EPOCROOT to end in a slash
-	# We ensure it does (doesn't matter if there are multiple slashes)
-	t.environ["EPOCROOT"] = os.environ["EPOCROOT"] + os.sep
 
 	# Its using rvct4_0 because thats's also the 10.1 default now.
 	t.command = "cd smoke_suite/test_resources/qt/helloworld && sbs --qtpro helloworldqt.pro -k -c arm.v5.urel.rvct4_0 -c arm.v5.udeb.rvct4_0 -c winscw"
@@ -42,7 +39,9 @@ def run():
 			"$(EPOCROOT)/epoc32/release/armv5/udeb/helloworldqt.exe",
 			"$(EPOCROOT)/epoc32/release/armv5/udeb/helloworldqt.exe.map",
 			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe",
-			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe.map"
+			"$(EPOCROOT)/epoc32/release/armv5/urel/helloworldqt.exe.map",
+			"$(EPOCROOT)/epoc32/release/winscw/urel/helloworldqt.exe",
+			"$(EPOCROOT)/epoc32/release/winscw/udeb/helloworldqt.exe"
 		]
 	t.addbuildtargets('smoke_suite/test_resources/qt/helloworld/bld.inf', [
 		"helloworldqt_exe/helloworldqt_helloworldqt.rsc",

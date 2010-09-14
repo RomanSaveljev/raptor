@@ -43,6 +43,9 @@
 		<env name='SBS_PERL' default='perl' type='tool'/>
 		<env name='SBS_PYTHON' default='python' type='tool'/>
 		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qmake' type='tool'/>
+		<env name='SBS_MOC' default='$(SBS_QTBIN)/moc' type='tool'/>
+		<env name='SBS_UIC' default='$(SBS_QTBIN)/uic' type='tool'/>
+		<env name='SBS_RCC' default='$(SBS_QTBIN)/rcc' type='tool'/>
 	</var>
 	<var name="hostplatform.locations" host='win.*' >
 		<set name='COREUTILSBINDIR' value='$(SBS_CYGWIN)/bin' type='path'/>
@@ -82,6 +85,9 @@
 		<env name='SBS_PERL' default='perl.exe' type='tool'/>
 		<env name='SBS_PYTHON' default='python.exe' type='tool'/>
 		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qmake.exe' type='tool'/>
+		<env name='SBS_MOC' default='$(SBS_QTBIN)/moc.exe' type='tool'/>
+		<env name='SBS_UIC' default='$(SBS_QTBIN)/uic.exe' type='tool'/>
+		<env name='SBS_RCC' default='$(SBS_QTBIN)/rcc.exe' type='tool'/>
 	</var>
 
 	<var name="default.locations" extends="hostplatform.locations">
@@ -89,6 +95,8 @@
 		<env name='SBS_HOME' default='' type='path'/>
 		<!-- Place where intermediate files are built -->
 		<env name='SBS_BUILD_DIR' default='$(EPOCROOT)/epoc32/build' type='path'/>
+		<env name='SBS_QT_HEADERS' default='$(EPOCROOT)/epoc32/include/mw' />
+		<env name='SBS_QMAKE_INCDIR_QT' default='$(EPOCROOT)/epoc32/tools/qt/mkspecs/symbian-sbsv2' />
 
 		<set name='DATE' value='$(SBS_GNUDATE)' type='tool'/>
 		<set name='GNUCPP' value='$(SBS_GNUCPP)' type='tool' versionCommand='$(GNUCPP) --version' versionResult='cpp(.exe)? .* [345]\..*'/>
@@ -123,6 +131,11 @@
 		<set name='FEATURELISTFILES' value=''/>
 		<set name='FEATUREVARIANTNAME' value=''/>
 		<set name='QMAKE' value='$(SBS_QMAKE)' type='tool'/>
+		<set name='MOC' value='$(SBS_MOC)' type='tool'/>
+		<set name='UIC' value='$(SBS_UIC)' type='tool'/>
+		<set name='RCC' value='$(SBS_RCC)' type='tool'/>
+		<set name='QT_HEADERS' default='$(SBS_QT_HEADERS)' />
+		<set name='QMAKE_INCDIR_QT' default='$(SBS_QMAKE_INCDIR_QT)' />
 	</var>
 
 </build>

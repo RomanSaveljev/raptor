@@ -239,8 +239,8 @@ class Project(ModelNode):
 		# to be able to simulate the overall recursive unfurling of a build.
 
 class Component(ModelNode):
-	"""A group of projects or, in symbian-speak, a bld.inf.
-	"""
+	""" An Abstract class for group of projects (where projects are
+	    usually things that represent one program or libary) """
 	def __init__(self, filename, layername="", componentname=""):
 		super(Component,self).__init__(filename)
 
@@ -253,9 +253,6 @@ class Component(ModelNode):
 		# Extra metadata optionally supplied with system definition file gathered components
 		self.layername = layername
 		self.componentname = componentname
-
-	def AddMMP(self, filename):
-		self.children.add(Project(filename))
 
 	def render_bldinf(self, build):
 		raise Exception("Can't render a bld.inf from component {0} - don't know how".format(self.filename))
@@ -300,23 +297,16 @@ class QtProComponent(BldinfComponent):
 	def render_bldinf(self, build):
 		self.bldinf_produced = True
 		qmake = build.metaeval.Get("QMAKE")
-		qtbin = build.metaeval.Get("SBS_QTBIN")
-		global isunix
-		if  isunix:
-			moc = qtbin+"/moc"
-			uic = qtbin+"/uic"
-			rcc = qtbin+"/rcc"
-		else:
-			moc = qtbin+"/moc.exe"
-			uic = qtbin+"/uic.exe"
-			rcc = qtbin+"/rcc.exe"
+		moc = build.metaeval.Get("MOC")
+		uic = build.metaeval.Get("UIC")
+		rcc = build.metaeval.Get("RCC")
 
 		# run qmake and produce the bld.inf immediately.
 		shell = "/bin/sh" # only needed on linux.
 		# should really get qmake(.exe)'s absolute location from somewhere
 		global epocroot
-		specs = os.path.join(epocroot,"epoc32","tools","qt","mkspecs","symbian-sbsv2")
-		headers = os.path.join(epocroot,"epoc32","include","mw","qt")
+		specs = build.metaeval.Get("QMAKE_INCDIR_QT")
+		headers = build.metaeval.Get("QT_HEADERS")
 
 		command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, os.path.join(epocroot,"epoc32","include","mw"), moc,uic,rcc)
 		makeenv = os.environ.copy()
@@ -347,7 +337,7 @@ class QtProComponent(BldinfComponent):
 		returncode = p.wait()
 
 		if returncode != 0:
-			e = QmakeErrorException("Qmake failed for {0}".format(self.qtpro_filename), output = "\n".join(self.qmake_output), errorcode = returncode, command = command)
+			e = QmakeErrorException("qmake failed for '{0}'".format(self.qtpro_filename), output = "\n".join(self.qmake_output), errorcode = returncode, command = command)
 			raise e
 		return self
 
@@ -377,7 +367,7 @@ class Layer(ModelNode):
 	def from_system_model(cls, name, sysmodel_componentlist):
 		""" A factory method to build a layer from a raptor_xml.SystemModelComponent
 		    this eases the process of working with a "system_definition.xml" file. """
-		l = cls(name)
+		l = cls(name) # Call our class' constructor
 		for c in sysmodel_componentlist:
 			l.children.add(BldinfComponent(c, c.GetContainerName("layer"), c.GetContainerName("component")))
 
@@ -456,8 +446,6 @@ class Layer(ModelNode):
 
 		if build.noDependGenerate == True:
 			cli_options += " --no-depend-generate"
-
-		self.unfurl_generated_bldinfs
 
 
 		nc = len(self.children)
@@ -798,10 +786,7 @@ class Raptor(object):
 	def AddQtProFile(self, filename):
 
 		qt_pro_file = str(generic_path.Path(filename).Absolute())
-		try:
-			self.commandline_layer.add(QtProComponent(qt_pro_file))
-		except QmakeErrorException, e:
-			self.Error(str(e))
+		self.commandline_layer.add(QtProComponent(qt_pro_file))
 		
 		return True
 
@@ -1301,8 +1286,7 @@ class Raptor(object):
 		"""Send a warning message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<warning{0}>{1}</warning>\n".format(self.attributeString(attributes),
-		               escape(format % extras)))
+		self.out.write("<warning{0}>{1}</warning>\n".format(self.attributeString(attributes), escape(format % extras)))
 
 	def FatalError(self, format, *extras, **attributes):
 		"""Send an error message to the configured channel. This implies such a serious
@@ -1320,8 +1304,7 @@ class Raptor(object):
 		"""Send an error message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes),
-			escape(format % extras)))
+		self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes), escape(format % extras)))
 		self.errorCode = 1
 
 
@@ -1423,7 +1406,6 @@ class Raptor(object):
 
 
 			# find out what configurations to build
-			self.AssertBuildOK()
 			buildUnitsToBuild = self.GetBuildUnitsToBuild(self.configNames)
 
 			if len(buildUnitsToBuild) == 0:

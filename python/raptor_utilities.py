@@ -62,7 +62,7 @@ def sanitise(aPotentialFilename):
 	"Take a string and return a version suitable for use as a filename."
 	return re.sub("(\\\\|\/|:|;| )", "_", aPotentialFilename)
 
-def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCROOT="$(EPOCROOT)",emulatordrives=True):
+def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCROOT="$(EPOCROOT)"):
 	""" Convert raw Symbian metadata path/file references into absolute makefile references, or list of references
 
 	<drive>-prefix	: maps to an emulated drive depending on the following cases:
@@ -96,7 +96,8 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 		reference = reference.rstrip('/')
 
 	emulatedDrive = dosDriveRegEx.match(reference)	
-	if emulatedDrive and emulatordrives:
+	if emulatedDrive and (aMainType=="PRJ_EXPORTS" or aMainType == "PRJ_TESTEXPORTS")
+		# Interpret drive letters as emulaor drives but only when dealing with exports
 		# Emulated drive C:/ Z:/ and the like
 		# C: drive 
 		if reference.lower().startswith("c"):

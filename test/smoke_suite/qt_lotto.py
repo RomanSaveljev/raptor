@@ -24,9 +24,6 @@ def run():
 
 	t.id = "0110a"
 	t.name = "qt_lotto"
-	# Internal QT deliveries use a QMAKE launcher that expects EPOCROOT to end in a slash
-	# We ensure it does (doesn't matter if there are multiple slashes)
-	t.environ["EPOCROOT"] = os.environ["EPOCROOT"] + os.sep
 
 	# Its using rvct4_0 because that's the 10.1 default.
 	t.command = "cd smoke_suite/test_resources/qt/lotto && sbs --qtpro LottoNumberPicker.pro -k -c arm.v5.urel.rvct4_0 -c winscw"
