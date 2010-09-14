@@ -97,6 +97,7 @@
 		<env name='SBS_BUILD_DIR' default='$(EPOCROOT)/epoc32/build' type='path'/>
 		<env name='SBS_QT_HEADERS' default='$(EPOCROOT)/epoc32/include/mw' />
 		<env name='SBS_QMAKE_INCDIR_QT' default='$(EPOCROOT)/epoc32/tools/qt/mkspecs/symbian-sbsv2' />
+		<env name='SBS_QMAKESPEC' default='$(EPOCROOT)/epoc32/tools/qt/mkspecs/symbian-sbsv2' />
 
 		<set name='DATE' value='$(SBS_GNUDATE)' type='tool'/>
 		<set name='GNUCPP' value='$(SBS_GNUCPP)' type='tool' versionCommand='$(GNUCPP) --version' versionResult='cpp(.exe)? .* [345]\..*'/>
@@ -134,8 +135,9 @@
 		<set name='MOC' value='$(SBS_MOC)' type='tool'/>
 		<set name='UIC' value='$(SBS_UIC)' type='tool'/>
 		<set name='RCC' value='$(SBS_RCC)' type='tool'/>
-		<set name='QT_HEADERS' default='$(SBS_QT_HEADERS)' />
-		<set name='QMAKE_INCDIR_QT' default='$(SBS_QMAKE_INCDIR_QT)' />
+		<set name='QT_HEADERS' value='$(SBS_QT_HEADERS)' />
+		<set name='QMAKE_INCDIR_QT' value='$(SBS_QMAKE_INCDIR_QT)' />
+		<set name='QMAKESPEC' value='$(SBS_QMAKESPEC)' />
 	</var>
 
 </build>

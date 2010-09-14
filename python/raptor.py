@@ -305,10 +305,11 @@ class QtProComponent(BldinfComponent):
 		shell = "/bin/sh" # only needed on linux.
 		# should really get qmake(.exe)'s absolute location from somewhere
 		global epocroot
-		specs = build.metaeval.Get("QMAKE_INCDIR_QT")
+		spec = build.metaeval.Get("QMAKESPEC")
+		incdir = build.metaeval.Get("QMAKE_INCDIR_QT")
 		headers = build.metaeval.Get("QT_HEADERS")
 
-		command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, specs, self.qtpro_filename, self.bldinf_filename, os.path.join(epocroot,"epoc32","include","mw"), moc,uic,rcc)
+		command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, spec, self.qtpro_filename, self.bldinf_filename, headers, moc,uic,rcc)
 		makeenv = os.environ.copy()
 
 		build.Debug("qmake command: {0}".format(command))

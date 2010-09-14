@@ -1442,10 +1442,7 @@ class MMPRaptorBackend(MMPBackend):
 			self.__debug("Set REQUESTEDTARGETEXT to " + self.__TARGETEXT.lower())
 
 			self.BuildVariant.AddOperation(raptor_data.Set("TARGET", self.__TARGET))
-			if self.nocasefolding:
-				self.BuildVariant.AddOperation(raptor_data.Set("TARGET_lower", lowercase_TARGET))
-			else
-				self.BuildVariant.AddOperation(raptor_data.Set("TARGET_lower", self.__TARGET))
+			self.BuildVariant.AddOperation(raptor_data.Set("TARGET_lower", lowercase_TARGET))
 			if  lowercase_TARGET !=  self.__TARGET:
 				self.__debug("TARGET is not lowercase: '%s' - might cause BC problems." % self.__TARGET)
 		elif varname=='TARGETTYPE':
