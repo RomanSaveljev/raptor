@@ -570,7 +570,17 @@ class Raptor(object):
 
 		self.commandline = commandline
 		self.dotargets = dotargets
+
 		self.logger = logger
+		if self.logger is not None:
+			# Patching functions out here rather than putting
+			# an if statement in each function seems 
+			# a little more efficient although it may
+			# be over optimisation.
+			self.Info     = self.logger.Info
+			self.Debug    = self.logger.Debug
+			self.Warn     = self.logger.Warn
+
 		self.load_defaults = load_defaults
 		self._default_setup(home)
 
@@ -598,14 +608,6 @@ class Raptor(object):
 		# Create a bootstrap output system.
 		self.out = filter_list.FilterList()
 
-		if self.logger is not None:
-			# Patching functions out here rather than putting
-			# an if statement in each function seems 
-			# a little more efficient although it may
-			# be over optimising.
-			self.Info     = self.logger.Info
-			self.Debug    = self.logger.Debug
-			self.Warn     = self.logger.Warn
 
 		if home == None:
 			try:

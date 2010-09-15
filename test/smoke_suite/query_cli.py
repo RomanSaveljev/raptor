@@ -105,9 +105,11 @@ def run():
 		"</build>",
 		"<metadata>",
 		"outputpath='.*/epoc32/release/armv5/urel'",
-		"include path='.*/epoc32/include/variant'",
 		"include path='.*/epoc32/include'",
-		"preinclude file='.*/epoc32/include/variant/Symbian_OS.hrh'",
+		"include path='.*/epoc32/include'",
+		"preinclude file='.*/epoc32/include/feature_settings.hrh'",
+		# In older baselines the following made sense:
+		#"preinclude file='.*/epoc32/include/variant/Symbian_OS.hrh'",
 		"macro name='SBSV2' value='_____SBSV2'/>",
 		"macro name='ARMCC' value='_____ARMCC'/>",
 		"macro name='EPOC32' value='_____EPOC32'/>",
