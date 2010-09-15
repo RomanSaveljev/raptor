@@ -26,11 +26,11 @@ class TestRaptorApi(unittest.TestCase):
 		api = raptor_api.Context()
 		
 	def testContextInitialiser(self):
-		r = raptor.Raptor(nodefaults=True)
+		r = raptor.Raptor(dotargets=False)
 		api = raptor_api.Context(r)
 		
 	def testAliases(self):
-		r = raptor.Raptor(nodefaults=True)
+		r = raptor.Raptor(dotargets=False)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
@@ -52,7 +52,7 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(aliases[0].meaning, "a.b.c.d")
 	
 	def testConfig(self):
-		r = raptor.Raptor(nodefaults=True)
+		r = raptor.Raptor(dotargets=False)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)
@@ -65,6 +65,7 @@ class TestRaptorApi(unittest.TestCase):
 		config = api.getconfig("buildme")
 		self.failUnlessEqual(config.meaning, "buildme")
 		self.failUnlessEqual(config.outputpath, path)
+		self.failIfEqual(config.metadata, None)
 		
 		# metadata
 				
@@ -76,13 +77,24 @@ class TestRaptorApi(unittest.TestCase):
 		
 		includepaths = map(lambda x: str(x.path), config.metadata.includepaths)
 		includepaths.sort()
-		expected_includepaths = [raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant"), 
+
+		# This result is highly dependent on the epocroot being used to test against.
+		# with an SF baseline or an old Symbian one one might see this:
+		# expected_includepaths = [raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant"), 
+		#						raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), "."
+
+		# With another one might see: 
+		expected_includepaths = [raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), 
 								raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include"), "."]
+
 		expected_includepaths.sort()
 		self.failUnlessEqual(includepaths, expected_includepaths)
 		
 		preincludefile = str(config.metadata.preincludeheader.file)
-		self.failUnlessEqual(preincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant/Symbian_OS.hrh"))
+
+		# Another baseline dependent result
+		# self.failUnlessEqual(preincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/variant/Symbian_OS.hrh"))
+		self.failUnlessEqual(preincludefile, raptor_tests.ReplaceEnvs("$(EPOCROOT)/epoc32/include/feature_settings.hrh"))
 		
 		# build
 		
@@ -114,7 +126,7 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(config.outputpath, path)
 		
 	def testProducts(self):
-		r = raptor.Raptor(nodefaults=True)
+		r = raptor.Raptor(dotargets=False)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
 		api = raptor_api.Context(r)

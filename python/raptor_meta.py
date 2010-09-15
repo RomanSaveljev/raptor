@@ -537,6 +537,7 @@ class MetaDataFile(object):
 		systemIncludes = aBuildPlatform['SYSTEMINCLUDE']
 		if systemIncludes:
 			paths.extend(systemIncludes.split())
+		sys.stdout.write("post SYSTEMINCLUDE: {0:s}\n".format(" ".join(paths)))
 
 		preInclude = aBuildPlatform['VARIANT_HRH']
 		
@@ -544,19 +545,23 @@ class MetaDataFile(object):
 		# be on the include path
 		if not aBuildPlatform['ISFEATUREVARIANT']:
 			paths.append(preInclude.Dir())
+			sys.stdout.write("\nPREINCLUDE: {0:s}\n".format(preInclude))
 
 		# and EPOCROOT/epoc32/include
 		paths.append(aBuildPlatform['EPOCROOT'].Append('epoc32/include'))
+		sys.stdout.write("epocinclude: {0:s}\n".format(paths[-1]))
 
 		# and the directory containing the bld.inf file
 		if self.__RootLocation is not None and str(self.__RootLocation) != "":
 			paths.append(self.__RootLocation)
+			sys.stdout.write("rootlocation: {0:s}\n".format(paths[-1]))
 
 		# and the directory containing the file we are processing.
 		# This won't always be applicable - if the client is a front-end query for preprocessing
 		# include paths then there's no bld.inf path to take into account
 		if self.filename.Dir().Exists():
 			paths.append(self.filename.Dir())
+			sys.stdout.write("selfdir: {0:s}\n".format(paths[-1]))
 		
 		return paths
 

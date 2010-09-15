@@ -39,7 +39,7 @@ def run():
 		"$(SBS_HOME)/test/smoke_suite/test_resources/tracecompiler/testTC/traces/wlanhwinitpermparserTraces.h",	
 		"$(SBS_HOME)/test/smoke_suite/test_resources/tracecompiler/testTC/traces/fixed_id.definitions",
 		"$(EPOCROOT)/epoc32/ost_dictionaries/testTC_0x1000008d_Dictionary.xml",
-		"$(EPOCROOT)/epoc32/include/internal/symbiantraces/autogen/testTC_0x1000008d_TraceDefinitions.h"
+		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/testTC_0x1000008d_TraceDefinitions.h"
 		]
 	t.run()
 

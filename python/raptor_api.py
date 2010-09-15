@@ -164,6 +164,7 @@ class Config(Reply):
 			self.text = str(e)
 
 	def resolveMetadata(self):
+		import sys
 		try:
 			metadata = self.metadata
 		except AttributeError:
@@ -172,7 +173,7 @@ class Config(Reply):
 			
 		try:
 			metadata.resolve()
-		except Exception:
+		except Exception, e:
 			# Evaluator exception hopefully - already handled
 			self.metadata = None
 
@@ -406,7 +407,6 @@ class Context(object):
 				variants.append( Product(v.name) )
 		variants.sort()	
 		return variants
-	
 class BadQuery(Exception):
 	pass
 

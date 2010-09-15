@@ -557,21 +557,21 @@ class Raptor(object):
 	M_QUERY = 2
 	M_VERSION = 3
 
-	def __init__(self, home = None, commandline = [], do_check_targets = True, logger = None, nodefaults = False):
+	def __init__(self, home = None, commandline = [], dotargets = True, logger = None, load_defaults = True):
 		"""
 		Keyword Arguments:
 		home - where to load xml settings from (default None indicated the current working directory)
 
 		commandline - potentially a commandline full of options to set (default empty list)
-		do_check_targets - when processing a commandline this ensures 
+		targets - when processing a commandline this ensures 
 			that correct make targets are added e.g. "WHAT" if doing --what. (Default True)
 		logger - a class that provides Debug, Info, Warning and Error 
 			functions ( default is an internal logger )"""
 
 		self.commandline = commandline
-		self.do_check_targets = do_check_targets
+		self.dotargets = dotargets
 		self.logger = logger
-		self.nodefaults = nodefaults
+		self.load_defaults = load_defaults
 		self._default_setup(home)
 
 		# Load up the all the other XML configuration data:
@@ -581,7 +581,7 @@ class Raptor(object):
 		if len(commandline) > 0:
 			self._apply_commandline(self.commandline)
 
-		if (do_check_targets):
+		if (self.dotargets):
 			self._check_and_set_build_targets()
 
 
@@ -685,7 +685,7 @@ class Raptor(object):
 		self.fatalErrorState = False
 
 
-		if not self.nodefaults:
+		if self.load_defaults:
 			# Load up the raptor defaults from XML (formerly from the ConfigFile function)
 			if self.raptorXML.isFile():
 				self.cache.Load(self.raptorXML)
@@ -1505,7 +1505,7 @@ class Raptor(object):
 	def CreateCommandlineAnalysis(cls, argv):
 		""" Perform an analysis run where a build is not performed. 
 		Don't parse command line targets - they don't make any sense if you're not doing a build"""
-		build = Raptor(commandline=argv, notargets = true)
+		build = Raptor(commandline=argv, dotargets = False)
 
 		return build
 
