@@ -338,7 +338,7 @@ class QtProComponent(BldinfComponent):
 		returncode = p.wait()
 
 		if returncode != 0:
-			e = QmakeErrorException("qmake failed for '{0}'".format(self.qtpro_filename), output = "\n".join(self.qmake_output), errorcode = returncode, command = command)
+			e = QmakeErrorException("{0} failed for '{1}'".format(qmake, self.qtpro_filename), output = "\n".join(self.qmake_output), errorcode = returncode, command = command)
 			raise e
 		return self
 

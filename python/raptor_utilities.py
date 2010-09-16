@@ -96,8 +96,8 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 		reference = reference.rstrip('/')
 
 	emulatedDrive = dosDriveRegEx.match(reference)	
-	if emulatedDrive and (aMainType=="PRJ_EXPORTS" or aMainType == "PRJ_TESTEXPORTS"):
-		# Interpret drive letters as emulaor drives but only when dealing with exports
+	if emulatedDrive and aMainType in ("PRJ_EXPORTS", "PRJ_TESTEXPORTS"):
+		# Interpret drive letters as emulator drives but only when dealing with exports
 		# Emulated drive C:/ Z:/ and the like
 		# C: drive 
 		if reference.lower().startswith("c"):

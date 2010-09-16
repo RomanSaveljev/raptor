@@ -164,7 +164,6 @@ class Config(Reply):
 			self.text = str(e)
 
 	def resolveMetadata(self):
-		import sys
 		try:
 			metadata = self.metadata
 		except AttributeError:
@@ -173,7 +172,7 @@ class Config(Reply):
 			
 		try:
 			metadata.resolve()
-		except Exception, e:
+		except Exception:
 			# Evaluator exception hopefully - already handled
 			self.metadata = None
 
