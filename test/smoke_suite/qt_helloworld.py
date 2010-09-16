@@ -12,7 +12,7 @@
 # Contributors:
 #
 # Description: 
-# This test case requires install of Qt. 
+# 
 
 from raptor_tests import SmokeTest
 import os
