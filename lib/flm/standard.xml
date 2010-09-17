@@ -112,6 +112,7 @@
 		<param name='CREATEVMAPCPP'/>
 		<param name='DEBUG_FORMAT'/>
 		<param name='DEBUG_INFO'/>
+		<param name='DEF2DLLTOOL'/>
 		<param name='DEFGENTOOL'/>
 		<param name='DEPEND_OPTION'/>
 		<param name='EFREEZE'/>

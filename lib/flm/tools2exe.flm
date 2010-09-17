@@ -45,8 +45,8 @@ include $(FLMHOME)/tools2common.flm
 
 ## Static libraries
 ifneq ($(STATICLIBRARY),)
-STATICLIBS:=$(patsubst %,$(RELEASEPATH)/lib%.a,$(STATICLIBRARY))
-LLIBS:=$(OPT.L)"$(RELEASEPATH)" $(patsubst %,$(OPT.l)%,$(STATICLIBRARY))
+STATICLIBS:=$(if $(STLPORTLIBRARY),$(patsubst %,$(LIBRARYPATH)/lib%.a,$(STLPORTLIBRARY))) $(patsubst %,$(RELEASEPATH)/lib%.a,$(STATICLIBRARY))
+LLIBS:=$(OPT.L)"$(LIBRARYPATH)" $(OPT.L)"$(RELEASEPATH)" $(patsubst %,$(OPT.l)%,$(STATICLIBRARY))
 #
 ifneq ($(SYSTEMLIBS),)
 LLIBS:=$(LLIBS) $(patsubst %,$(OPT.l)%,$(SYSTEMLIBS))
