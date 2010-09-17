@@ -42,7 +42,7 @@
 		<env name='SBS_BVCPP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bv/bin/cpp" type='tool'/>
 		<env name='SBS_PERL' default='perl' type='tool'/>
 		<env name='SBS_PYTHON' default='python' type='tool'/>
-		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qmake' type='tool'/>
+		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qt/qmake' type='tool'/>
 		<env name='SBS_MOC' default='$(SBS_QTBIN)/moc' type='tool'/>
 		<env name='SBS_UIC' default='$(SBS_QTBIN)/uic' type='tool'/>
 		<env name='SBS_RCC' default='$(SBS_QTBIN)/rcc' type='tool'/>
@@ -84,7 +84,7 @@
 		<env name='SBS_BVCPP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bv/bin/cpp.exe" type='tool'/>
 		<env name='SBS_PERL' default='perl.exe' type='tool'/>
 		<env name='SBS_PYTHON' default='python.exe' type='tool'/>
-		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qmake.exe' type='tool'/>
+		<env name='SBS_QMAKE' default='$(SBS_QTBIN)/qt/qmake.exe' type='tool'/>
 		<env name='SBS_MOC' default='$(SBS_QTBIN)/moc.exe' type='tool'/>
 		<env name='SBS_UIC' default='$(SBS_QTBIN)/uic.exe' type='tool'/>
 		<env name='SBS_RCC' default='$(SBS_QTBIN)/rcc.exe' type='tool'/>

@@ -20,7 +20,7 @@ from raptor_tests import SmokeTest
 def run():
 	t = SmokeTest()
 	t.id = "0092a"
-	t.name = "toolcheck"
+	t.name = "toolcheck_on"
 	t.description = """Test toolcheck works properly, with 3 options: on, off and forced. 
 				TOOL1 3 4 and 5 are expected to fail and 2 to pass"""
 	result = SmokeTest.PASS
@@ -51,6 +51,7 @@ def run():
 			" -c default.toolcheck --toolcheck=off"
 
 	t.id = "0092b"
+	t.name = "toolcheck_off"
 	t.mustmatch = []
 	t.mustnotmatch = [
 		".*TOOLCHECK1.*",
@@ -70,6 +71,7 @@ def run():
 			" -c default.toolcheck --toolcheck=forced"
 
 	t.id = "0092c"
+	t.name = "toolcheck_forced"
 	t.mustmatch = [
 		".*tool 'TOOLCHECK1' from config 'none' did not return version.*",
 		".*tool 'TOOLCHECK3' from config 'none' did not return version.*",

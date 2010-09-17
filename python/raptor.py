@@ -1420,18 +1420,17 @@ class Raptor(object):
 
 		# open the log file
 		self.OpenLog()
+		# show the command and platform info
+		self.AssertBuildOK()
+		self.Introduction()
 
 		# load the cache - we now have logging if there are errors.
 		self._load_cache()
 
 
 		try:
-			# show the command and platform info
-			self.AssertBuildOK()
-			self.Introduction()
 			# establish an object cache
 			self.AssertBuildOK()
-
 
 			# find out what configurations to build
 			buildUnitsToBuild = self.GetBuildUnitsToBuild(self.configNames)

@@ -1392,6 +1392,8 @@ class ToolSet(object):
 
 		if not self.shellok:
 			self.shellok = self.check_shell()
+
+		if not self.shellok:
 			return # No point in going further as the other tests won't work.
 
 		self.valid = self.valid and self.shellok
