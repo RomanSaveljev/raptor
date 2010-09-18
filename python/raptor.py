@@ -568,7 +568,7 @@ class Raptor(object):
 		logger - a class that provides Debug, Info, Warning and Error 
 			functions ( default is an internal logger )"""
 
-		self.commandline = commandline
+		self.args = commandline
 		self.dotargets = dotargets
 
 		self.logger = logger
@@ -589,7 +589,14 @@ class Raptor(object):
 
 		# If there are any commandline arguments then apply them
 		if len(commandline) > 0:
-			self._apply_commandline(self.commandline)
+			# remember the arguments for the log
+			self.args = commandline
+
+			# assuming self.CLI = "raptor_cli"
+			if not raptor_cli.GetArgs(self, self.args):
+				# raise exception quietly since the error
+				# messages are already printed out from GetArgs
+				raise BuildCannotProgressException("")
 
 		if (self.dotargets):
 			self._check_and_set_build_targets()
@@ -976,15 +983,6 @@ class Raptor(object):
 			self.Debug("Target %s", t)
 
 
-
-
-	def _apply_commandline(self, args):
-		# remember the arguments for the log
-		self.args = args
-
-		# assuming self.CLI = "raptor_cli"
-		if not raptor_cli.GetArgs(self, args):
-			self.skipAll = True		# nothing else to do
 
 	def _check_and_set_build_targets(self):
 		# resolve inter-argument dependencies.
@@ -1420,15 +1418,14 @@ class Raptor(object):
 
 		# open the log file
 		self.OpenLog()
-		# show the command and platform info
-		self.AssertBuildOK()
-		self.Introduction()
-
-		# load the cache - we now have logging if there are errors.
-		self._load_cache()
-
-
 		try:
+			self.AssertBuildOK()
+			# show the command and platform info
+			self.Introduction()
+
+			# load the cache 
+			self._load_cache()
+
 			# establish an object cache
 			self.AssertBuildOK()
 
@@ -1543,13 +1540,19 @@ def Main(argv):
 
 	DisplayBanner()
 
-	# object which represents a build
-	b = Raptor(commandline=argv)
+	try:
+		# object which represents a build
+		b = Raptor(commandline=argv)
 
-	if b.mission == Raptor.M_QUERY:
-		return b.Query()
+		if b.mission == Raptor.M_QUERY:
+			return b.Query()
 	
-	return b.Build()
+		return b.Build()
+	except BuildCannotProgressException, e:
+		t = str(e)
+		if t != "":
+			print("sbs error: {0:s}".format(t))
+		return 1
 
 
 def DisplayBanner():
