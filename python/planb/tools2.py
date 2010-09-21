@@ -75,13 +75,14 @@ class Common(planb.target.Target):
 		include_flags += "".join([" " + self.agent['OPT.SYSTEMINCLUDE'] + i for i in self.system_includes])
 		
 		# compose the common parts of the command-line
-		command = ''
+		common_command = ''
 		
 		if self.compiler_path:
-			command += 'COMPILER_PATH="%s" ' % self.compiler_path
+			common_command += 'COMPILER_PATH="%s" ' % self.compiler_path
 
-		command += ' ' + self.agent['COMPILER'] + ' ' + self.cflags
-		command += ' ' + ''.join([' ' + self.agent['OPT.D'] + "'" + i + "'" for i in self.cdefs.split()])
+		common_command += ' ' + self.agent['COMPILER'] + ' ' + self.cflags
+		common_command += ' ' + ''.join([' ' + self.agent['OPT.D'] + "'" + i + "'" for i in self.cdefs.split()])
+		common_command += ' ' + include_flags
 		
 		# save  the list of object files as they are the inputs for EXE
 		# and LIB targets that extend this general collection of .o files.
@@ -89,6 +90,8 @@ class Common(planb.target.Target):
 		
 		# create an object file target for each source file
 		for src in self.source_files:
+			command = common_command
+			
 			base = os.path.basename(src)
 			s = base.lower()
 			if s.endswith(".cpp"):
@@ -169,7 +172,7 @@ class Exe(Common):
 		# piece together the link command
 		command = self.agent['LINKER'] + " " + self.cflags + " " + self.agent['LFLAGS'] 
 		command += " " + self.agent['OPT.O'] + '"' + self.exepath + '"'
-		command += " " + "".join(['"' + i + '"' for i in self.object_files])
+		command += " " + " ".join(['"' + i + '"' for i in self.object_files])
 		command += " " + static_lib_flags + " " + self.agent['LINKER_OPTIONS']
 	
 		# copy the linked exe to the tools folder if required

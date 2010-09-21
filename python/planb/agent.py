@@ -73,6 +73,7 @@ class Connect(object):
 				print "\t", k, "=", v
 					
 		self.targets = []
+		self.directories = set()
 	
 	def __getitem__(self, name):
 		"""retrieve parameters as if this were a dictionary.
@@ -93,34 +94,49 @@ class Connect(object):
 		return self.parameters[name]
 	
 	def add_directory(self, directory):
-		print "WARNING: add_directory doesn't do anything yet with", directory
+		'''care is needed creating directories so let the agent manage it.'''
+		self.directories.add(directory)
 				
 	def add_target(self, target):
 		self.targets.append(target)
 		
 	def commit(self):
-
-		print "REMARK: dir =", self.dir
+		'''pass all the dependencies and actions to the build engine.'''
+		# this is hardcoded to create makefiles for now...
 		
+		# the directory for the makefiles
 		if not os.path.isdir(self.dir):
 			os.makedirs(self.dir)
 		
+		# group the targets together by phase: BITMAP, RESOURCE, etc.
 		phases = {}
 		for t in self.targets:	
 			if t.phase in phases:
 				phases[t.phase].append(t)
 			else:
 				phases[t.phase] = [t]
-			
+		
+		first_phase = True
+		
 		for phase in ['BITMAP', 'RESOURCE', 'ALL']:
 			if phase in phases:
 				filename = os.path.join(self.dir, phase)
 				file = open(filename, "w")
 				
+				if first_phase:
+					# create all the directories in the first phase.
+					# this is a candidate for feeding info back to the main
+					# python process do act on rather than doing it in make.
+					file.write("$(call makepath,{0})\n\n".format(" ".join(self.directories)))
+					first_phase = False
+					
+				releasables = []
+				cleaners = []
+				
 				for t in phases[phase]:
 					pre_reqs = " ".join(t.inputs)
 					if t.outputs:
-						main_target = t.outputs[0][0]
+						main_target = t.outputs[0].filename
 						macro = "raptor_recipe"
 					else:
 						main_target = phase
@@ -128,10 +144,36 @@ class Connect(object):
 				
 					file.write("$(call {0},{1},{2},{3},{4})\n\n".format(macro, t.title, main_target, pre_reqs, t.run))
 					
+					# extra dependencies
+					if main_target != phase:
+						file.write("{0}:: {1}\n\n".format(phase, main_target))
+						
+					if len(t.outputs) > 1:
+						for other in t.outputs[1:]:
+							file.write("{0}: {1}\n\n".format(main_target, other.filename))
+					
+					# release and clean info
+					for output in t.outputs:
+						if output.releasable:
+							releasables.append(output.filename)
+						else:
+							cleaners.append(output.filename)
+							
+				if releasables:
+					file.write("$(call raptor_release,{0})\n\n".format(" ".join(releasables)))
+				
+				if cleaners:
+					file.write("$(call raptor_clean,{0})\n\n".format(" ".join(cleaners)))
+						
 				file.close()
-				print "REMARK: file =", filename
+				print "generated makefile =", filename
 		
-		# write out the dependency file
+		# write out the dependency file for incremental makefile generation
+		#
+		# done: script.py pickle
+		#
+		# the makefile is only regenerated if the script or parameters change
+
 		done_target = os.path.join(self.dir, "done")
 		depends = os.path.join(self.dir, "depend.mk")
 		file = open(depends, "w")

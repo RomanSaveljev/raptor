@@ -23,7 +23,7 @@ Python objects for setting up build actions in Raptor.
 
 # objects
 
-class File(object):
+class Base(object):
 	def __init__(self, agent):
 		self.agent = agent
 		agent.add_target(self)
@@ -40,10 +40,7 @@ class File(object):
 		self.inputs.extend(inputs)
 			
 	def add_output(self, output, releasable=True):
-		self.outputs.append( (output, releasable) )
-	
-	def add_outputs(self, outputs, releasable=True):
-		self.outputs.extend( [ (i, releasable) for i in outputs] )
+		self.outputs.append(Output(output, releasable))
 			
 	def action(self, command):
 		self.run = command
@@ -52,24 +49,31 @@ class File(object):
 		self.generated_dependency_file = depfile
 		
 	def finalise(self):
-		'''the agent calls this just before it uses the object.'''
 		pass
-	
-class Bitmap(File):
+
+class Input(object):
+	pass
+
+class Output(object):
+	def __init__(self, filename, releasable=True):
+		self.filename = filename
+		self.releasable = releasable
+		
+class Bitmap(Base):
 	def __init__(self, agent):
-		File.__init__(self, agent)
+		Base.__init__(self, agent)
 		self.phase = 'BITMAP'
 		self.title = 'planb.bitmap'
 
-class Resource(File):
+class Resource(Base):
 	def __init__(self, agent):
-		File.__init__(self, agent)
+		Base.__init__(self, agent)
 		self.phase = 'RESOURCE'
 		self.title = 'planb.resource'
 
-class Target(File):
+class Target(Base):
 	def __init__(self, agent):
-		File.__init__(self, agent)
+		Base.__init__(self, agent)
 		self.phase = 'ALL'
 		self.title = 'planb.target'
 
