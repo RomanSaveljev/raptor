@@ -85,8 +85,6 @@ def run():
 		]
 	t.run()
 
-	t.clean()
-
 	t.id = "48b"
 	t.name = "sysdef_layers_pp"
 	t.description = "Test system definition layer building and logging with parallel processing on"
