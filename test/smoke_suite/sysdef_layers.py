@@ -91,6 +91,10 @@ def run():
 	t.name = "sysdef_layers_pp"
 	t.description = "Test system definition layer building and logging with parallel processing on"
 	t.command = command + " --pp on"
+	t.countmatch = [
+		["<recipe .*layer='Component with Layer Dependencies' component='dependent'.*>", 32],
+		["<recipe .*layer='Build Generated Source' component='build generated source'.*>", 1]		
+		]
 	t.run()
 
 	t.id = "48"
