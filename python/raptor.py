@@ -238,7 +238,7 @@ class Project(ModelNode):
 class Component(ModelNode):
 	"""A group of projects or, in symbian-speak, a bld.inf.
 	"""
-	def __init__(self, filename, layername="raptor_cli", componentname=""):
+	def __init__(self, filename, layername="commandline", componentname=""):
 		super(Component,self).__init__(filename)
 		# Assume that components are specified in bld.inf files for now
 		# One day that tyranny might end.
