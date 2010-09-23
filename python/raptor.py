@@ -238,7 +238,7 @@ class Project(ModelNode):
 class Component(ModelNode):
 	"""A group of projects or, in symbian-speak, a bld.inf.
 	"""
-	def __init__(self, filename, layername="", componentname=""):
+	def __init__(self, filename, layername="commandline", componentname=""):
 		super(Component,self).__init__(filename)
 		# Assume that components are specified in bld.inf files for now
 		# One day that tyranny might end.
@@ -373,7 +373,16 @@ class Layer(ModelNode):
 			loop_number += 1
 			specNode = raptor_data.Specification("metadata_" + self.name)
 
-			componentList = " ".join([str(c.bldinf_filename) for c in block])
+			pp_system_definition = str(generic_path.Join(sbs_build_dir, "pp_system_definition_{0:03}.xml".format(loop_number)))
+			try:
+				sys_def_writer = raptor_xml.SystemModel(build, aDoRead=False)
+				for component in block:
+					sys_def_writer.AddComponent(component)
+				sys_def_writer.Write(pp_system_definition)
+				build.Debug("Wrote intermediate parallel-parsing system definition file " + pp_system_definition)
+			except Exception as e:
+				build.Error("Failed to write intermediate parallel-parsing system definition file " + pp_system_definition)
+				raise
 
 
 			configList = " ".join([c.name for c in self.configs if c.name != "build" ])
@@ -386,7 +395,7 @@ class Layer(ModelNode):
 
 			# add some basic data in a component-wide variant
 			var = raptor_data.Variant()
-			var.AddOperation(raptor_data.Set("COMPONENT_PATHS", componentList))
+			var.AddOperation(raptor_data.Set("PP_SYSTEM_DEFINITION", pp_system_definition))
 			var.AddOperation(raptor_data.Set("MAKEFILE_PATH", makefile_path))
 			var.AddOperation(raptor_data.Set("CONFIGS", configList))
 			var.AddOperation(raptor_data.Set("CLI_OPTIONS", cli_options))
