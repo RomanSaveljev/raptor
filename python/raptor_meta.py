@@ -2840,14 +2840,10 @@ class MetaReader(object):
 	def ModuleName(self,aBldInfPath):
 		"""Calculate the name of the ROM/emulator batch files that run the tests"""
 
-		def LeftPortionOf(pth,sep):
-			""" Internal function to return portion of str that is to the left of sep. 
-			The split is case-insensitive."""
-			length = len((pth.lower().split(sep.lower()))[0])
-			return pth[0:length]
-			
-		modulePath = LeftPortionOf(LeftPortionOf(os.path.dirname(aBldInfPath), "group"), "ongoing")
-		moduleName = os.path.basename(modulePath.strip("/"))
+		epocroot = str(self.ExportPlatforms[0]['EPOCROOT'])
+		modulePath = os.path.dirname(aBldInfPath).replace(epocroot, '', 1).lower().replace('group', '')
+		# Only join the last 3 folder names in case the path is very long
+		moduleName = '_'.join([i for i in modulePath.split('/') if i][-3:])
 		
 		# Ensure that ModuleName does not return blank, if the above calculation determines
 		# that moduleName is blank
