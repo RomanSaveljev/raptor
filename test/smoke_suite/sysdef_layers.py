@@ -50,7 +50,9 @@ def run():
 		"$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/apps/helloworld.rsc",
 		]
 	t.addbuildtargets('smoke_suite/test_resources/sysdef/build_gen_source/bld.inf', [
-		"helloworld_/helloworld_HelloWorld.rsc.rpp"
+		"helloworld_/helloworld_HelloWorld.rsc.rpp",
+		"helloworld_/helloworld_HelloWorld.rsc",
+		"helloworld_/helloworld_HelloWorld.rsc.d"
 		])
 	t.addbuildtargets('smoke_suite/test_resources/sysdef/dependent/bld.inf', [
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o",
@@ -77,7 +79,8 @@ def run():
 		"helloworld_exe/winscw/urel/HelloWorld_Main.o",
 		"helloworld_exe/winscw/urel/helloworld.UID.CPP",
 		"helloworld_exe/winscw/urel/helloworld_UID_.o",
-		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.rpp"
+		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.rpp",
+		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.d"
 		])
 	t.countmatch = [
 		["<recipe .*layer='Component with Layer Dependencies' component='dependent'.*>", 33],
@@ -89,10 +92,6 @@ def run():
 	t.name = "sysdef_layers_pp"
 	t.description = "Test system definition layer building and logging with parallel processing on"
 	t.command = command + " --pp on"
-	t.countmatch = [
-		["<recipe .*layer='Component with Layer Dependencies' component='dependent'.*>", 32],
-		["<recipe .*layer='Build Generated Source' component='build generated source'.*>", 1]		
-		]
 	t.run()
 
 	t.id = "48"
