@@ -132,7 +132,7 @@ class TestRaptorXML(unittest.TestCase):
 		# Probably redundant, but return local environment (at least its dictionary) to pre-test state
 		os.environ["SOURCEROOT"] = sourceroot
 
-	def testWriting(self):
+	def testSystemDefinitionWriting(self):
 		# Test creating a system model not from a file
 		model = raptor_xml.SystemModel(self.__logger, aDoRead=False)
 		sbsHome = os.environ["SBS_HOME"]
