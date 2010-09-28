@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -116,5 +116,106 @@ class FilterSAX(Filter, xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHan
 			
 		return self.ok
 	
+class RaptorLogNotValid(Exception):
+	pass
+
+class FilterPerRecipe(FilterSAX):
+	# Define this in your class
+	def handleRecipe(self):
+		# These variables are available to you:
+		# self.name
+		# self.target
+		# self.host
+		# self.layer
+		# self.component
+		# self.bldinf
+		# self.mmp
+		# self.config
+		# self.platform
+		# self.phase
+		# self.source
+		# self.prereqs
+		# self.text
+		# self.exit
+		# self.attempt (final attempt number)
+		# self.flags
+		# self.start
+		# self.elapsed
+
+		return False
+	
+	# Helper functions
+	def getOrUndef(self, key, hash='self'):
+		'''Output prettifier - gata getter, or just return '<undef>' if the
+		attribute is not set.'''
+
+		if hash=='self':
+			hash=self
+		if self.has_key(key):
+			return self[key]
+		else:
+			return '<undef>'
+
+	# data keys
+	recipeData = ['name','target','host','layer','component','bldinf','mmp','config','platform','phase','source','prereqs']
+	statusData = ['exit','attempt','flags']
+	timeData = ['start','elapsed']
+
+	# methods from the SAX parser
+	def startDocument(self):
+		self.inRecipe = False
+		self.text = ""
+
+	def startElement(self, name, attributes):
+		if name == "recipe":
+			if self.inRecipe:
+				self.error(RaptorLogNotValid("Nested recipes; {0} recipe for {1} inside {2} recipe for {3}".format(self.getOrBlank('name', hash=attibutes), self.getOrBlank('target',hash=attributes), self.getOrBlank('name'), self.getOrBlank('target') )))
+			else:
+				self.inRecipe = True
+				self.__copyHash(attributes, self.__dict__, self.recipeData )		
+		elif self.inRecipe:
+			if name == "status":
+				self.__copyHash(attributes, self.__dict__, self.statusData)
+			elif name == "time":
+				self.__copyHash(attributes, self.__dict__, self.timeData)
+			else:
+				self.error(RaptorLogNotValid("Unexpected <{0}> tag in {1} recipe for {2}".format(name, self.getOrBlank('name'), self.getOrBlank('target'))))
+	
+	def endElement(self, name):
+		if name == "recipe":
+			if not self.inRecipe:
+				self.error(RaptorLogNotValid("Extra recipe close tag"))
+			else:
+				self.HandleRecipe()
+				self.inRecipe = False
+				def deldata(hash, keys):
+					for key in keys:
+						if hash.has_key(key):
+							del hash[key]
+				
+				deldata(self.__dict__,self.recipeData+self.statusData+self.timeData)
+				self.text=""
+
+	def characters(self, char):
+		if self.inRecipe:
+			self.text += char
+
+	def error(self, exception):
+		"the parse found an error which is (possibly) recoverable"
+		pass
+		
+	def fatalError(self, exception):
+		"the parser thinks an error occurred which should stop everything"
+		pass
+		
+	def warning(self, exception):
+		"the parser found something to complain about that might not matter"
+		pass
+
+	def __copyHash(self, fro, to, keys):
+		for key in keys:
+			if fro.has_key(key):
+				to[key] = fro[key]
+
 
 # the end
