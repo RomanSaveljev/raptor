@@ -13,12 +13,11 @@
 # Description:
 #
 
-EPOC_ROOT:=$(patsubst %/,%,$(EPOCROOT))
-TOBLDINF:=$(dir $(subst :,,$(subst $(EPOC_ROOT)/,,$(COMPONENT_META))))
+TOBLDINF:=$(dir $(subst :,,$(subst $(EPOCROOT)/,,$(COMPONENT_META))))
 
 ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
     ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT)):=1
-    ROMDIR:=$(EPOC_ROOT)/epoc32/rom/$(TOBLDINF)
+    ROMDIR:=$(EPOCROOT)/epoc32/rom/$(TOBLDINF)
 
     # Default values
     ROMFILETYPE:=file
@@ -132,7 +131,7 @@ $(ALLTARGET)::ROMFILE
 ROMFILE::
 	$(call startrule,rombuild) \
 	$(GNUMKDIR) -p $(ROMDIR) \
-	$(if $(ROMFILE_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOC_ROOT)/,,$(ROMFILENAME))\n//\n$(DATATEXT)" > $(ROMFILENAME)) \
+	$(if $(ROMFILE_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME))\n//\n$(DATATEXT)" > $(ROMFILENAME)) \
 	$(if $(BUILDROMTARGET),&& echo "$(ROMFILETYPE)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(1)$(ROMDECORATIONS)" >> $(ROMFILENAME)) \
 	$(if $(RAMTARGET),&& echo "$(ROMFILETYPE_RAM)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(ROMPATH_RAM)$(ROMFILE_RAM)$(ROMDECORATIONS_RAM)" >> $(ROMFILENAME)) \
 	$(call endrule,buildromfiletarget)
