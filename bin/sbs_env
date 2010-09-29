@@ -74,7 +74,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 			export CYGWIN=nodosfilewarning
 			__MOUNTOPTIONS__=-o noacl -o user
 			__UMOUNTOPTIONS__=
-
+	fi
     # Command for unifying path strings. For example, "c:\some\path" and
     # "/cygdrive/c/some/path" will both be converted into "c:/some/path".
 	u="$__CYGWIN__/bin/cygpath.exe -m"
@@ -107,7 +107,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 		export PYTHONPATH=$($u "$SBS_PYTHONPATH")
 	fi
 
-else	
+	
 	PYDIR=python27 # not exported on purpose
 	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}
 	PATH=$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/bin:$SBS_HOME/$HOSTPLATFORM_DIR/bin:$PATH
@@ -116,4 +116,3 @@ else
 	export PATH LD_LIBRARY_PATH
 	export __PYTHON__=python
 fi
-
