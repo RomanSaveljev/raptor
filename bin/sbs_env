@@ -107,7 +107,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 		export PYTHONPATH=$($u "$SBS_PYTHONPATH")
 	fi
 
-	
+else	
 	PYDIR=python27 # not exported on purpose
 	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}
 	PATH=$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/bin:$SBS_HOME/$HOSTPLATFORM_DIR/bin:$PATH
