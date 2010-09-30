@@ -72,7 +72,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	else
 			__CYGWIN__=$SBS_CYGWIN17
 			export CYGWIN=nodosfilewarning
-			__MOUNTOPTIONS__=-o noacl -o user
+			__MOUNTOPTIONS__='-o noacl -o user'
 			__UMOUNTOPTIONS__=
 	fi
     # Command for unifying path strings. For example, "c:\some\path" and
