@@ -26,6 +26,8 @@
 
 	<!-- python replacements for standard FLMs -->
 	
+	<!-- this should really extend Tools.exe *and* planb.extension.py
+	-->
 	<interface name="planb.Tools.exe.py" extends="Tools.exe" flm="extension.flm" pickled="true">
 		<param name='SCRIPTDIR' default='$(FLMHOME)'/>
 		<param name='SCRIPT' default='planb/tools2.exe.py'/>

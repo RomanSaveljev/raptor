@@ -16,4 +16,5 @@ target.add_source_files(agent['SOURCE'].split())
 target.add_static_libraries(agent['STATICLIBRARY'].split())
 target.finalise()
 
+agent.add_target(target)
 agent.commit()

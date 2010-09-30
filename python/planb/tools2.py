@@ -29,8 +29,9 @@ class Common(planb.target.Target):
 	'''The commonality between all TOOLS2 targets (EXE and LIB).'''
 	
 	def __init__(self, agent):
-		planb.target.Target.__init__(self, agent)
+		planb.target.Target.__init__(self)
 		
+		self.agent = agent
 		self.user_includes = []
 		self.system_includes = []
 		self.source_files = []
@@ -49,19 +50,17 @@ class Common(planb.target.Target):
 	def finalise(self):
 		"""all the parameters are set so we can create ObjectFile targets."""
 
+		self.outputpath = self.agent['OUTPUTPATH'] + "/" + self.agent['TARGET'] + "_" + self.agent['TARGETTYPE'] + "/tools2/" + self.agent['VARIANTTYPE']
+		
 		if linux and not self.crosscompile:
-
 			self.cdefs = self.agent['CDEFS.LINUX'] + " " + self.agent['CDEFS']
 			self.cflags = self.agent['CFLAGS'] + " " + self.agent['OPTION_GCC']
 			self.compiler_path = self.agent['COMPILER_PATH.LINUX']
+			self.outputpath += "/" + self.agent['HOSTPLATFORM_DIR']
 		else:
 			self.cdefs = self.agent['CDEFS.WIN32'] + " " + self.agent['CDEFS']
 			self.cflags = self.agent['CFLAGS.WIN32'] + " " + self.agent['CFLAGS'] + " " + self.agent['OPTION_GCC']
 			self.compiler_path = self.agent['COMPILER_PATH.WIN32']
-		
-		self.outputpath = self.agent['OUTPUTPATH'] + "/" + self.agent['TARGET'] + "_" + self.agent['TARGETTYPE'] + "/tools2/" + self.agent['VARIANTTYPE']
-		if linux:
-			self.outputpath += "/" + self.agent['HOSTPLATFORM_DIR']
 			
 		# tell the agent about directories we need to exist
 		self.agent.add_directory(self.outputpath)
@@ -105,7 +104,7 @@ class Common(planb.target.Target):
 			obj = self.outputpath + "/" + base[0:chop] + "o"
 			self.object_files.append(obj)
 
-			object_target = planb.target.Target(self.agent)
+			object_target = planb.target.Target()
 			object_target.title = "compile2object"
 			object_target.add_input(src)
 			object_target.add_output(obj, False)    # not releasable
@@ -120,7 +119,10 @@ class Common(planb.target.Target):
 			# complete the command-line
 			command += ' %s"%s" "%s"' % (self.agent['OPT.O'], obj, src)
 			
-			object_target.action(command) 
+			object_target.action(command)
+			
+			# pass the sub-target to the agent
+			self.agent.add_target(object_target)
 			
 class Exe(Common):
 	'''A TOOLS2 target type EXE.'''

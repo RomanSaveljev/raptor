@@ -24,10 +24,7 @@ Python objects for setting up build actions in Raptor.
 # objects
 
 class Base(object):
-	def __init__(self, agent):
-		self.agent = agent
-		agent.add_target(self)
-		
+	def __init__(self):
 		self.generated_dependency_file = None
 		self.inputs = []
 		self.outputs = []
@@ -60,20 +57,20 @@ class Output(object):
 		self.releasable = releasable
 		
 class Bitmap(Base):
-	def __init__(self, agent):
-		Base.__init__(self, agent)
+	def __init__(self):
+		Base.__init__(self)
 		self.phase = 'BITMAP'
 		self.title = 'planb.bitmap'
 
 class Resource(Base):
-	def __init__(self, agent):
-		Base.__init__(self, agent)
+	def __init__(self):
+		Base.__init__(self)
 		self.phase = 'RESOURCE'
 		self.title = 'planb.resource'
 
 class Target(Base):
-	def __init__(self, agent):
-		Base.__init__(self, agent)
+	def __init__(self):
+		Base.__init__(self)
 		self.phase = 'ALL'
 		self.title = 'planb.target'
 
