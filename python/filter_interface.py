@@ -82,29 +82,19 @@ class FilterSAX(Filter, xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHan
 		"initialise"
 		
 		self.params = params
+
+		self.parser = xml.sax.make_parser(['xml.sax.expatreader'])
+		self.parser.setContentHandler(self)
+		self.parser.setErrorHandler(self)
+		
 		self.ok = True
-		try:
-			self.parser = xml.sax.make_parser(['xml.sax.expatreader'])
-			self.parser.setContentHandler(self)
-			self.parser.setErrorHandler(self)
-			
-		except Exception, ex:
-			sys.stderr.write(self.formatError(str(ex)))
-			self.ok = False
-		
+
 		return self.ok
-	
-		
+			
 	def write(self, text):
 		"process some log text"
-		try:
-			self.parser.feed(text)
-		except Exception, ex:
-			sys.stderr.write(self.formatError(str(ex)))
-			self.ok = False
-				
+		self.parser.feed(text)
 		return self.ok
-	
 
 	def close(self):
 		"finish off"
@@ -119,7 +109,7 @@ class FilterSAX(Filter, xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHan
 class RaptorLogNotValid(Exception):
 	pass
 
-class FilterPerRecipe(FilterSAX):
+class PerRecipeFilter(FilterSAX):
 	# Define this in your class
 	def handleRecipe(self):
 		# These variables are available to you:
@@ -146,20 +136,20 @@ class FilterPerRecipe(FilterSAX):
 	
 	# Helper functions
 	def getOrUndef(self, key, hash='self'):
-		'''Output prettifier - gata getter, or just return '<undef>' if the
+		'''Output prettifier - data getter, or just return '<undef>' if the
 		attribute is not set.'''
 
 		if hash=='self':
-			hash=self
-		if self.has_key(key):
-			return self[key]
+			hash=self.__dict__
+		if hash.has_key(key):
+			return hash[key]
 		else:
 			return '<undef>'
-
+	
 	# data keys
-	recipeData = ['name','target','host','layer','component','bldinf','mmp','config','platform','phase','source','prereqs']
-	statusData = ['exit','attempt','flags']
-	timeData = ['start','elapsed']
+	recipeData = set(['name','target','host','layer','component','bldinf','mmp','config','platform','phase','source','prereqs'])
+	statusData = set(['exit','attempt','flags'])
+	timeData = set(['start','elapsed'])
 
 	# methods from the SAX parser
 	def startDocument(self):
@@ -169,31 +159,28 @@ class FilterPerRecipe(FilterSAX):
 	def startElement(self, name, attributes):
 		if name == "recipe":
 			if self.inRecipe:
-				self.error(RaptorLogNotValid("Nested recipes; {0} recipe for {1} inside {2} recipe for {3}".format(self.getOrBlank('name', hash=attibutes), self.getOrBlank('target',hash=attributes), self.getOrBlank('name'), self.getOrBlank('target') )))
+				self.error(RaptorLogNotValid("Nested recipes; {0} recipe for {1} inside {2} recipe for {3}".format(self.getOrUndef('name', hash=attibutes), self.getOrUndef('target',hash=attributes), self.getOrUndef('name'), self.getOrUndef('target') )))
 			else:
 				self.inRecipe = True
-				self.__copyHash(attributes, self.__dict__, self.recipeData )		
+				self.__setHashElements(attributes, self.__dict__, self.recipeData )		
 		elif self.inRecipe:
 			if name == "status":
-				self.__copyHash(attributes, self.__dict__, self.statusData)
+				self.__setHashElements(attributes, self.__dict__, self.statusData)
 			elif name == "time":
-				self.__copyHash(attributes, self.__dict__, self.timeData)
+				self.__setHashElements(attributes, self.__dict__, self.timeData)
 			else:
-				self.error(RaptorLogNotValid("Unexpected <{0}> tag in {1} recipe for {2}".format(name, self.getOrBlank('name'), self.getOrBlank('target'))))
+				self.error(RaptorLogNotValid("Unexpected <{0}> tag in {1} recipe for {2}".format(name, self.getOrUndef('name'), self.getOrUndef('target'))))
 	
 	def endElement(self, name):
 		if name == "recipe":
 			if not self.inRecipe:
 				self.error(RaptorLogNotValid("Extra recipe close tag"))
 			else:
-				self.HandleRecipe()
+				if not self.handleRecipe():
+					self.error(RaptorLogNotValid('Handling of {0} recipe for {1} failed'.format(self.getOrUndef('name'), self.getOrUndef('target'))))
 				self.inRecipe = False
-				def deldata(hash, keys):
-					for key in keys:
-						if hash.has_key(key):
-							del hash[key]
 				
-				deldata(self.__dict__,self.recipeData+self.statusData+self.timeData)
+				self.__delData(self.recipeData|self.statusData|self.timeData)
 				self.text=""
 
 	def characters(self, char):
@@ -212,10 +199,15 @@ class FilterPerRecipe(FilterSAX):
 		"the parser found something to complain about that might not matter"
 		pass
 
-	def __copyHash(self, fro, to, keys):
+	# Private methods
+	def __setHashElements(self, fro, to, keys):
 		for key in keys:
 			if fro.has_key(key):
 				to[key] = fro[key]
 
+	def __delData(self, keys):
+		for key in keys:
+			if self.__dict__.has_key(key):
+				del self.__dict__[key]
 
 # the end

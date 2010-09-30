@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -91,7 +91,7 @@ class TestFilterInterface(unittest.TestCase):
 		self.assertFalse(filter.failed)
 
 	def testPerRecipeFilter(self):
-		class testFilter(filter_interface.FilterPerRecipe):
+		class testFilter(filter_interface.PerRecipeFilter):
 			recipes = [ { 'name':'recipe1', 'target':'target1', 'host':'host1', 'layer':'layer1',  'component':'component1', 'bldinf':'test1.inf', 'mmp':'test1.mmp', 'config':'winscw_test1', 'platform':'plat1', 'phase':'PHASE1', 'source':'source1', 'prereqs':'prereqs1', 'text':'\nTest text 1\n\n'},
 			{ 'name':'recipe2', 'target':'target2', 'host':'host2', 'layer':'layer2',  'component':'component2', 'bldinf':'test2.inf', 'mmp':'test2.mmp', 'config':'winscw_test2', 'platform':'', 'phase':'PHASE2', 'source':'', 'prereqs':'', 'text':'\nTest text 2\n\n'} ]
 
