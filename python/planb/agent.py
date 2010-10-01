@@ -16,7 +16,18 @@
 # planb.agent module
 
 '''
-Python API for setting up build actions in Raptor.
+The agent module encapsulates all the knowledge about the environment in which
+build targets are being created and used.
+
+Scripts communicate with the environment (and possibly each other) by creating
+an instance of the agent.Connect object.
+
+Where data comes from (such as the values of build parameters) and how the
+build is actually scheduled and executed are completely hidden.
+
+Think of this module as a database of build targets: it can be used to set up
+the targets but it does not execute the build itself. You are describing the
+build but doing the build is Raptor's job. 
 '''
 
 import optparse
@@ -29,17 +40,29 @@ import sys
 # objects
 
 class PlanbException(Exception):
+	'''In planb, errors always raise exceptions rather than returning
+	something and/or printing messages.'''
 	pass
 	
 class Connect(object):
-	"""object to contain state information for API calls.
+	"""Represents a connection to a database of build information.
+	
+	Can be queried for build parameters.
+	Can record the presence of build targets.
 	
 	For example,
 	
-	agent = planb.agent.Connect()
-	target = planb.target.Target(agent)
-	target.action("echo this makes my target")
-	agent.commit()
+	  agent = planb.agent.Connect()
+	  epocroot = agent['EPOCROOT']
+	
+	  target = planb.target.Target()
+	  target.action("echo this makes my target in " + epocroot)
+	
+	  agent.add_target(target)
+	  agent.commit()
+	  
+	After "commit" the connection should be considered closed. Further calls
+	to the object's will raise an exception.
 	"""
 	def __init__(self):
 		# ignore the user's flags, all ours start with --planb
@@ -76,12 +99,16 @@ class Connect(object):
 		self.directories = set()
 	
 	def __getitem__(self, name):
-		"""retrieve parameters as if this were a dictionary.
+		"""Retrieve build parameters as if this were a dictionary.
 		
 		For example,
 		
 		print agent['EPOCROOT']
 		"""
+		# it would have been nice to use agent.EPOCROOT instead but we seem
+		# to have quite a few parameters with a "." in the name and you can't
+		# do agent.OPT.L as far as I know.
+		
 		# in future we may have multiple private dictionaries or even
 		# a connection to some other process.
 		
@@ -94,15 +121,24 @@ class Connect(object):
 		return self.parameters[name]
 	
 	def add_directory(self, directory):
-		'''care is needed creating directories so let the agent manage it.'''
+		'''Care is needed creating directories so let the agent manage it.
+		
+		Perhaps directories should just be a type of Target?'''
 		self.directories.add(directory)
 				
 	def add_target(self, target):
+		'''Register a new target.'''
 		self.targets.append(target)
 		
 	def commit(self):
-		'''pass all the dependencies and actions to the build engine.'''
+		'''Close the connection.
+		
+		This will pass all the dependencies and actions to the build engine
+		for building at some point.'''
 		# this is hardcoded to create makefiles for now...
+		# there really should be different helper objects for walking the
+		# target tree and doing whatever it is we want - makefiles, analysis
+		# or even actually building stuff directly from python.
 		
 		# the directory for the makefiles
 		if not os.path.isdir(self.dir):

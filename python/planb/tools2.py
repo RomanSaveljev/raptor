@@ -16,7 +16,11 @@
 # planb.tools2 module
 
 '''
-Python API for setting up TOOLS2 build actions in Raptor.
+The tools2 module defines all the target classes for the TOOLS2 platform.
+
+Currently the only types buildable for TOOLS2 are EXE and LIB.
+
+And only EXE is defined here so far...
 '''
 
 import os
@@ -26,7 +30,11 @@ import sys
 linux = sys.platform.lower().startswith("linux")
 
 class Common(planb.target.Target):
-	'''The commonality between all TOOLS2 targets (EXE and LIB).'''
+	'''The commonality between all TOOLS2 targets (EXE and LIB).
+	
+	This is basically a collection of source->object targets. So some of
+	the code here is generic and should be factored out into other
+	modules.'''
 	
 	def __init__(self, agent):
 		planb.target.Target.__init__(self)
@@ -48,7 +56,7 @@ class Common(planb.target.Target):
 		self.source_files.extend(files)
 	
 	def finalise(self):
-		"""all the parameters are set so we can create ObjectFile targets."""
+		"""all the parameters are set so we can create Object File targets."""
 
 		self.outputpath = self.agent['OUTPUTPATH'] + "/" + self.agent['TARGET'] + "_" + self.agent['TARGETTYPE'] + "/tools2/" + self.agent['VARIANTTYPE']
 		
@@ -125,8 +133,12 @@ class Common(planb.target.Target):
 			self.agent.add_target(object_target)
 			
 class Exe(Common):
-	'''A TOOLS2 target type EXE.'''
+	'''A TOOLS2 target type EXE.
 	
+	This extends Common, which contains all the object file targets. So all
+	this class needs to do is set the action to be the link command and set
+	the inputs to be the objects and libraries we use.
+	'''
 	def __init__(self, exename, agent):
 		Common.__init__(self, agent)
 		
@@ -149,7 +161,7 @@ class Exe(Common):
 		
 		so we can create all the targets we need now."""
 		
-		# finalise our parent class first to create all the ObjectFile targets
+		# finalise our parent class first to create all the object-file targets
 		Common.finalise(self)
 		
 		# the main output of this target
