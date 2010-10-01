@@ -22,19 +22,20 @@ def run():
 
 	t.description = """Checks that if you give an incomplete (unbuildable) configuration that raptor complains nicely without a traceback."""
 	
-	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c arm.v5.rvct4_0" # missing "urel" or "udeb"
+	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c arm.v5.rvct4_0 -c arm.v5.rvct2_2" # missing "urel" or "udeb"
 	t.targets = [
 		]	
 	t.mustmatch = [
-	"sbs: error: The selected configuration .-c option. 'arm\.v5\.rvct4_0' is incomplete or invalid and cannot result in a successful build: Unset variable 'VARIANTTYPE' used in spec 'none' with config 'none'"
+	"sbs: error: arm.v5.rvct2_2 is a bad configuration: Unset variable '.*' used in spec 'none' with config 'none'",
+	"sbs: error: arm.v5.rvct4_0 is a bad configuration: Unset variable '.*' used in spec 'none' with config 'none'",
+	"sbs: error: Build stopped because some requested configurations are incomplete or invalid: arm.v5.rvct2_2, arm.v5.rvct4_0"
 	]
 	t.mustnotmatch = [
 		".*Traceback.*",
 		".*UninitialisedVariableException.*"
 	]
-	t.errors = 1
+	t.errors = 3
 	t.returncode = 1
 	
 	t.run()
-	t.print_result()
 	return t

@@ -920,13 +920,21 @@ class Raptor(object):
 			configurations."""
 
 		tools_ok = True
+		tool_problems = []
 		for b in configs:
 			self.Debug("Tool check for %s", b.name)
+			config_ok = False  #default
 			try:
 				evaluator = self.GetEvaluator(None, b, gathertools=True)
-				tools_ok = tools_ok and self.CheckToolset(evaluator, b.name)
+				config_ok = self.CheckToolset(evaluator, b.name)
 			except raptor_data.UninitialisedVariableException,e:
-				self.FatalError("The selected configuration (-c option) '{0}' is incomplete or invalid and cannot result in a successful build: {1}".format(b.name,str(e)))
+				tool_problems.append(b.name)
+				self.Error("{0} is a bad configuration: {1}".format(b.name,str(e)))
+
+			tools_ok = tools_ok and config_ok
+
+		if len(tool_problems) > 0:
+			self.FatalError("Build stopped because some requested configurations are incomplete or invalid: {0}".format(", ".join(tool_problems)))
 
 		return tools_ok
 
