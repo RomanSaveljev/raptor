@@ -28,7 +28,7 @@ def run():
 	t.mustmatch = [
 	"sbs: error: arm.v5.rvct2_2 is a bad configuration: Unset variable '.*' used in spec 'none' with config 'none'",
 	"sbs: error: arm.v5.rvct4_0 is a bad configuration: Unset variable '.*' used in spec 'none' with config 'none'",
-	"sbs: error: Build stopped because some requested configurations are incomplete or invalid: arm.v5.rvct2_2, arm.v5.rvct4_0"
+	"sbs: error: Build stopped because the following requested configurations are incomplete or invalid: arm.v5.rvct2_2, arm.v5.rvct4_0"
 	]
 	t.mustnotmatch = [
 		".*Traceback.*",
