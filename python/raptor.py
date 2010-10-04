@@ -934,7 +934,7 @@ class Raptor(object):
 			tools_ok = tools_ok and config_ok
 
 		if len(tool_problems) > 0:
-			self.FatalError("Build stopped because some requested configurations are incomplete or invalid: {0}".format(", ".join(tool_problems)))
+			self.FatalError("Build stopped because the following requested configurations are incomplete or invalid: {0}".format(", ".join(tool_problems)))
 
 		return tools_ok
 
