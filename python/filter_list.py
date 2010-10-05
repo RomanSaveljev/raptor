@@ -142,7 +142,7 @@ class FilterList(filter_interface.Filter):
 				try:
 					ok = filter.open(raptor_instance)
 				except Exception, e:
-					sys.stderr.write(filter.formatError(str(ex)))
+					sys.stderr.write(filter.formatError(str(e)))
 					ok = False
 
 				if ok:

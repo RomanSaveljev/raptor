@@ -47,7 +47,7 @@ class Filter_EXEs(filter_interface.PerRecipeFilter):
 	def handleRecipe(self):
 		if (self.name == 'linkandpostlink' or self.name == 'win32simplelink') and self.target.endswith('.exe'):
 			if (len(self.configs) == 0 or (self.config in self.configs)) and
-			  len(self.layers) == 0 or (self.layer in self.layers):
+			  (len(self.layers) == 0 or (self.layer in self.layers)):
 				layer = self.formatData('layer') or 'nolayer'
 				config = self.formatData('config') or 'noconfig'
 				filename = "{0}_{1}.txt".format(layer,config)
