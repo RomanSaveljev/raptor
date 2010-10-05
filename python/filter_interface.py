@@ -74,11 +74,11 @@ class Filter(object):
 						matched = True
 						break
 				if not matched:
-					raise ValueError("Named parameter '{0}' not valid".format(key))
+					raise ValueError("Named parameter '{0}' not valid in filter {1}".format(key,self.__class__.__name__))
 			else:
 				# Unnamed arg
 				if not '' in names:
-					raise ValueError("All parameters to this filter must be named")
+					raise ValueError("All parameters to the {0} filter must be named".format(self.__class__.__name__))
 				else:
 					r[''].append(param.strip())
 		return r	
