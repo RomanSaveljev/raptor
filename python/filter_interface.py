@@ -36,6 +36,53 @@ class Filter(object):
 	def formatWarning(self, message):
 		return "sbs: warning: " + message + "\n"	
 
+	def parseNamedParams(self, names, params):
+		''' Match named parameters e.g. ['a=b','c=d'] against a list of expected
+		names.  Allow for abbreviations.
+		'''
+		r = {}
+		
+		# Shorten all the names so they match abbreviations
+		shortnames = []
+
+		for name in names:
+			shortname = ""
+			conflict = True
+			while len(shortname)<len(name) and conflict:
+				shortname+=name[len(shortname)]
+				conflict = False
+				othernames = names[:] # Copy
+				othernames.remove(name)
+				for othername in othernames:
+					if othername.startswith(shortname):
+						conflict = True
+						break
+				if conflict == False:
+					shortnames.append((shortname,name))
+					r[name] = [] # Prime the hash key for this param
+			if conflict:
+				raise KeyError("Parameter name '{0}' duplicated".format(name))
+
+		# Parse the params
+		for param in params:
+			if '=' in param:
+				(key,value) = param.split('=')
+				matched = False
+				for (shortname, name) in shortnames:
+					if key.strip().startswith(shortname):
+						r[name].append(value.strip())
+						matched = True
+						break
+				if not matched:
+					raise ValueError("Named parameter '{0}' not valid".format(key))
+			else:
+				# Unnamed arg
+				if not '' in names:
+					raise ValueError("All parameters to this filter must be named")
+				else:
+					r[''].append(param.strip())
+		return r	
+			
 import sys
 import xml.sax
 
@@ -93,7 +140,8 @@ class FilterSAX(Filter, xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHan
 			
 	def write(self, text):
 		"process some log text"
-		self.parser.feed(text)
+		if self.ok:
+			self.parser.feed(text)
 		return self.ok
 
 	def close(self):
@@ -135,16 +183,15 @@ class PerRecipeFilter(FilterSAX):
 		return False
 	
 	# Helper functions
-	def getOrUndef(self, key, hash='self'):
-		'''Output prettifier - data getter, or just return '<undef>' if the
-		attribute is not set.'''
+	def formatData(self, key, hash='self'):
+		'''Output prettifier - return the attribute value, or just return 'undef' if the attribute is not set.'''
 
 		if hash=='self':
 			hash=self.__dict__
 		if hash.has_key(key):
 			return hash[key]
 		else:
-			return '<undef>'
+			return 'undef'
 	
 	# data keys
 	recipeData = set(['name','target','host','layer','component','bldinf','mmp','config','platform','phase','source','prereqs'])
@@ -159,7 +206,7 @@ class PerRecipeFilter(FilterSAX):
 	def startElement(self, name, attributes):
 		if name == "recipe":
 			if self.inRecipe:
-				self.error(RaptorLogNotValid("Nested recipes; {0} recipe for {1} inside {2} recipe for {3}".format(self.getOrUndef('name', hash=attibutes), self.getOrUndef('target',hash=attributes), self.getOrUndef('name'), self.getOrUndef('target') )))
+				self.error(RaptorLogNotValid("Nested recipes; {0} recipe for {1} inside {2} recipe for {3}".format(self.formatData('name', hash=attributes), self.formatData('target',hash=attributes), self.formatData('name'), self.formatData('target') )))
 			else:
 				self.inRecipe = True
 				self.__setHashElements(attributes, self.__dict__, self.recipeData )		
@@ -169,7 +216,7 @@ class PerRecipeFilter(FilterSAX):
 			elif name == "time":
 				self.__setHashElements(attributes, self.__dict__, self.timeData)
 			else:
-				self.error(RaptorLogNotValid("Unexpected <{0}> tag in {1} recipe for {2}".format(name, self.getOrUndef('name'), self.getOrUndef('target'))))
+				self.error(RaptorLogNotValid("Unexpected <{0}> tag in {1} recipe for {2}".format(name, self.formatData('name'), self.formatData('target'))))
 	
 	def endElement(self, name):
 		if name == "recipe":
@@ -177,7 +224,7 @@ class PerRecipeFilter(FilterSAX):
 				self.error(RaptorLogNotValid("Extra recipe close tag"))
 			else:
 				if not self.handleRecipe():
-					self.error(RaptorLogNotValid('Handling of {0} recipe for {1} failed'.format(self.getOrUndef('name'), self.getOrUndef('target'))))
+					self.error(RaptorLogNotValid('Handling of {0} recipe for {1} failed'.format(self.formatData('name'), self.formatData('target'))))
 				self.inRecipe = False
 				
 				self.__delData(self.recipeData|self.statusData|self.timeData)

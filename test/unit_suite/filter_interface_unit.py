@@ -46,6 +46,7 @@ class TestFilterInterface(unittest.TestCase):
 
 				if self.startcount < 0:
 					self.failed = True
+					# Report the number of excessive start elements
 					sys.stdout.write('FAIL: Seen {0} too many start elements'.format(0-self.startcount))
 
 			def endElement(self, name):
@@ -53,6 +54,7 @@ class TestFilterInterface(unittest.TestCase):
 
 				if self.endcount < 0:
 					self.failed = True
+					# Report the number of excessive end elements
 					sys.stdout.write('FAIL: Seen {0} too many end elements'.format(0-self.endcount))
 
 			def endDocument(self):
@@ -66,6 +68,7 @@ class TestFilterInterface(unittest.TestCase):
 
 				if self.charcount < 0:
 					self.failed = True
+					# Report the number of excessive characters
 					sys.stdout.write('FAIL: Seen {0} too many characters'.format(0-self.charcount))
 
 			def finish(self):
