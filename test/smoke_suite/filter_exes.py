@@ -63,8 +63,8 @@ def run():
 	t.name = "filter_exes_specified_output"
 	t.id = "999d"
 	t.command = "sbs_filter --filter=filter_exes[output=$(EPOCROOT)/epoc32/build/filter_exes_test] "+log
-	t.mustmatch = [ "Wrote 1 file\(s\) into .*epoc32/build/filter_exes_test/one_armv5_urel\.txt",
-		"Wrote 1 file\(s\) into .*epoc32/build/filter_exes_test/two_winscw_udeb\.txt" ]
+	t.mustmatch = [ "Wrote 1 file\(s\) into .*epoc32/build/filter_exes_test[/\\\\]one_armv5_urel\.txt",
+		"Wrote 1 file\(s\) into .*epoc32/build/filter_exes_test[/\\\\]two_winscw_udeb\.txt" ]
 	t.targets = [ "$(EPOCROOT)/epoc32/build/filter_exes_test/one_armv5_urel.txt",
 		"$(EPOCROOT)/epoc32/build/filter_exes_test/two_winscw_udeb.txt"]
 	t.run()
