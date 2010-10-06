@@ -49,7 +49,6 @@
 		<set name="PLATMACROS.VAR" value=""/>
 		<set name="PLATMACROS.TOOLCHAIN" value=""/>
 		
-		<set name="BLDINF_OUTPUTPATH" value="$(SBS_BUILD_DIR)"/>
 		<set name="CAPABILITY" value=""/>
 		<set name="CDEFS" value="__SUPPORT_CPP_EXCEPTIONS__ _UNICODE __SYMBIAN32__ __EPOC32__ __MARM__ __EABI__ __PRODUCT_INCLUDE__=&quot;$(PRODUCT_INCLUDE)&quot; $(MMPDEFS) $(ARMMACROS)"/>
 		<set name="CODE_SEGMENT_START" value=""/>

@@ -1,0 +1,28 @@
+
+// This is a test component
+
+// There are no MMP files, just extensions (FLMs)
+PRJ_EXTENSIONS
+
+// scripts are located relative to this bld.inf
+
+// runs for all platforms and variants (e.g. armv5 and winscw, urel and udeb)
+//
+START EXTENSION planb.extension.py ext1
+OPTION SCRIPT a.py
+OPTION PARAMS all
+END
+
+// runs once for each platform (e.g. armv5 and winscw)
+//
+START EXTENSION planb.variant.independent.extension.py ext2
+OPTION SCRIPT a.py
+OPTION PARAMS no_var_dep
+END
+
+// runs once per build
+//
+START EXTENSION planb.platform.independent.extension.py ext3
+OPTION SCRIPT a.py
+OPTION PARAMS no_plat_dep
+END

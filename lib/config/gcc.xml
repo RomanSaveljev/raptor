@@ -76,7 +76,6 @@
 		<set name='MMPDEFS' value=''/>
 		<set name='TARGET' value=''/>
 		<set name='TARGETTYPE' value=''/>
-		<set name='BLDINF_OUTPUTPATH' value='$(SBS_BUILD_DIR)'/>
 
 		<set name='OUTPUTPATH' value='$(SBS_BUILD_DIR)'/>
 		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2' host='win.*'/>

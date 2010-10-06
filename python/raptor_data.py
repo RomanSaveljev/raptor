@@ -197,6 +197,7 @@ class Interface(Model):
 		self.flm = None
 		self.abstract = False
 		self.extends = None
+		self.pickled = False
 		self.params = []
 		self.paramgroups = []
 
@@ -209,6 +210,14 @@ class Interface(Model):
 		except KeyError:
 			raise BadReferenceError("Cannot extend interface because it cannot be found: "+str(self.extends))
 
+	def isPickled(self, cache):
+		if self.pickled:
+			return True
+		if self.extends != None:
+			parent = self.FindParent(cache)
+			return parent.isPickled(cache)
+		return False
+	
 	def GetParams(self, cache):
 		if self.extends != None:
 			parent = self.FindParent(cache)
@@ -269,6 +278,8 @@ class Interface(Model):
 			self.abstract = (value == "true")
 		elif name == "extends":
 			self.extends = value
+		elif name == "pickled":
+			self.pickled = (value == "true")
 		else:
 			raise InvalidPropertyError()
 

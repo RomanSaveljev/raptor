@@ -49,6 +49,9 @@
 :sbspythonpath
 @IF NOT "%SBS_PYTHONPATH%"=="" SET PYTHONPATH=%SBS_PYTHONPATH%
 
+@REM Add the Raptor python modules to whatever PYTHONPATH we got
+@SET PYTHONPATH=%PYTHONPATH%;%SBS_HOME%\python
+
 @REM Use the mingw set by the environment if possible
 @SET __MINGW__=%SBS_MINGW%
 @IF "%__MINGW__%"=="" SET __MINGW__=%SBS_HOME%\win32\mingw

@@ -112,6 +112,8 @@ else
 	__PYTHON__=python
 fi
 
+# add the Raptor python modules to whatever PYTHONPATH we got
+export PYTHONPATH=$PYTHONPATH%:$SBS_HOME/python
 
 # call raptor_start.py with the arguments
 

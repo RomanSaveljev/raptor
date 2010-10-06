@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<build xmlns="http://symbian.com/xml/build" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symbian.com/xml/build ../../../schema/build/2_0.xsd">
+
+	<!-- planb interfaces : a new way of doing extension FLMs
+	
+	the "pickled" attribute is used to indicate that a python pickle file
+	containing the FLM parameters should be created by the front end. This
+	allows the planb script easy access to the same parameters that an FLM
+	would see.
+	
+	pickled is inherited from a parent interface.
+	-->
+	<interface name="planb.base" extends="base.flm" abstract="true" pickled="true">
+		<param name='EPOCROOT'/>
+		<param name='EPOCBLD'/>
+		<param name='EXTENSION_ROOT'/>
+		<param name='PRODUCT_INCLUDE'/>
+	</interface>
+
+	<!-- run once per build - don't care about VARIANTPLATFORM or VARIANTYPE
+	-->
+	<interface name="planb.platform.independent.extension.py" extends="planb.base" flm="pi_extension.flm">
+		<param name='SCRIPTDIR' default='$(EXTENSION_ROOT)'/>
+		<param name='SCRIPT'/>
+		<param name='PARAMS' default=''/>
+	</interface>
+	
+	<!-- run once per platform - just care about VARIANTPLATFORM
+	-->
+	<interface name="planb.variant.independent.extension.py" extends="planb.platform.independent.extension.py" flm="vi_extension.flm">
+		<param name='VARIANTPLATFORM'/>
+	</interface>
+	
+	<!-- run for all platforms and variants - care about VARIANTPLATFORM and VARIANTTYPE
+	-->
+	<interface name="planb.extension.py" extends="planb.variant.independent.extension.py" flm="extension.flm">
+		<param name='VARIANTTYPE'/>
+	</interface>
+
+	<!-- python replacements for standard FLMs -->
+	
+	<!-- this should really extend Tools.exe *and* planb.extension.py
+	-->
+	<interface name="planb.Tools.exe.py" extends="Tools.exe" flm="extension.flm" pickled="true">
+		<param name='SCRIPTDIR' default='$(FLMHOME)'/>
+		<param name='SCRIPT' default='planb/tools2.exe.py'/>
+		<param name='PARAMS' default=''/>
+	</interface>
+		
+</build>

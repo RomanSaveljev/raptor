@@ -1,0 +1,6 @@
+
+# a planb python extension which runs only once for each platform
+
+VARIANTTYPE:=all_variants
+
+include $(FLMHOME)/planb/extension.flm
