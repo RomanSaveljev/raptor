@@ -70,7 +70,7 @@ class Filter_EXEs(filter_interface.PerRecipeFilter):
 					(num, file) = self.fileswritten[filename]
 					self.fileswritten[filename] = (num+1, file)
 
-				file.write(self.target)
+				file.write(os.path.basename(self.target))
 
 				try:
 					self.unmatchedlayers.remove(self.layer)
