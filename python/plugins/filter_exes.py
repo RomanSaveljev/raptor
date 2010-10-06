@@ -57,20 +57,20 @@ class Filter_EXEs(filter_interface.PerRecipeFilter):
 					pass # No output path to join
 
 				if not filename in self.fileswritten:
+					newfilename = filename
 					if os.path.exists(filename):
 						# Oops - file already exists
-						newfilename = filename
 						index = 2 # Start with .txt2
 						while os.path.exists(filename+str(index)):
 							index += 1
-						filename = newfilename+str(index)
-					file = open(filename,"w")
-					self.fileswritten[filename] = (1, file)
+						newfilename = filename+str(index)
+					file = open(newfilename,"w")
+					self.fileswritten[filename] = (newfilename, 1, file)
 				else:
-					(num, file) = self.fileswritten[filename]
-					self.fileswritten[filename] = (num+1, file)
+					(realfilename, num, file) = self.fileswritten[filename]
+					self.fileswritten[filename] = (realfilename, num+1, file)
 
-				file.write(os.path.basename(self.target))
+				file.write(os.path.basename(self.target)+"\n")
 
 				try:
 					self.unmatchedlayers.remove(self.layer)
@@ -91,16 +91,15 @@ class Filter_EXEs(filter_interface.PerRecipeFilter):
 		if len(self.configs) > 0:
 			for config in self.unmatchedconfigs:
 				self.info("Config '{0}' did not match any EXEs\n".format(config))
-		for filewritten in self.fileswritten.keys():
-			(num, file) = self.fileswritten[filewritten]
+		for (filename, num, file) in self.fileswritten.values():
 			file.close()
-			self.info("Wrote {0} file(s) into {1}\n".format(num, filewritten) )
+			self.info("Wrote {0} file(s) into {1}\n".format(num, filename) )
 
 	def error(self,exception):
 		sys.stderr.write(self.formatError(str(exception)))
 
 	def fatalError(self,exception):
-		for (num,file) in self.fileswritten.values():
+		for (realfilename, num,file) in self.fileswritten.values():
 			file.close()
 
 		raise(exception)
