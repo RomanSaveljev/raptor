@@ -1,0 +1,7 @@
+
+TARGET:=$(COMPONENT_META).docs
+
+ALL:: $(TARGET)
+
+$(call raptor_recipe,doc_component,$(TARGET),,echo $(TARGET))
+

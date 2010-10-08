@@ -1,0 +1,7 @@
+
+TARGET:=$(TARGET).docs
+
+ALL:: $(TARGET)
+
+$(call raptor_recipe,doc_target,$(TARGET),,echo $(TARGET))
+
