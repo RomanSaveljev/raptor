@@ -789,15 +789,22 @@ $(foreach ITEM,$(OPTION_REPLACE_COMPILER),$(eval $(call option_replace,$(ITEM)))
 
 define e32abiv2_compile
 
+# $(1) : target file
+# $(2) : single source file or c++ source file list <=> MULTIFILE_ENABLED
+# $(3) : empty or c source file list <=> MULTIFILE_ENABLED
+# $(4) : language specific options (e.g. C++ vs C)
+# $(5) : type (optional) - "compile" [default] or "preprocess"
+
 $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
+$(eval TYPE:=$(if $(5),$(5),compile))
 
-# $4 is for language specific options (e.g. C++ vs C)
 $(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(TRACE_THISCOMPONENT_ALLRULE) 
-	$(call startrule,compile,,$(2))		\
+	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
 		$(CC) $(LICENSERETRY_OPTION) \
+			$(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \
 			$(CC_CORE_ARGS) \
 			$(OPTION_COMPILER) $(if $(MULTIFILE_ENABLED),$(4),$(3)) \
 			$(if $(LTCG),$(LTCG_OPTION),) \
@@ -809,11 +816,11 @@ $(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOUR
 			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
 			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
-			$(if $(NO_DEPEND_GENERATE),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
+			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
 			$(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
 			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $(MULTIFILEOBJECT) \
 			--via $$(call dblquote, $(MULTIFILE_VIAFILE)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
-	$(call endrule,compile)
+	$(call endrule,$(TYPE))
 
 ifeq ($(NO_DEPEND_GENERATE),)
   CLEANTARGETS:=$$(CLEANTARGETS) $(DEPENDFILENAME)
@@ -842,6 +849,24 @@ endif
 
 CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(MULTIFILEOBJECT),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS)) $(if $(GENERATELINKERFEEDBACK),$(FEEDBACKFILE))
 
+
+## Preprocess target ###################################################
+
+define e32abiv2_preprocess
+  $(eval PREPROCESSTARGET:=$(1).$(VARIANTPLATFORM).$(VARIANTTYPE).pre)
+
+  PREPROCESS:: $(PREPROCESSTARGET)
+  $(call e32abiv2_compile,$(PREPROCESSTARGET),$(1),$(2),,preprocess)
+  CLEANTARGETS:=$$(CLEANTARGETS) $(PREPROCESSTARGET)
+endef
+
+# Only generate preprocess targets if they are requested
+ifneq ($(filter PREPROCESS,$(call uppercase,$(MAKECMDGOALS))),)
+  $(foreach F,$(CFILES),$(eval $(call e32abiv2_preprocess,$(F),$(C_LANG_OPTION))))
+  $(foreach F,$(CPPFILES),$(eval $(call e32abiv2_preprocess,$(F),$(CPP_LANG_OPTION))))
+endif
+
+
 ## Listing target ###################################################
 # Very similar to compile, apart from the extra flags passed to the
 # compile and different output options
@@ -849,37 +874,6 @@ CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(M
 define map2listfile
 $(call relocatefiles,$(INTERMEDIATEPATH),$(call extractandmap,$(CPPFILEEXTENSIONS) $(CFILEEXTENSIONS),.lis,$1))
 endef
-
-
-define e32abiv2_cpponly
-# $1 is the sourcefile
-
-$(eval CPPONLYTARGET:=$(strip $(call extractandmap,$(CPPFILEEXTENSIONS) $(CFILEEXTENSIONS),.$(subst _,.,$(call sanitise,$(FULLVARIANTPATH))).pre,$1)))
-
-CPPONLY:: $(CPPONLYTARGET)
-
-$(CPPONLYTARGET): $(1) $(PROJECT_META)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
-	$(call startrule,e32cpponly,,$(1))		\
-		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
-		$(CC) $(LICENSERETRY_OPTION) $(SYMBIAN_CCFLAGS) \
-			$(CC_CPPONLY_ARGS) \
-			$(OPTION_COMPILER) 						\
-			$(call makemacrodef,-D,$(COMPILER_INTERWORK_DEFINES) $(CDEFS))				\
-			$(if $(PREINCLUDE),$(PREINCLUDE_OPTION) ,)$(call concat, $(PREINCLUDE_OPTION) ,$(call dblquote,$(PREINCLUDE)))\
-			$(if $(SET_ARMINC),$(if $(RVCTINC),$(COMPILER_SYSTEM_INCLUDE_OPTION)$(call dblquote,$(RVCTINC)),),)       \
-			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                   \
-			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
-			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
-			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
-			$$(call dblquote, $$<) $(OUTPUT_OPTION) $$(@) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
-	$(call endrule,e32cpponly)
-
-CLEANTARGETS:=$$(CLEANTARGETS) $(CPPONLYTARGET)
-endef
-
-ifneq ($(filter CPPONLY,$(call uppercase,$(MAKECMDGOALS))),)
-$(foreach F,$(CPPFILES) $(CFILES),$(eval $(call e32abiv2_cpponly,$(F))))
-endif
 
 define e32abiv2_listing
 # $1 is the sourcefile
@@ -925,7 +919,7 @@ endif
 
 endef
 
-# No point at all in generating listing targetsif we aren't going to make them
+# No point at all in generating listing targets if we aren't going to make them
 ifneq ($(filter LISTING,$(call uppercase,$(MAKECMDGOALS))),)
 $(foreach F,$(CPPFILES) $(CFILES),$(eval $(call e32abiv2_listing,$(F))))
 endif

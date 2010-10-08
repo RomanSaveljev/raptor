@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -69,6 +69,7 @@ $(call addglobal,FREEZE)
 $(call addglobal,LIBRARY)
 $(call addglobal,LISTING)
 $(call addglobal,MAKEFILE)
+$(call addglobal,PREPROCESS)
 $(call addglobal,REALLYCLEAN)
 $(call addglobal,BITMAP)
 $(call addglobal,RESOURCE)
@@ -128,6 +129,8 @@ WHATARMV5::
 WHATEXPORTS::
 
 LISTING::
+
+PREPROCESS::
 
 CLEAN::
 

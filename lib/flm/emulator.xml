@@ -76,6 +76,7 @@
 		<param name='CC'/>
 		<param name='CDEFS' default=''/>
 		<param name='CFLAGS' default=''/>
+		<param name='CPPONLYOPTION' default='-P'/>
 		<param name='CW_DEFAULT_LIBS'/>
 		<param name='CW_RUNTIME_STATIC'/>
 		<param name='CW_RUNTIME_NONSTATIC'/>

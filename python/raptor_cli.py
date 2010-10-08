@@ -39,6 +39,7 @@ FINAL          Allow extension makefiles to execute final commands
 FREEZE         Freeze exported functions in a .DEF file
 LIBRARY        Create import libraries from frozen .DEF files
 LISTING        Create assembler listing files for source files
+PREPROCESS     Create preprocessor output files alongside source files
 REALLYCLEAN    Same as CLEAN but also remove exported files
 RESOURCE       Create resource files
 ROMFILE        Create an IBY file to be included in a ROM
