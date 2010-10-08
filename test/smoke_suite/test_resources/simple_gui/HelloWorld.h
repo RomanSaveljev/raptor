@@ -28,7 +28,7 @@
 
 #include <eikon.hrh>
 
-#include <helloworld.rsg>
+#include <HelloWorld.rsg>
 #include "HelloWorld.hrh"
 
 

@@ -1,0 +1,13 @@
+Lowercasing for resources, including rsg and rsc files, are not support in Raptor.
+If it causes build errors on Linux, people should fix case issues in their source 
+code and keep case consistent.
+
+But because Raptor used to support this feature, option "--resource_rsg_casefolding"
+is provided for people to use tempararily, so they could continue to build
+their code on Linux before they fixed all the case issues in their code. However,
+they should not use this option as a permanent work around.
+
+Usage: --resource_rsg_casefolding on
+
+
+This doesn't affact build on Windows.

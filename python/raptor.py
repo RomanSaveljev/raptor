@@ -537,6 +537,7 @@ class Raptor(object):
 		self.doCheck = False
 		self.doWhat = False
 		self.doParallelParsing = False
+		self.doCaseFolding_rsg = False
 		self.mission = Raptor.M_BUILD
 
 		# what platform and filesystem are we running on?
@@ -717,6 +718,18 @@ class Raptor(object):
 			self.doParallelParsing = False
 		else:
 			self.Warn(" parallel parsing option must be either 'on' or 'off' (was %s)"  % type)
+			return False
+
+		return True
+
+	def SetRsgCaseFolding(self, type):
+		type = type.lower()
+		if type == "on":
+			self.doCaseFolding_rsg = True
+		elif type == "off":
+			self.doCaseFolding_rsg = False
+		else:
+			self.Warn("option for resource rsg file case folding must be either 'on' or 'off' (was {0})".format(type))
 			return False
 
 		return True

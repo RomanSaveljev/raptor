@@ -167,6 +167,16 @@ parser.add_option("--pp",action="store",dest="parallel_parsing",
 					"off" - Parse bld.infs serially 
 				     """)
 
+parser.add_option("--resource_rsg_casefolding", action="store", dest="resource_rsg_casefolding",
+				help="""Note:
+					This option should Not be used permanently to work around case issues on Linux.
+					Case issues need to be fixed and this option should only be used before that has done.   
+  
+					Controls whether case insensitive for resource rsg files:
+					"on"  - case insensitive
+					"off" - case sensitive (default) 
+				     """)
+
 parser.add_option("-v","--version",action="store_true",dest="version",
 				help="Print the version number and exit.")
 
@@ -245,6 +255,7 @@ def DoRaptor(Raptor, args):
 				 'source_target' : Raptor.AddSourceTarget,
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
+				 'resource_rsg_casefolding' : Raptor.SetRsgCaseFolding,
 			 	 'version' : Raptor.PrintVersion
 				}
 

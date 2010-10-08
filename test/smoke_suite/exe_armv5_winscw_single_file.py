@@ -27,8 +27,8 @@ def run():
 	t.command = "sbs -b smoke_suite/test_resources/simple_gui/Bld.inf -c armv5 -c winscw"
 	t.addbuildtargets('smoke_suite/test_resources/simple_gui/Bld.inf', [
 		"helloworld_exe/helloworld.mbm_bmconvcommands",
-		"helloworld_exe/helloworld_HelloWorld.rsc.rpp",
-		"helloworld_exe/helloworld_HelloWorld.rsc.d",
+		"HelloWorld_exe/HelloWorld_HelloWorld.rsc.rpp",
+		"HelloWorld_exe/HelloWorld_HelloWorld.rsc.d",
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o",
 		"helloworld_exe/armv5/udeb/HelloWorld_Application.o.d",
 		"helloworld_exe/armv5/udeb/HelloWorld_AppUi.o",
@@ -91,8 +91,8 @@ def run():
 		"helloworld_exe/winscw/urel/helloworld_UID_.o",
 		"helloworld_exe/winscw/urel/helloworld_UID_.o.d",
 		"helloworld_exe/winscw/urel/helloworld_urel_objects.lrf",
-		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.rpp",
-		"helloworld_reg_exe/helloworld_reg_HelloWorld_reg.rsc.d"
+		"HelloWorld_reg_exe/HelloWorld_reg_HelloWorld_reg.rsc.rpp",
+		"HelloWorld_reg_exe/HelloWorld_reg_HelloWorld_reg.rsc.d"
 	])
 
 	t.run()

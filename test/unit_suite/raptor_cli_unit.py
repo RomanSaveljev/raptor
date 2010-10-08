@@ -150,6 +150,10 @@ class TestRaptorCli(unittest.TestCase):
 		self.pp=onoroff
 		return True
 
+	def SetRsgCaseFolding(self, onoroff):
+		self.casefolding_rsg = onoroff
+		return True
+
 	def AddProject(self, project):
 		return True
 
@@ -198,6 +202,7 @@ class TestRaptorCli(unittest.TestCase):
 				'--source-target', 'some_source_file.cpp',
 				'--source-target', 'some_resource_file.rss',
 				'--pp', 'on',
+				'--resource_rsg_casefolding', 'on',
 				'--no-depend-include',
 				'--no-depend-generate']
 		
@@ -218,6 +223,7 @@ class TestRaptorCli(unittest.TestCase):
 		self.assertEqual(self.targets[0], 'some_source_file.cpp')
 		self.assertEqual(self.targets[1], 'some_resource_file.rss')
 		self.assertEqual(self.pp, 'on')
+		self.assertEqual(self.casefolding_rsg, 'on')
 		self.assertEqual(self.noDependInclude, True)
 		self.assertEqual(self.noDependGenerate, True)
 

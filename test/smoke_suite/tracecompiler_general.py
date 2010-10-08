@@ -42,23 +42,23 @@ def run():
 		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/testTC_0x1000008d_TraceDefinitions.h"
 		]
 	t.addbuildtargets('smoke_suite/test_resources/tracecompiler/testTC/group/bld.inf', [
-		"testtc_dll/armv5/udeb/wlanhwinit.o",
-		"testtc_dll/armv5/udeb/wlanhwinit.o.d",
-		"testtc_dll/armv5/udeb/wlanhwinitmain.o",
-		"testtc_dll/armv5/udeb/wlanhwinitmain.o.d",
-		"testtc_dll/armv5/udeb/wlanhwinitpermparser.o",
-		"testtc_dll/armv5/udeb/wlanhwinitpermparser.o.d",
-		"testtc_dll/armv5/udeb/testTC_udeb_objects.via",
-		"testtc_dll/armv5/udeb/testTC{000a0000}.def",
-		"testtc_dll/armv5/urel/wlanhwinit.o",
-		"testtc_dll/armv5/urel/wlanhwinit.o.d",
-		"testtc_dll/armv5/urel/wlanhwinitmain.o",
-		"testtc_dll/armv5/urel/wlanhwinitmain.o.d",
-		"testtc_dll/armv5/urel/wlanhwinitpermparser.o",
-		"testtc_dll/armv5/urel/wlanhwinitpermparser.o.d",	
-		"testtc_dll/armv5/urel/testTC_urel_objects.via",
-		"testtc_dll/armv5/urel/testTC{000a0000}.def",
-		"testtc_dll/tracecompile_testTC_dll_1000008d.done"
+		"testTC_dll/armv5/udeb/wlanhwinit.o",
+		"testTC_dll/armv5/udeb/wlanhwinit.o.d",
+		"testTC_dll/armv5/udeb/wlanhwinitmain.o",
+		"testTC_dll/armv5/udeb/wlanhwinitmain.o.d",
+		"testTC_dll/armv5/udeb/wlanhwinitpermparser.o",
+		"testTC_dll/armv5/udeb/wlanhwinitpermparser.o.d",
+		"testTC_dll/armv5/udeb/testTC_udeb_objects.via",
+		"testTC_dll/armv5/udeb/testTC{000a0000}.def",
+		"testTC_dll/armv5/urel/wlanhwinit.o",
+		"testTC_dll/armv5/urel/wlanhwinit.o.d",
+		"testTC_dll/armv5/urel/wlanhwinitmain.o",
+		"testTC_dll/armv5/urel/wlanhwinitmain.o.d",
+		"testTC_dll/armv5/urel/wlanhwinitpermparser.o",
+		"testTC_dll/armv5/urel/wlanhwinitpermparser.o.d",	
+		"testTC_dll/armv5/urel/testTC_urel_objects.via",
+		"testTC_dll/armv5/urel/testTC{000a0000}.def",
+		"testTC_dll/tracecompile_testTC_dll_1000008d.done"
 	])
 	t.run()
 	
@@ -91,13 +91,13 @@ def run():
 		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/HelloWorld_0xe78a5aa3_TraceDefinitions.h"
 		]
 	t.addbuildtargets('smoke_suite/test_resources/tracecompiler/TC_featurevariant/group/bld.inf', [
-		"helloworld_exe/armv5/udeb/HelloWorld.o",
-		"helloworld_exe/armv5/udeb/HelloWorld.o.d",
-		"helloworld_exe/armv5/udeb/HelloWorld_udeb_objects.via",
-		"helloworld_exe/armv5/urel/HelloWorld.o",
-		"helloworld_exe/armv5/urel/HelloWorld.o.d",
-		"helloworld_exe/armv5/urel/HelloWorld_urel_objects.via",
-		"helloworld_exe/tracecompile_HelloWorld_exe_e78a5aa3.done"
+		"HelloWorld_exe/armv5/udeb/HelloWorld.o",
+		"HelloWorld_exe/armv5/udeb/HelloWorld.o.d",
+		"HelloWorld_exe/armv5/udeb/HelloWorld_udeb_objects.via",
+		"HelloWorld_exe/armv5/urel/HelloWorld.o",
+		"HelloWorld_exe/armv5/urel/HelloWorld.o.d",
+		"HelloWorld_exe/armv5/urel/HelloWorld_urel_objects.via",
+		"HelloWorld_exe/tracecompile_HelloWorld_exe_e78a5aa3.done"
 	])
 	t.antitargets = []
 	t.run()

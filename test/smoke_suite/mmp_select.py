@@ -30,10 +30,10 @@ def run():
 		"$(EPOCROOT)/epoc32/release/winscw/urel/HelloWorld.exe"
 		]
 	t.addbuildtargets('smoke_suite/test_resources/basics/helloworld/Bld.inf', [
-		"helloworld_exe/armv5/udeb/HelloWorld.o",
-		"helloworld_exe/armv5/urel/HelloWorld.o",
-		"helloworld_exe/winscw/udeb/HelloWorld.o",
-		"helloworld_exe/winscw/urel/HelloWorld.o"
+		"HelloWorld_exe/armv5/udeb/HelloWorld.o",
+		"HelloWorld_exe/armv5/urel/HelloWorld.o",
+		"HelloWorld_exe/winscw/udeb/HelloWorld.o",
+		"HelloWorld_exe/winscw/urel/HelloWorld.o"
 	])
 	t.run()
 	return t
