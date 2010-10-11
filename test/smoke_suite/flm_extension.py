@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -29,17 +29,31 @@ def run():
 	t.run()
 	
 	t.name = "per_component_flm"
+	t.usebash = True
 	t.command = "sbs --configpath=test/smoke_suite/test_resources/docs" + \
 	            " -b smoke_suite/test_resources/simple_dll/bld.inf" + \
 	            " -b smoke_suite/test_resources/simple_lib/bld.inf" + \
-	            " -c armv5.documentation"
-	t.targets = [
-		"$(EPOCROOT)/epoc32/build/flm_test_1_2",
-		"$(EPOCROOT)/epoc32/tools/makefile_templates/tools/flm_export.xml",
-		"$(EPOCROOT)/epoc32/tools/makefile_templates/tools/flm_export.flm"
+	            " -b smoke_suite/test_resources/tools2/bld.inf" + \
+	            " -c armv5.documentation -c tools2.documentation -f-"
+	t.targets = [         
+		"$(EPOCROOT)/epoc32/docs/simple_dll.txt",
+		"$(EPOCROOT)/epoc32/docs/CreateStaticDLL.mmp",
+
+		"$(EPOCROOT)/epoc32/docs/simple_lib.txt",
+		"$(EPOCROOT)/epoc32/docs/simple.mmp",
+
+		"$(EPOCROOT)/epoc32/docs/tools2.txt",
+		"$(EPOCROOT)/epoc32/docs/tool_exe.mmp",
+		"$(EPOCROOT)/epoc32/docs/tool_lib1.mmp",
+		"$(EPOCROOT)/epoc32/docs/tool_lib2.mmp"
+		]
+	t.mustmatch = [
+		"simple_dll.txt uses .+/docs/CreateStaticDLL.mmp",
+		"simple_lib.txt uses .+/docs/simple.mmp",
+		"tools2.txt uses .+/docs/tool_(exe|lib1|lib2).mmp .+/docs/tool_(exe|lib1|lib2).mmp .+/docs/tool_(exe|lib1|lib2).mmp"
 		]
 	t.run()
-	
+		
 	t.name = "flm_extension"
 	t.print_result()
 	return t
