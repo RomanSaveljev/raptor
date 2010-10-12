@@ -114,7 +114,7 @@ fi
 
 # add the Raptor python modules to whatever PYTHONPATH we got
 if [ "$OSTYPE" == "cygwin" ]; then
-	PYTHONPATH=$PYTHONPATH;$($u "$SBS_HOME/python")
+	PYTHONPATH=$($u "$PYTHONPATH;$SBS_HOME/python")
 else
 	PYTHONPATH=$PYTHONPATH:$SBS_HOME/python
 fi
