@@ -722,16 +722,8 @@ class Raptor(object):
 
 		return True
 
-	def SetRsgCaseFolding(self, type):
-		type = type.lower()
-		if type == "on":
-			self.doCaseFolding_rsg = True
-		elif type == "off":
-			self.doCaseFolding_rsg = False
-		else:
-			self.Warn("option for resource rsg file case folding must be either 'on' or 'off' (was {0})".format(type))
-			return False
-
+	def SetRsgCaseFolding(self, TrueOrFalse):
+		self.doCaseFolding_rsg = TrueOrFalse
 		return True
 
 	def AddProject(self, projectName):

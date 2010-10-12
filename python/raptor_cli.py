@@ -167,14 +167,12 @@ parser.add_option("--pp",action="store",dest="parallel_parsing",
 					"off" - Parse bld.infs serially 
 				     """)
 
-parser.add_option("--resource_rsg_casefolding", action="store", dest="resource_rsg_casefolding",
+parser.add_option("--use-rsg-casefolding", action="store_true", dest="resource_rsg_casefolding",
 				help="""Note:
 					This option should Not be used permanently to work around case issues on Linux.
 					Case issues need to be fixed and this option should only be used before that has done.   
   
-					Controls whether case insensitive for resource rsg files:
-					"on"  - case insensitive
-					"off" - case sensitive (default) 
+					Process resource rsg files case insensitively.
 				     """)
 
 parser.add_option("-v","--version",action="store_true",dest="version",
