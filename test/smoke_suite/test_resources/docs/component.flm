@@ -24,7 +24,7 @@ ALL:: $(DOCTARGET)
 # Script to generate the per-component file. The special "make" variable $^
 # contains the list of prerequisites.
 #
-SCRIPT:=echo $(DOCTARGET) uses $$^ > $(DOCTARGET)
+SCRIPT:=echo $(DOCTARGET) uses $$(sort $$^) > $(DOCTARGET)
 
 # Create a recipe to execute the script.
 #

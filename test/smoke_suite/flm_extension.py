@@ -14,7 +14,7 @@
 # Description: 
 #
 
-from raptor_tests import SmokeTest
+from raptor_tests import SmokeTest, ReplaceEnvs
 
 def run():
 	t = SmokeTest()
@@ -48,9 +48,11 @@ def run():
 		"$(EPOCROOT)/epoc32/docs/tool_lib2.mmp"
 		]
 	t.mustmatch = [
-		"simple_dll.txt uses .+/docs/CreateStaticDLL.mmp",
-		"simple_lib.txt uses .+/docs/simple.mmp",
-		"tools2.txt uses .+/docs/tool_(exe|lib1|lib2).mmp .+/docs/tool_(exe|lib1|lib2).mmp .+/docs/tool_(exe|lib1|lib2).mmp"
+		"simple_dll.txt uses " + ReplaceEnvs(t.targets[1]),
+		"simple_lib.txt uses " + ReplaceEnvs(t.targets[3]),
+		"tools2.txt uses " + ReplaceEnvs(t.targets[5]) + " " + \
+		                     ReplaceEnvs(t.targets[6]) + " " + \
+		                     ReplaceEnvs(t.targets[7])
 		]
 	t.run()
 		
