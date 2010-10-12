@@ -574,7 +574,7 @@ include %s
 			md5hash.update(k + value)
 			dictionary[k] = value
 			
-		planbdir = os.path.join(directory, md5hash.hexdigest())
+		planbdir = directory + "/" + md5hash.hexdigest()
 		if not os.path.isdir(planbdir):
 			try:
 				os.makedirs(planbdir)
