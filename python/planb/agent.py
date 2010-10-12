@@ -75,7 +75,7 @@ class Connect(object):
 		(options, []) = parser.parse_args(flags)
 
 		# save the options (writing direct into self doesn't work)
-		self.dir = options.dir
+		self.dir = os.path.normpath(options.dir)
 		self.debug = options.debug
 		
 		# load a parameter dictionary if we can
