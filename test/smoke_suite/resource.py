@@ -138,6 +138,28 @@ def run():
 	t.mustmatch = []
 	t.run()
 
+
+	t.id = "30d"
+	t.name =  "resource_rsg_casefolding_fail"
+	t.command = "sbs -b smoke_suite/test_resources/resource/rsg_casefolding/bld.inf RESOURCE"
+	t.targets = []
+	
+	t.warnings = 1
+	t.errors = 3
+	t.returncode = 1
+	t.run("linux")
+
+	t.id = "30e"
+	t.name =  "resource_rsg_casefolding_pass"
+	t.command = "sbs -b smoke_suite/test_resources/resource/rsg_casefolding/bld.inf --use-rsg-casefolding RESOURCE"
+	t.targets = []
+
+	t.warnings = 0
+	t.errors = 0
+	t.returncode = 0
+	t.run("linux")
+
+
 	t.name = 'resource'
 	t.print_result()
 	return t
