@@ -170,7 +170,7 @@ parser.add_option("--pp",action="store",dest="parallel_parsing",
 parser.add_option("--use-rsg-casefolding", action="store_true", dest="resource_rsg_casefolding",
 				help="""This option should not be used permanently to work around case issues on Linux. Case issues need to be fixed and this option should only be used before that has been done.
 
-					Process resource rsg files case insensitively.
+					Generate resource rsg files in lowercase regardless what is specified in mmp file.
 				     """)
 
 parser.add_option("-v","--version",action="store_true",dest="version",
