@@ -1793,7 +1793,7 @@ class MMPRaptorBackend(MMPBackend):
 			
 			if self.__Raptor.doCaseFolding_rsg:
 				variant.AddOperation(raptor_data.Set("TARGET_var", target.lower()))
-				header = target.lower() + ".rsg"	# filename policy
+				header = target.lower() + ".rsg"
 			else:
 				variant.AddOperation(raptor_data.Set("TARGET_var", target))
 				header = target + ".rsg"
@@ -2608,6 +2608,7 @@ class MetaReader(object):
 			flm_export_dir = evaluator.CheckedGet("FLM_EXPORT_DIR")
 			detail['FLM_EXPORT_DIR'] = generic_path.Path(flm_export_dir)
 			detail['CACHEID'] = flm_export_dir
+			detail['INTERFACE.component'] = evaluator.Get('INTERFACE.component')
 			if raptor_utilities.getOSPlatform().startswith("win"):
 				detail['PLATMACROS'] = evaluator.CheckedGet("PLATMACROS.WINDOWS")
 			else:
@@ -2668,7 +2669,7 @@ class MetaReader(object):
 		    	+ detail['PLATFORM'] \
 		    	+ detail['PLATMACROS']
 
-		    # Keep a short version of the key for use in filenames.
+			# Keep a short version of the key for use in filenames.
 			uniq = hashlib.md5()
 			uniq.update(key)
 
@@ -2920,6 +2921,11 @@ class MetaReader(object):
 				# remember what component this spec node comes from for later
 				specNode.component = component
 
+				# if there is a per-component interface for this platform
+				# then set it for this spec node.
+				if bp['INTERFACE.component']:
+					specNode.SetInterface(bp['INTERFACE.component'])
+					
 				# add some basic data in a component-wide variant
 				var = raptor_data.Variant(name='component-wide-settings-' + plat)
 				var.AddOperation(raptor_data.Set("COMPONENT_META",str(component.bldinf_filename)))
