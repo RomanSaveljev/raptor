@@ -226,8 +226,7 @@ class FilterTerminal(filter_interface.Filter):
 				for i in m:
 					if i[0] == 'bldinf':
 						component = " (component " + i[1] + ")"
-				sys.stderr.write(str(raptor.name) + ": error: " + \
-								 text[(start + 1):end] + component + "\n")
+				sys.stderr.write(self.formatError(text[(start + 1):end] + component))
 		elif text.startswith("<warning"):
 			start = text.find(">")
 			end = text.rfind("<")
@@ -238,8 +237,7 @@ class FilterTerminal(filter_interface.Filter):
 				for i in m:
 					if i[0] == 'bldinf':
 						component = " (component " + i[1] + ")"
-				sys.stdout.write(str(raptor.name) + ": warning: " + \
-					             text[(start + 1):end] + component + "\n")
+				sys.stdout.write(self.formatWarning(text[(start + 1):end] + component))
 		elif text.startswith("<status "):
 			# detect the status report from a recipe
 			if text.find('failed') != -1:
