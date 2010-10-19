@@ -448,7 +448,7 @@ $(EXPTARGET): $(DEFFILE) $(POSTLINKER)
 	   --definput=$$(call dblquote,$(DEFFILE)) \
 	   --dump=a $(if $(POSTLINKER_SUPPORTS_ASMTYPE),$(POSTLINKER_ASM_OPTION),) \
 	   --output=$(call dblquote,$(EXPTARGETASMFILE)) && \
-	$(ASM) $(TARGET_ARCH_OPTION) $(AAPCS_OPTION) $(ASM_OUTPUT_OPTION) $$(call dblquote, $$@) $(EXPTARGETASMFILE) \
+	$(ASM) $(COMPILE_ONLY_OPTION) $(TARGET_ARCH_OPTION) $(AAPCS_OPTION) $(ASM_OUTPUT_OPTION) $$(call dblquote, $$@) $(EXPTARGETASMFILE)  \
 	$(call endrule,expgen)
 endef
 
