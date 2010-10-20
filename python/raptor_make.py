@@ -482,7 +482,7 @@ include %s
 				guard = "guard_" + hash
 
 		# generate the call to the FLM
-		if iface is not None:
+		if iface is not None and not dupe:
 			makefileset.addCall(spec.name, config.name, iface.name, useAllInterfaces, iface.GetFLMIncludePath(self.raptor.cache), parameters, guard)
 
 		# recursive includes

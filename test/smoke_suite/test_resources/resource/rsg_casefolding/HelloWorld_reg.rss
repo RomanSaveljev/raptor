@@ -15,7 +15,7 @@
 *
 */
 #include <appinfo.rh>
-#include <HelloWorld.rsg>
+#include <helloworld.rsg>
 
 UID2 KUidAppRegistrationResourceFile
 UID3 0xE800005A // application UID

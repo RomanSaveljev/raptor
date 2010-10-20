@@ -129,7 +129,7 @@ def run():
 	buildLocation = "$(EPOCROOT)/epoc32/build/" + BldInfFile.outputPathFragment('smoke_suite/test_resources/dependencies/bld.inf') + "/dependency_"
         # use one long bash command so that we can capture 
 	# the output in a way that isn't messed up with all the ordering confused.
-	t.command = " mkdir -p $(EPOCROOT)/epoc32/build/smoketestlogs ; { sleep 1 ; set -x ; \
+	t.command = " { sleep 1 ; set -x ; \
 touch smoke_suite/test_resources/dependencies/dependency.cpp; \
 echo INVALIDATE_ARMV5_DEPENDENCY_FILE >> %s/armv5/urel/dependency.o.d ; \
 echo INVALIDATE_WINSCW_DEPENDENCY_FILE >> %s/winscw/urel/dependency.o.d ;\

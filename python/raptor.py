@@ -537,6 +537,7 @@ class Raptor(object):
 		self.doCheck = False
 		self.doWhat = False
 		self.doParallelParsing = False
+		self.doCaseFolding_rsg = False
 		self.mission = Raptor.M_BUILD
 
 		# what platform and filesystem are we running on?
@@ -719,6 +720,10 @@ class Raptor(object):
 			self.Warn(" parallel parsing option must be either 'on' or 'off' (was %s)"  % type)
 			return False
 
+		return True
+
+	def SetRsgCaseFolding(self, TrueOrFalse):
+		self.doCaseFolding_rsg = TrueOrFalse
 		return True
 
 	def AddProject(self, projectName):
@@ -914,21 +919,29 @@ class Raptor(object):
 
 		return self.toolset.check(evaluator, configname)
 
-
 	def CheckConfigs(self, configs):
 		"""	Tool checking for all the buildable configurations
 			NB. We are allowed to use different tool versions for different
 			configurations."""
 
 		tools_ok = True
+		tool_problems = []
 		for b in configs:
 			self.Debug("Tool check for %s", b.name)
-			evaluator = self.GetEvaluator(None, b, gathertools=True)
-			tools_ok = tools_ok and self.CheckToolset(evaluator, b.name)
+			config_ok = False  #default
+			try:
+				evaluator = self.GetEvaluator(None, b, gathertools=True)
+				config_ok = self.CheckToolset(evaluator, b.name)
+			except raptor_data.UninitialisedVariableException,e:
+				tool_problems.append(b.name)
+				self.Error("{0} is a bad configuration: {1}".format(b.name,str(e)))
+
+			tools_ok = tools_ok and config_ok
+
+		if len(tool_problems) > 0:
+			self.FatalError("Build stopped because the following requested configurations are incomplete or invalid: {0}".format(", ".join(tool_problems)))
 
 		return tools_ok
-
-
 
 	def GatherSysModelLayers(self, systemModel, systemDefinitionRequestedLayers):
 		"""Return a list of lists of components to be built.

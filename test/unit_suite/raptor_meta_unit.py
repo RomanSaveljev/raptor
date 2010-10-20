@@ -671,7 +671,7 @@ class TestRaptorMeta(unittest.TestCase):
 	
 	
 		mmpContent = mmpFile.getContent(self.ARMV5)
-		mmpBackend = raptor_meta.MMPRaptorBackend(None, str(mmpFile.filename), str(bldInfObject.filename))
+		mmpBackend = raptor_meta.MMPRaptorBackend(self.raptor, str(mmpFile.filename), str(bldInfObject.filename))
 		mmpParser = mmpparser.MMPParser(mmpBackend)
 		parseresult = None
 		try:
