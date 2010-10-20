@@ -12,7 +12,7 @@
 # Contributors:
 #
 # Description: 
-#
+
 
 from raptor_tests import SmokeTest 
 
@@ -26,9 +26,7 @@ def run():
 		"$(EPOCROOT)/epoc32/release/armv5/lib/customdll{000a0000}.dso",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/customdll.dll",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/customdll.dll.map",
-		"$(EPOCROOT)/epoc32/release/armv5/udeb/customdll.dll.map",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/customdll.dll",
-		"$(EPOCROOT)/epoc32/release/armv5/urel/customdll.dll.map",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/customdll.dll.map"
 		]
 	# Windows-only until we know about a suitable linux version of the post-linker

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description: 
-*
+* Custom DLL - a DLL that exports functions from a static library
 */
 
 TARGET        customdll.dll
