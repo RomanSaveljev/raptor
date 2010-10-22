@@ -363,7 +363,7 @@ class Layer(ModelNode):
 
 		build.Info("Parallel Parsing: bld.infs split into %d blocks\n", number_blocks)
 		# Cause the binding makefiles to have the toplevel makefile's
-		# name.  The bindee's have __pp appended.
+		# name.  The bindee's have _pp appended.
 		tm = build.topMakefile.Absolute()
 		binding_makefiles = raptor_makefile.MakefileSet(str(tm.Dir()), build.maker.selectors, makefiles=None, filenamebase=str(tm.File()))
 		build.topMakefile = generic_path.Path(str(build.topMakefile) + "_pp")
@@ -372,8 +372,17 @@ class Layer(ModelNode):
 		for block in component_blocks:
 			loop_number += 1
 			specNode = raptor_data.Specification("metadata_" + self.name)
+			
+			# root path for generated sysdef files and their partnering makefiles
+			makefile_path = str(build.topMakefile) + "_" + str(loop_number)
 
-			pp_system_definition = str(generic_path.Join(sbs_build_dir, "pp_system_definition_{0:03}.xml".format(loop_number)))
+			try:
+				os.unlink(makefile_path) # until we have dependencies working properly
+			except Exception:
+				pass
+			
+			pp_system_definition = makefile_path + ".sysdef.xml"
+			
 			try:
 				sys_def_writer = raptor_xml.SystemModel(build, aDoRead=False)
 				for component in block:
@@ -387,11 +396,6 @@ class Layer(ModelNode):
 
 			configList = " ".join([c.name for c in self.configs if c.name != "build" ])
 
-			makefile_path = str(build.topMakefile) + "_" + str(loop_number)
-			try:
-				os.unlink(makefile_path) # until we have dependencies working properly
-			except Exception:
-				pass
 
 			# add some basic data in a component-wide variant
 			var = raptor_data.Variant()
