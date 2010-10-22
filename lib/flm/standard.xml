@@ -88,6 +88,7 @@
 		<param name='DEFAULT_SYMBIAN_NEWLIB'/>
 		<param name='CHECKLIB'/>
 		<param name='ASM'/>
+		<param name='ASM_FLAGS'/>
 		<param name='ASM_OUTPUT_OPTION'/>
 		<param name='ARM_INSTRUCTION_SET'/>
 		<param name='THUMB_INSTRUCTION_SET'/>
