@@ -46,7 +46,11 @@ include $(FLMHOME)/tools2common.flm
 ## Static libraries
 STATICLIBS:=
 ifneq ($(STATICLIBRARY),)
-STATICLIBS:=$(patsubst %,$(RELEASEPATH)/lib%.a,$(STATICLIBRARY)) $(STLPORTBINDIR)/lib$(STLPORTLIBRARY).a
+STATICLIBS:=$(patsubst %,$(RELEASEPATH)/lib%.a,$(STATICLIBRARY))
+endif
+
+ifneq ($(STLPORTLIBRARY),)
+STATICLIBS:=$(STATICLIBS) $(STLPORTBINDIR)/lib$(STLPORTLIBRARY).a
 endif
 
 # System dynamic libraries (e.g. pthreads)
