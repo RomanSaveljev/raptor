@@ -80,9 +80,11 @@
 		<set name='OUTPUTPATH' value='$(SBS_BUILD_DIR)'/>
 		<env name='SBS_STLPORTBINDIR' default='$(EPOCROOT)/epoc32/release/tools2' host='win.*' type='path'/>
 		<env name='SBS_STLPORTBINDIR' default='$(EPOCROOT)/epoc32/release/tools2/$(HOSTPLATFORM_DIR)' host='lin.*' type='path'/>
-		<set name='LIBRARYPATH' value='$(SBS_STLPORTBINDIR)' type='path'/>
+		<set name='STLPORTBINDIR' value='$(SBS_STLPORTBINDIR)'/>
+		<set name='STLPORTLIBRARY' value='stlport.5.1'/>
 		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2' host='win.*' type='path'/>
 		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2/$(HOSTPLATFORM_DIR)' host='lin.*' type='path'/>
+		<set name='OLDRELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2/linux-i386' host='lin.*' type='path'/>
 	</var>
 
 	<var name="t_deb">
@@ -92,7 +94,8 @@
 		<append name='CFLAGS' value='-g'/>
 		<append name='CDEFS' value='_DEBUG'/>
 		<append name='RELEASEPATH' value='/deb' separator=''/>
-		<append name='LIBRARYPATH' value='/deb' separator=''/>
+		<append name='OLDRELEASEPATH' value='/deb' separator=''/>
+		<append name='STLPORTBINDIR' value='/deb' separator=''/>		
 	</var>
 	<alias name="tools2_deb" meaning="tools2_base.t_deb"/>
 	
@@ -103,7 +106,8 @@
 		<append name='CFLAGS' value='-s'/>
 		<append name='CDEFS' value='NDEBUG'/>
 		<append name='RELEASEPATH' value='/rel' separator=''/>
-		<append name='LIBRARYPATH' value='/rel' separator=''/>
+		<append name='OLDRELEASEPATH' value='/rel' separator=''/>
+		<append name='STLPORTBINDIR' value='/rel' separator=''/>		
 	</var>
 	<alias name="tools2_rel" meaning="tools2_base.t_rel"/>
 	

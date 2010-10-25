@@ -23,6 +23,7 @@
 		<param name='VARIANTPLATFORM'/>
 		<param name='PLATFORM' default='$(VARIANTPLATFORM)'/>
 		<param name='LIBRARYPATH' default=''/>
+		<param name='STLPORTBINDIR' default=''/>
 		<param name='STLPORTLIBRARY' default=''/>
 		<param name='RELEASEPATH'/>
 		<param name='SOURCE'/>
