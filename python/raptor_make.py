@@ -284,6 +284,7 @@ USE_TALON:=
 
 HOSTPLATFORM:=%s
 HOSTPLATFORM_DIR:=%s
+HOSTPLATFORM32_DIR:=%s
 OSTYPE:=%s
 FLMHOME:=%s
 SHELL:=%s
@@ -298,6 +299,7 @@ include %s
 """ 		% (  raptor.name, raptor_version.fullversion(),
 			 " ".join(raptor.hostplatform),
 			 raptor.hostplatform_dir,
+			 raptor.hostplatform32_dir,
 			 self.raptor.filesystem,
 			 str(self.raptor.systemFLM),
 			 self.shellpath,

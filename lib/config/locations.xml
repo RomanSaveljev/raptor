@@ -16,6 +16,7 @@
 		<set name='GNUPREFIX' value='$(SBS_SLASHBIN)/'/>
 		
 		<env name='HOSTPLATFORM_DIR' default='linux-i386' />
+		<env name='HOSTPLATFORM32_DIR' default='linux-i386' />
 		<env name='HOSTPLATFORM' default='linux i386'/>
 		
 		<env name='SBS_GNUCPP' default='$(SBS_USRBIN)/cpp' type='tool'/>

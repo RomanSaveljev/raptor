@@ -53,6 +53,7 @@ if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ:
 
 hostplatform = os.environ["HOSTPLATFORM"].split(" ")
 hostplatform_dir = os.environ["HOSTPLATFORM_DIR"]
+hostplatform32_dir = os.environ["HOSTPLATFORM32_DIR"]
 
 # defaults can use EPOCROOT
 

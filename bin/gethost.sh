@@ -30,10 +30,23 @@ if [[ "${OSTYPE}" =~ "linux" ]]; then
         LIBC=$(echo /lib/libc-* | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
         HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 
+	# The 32-bit platform is often compatible in the sense that
+	# a) 32-bit programs can run on the 64-bit OS.
+	# b) a 64-bit OS can tell the compiler to create 32-bit executables.
+
+       	ARCH32="i386"
+
+	# deal with ubuntu/debian:
+	if [ "$ARCH" == "unknown" ]; then
+		ARCH32="${ARCH}"
+	fi
+
 	if [ "$LIBC" == "libc2_3" ]; then
         	HOSTPLATFORM_DIR="linux-${ARCH}"
+        	HOSTPLATFORM32_DIR="linux-${ARCH32}"
 	else
         	HOSTPLATFORM_DIR="linux-${ARCH}-${LIBC}"
+        	HOSTPLATFORM32_DIR="linux-${ARCH32}-${LIBC}"
 	fi
 	
 elif [[ "$OS" == "Windows_NT" ]]; then
@@ -46,6 +59,7 @@ fi
 
 if [ "$OPT" == "e" ]; then 
 	echo "export HOSTPLATFORM_DIR=$HOSTPLATFORM_DIR"
+	echo "export HOSTPLATFORM32_DIR=$HOSTPLATFORM32_DIR"
 	echo "export HOSTPLATFORM='$HOSTPLATFORM'"
 elif [ "$OPT" == "d" ]; then 
 	echo "$HOSTPLATFORM_DIR"
