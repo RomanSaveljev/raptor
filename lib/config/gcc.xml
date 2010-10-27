@@ -83,7 +83,7 @@
 		<set name='STLPORTLIBRARY' value='stlport.5.1'/>
 		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2' host='win.*' type='path'/>
 		<!-- Tools are 32-bit at the moment, so use the 32-bit directory -->
-		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2/$(HOSTPLATFORM32_DIR)' host='lin.*'/>
+		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2/$(HOSTPLATFORM32_DIR)' host='lin.*' type='path'/>
 	</var>
 
 	<var name="t_deb">
