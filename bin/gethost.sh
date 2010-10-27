@@ -47,6 +47,7 @@ if [[ "${OSTYPE}" =~ "linux" ]]; then
 elif [[ "$OS" == "Windows_NT" ]]; then
 	HOSTPLATFORM="win 32"
 	HOSTPLATFORM_DIR="win32"
+	HOSTPLATFORM32_DIR="win32"
 else
 	HOSTPLATFORM=unknown
 	HOSTPLATFORM_DIR=unknown
