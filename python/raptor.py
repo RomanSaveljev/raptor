@@ -47,8 +47,8 @@ import pluginbox
 from xml.sax.saxutils import escape
 
 
-if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ:
-	print "Error: HOSTPLATFORM and HOSTPLATFORM_DIR must be set in the environment (this is usually done automatically by the startup script)."
+if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ or not "HOSTPLATFORM32_DIR" in os.environ:
+	print "Error: HOSTPLATFORM, HOSTPLATFORM_DIR and HOSTPLATFORM32_DIR must be set in the environment (this is usually done automatically by the startup script)."
 	sys.exit(1)
 
 hostplatform = os.environ["HOSTPLATFORM"].split(" ")

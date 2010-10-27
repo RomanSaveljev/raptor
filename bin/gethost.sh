@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -41,13 +41,8 @@ if [[ "${OSTYPE}" =~ "linux" ]]; then
 		ARCH32="${ARCH}"
 	fi
 
-	if [ "$LIBC" == "libc2_3" ]; then
-        	HOSTPLATFORM_DIR="linux-${ARCH}"
-        	HOSTPLATFORM32_DIR="linux-${ARCH32}"
-	else
-        	HOSTPLATFORM_DIR="linux-${ARCH}-${LIBC}"
-        	HOSTPLATFORM32_DIR="linux-${ARCH32}-${LIBC}"
-	fi
+       	HOSTPLATFORM_DIR="linux-${ARCH}-${LIBC}"
+       	HOSTPLATFORM32_DIR="linux-${ARCH32}-${LIBC}"
 	
 elif [[ "$OS" == "Windows_NT" ]]; then
 	HOSTPLATFORM="win 32"
