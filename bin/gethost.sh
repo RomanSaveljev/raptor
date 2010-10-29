@@ -25,7 +25,7 @@
 
 getopts de  OPT
 
-if [[ "${OSTYPE}" =~ "linux" ]]; then
+if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 	ARCH=$(uname -i)
         LIBC=$(echo /lib/libc-* | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
         HOSTPLATFORM="linux ${ARCH} ${LIBC}"
