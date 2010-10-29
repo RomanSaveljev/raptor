@@ -103,7 +103,7 @@ defaults = {
 		"systemDefinitionBase" : generic_path.Path("."),
 		"systemFLM" : generic_path.Path("lib/flm"),
 		"systemPlugins" : generic_path.Path("python/plugins"),
-		"topMakefile" : generic_path.Join(sbs_build_dir,"Makefile"),
+		"topMakefile" : generic_path.Join(sbs_build_dir,"Makefile.%TIME"),
 		"tries": 1,
 		"writeSingleMakefile": True,
 		"ignoreOsDetection": False,
@@ -470,7 +470,7 @@ class Layer(ModelNode):
 		# name.  The bindee's have __pp appended.
 		tm = build.topMakefile.Absolute()
 		binding_makefiles = raptor_makefile.MakefileSet(str(tm.Dir()), build.maker.selectors, makefiles=None, filenamebase=str(tm.File()))
-		build.topMakefile = generic_path.Path(str(build.topMakefile) + "_pp")
+		build.topMakefile = generic_path.Path(str(build.topMakefile).replace("%TIME", build.timestring) + "_pp")
 
 		loop_number = 0
 		for block in component_blocks:
@@ -689,7 +689,10 @@ class Raptor(object):
 		self.toolset = None
 
 		self.starttime = time.time()
-		self.timestring = time.strftime("%Y-%m-%d-%H-%M-%S")
+		# Create a unique time id that combines millisecond part of start time
+		# and id of the process which Raptor python is running on 
+		timeid = str(round(self.starttime, 3)).split('.')[1] + '-' + str(os.getpid())
+		self.timestring = time.strftime("%Y-%m-%d-%H-%M-%S.") + timeid
 
 		self.fatalErrorState = False
 
