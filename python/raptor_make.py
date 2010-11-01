@@ -186,13 +186,16 @@ class MakeEngine(object):
 			# console output is lost.  The annotation file has a copy of this
 			# output in the "parse" job and it turns out to be uncorrupted.
 			self.copyLogFromAnnoFile = (evaluator.Get("copylogfromannofile") == "true")
-			self.annoFileName = None
+			self.annoFileName = None # store the anno file name
+			anno_file_name = None # temp variable to aid determining of anno file name
 
 			if self.copyLogFromAnnoFile:
+				# need to iterate over all self.raptor.makeOptions to obtain the anno file, if it's present
 				for o in self.raptor.makeOptions:
-					self.annoFileName = string_following("--emake-annofile=", o)
-					if self.annoFileName:
-						self.raptor.Info("annofile: " + o)
+					anno_file_name = string_following("--emake-annofile=", o) # will be None if no anno file is in "o"
+					if anno_file_name:
+						self.annoFileName = anno_file_name # anno file name found
+						self.raptor.Info("annofile: " + self.annoFileName)
 
 				if not self.annoFileName:
 					self.raptor.Info("Cannot copy log from annotation file as no annotation filename was specified via the option --mo=--emake-annofile=<filename>")
