@@ -177,6 +177,10 @@ parser.add_option("-v","--version",action="store_true",dest="version",
 parser.add_option("--what",action="store_true",dest="what",
 				help="Print out the names of the files created by the build. Do not build anything.")
 
+parser.add_option("--metadepfile",action="store",dest="metadepfile",
+				help="""This option is only for use by parent-invocations of raptor to communicate to child-invocations.  It is a filename that indicates where to write dependency information for the makefiles in this build.  The file should be in GNU make format, containing a rule of the form: "$(PARSETARGET) :  <dep1> <dep2> ... <depn>"
+""")
+
 def GetArgs(Raptor, args):
 	"Process command line arguments for a Raptor object"
 	return DoRaptor(Raptor,args)
@@ -250,6 +254,7 @@ def DoRaptor(Raptor, args):
 				 'source_target' : Raptor.AddSourceTarget,
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
+				 'metadepfile' : Raptor.SetMetadepfile,
 			 	 'version' : Raptor.PrintVersion
 				}
 
