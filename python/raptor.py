@@ -955,7 +955,7 @@ class Raptor(object):
 		global name
 		print name, "version", raptor_version.fullversion()
 		self.mission = Raptor.M_VERSION
-		return False
+		return True
 
 	# worker methods
 

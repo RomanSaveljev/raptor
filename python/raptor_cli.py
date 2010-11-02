@@ -257,11 +257,8 @@ def DoRaptor(Raptor, args):
 	if parser.values.quiet:
 		Raptor.RunQuietly(True)
 
-	# some options imply that Raptor should exit immediately (e.g. --version)
+	# only return True if there are no command-line errors
 	keepGoing = True
-
-	if parser.values.version:
-		keepGoing = False
 
 	# Parse through the command line arguments passed, and call the
 	# corresponding function with the correct parameter.
@@ -286,9 +283,4 @@ def CommandFile(file):
 	print raptor.name + ": error: command file '%s' was not expanded" % file
 	return False
 
-
-
-
 # end of the raptor_cli module
-
-
