@@ -155,6 +155,15 @@ class ModelNode(object):
 	def isunfurled(self, c):
 		return self.unfurled == False
 
+	def alldeps(self):
+		print("Node {0}: deps {1} ".format(self.id, str(self.deps)))
+		for d in self.deps:
+			yield d	
+		for c in self.children:
+			for d in c.alldeps():
+				yield d
+
+
 	def unfurl(self, build):
 		"""Find any children of this node by processing it, produces specs"""
 		pass
@@ -178,6 +187,18 @@ class ModelNode(object):
 		pass
 
 	def realise_makefile(self, build, specs):
+
+		if build.metadepfile is not None:
+			try:
+				with open(str(build.metadepfile),"w+") as f:
+					print "I AM: {0} with {1} children".format(self.id, len(self.children))
+					for d in self.alldeps():
+						print "-include {0}".format(d[1])
+						f.write("-include {0}".format(d[1]))
+			except Exception,e:
+				build.Warn("Could not write metadepfile: {0} {1}".format(str(build.metadepfile), str(e)))
+				
+				
 		makefilename_base = build.topMakefile
 		if self.name is not None:
 			makefile = generic_path.Path(str(makefilename_base) + "_" + raptor_utilities.sanitise(self.name))
@@ -693,6 +714,7 @@ class Raptor(object):
 
 		self.fatalErrorState = False
 
+		self.metadepfile = None # Don't write a dependency file by default
 
 		if self.load_defaults:
 			# Load up the raptor defaults from XML (formerly from the ConfigFile function)
@@ -930,6 +952,15 @@ class Raptor(object):
 			return False
 
 		return True
+
+	def SetMetadepfile(self, filename):
+		try:
+			self.metadepfile = generic_path.Path(filename)
+		except Exception,e:
+			self.Error("--metadepfile  option was not a valid filename: {0}".format(filename))
+			return False
+		return True
+
 
 	def AddProject(self, projectName):
 		self.projects.add(projectName.lower())
