@@ -4,14 +4,15 @@
 	<interface name="build.makefiles" extends="base.flm" flm='build.flm' >
 		<param name='SBS_BUILD_DIR' /> 
 		<param name='DATE' /> 
-		<param name='PP_SYSTEM_DEFINITION' />
 		<param name='MAKEFILE_PATH' />
+		<param name='COMPONENT_PATHS' />
 		<param name='CONFIGS' default=''/>
 		<param name='CLI_OPTIONS' default=''/>
 		<param name='NO_BUILD' default='' />
 		<param name='DOEXPORT' default='1' />
 		<param name='PERBLOCKEXPORT' default='' />
 		<param name='METADEPFILES' default='' />
+		<param name='NEWMETADEPFILE' default='' />
 	</interface>
 
 </build>

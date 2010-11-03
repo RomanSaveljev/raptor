@@ -181,6 +181,10 @@ parser.add_option("--metadepfile",action="store",dest="metadepfile",
 				help="""This option is only for use by parent-invocations of raptor to communicate to child-invocations.  It is a filename that indicates where to write dependency information for the makefiles in this build.  The file should be in GNU make format, containing a rule of the form: "$(PARSETARGET) :  <dep1> <dep2> ... <depn>"
 """)
 
+parser.add_option("--incremental",action="store_true",dest="incremental",
+				help="Reuse makefiles from previous builds if they are still relevant. i.e if no bld.infs/mmps or other metadata has changed and if the environment has not altered either.  This option can improve raptor's performance but it is possible that it may sometimes be too optimistic and reuse makefiles that really should be regenerated.")
+
+
 def GetArgs(Raptor, args):
 	"Process command line arguments for a Raptor object"
 	return DoRaptor(Raptor,args)
@@ -255,6 +259,7 @@ def DoRaptor(Raptor, args):
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
 				 'metadepfile' : Raptor.SetMetadepfile,
+				 'incremental' : Raptor.SetIncremental,
 			 	 'version' : Raptor.PrintVersion
 				}
 

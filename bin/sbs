@@ -111,6 +111,7 @@ else
 	export PATH LD_LIBRARY_PATH
 	__PYTHON__=python
 fi
+#__PYTHON__=/usr/local/bin/winpdb
 
 # add the Raptor python modules to whatever PYTHONPATH we got
 if [ "$OSTYPE" == "cygwin" ]; then
