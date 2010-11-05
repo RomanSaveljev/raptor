@@ -204,9 +204,9 @@ class ModelNode(object):
 				with open(str(build.metadepfile),"w+") as f:
 					build.Debug("Layer Deps: {0} with {1} children depfile {2}".format(self.id, len(self.children),build.metadepfile))
 					for d in self.alldeps():
-						f.write("$(PARSETARGET): {0}\n".format(d))
+						f.write("dep: {0}\n".format(d))
 					for d in self.alldepfiles():
-						f.write("-include {0}\n".format(d[0]))
+						f.write("gnumakedeps: {0}\n".format(d[0]))
 			except Exception,e:
 				build.Warn("Could not write metadepfile: {0} {1}".format(str(build.metadepfile), str(e)))
 				
@@ -230,18 +230,21 @@ class ModelNode(object):
 		return makefileset
 
 
-
 	def realise(self, build):
 		"""Give the spec trees to the make engine and actually
 		"build" the product represented by this model node"""
 		# Must ensure that all children are unfurled at this point
-		self.unfurl_all(build)
 
-		sp = self.specs
-
-		build.AssertBuildOK()
-
-		m = self.realise_makefile(build, sp)
+		if build.incremental_metadata and build.build_record.uptodate:
+			tm = generic_path(build.build_record.topmakefile)
+			tm_dir = str(tm.Dir())
+			tm_file = str(tm.File())
+			m = raptor_makefile.MakefileSet(tm_dir, build.maker.selectors, makefiles=None, filenamebase=tm_file)
+		else:
+			self.unfurl_all(build)
+			sp = self.specs
+			build.AssertBuildOK()
+			m = self.realise_makefile(build, sp)
 
 		build.InfoStartTime(object_type = "layer", task = "build",
 				key = (str(m.directory) + "/" + str(m.filenamebase)))
@@ -249,6 +252,7 @@ class ModelNode(object):
 		build.InfoEndTime(object_type = "layer", task = "build",
 				key = (str(m.directory) + "/" + str(m.filenamebase)))
 
+		build.build_record.tofile(build.build_record_filename)
 
 		return result
 
@@ -387,6 +391,7 @@ class BuildRecord(object):
 		self.configlist = configlist
 		self.metadepsfilename = metadepsfilename
 		self.old_metadepsfilename = None
+		self.uptodate = False # Do we need to regenerate the makefiles to reuse this build?
 
 	def tofile(self, buildrecord_filename):
 		with open(buildrecord_filename,"w+") as f:
@@ -416,13 +421,66 @@ class BuildRecord(object):
 				return True
 		return False
 
+	def tofile(self, buildrecord_filename):
+		with open(buildrecord_filename,"w+") as f:
+			for a in BuildRecord.stored_attrs:
+				f.write("{0}={1}\n".format(a,self.__dict__[a]))
+
+	def _check_uptodate(self):
+		makefile_mtime = 0
+		makefile_stat = 0
+		try:
+			makefilestat = os.stat(self.topmakefilename)
+			makefile_mtime = makefilestat[stat.ST_MTIME]
+		except OSError, e:
+			return False
+
+		try:
+			with mdf as open(self.metadatafile,"r+"):
+				for l in mdf:
+					toks=l.strip("\n\r ").split(":")
+					print ("metadata deps: {0} {1}".format(toks[0],toks[1]))
+					if toks[0] == "dep:"
+						depfile = toks[1].strip(" ")
+						depstat = os.stat(depfile)
+						deptime = os.stat(dest_str)[stat.ST_MTIME]
+
+						if deptime >= makefile_mtime:
+							return False
+					elif toks[0] == "gnumakedeps:"
+						print ("metadata gnumakedeps: {0} {1}".format(toks[0],toks[1]))
+						with gmdf as open(toks[1],"r"):
+							for depl in gmdf:
+								toks=l.strip("\n\r\\ ").split(":")
+								if len(toks)>1:
+									deplist = toks[1].split(" ")
+								else:
+									deplist = [toks[0]]
+
+								for depfile in deplist:	
+									depstat = os.stat(depfile)
+									deptime = os.stat(dest_str)[stat.ST_MTIME]
+
+									if deptime >= makefile_mtime:
+										return False
+					
+		except OSError, e:
+			return False
+
+		return True
+
+
+
+
 	@classmethod
 	def find_matching_record(cls, adir, matching):
 		for b in os.listdir(adir):
 			if b.endswith(".buildrecord"):
 				br = cls.from_file(os.path.join(adir,b))
 				if br == matching:
-					return br
+					if br._check_uptodate():
+						br.uptodate = True
+						return br
 		return None
 
 	@classmethod
@@ -496,20 +554,44 @@ class Layer(ModelNode):
 
 		if len(components) > 0:
 			try:
+				tm = build.topMakefile.Absolute()
+				tm_dir = str(tm.Dir())
+				tm_file = str(tm.File())
 
-				# create a MetaReader that is aware of the list of
-				# configurations that we are trying to build.
-				metaReader = raptor_meta.MetaReader(build, build.buildUnitsToBuild)
+				# Work out if we could potentially reuse old makefiles or not.
+				configList = " ".join([c.name for c in self.configs if c.name != "build" ])
+				self.build_record_filename = str(generic_path.Path(tm_dir, tm_file + ".buildrecord"))
+				self.metadepsfilename = str(generic_path.Path(tm_dir, tm_file + ".metadeps"))
 
-				# convert the list of bld.inf files into a specification
-				# hierarchy suitable for all the configurations we are using.
-				self.specs = list(build.generic_specs)
-				self.specs.extend(metaReader.ReadBldInfFiles(components, doexport = build.doExport, dobuild = not build.doExportOnly))
+				# "commandline" really ought to mean the list of all inputs (e.g. system definition files).
+				commandline = " ".join([c.filename for c in self.children])
+
+				if build.incremental_metadata:
+					self.build_record = BuildRecord.from_old(tm_dir, commandline, str(tm), configList, metadepsfilename)
+					build.topMakefile = generic_path.Path(build_record.topmakefilename)
+
+
+				else:
+					self.build_record = BuildRecord(str(tm), commandline, configList, metadepsfilename)
+
+
+				# Parse everything but only if we need to
+				if not build.incremental_metadata or not build_record.uptodate:
+					# create a MetaReader that is aware of the list of
+					# configurations that we are trying to build.
+					metaReader = raptor_meta.MetaReader(build, build.buildUnitsToBuild)
+
+					# convert the list of bld.inf files into a specification
+					# hierarchy suitable for all the configurations we are using.
+					self.specs = list(build.generic_specs)
+					self.specs.extend(metaReader.ReadBldInfFiles(components, doexport = build.doExport, dobuild = not build.doExportOnly))
 
 			except raptor_meta.MetaDataError, e:
 				build.Error(e.Text)
 
 		self.unfurled = True
+
+
 
 
 	def _split_into_blocks(self, build):
@@ -570,22 +652,7 @@ class Layer(ModelNode):
 		tm = build.topMakefile.Absolute()
 
 
-		# Work out if we could potentially reuse old makefiles or not.
 		configList = " ".join([c.name for c in self.configs if c.name != "build" ])
-		build_record_filename = str(generic_path.Path(str(tm.Dir()), str(tm.File()) + ".buildrecord"))
-		metadepsfilename = str(generic_path.Path(str(tm.Dir()), str(tm.File()) + ".metadeps"))
-
-		# "commandline" really ought to mean the list of all inputs (e.g. system definition files).
-		commandline = " ".join([c.filename for c in self.children])
-
-		# Always generate the metadata dependencies file whether or not we use it.
-		cli_options += " --metadepfile={0}".format(metadepsfilename)
-
-		if build.incremental_metadata:
-			build_record = BuildRecord.from_old(str(tm.Dir()), commandline, str(tm), configList, metadepsfilename)
-			build.topMakefile = generic_path.Path(build_record.topmakefilename)
-		else:
-			build_record = BuildRecord(str(tm), commandline, configList, metadepsfilename)
 			
 			
 		# Cause the binding makefiles to have the toplevel makefile's
@@ -613,12 +680,11 @@ class Layer(ModelNode):
 
 			makefile_path = str(build.topMakefile) + "_" + str(loop_number)
 
-			if not build.incremental_metadata:
-				# Don't permit the reuse of makefiles if we are not working incrementally
-				try:
-					os.unlink(makefile_path)
-				except Exception:
-					pass
+			# Don't permit the reuse of makefiles 
+			try:
+				os.unlink(makefile_path)
+			except Exception:
+				pass
 
 			# add some basic data in a component-wide variant
 			var = raptor_data.Variant()
@@ -627,14 +693,6 @@ class Layer(ModelNode):
 			var.AddOperation(raptor_data.Set("CONFIGS", configList))
 			var.AddOperation(raptor_data.Set("CLI_OPTIONS", cli_options))
 			var.AddOperation(raptor_data.Set("NEWMETADEPFILE", build_record.metadepsfilename))
-			if build.incremental_metadata:
-				if build_record.old_metadepsfilename:
-					var.AddOperation(raptor_data.Set("METADEPFILES", build_record.metadepsfilename))
-
-				# Don't do exports separately since it neutralises a lot of the gain of being incremental
-				# This is a trade-off which will mostly work very well for smaller builds but may involve
-				# clashes on large parallel-parsed ones.
-				var.AddOperation(raptor_data.Set("PERBLOCKEXPORT", "1"))
 
 			# Allow the flm to skip exports. Note: this parameter
 			doexport_str = '1'
@@ -674,7 +732,6 @@ class Layer(ModelNode):
 				key = str(build.topMakefile))
 
 
-		build_record.tofile(build_record_filename)
 
 		return b
 
