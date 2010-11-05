@@ -233,14 +233,30 @@ class ModelNode(object):
 	def realise(self, build):
 		"""Give the spec trees to the make engine and actually
 		"build" the product represented by this model node"""
-		# Must ensure that all children are unfurled at this point
+
+		tm = build.topMakefile.Absolute()
+		tm_dir = str(tm.Dir())
+		tm_file = str(tm.File())
+
+		# Work out if we could potentially reuse old makefiles or not.
+		configList = " ".join([c.name for c in build.buildUnitsToBuild if c.name != "build" ])
+		build.build_record_filename = str(generic_path.Path(tm_dir, tm_file + ".buildrecord"))
+		metadepsfilename = str(generic_path.Path(tm_dir, tm_file + ".metadeps"))
+
+		# "commandline" really ought to mean the list of all inputs (e.g. system definition files).
+		commandline = " ".join([str(c.filename) for c in self.children])
+
+		if build.incremental_metadata:
+			build.build_record = BuildRecord.from_old(tm_dir, commandline, str(tm), configList, metadepsfilename)
+			build.topMakefile = generic_path.Path(build.build_record.topmakefilename)
+		else:
+			build.build_record = BuildRecord(str(tm), commandline, configList, metadepsfilename)
+
 
 		if build.incremental_metadata and build.build_record.uptodate:
-			tm = generic_path(build.build_record.topmakefile)
-			tm_dir = str(tm.Dir())
-			tm_file = str(tm.File())
 			m = raptor_makefile.MakefileSet(tm_dir, build.maker.selectors, makefiles=None, filenamebase=tm_file)
 		else:
+			# Must ensure that all children are unfurled at this point
 			self.unfurl_all(build)
 			sp = self.specs
 			build.AssertBuildOK()
@@ -436,21 +452,22 @@ class BuildRecord(object):
 			return False
 
 		try:
-			with mdf as open(self.metadatafile,"r+"):
+			with open(self.metadatafile,"r+") as mdf:
 				for l in mdf:
 					toks=l.strip("\n\r ").split(":")
 					print ("metadata deps: {0} {1}".format(toks[0],toks[1]))
-					if toks[0] == "dep:"
+					if toks[0] == "dep:":
 						depfile = toks[1].strip(" ")
 						depstat = os.stat(depfile)
 						deptime = os.stat(dest_str)[stat.ST_MTIME]
 
 						if deptime >= makefile_mtime:
 							return False
-					elif toks[0] == "gnumakedeps:"
+					elif toks[0] == "gnumakedeps:":
 						print ("metadata gnumakedeps: {0} {1}".format(toks[0],toks[1]))
-						with gmdf as open(toks[1],"r"):
-							for depl in gmdf:
+
+						with open(toks[1],"r") as gf:
+							for depl in gf:
 								toks=l.strip("\n\r\\ ").split(":")
 								if len(toks)>1:
 									deplist = toks[1].split(" ")
@@ -554,37 +571,16 @@ class Layer(ModelNode):
 
 		if len(components) > 0:
 			try:
-				tm = build.topMakefile.Absolute()
-				tm_dir = str(tm.Dir())
-				tm_file = str(tm.File())
-
-				# Work out if we could potentially reuse old makefiles or not.
-				configList = " ".join([c.name for c in self.configs if c.name != "build" ])
-				self.build_record_filename = str(generic_path.Path(tm_dir, tm_file + ".buildrecord"))
-				self.metadepsfilename = str(generic_path.Path(tm_dir, tm_file + ".metadeps"))
-
-				# "commandline" really ought to mean the list of all inputs (e.g. system definition files).
-				commandline = " ".join([c.filename for c in self.children])
-
-				if build.incremental_metadata:
-					self.build_record = BuildRecord.from_old(tm_dir, commandline, str(tm), configList, metadepsfilename)
-					build.topMakefile = generic_path.Path(build_record.topmakefilename)
 
 
-				else:
-					self.build_record = BuildRecord(str(tm), commandline, configList, metadepsfilename)
+				# create a MetaReader that is aware of the list of
+				# configurations that we are trying to build.
+				metaReader = raptor_meta.MetaReader(build, build.buildUnitsToBuild)
 
-
-				# Parse everything but only if we need to
-				if not build.incremental_metadata or not build_record.uptodate:
-					# create a MetaReader that is aware of the list of
-					# configurations that we are trying to build.
-					metaReader = raptor_meta.MetaReader(build, build.buildUnitsToBuild)
-
-					# convert the list of bld.inf files into a specification
-					# hierarchy suitable for all the configurations we are using.
-					self.specs = list(build.generic_specs)
-					self.specs.extend(metaReader.ReadBldInfFiles(components, doexport = build.doExport, dobuild = not build.doExportOnly))
+				# convert the list of bld.inf files into a specification
+				# hierarchy suitable for all the configurations we are using.
+				self.specs = list(build.generic_specs)
+				self.specs.extend(metaReader.ReadBldInfFiles(components, doexport = build.doExport, dobuild = not build.doExportOnly))
 
 			except raptor_meta.MetaDataError, e:
 				build.Error(e.Text)
