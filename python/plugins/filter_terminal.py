@@ -221,15 +221,15 @@ class FilterTerminal(filter_interface.Filter):
 			end = text.rfind("<")
 			self.err_count += 1
 			if not self.analyseonly:
-				sys.stderr.write(str(raptor.name) + ": error: %s\n" \
-						% text[(start + 1):end])
+				sys.stderr.write("{0}: error: {1}\n".format( \
+						str(raptor.name),text[(start + 1):end]))
 		elif text.startswith("<warning"):
 			start = text.find(">")
 			end = text.rfind("<")
 			self.warn_count += 1
 			if not self.analyseonly:
-				sys.stdout.write(str(raptor.name) + ": warning: %s\n" \
-					% text[(start + 1):end])
+				sys.stdout.write("{0}: warning: {1}\n".format( \
+					 str(raptor.name),text[(start + 1):end]))
 		elif text.startswith("<status "):
 			# detect the status report from a recipe
 			if text.find('failed') != -1:
@@ -244,9 +244,9 @@ class FilterTerminal(filter_interface.Filter):
 			if self.inRecipe:
 				sys.stdout.flush()
 				sys.stderr.write(self.formatError("Opening recipe tag found " \
-						+ "before closing recipe tag for previous recipe:\n" \
-						+ "Discarding previous recipe (Possible logfile " \
-						+ "corruption)"))
+						 "before closing recipe tag for previous recipe:\n" \
+						 "Discarding previous recipe (Possible logfile " \
+						 "corruption)"))
 				sys.stderr.flush()
 			self.inRecipe = True
 			self.current_recipe_logged = False
@@ -297,8 +297,8 @@ class FilterTerminal(filter_interface.Filter):
 			if not self.inRecipe:
 				sys.stdout.flush()
 				sys.stderr.write(self.formatError("Closing recipe tag found " \
-						+ "before opening recipe tag:\nUnable to print " \
-						+ "recipe data (Possible logfile corruption)"))
+						 "before opening recipe tag:\nUnable to print " \
+						 "recipe data (Possible logfile corruption)"))
 				sys.stderr.flush()
 			else:
 				self.inRecipe = False
@@ -309,15 +309,15 @@ class FilterTerminal(filter_interface.Filter):
 						if self.timedout:
 							reason="(timeout)"
 
-						sys.stderr.write("\n FAILED %s %s for %s: %s\n" % \
+						sys.stderr.write("\n FAILED {0} {1} for {2}: {3}\n".format( \
 								(self.recipe_dict['name'],
 								reason,
 								self.recipe_dict['config'],
-								self.recipe_dict['name_to_user']))
+								self.recipe_dict['name_to_user'])))
 	
 						mmppath = generic_path.Path(self.recipe_dict['mmp']).From(generic_path.CurrentDir()).GetShellPath()
 						if mmppath is not "":
-							sys.stderr.write("  mmp: %s\n" % mmppath)
+							sys.stderr.write("  mmp: {0}\n".format(mmppath))
 						if self.timedout:
 							sys.stderr.write( \
 """    Timeouts may be due to network related issues (e.g. license servers),
@@ -328,7 +328,7 @@ class FilterTerminal(filter_interface.Filter):
 						else:
 							for L in self.recipeBody:
 								if not L.startswith('+'):
-									sys.stdout.write("   %s\n" % L.rstrip())
+									sys.stdout.write("   {0}\n".format(L.rstrip()))
 					self.err_count += 1
 				else:
 					r = Recipe.factory(self.recipe_dict['name'], "".join(self.recipeBody))
@@ -338,7 +338,7 @@ class FilterTerminal(filter_interface.Filter):
 						if not self.analyseonly:
 							for L in self.recipeBody:
 								if not L.startswith('+'):
-									sys.stdout.write("   %s\n" % L.rstrip())
+									sys.stdout.write("   {0}\n".format(L.rstrip()))
 						self.warn_count += len(warnings)
 	
 				self.recipeBody = []
@@ -346,11 +346,11 @@ class FilterTerminal(filter_interface.Filter):
 		elif not self.inRecipe and self.isMakeError(text):
 			# these two statements pick up errors coming from make
 			self.err_count += 1
-			sys.stderr.write("    %s\n" % text.rstrip())
+			sys.stderr.write("    {0}\n".format(text.rstrip()))
 			return
 		elif not self.inRecipe and self.isMakeWarning(text):
 			self.warn_count += 1
-			sys.stdout.write("    %s\n" % text.rstrip())
+			sys.stdout.write("    {0}\n".format(text.rstrip()))
 			return
 		elif text.startswith("<![CDATA["):
                 	# save CDATA body during a recipe
@@ -360,19 +360,24 @@ class FilterTerminal(filter_interface.Filter):
 			if self.inRecipe:
 				self.inBody = False
 				if self.recipelineExceeded > 0:
-					self.recipeBody.append("[filter_terminal: OUTPUT TRUNCATED: " + \
-						"Recipe output limit exceeded; see logfile for full output " + \
-						"(%s lines shown out of %s)]" % (FilterTerminal.recipelinelimit, \
+					self.recipeBody.append("[filter_terminal: OUTPUT TRUNCATED: " \
+						"Recipe output limit exceeded; see logfile for full output " \
+						"({0} lines shown out of {1})]".format(FilterTerminal.recipelinelimit, 
 						FilterTerminal.recipelinelimit + self.recipelineExceeded))
-		elif text.startswith("<info>Copied"):
-			if not self.analyseonly and not self.quiet:
-				start = text.find(" to ") + 4
-				end = text.find("</info>",start)
-				short_target = text[start:end]
-				if short_target.startswith(self.epocroot):
-					short_target = short_target.replace(self.epocroot,"")[1:]
-				short_target = generic_path.Path(short_target).GetShellPath()
-				sys.stdout.write(" %s: %s\n" % ("export".ljust(FilterTerminal.recipewidth), short_target))
+		elif text.startswith("<info>"):
+			if text.startswith("<info>Copied"):
+				if not self.analyseonly and not self.quiet:
+					start = text.find(" to ") + 4
+					end = text.find("</info>",start)
+					short_target = text[start:end]
+					if short_target.startswith(self.epocroot):
+						short_target = short_target.replace(self.epocroot,"")[1:]
+					short_target = generic_path.Path(short_target).GetShellPath()
+					sys.stdout.write(" {0}: {1}\n".format("export".ljust(FilterTerminal.recipewidth), short_target))
+			if text.startswith("<info>incremental makefile generation: "):
+				message = text[text.find("<info>")+6:text.find("</info>")]
+				if not self.analyseonly and not self.quiet:
+					sys.stdout.write(" {0}\n".format(message))
 			return
 		elif text.find("<rm files") != -1 or text.find("<rmdir ") != -1:
 			# search for cleaning output but only if we 
@@ -416,7 +421,7 @@ class FilterTerminal(filter_interface.Filter):
 					name +=  i
 				else:
 					name +=  '\n\t      ' + i
-		sys.stdout.write(" %s: %s  \t[%s]\n" % (info, name, config))
+		sys.stdout.write(" {0}: {1}  \t[{2}]\n".format(info, name, config))
 
 	def logit_if(self):
 		""" Tell the user about the recipe that we are processing """
@@ -436,9 +441,9 @@ class FilterTerminal(filter_interface.Filter):
 			sys.stdout.write("\n\n")
 
 		if self.warn_count > 0 or self.err_count > 0:
-			sys.stdout.write("\n%s : warnings: %s\n" % (raptor.name,
+			sys.stdout.write("\n{0} : warnings: {1}\n".format(raptor.name,
 					self.warn_count))
-			sys.stdout.write("%s : errors: %s\n\n" % (raptor.name,
+			sys.stdout.write("{0} : errors: {1}\n\n".format(raptor.name,
 					self.err_count))
 		else:
 			sys.stdout.write("\nno warnings or errors\n\n")
@@ -446,7 +451,7 @@ class FilterTerminal(filter_interface.Filter):
 		for bc in self.built_configs:
 			sys.stdout.write("built " + bc + "\n")
 			
-		sys.stdout.write("\nRun time %d seconds\n" % self.raptor.runtime);
+		sys.stdout.write("\nRun time {0} seconds\n".format(self.raptor.runtime))
 		sys.stdout.write("\n")
 		return True
 	

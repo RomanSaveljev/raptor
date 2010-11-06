@@ -28,6 +28,7 @@ xml2 = ".sbs_init.xml"	# the override initialisation file
 
 import generic_path
 import os
+import stat
 import raptor_cache
 import raptor_cli
 import raptor_data
@@ -199,9 +200,10 @@ class ModelNode(object):
 
 	def realise_makefile(self, build, specs):
 
-		if build.metadepfile is not None:
+		print ("Realising Makefile")
+		if build.build_record.metadepsfilename is not None:
 			try:
-				with open(str(build.metadepfile),"w+") as f:
+				with open(str(build.build_record.metadepsfilename),"w+") as f:
 					build.Debug("Layer Deps: {0} with {1} children depfile {2}".format(self.id, len(self.children),build.metadepfile))
 					for d in self.alldeps():
 						f.write("dep: {0}\n".format(d))
@@ -219,6 +221,7 @@ class ModelNode(object):
 
 		# insert the start time into the Makefile name?
 		makefile.path = makefile.path.replace("%TIME", build.timestring)
+		build.topMakefile = generic_path.Path(build.build_record.topmakefilename)
 
 		build.InfoDiscovery(object_type = "layers", count = 1)
 		build.InfoStartTime(object_type = "layer", task = "parse",
@@ -250,12 +253,18 @@ class ModelNode(object):
 			build.build_record = BuildRecord.from_old(tm_dir, commandline, str(tm), configList, metadepsfilename)
 			build.topMakefile = generic_path.Path(build.build_record.topmakefilename)
 		else:
-			build.build_record = BuildRecord(str(tm), commandline, configList, metadepsfilename)
+			build.build_record = BuildRecord(commandline=commandline, topmakefilename=str(tm), configlist=configList, metadepsfilename = metadepsfilename)
 
 
 		if build.incremental_metadata and build.build_record.uptodate:
-			m = raptor_makefile.MakefileSet(tm_dir, build.maker.selectors, makefiles=None, filenamebase=tm_file)
+			build.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(tm_file))
+			thisnode_makefile = generic_path.Path(build.build_record.topmakefilename + "_all")
+			m = build.maker.incremental_makefileset(thisnode_makefile)
+			m.unwriteable()
+			
 		else:
+			if build.incremental_metadata:
+				build.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")
 			# Must ensure that all children are unfurled at this point
 			self.unfurl_all(build)
 			sp = self.specs
@@ -401,9 +410,9 @@ class BuildRecord(object):
 	"""Information about a build which can be used for incremental makefile generation.
 	   Parameters must all be strings. """
 	stored_attrs = ['commandline', 'topmakefilename', 'configlist', 'metadepsfilename']
-	def __init__(self, commandline=None, topmakefile=None, configlist=None, metadepsfilename=None):
+	def __init__(self, commandline=None, topmakefilename=None, configlist=None, metadepsfilename=None):
 		self.commandline = commandline
-		self.topmakefilename = topmakefile
+		self.topmakefilename = topmakefilename
 		self.configlist = configlist
 		self.metadepsfilename = metadepsfilename
 		self.old_metadepsfilename = None
@@ -415,8 +424,8 @@ class BuildRecord(object):
 				f.write("{0}={1}\n".format(a,self.__dict__[a]))
 
 	@classmethod
-	def from_file(cls, buildrecord_filename):
-		with open(buildrecord_filename,"r") as f:
+	def from_file(cls, filename):
+		with open(filename,"r") as f:
 			kargs = {}
 			for l in f:
 				nvp = l.strip("\n\r ").split("=")
@@ -426,16 +435,23 @@ class BuildRecord(object):
 					raise Exception("Bad build record format: line should be name=value but either it was missing '=' or it had more than one: {0}: {1}".format(l.strip("\n\r"), filename))
 
 			try:
-				br = BuildRecord(*kargs)
-			except Exception,e:
-				raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}".format(",".BuildRecord.stored_attrs, str(kargs), filename))
+				print ("kargs {0!s}".format(kargs))
+				br = BuildRecord(**kargs)
+			except TypeError,e:
+				raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}".format(BuildRecord.stored_attrs, str(kargs), filename))
+
+		return br
 
 
 	def __equal__(self, other):
 		if self.commandline == other.commandline:
 			if self.configlist == other.configlist:
-				return True
-		return False
+				print ("EQUAL {0}".format(self.topmakefilename))
+				return 1
+		
+		print("{0} == {1}".format(self.commandline, other.commandline))
+		print("{0} == {1}".format(self.configlist, other.configlist))
+		return 0
 
 	def tofile(self, buildrecord_filename):
 		with open(buildrecord_filename,"w+") as f:
@@ -443,16 +459,18 @@ class BuildRecord(object):
 				f.write("{0}={1}\n".format(a,self.__dict__[a]))
 
 	def _check_uptodate(self):
+		print("_check_uptodate: {0} ".format(self.topmakefilename))
 		makefile_mtime = 0
 		makefile_stat = 0
 		try:
-			makefilestat = os.stat(self.topmakefilename)
+			makefilestat = os.stat(self.topmakefilename+"_all")
 			makefile_mtime = makefilestat[stat.ST_MTIME]
 		except OSError, e:
+			print("_check_uptodate: cannot stat {0} ".format(self.topmakefilename+"_all"))
 			return False
 
 		try:
-			with open(self.metadatafile,"r+") as mdf:
+			with open(self.metadepsfilename,"r+") as mdf:
 				for l in mdf:
 					toks=l.strip("\n\r ").split(":")
 					print ("metadata deps: {0} {1}".format(toks[0],toks[1]))
@@ -462,6 +480,7 @@ class BuildRecord(object):
 						deptime = os.stat(dest_str)[stat.ST_MTIME]
 
 						if deptime >= makefile_mtime:
+							print ("OUTOFDATE: metadata deps: {0} {1}".format(toks[0],toks[1]))
 							return False
 					elif toks[0] == "gnumakedeps:":
 						print ("metadata gnumakedeps: {0} {1}".format(toks[0],toks[1]))
@@ -479,11 +498,14 @@ class BuildRecord(object):
 									deptime = os.stat(dest_str)[stat.ST_MTIME]
 
 									if deptime >= makefile_mtime:
+										print ("OUTOFDATE: gnu metadata deps: {0} {1}".format(toks[0],toks[1]))
 										return False
 					
-		except OSError, e:
+		except IOError, e:
+			print ("OUTOFDATE: ioerror: {0}".format(str(e)))
 			return False
 
+		print ("UPTODATE: ")
 		return True
 
 
@@ -493,9 +515,12 @@ class BuildRecord(object):
 	def find_matching_record(cls, adir, matching):
 		for b in os.listdir(adir):
 			if b.endswith(".buildrecord"):
+				print ("found buildrecord: {0}".format(b))
 				br = cls.from_file(os.path.join(adir,b))
-				if br == matching:
+				print ("topmake {0.topmakefilename}".format(br))
+				if br.__equal__(matching):
 					if br._check_uptodate():
+						print ("uptodate ---")
 						br.uptodate = True
 						return br
 		return None
@@ -505,8 +530,9 @@ class BuildRecord(object):
 		newbr = cls(commandline, topmakefile, configlist, metadepsfilename)
 		oldbr = cls.find_matching_record(adir, newbr)
 		if oldbr:
-			newbr.topmakefile = oldbr.topmakefile
+			newbr.topmakefilename = oldbr.topmakefilename
 			newbr.old_metadepsfilename = oldbr.metadepsfilename
+			newbr.uptodate = oldbr.uptodate
 		return newbr
 
 
@@ -660,11 +686,6 @@ class Layer(ModelNode):
 		component_blocks = self._split_into_blocks(build)
 
 
-		thisbuildrec = None
-		try:
-			thisbuildrec = BuildRecord(build_record_name)
-		except Exception,e:
-			build.Info("No build record could be created for this build")
 
 		spec_nodes = []
 		loop_number = 0
@@ -688,7 +709,6 @@ class Layer(ModelNode):
 			var.AddOperation(raptor_data.Set("MAKEFILE_PATH", makefile_path))
 			var.AddOperation(raptor_data.Set("CONFIGS", configList))
 			var.AddOperation(raptor_data.Set("CLI_OPTIONS", cli_options))
-			var.AddOperation(raptor_data.Set("NEWMETADEPFILE", build_record.metadepsfilename))
 
 			# Allow the flm to skip exports. Note: this parameter
 			doexport_str = '1'

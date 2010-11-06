@@ -218,6 +218,11 @@ class MakefileSet(object):
 				return mf.selector.ignoretargets 
 		return None
 
+	def unwriteable(self):
+		for mf in self.makefiles:
+			mf.file = None
+			mf.dead = True
+
 	def close(self):
 		for mf in self.makefiles:
 			mf.close()
