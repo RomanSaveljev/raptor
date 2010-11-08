@@ -322,6 +322,7 @@ USE_TALON:=%s
 		# global variables are set at the top of each makefile
 		self.global_make_variables['HOSTPLATFORM'] = " ".join(raptor.hostplatform)
 		self.global_make_variables['HOSTPLATFORM_DIR'] = raptor.hostplatform_dir
+		self.global_make_variables['HOSTPLATFORM32_DIR'] = raptor.hostplatform32_dir
 		self.global_make_variables['OSTYPE'] = self.raptor.filesystem
 		self.global_make_variables['FLMHOME'] = str(self.raptor.systemFLM)
 		self.global_make_variables['SHELL'] = self.shellpath
@@ -349,7 +350,7 @@ include %s
 """ 		% (  raptor.name, raptor_version.fullversion(),
 			 self.global_make_variables['HOSTPLATFORM'],
 			 self.global_make_variables['HOSTPLATFORM_DIR'],
-			 raptor.hostplatform32_dir,
+			 self.global_make_variables['HOSTPLATFORM32_DIR'],
 			 self.global_make_variables['OSTYPE'],
 			 self.global_make_variables['FLMHOME'],
 			 self.global_make_variables['SHELL'],
