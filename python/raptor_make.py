@@ -76,6 +76,8 @@ def AnnoFileParseOutput(annofile):
 	inOutput = False
 
 	buildid = ""
+	duration = "unknown"
+	availability = "unknown"
 	for line in af:
 		line = line.rstrip("\n\r")
 
