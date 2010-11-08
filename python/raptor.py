@@ -242,7 +242,7 @@ class Project(ModelNode):
 class Component(ModelNode):
 	""" An Abstract class for group of projects (where projects are
 	    usually things that represent one program or libary) """
-	def __init__(self, filename, layername="commandline", componentname=""):
+	def __init__(self, filename, layername="", componentname=""):
 		super(Component,self).__init__(filename)
 
 		self.filename = filename
@@ -261,7 +261,7 @@ class Component(ModelNode):
 class BldinfComponent(Component):
 	"""A group of projects or, in symbian-speak, a bld.inf.
 	"""
-	def __init__(self, filename, layername="", componentname=""):
+	def __init__(self, filename, layername="commandline", componentname=""):
 		super(BldinfComponent,self).__init__(filename, layername = layername, componentname=componentname)
 		# Assume that components are specified in bld.inf files for now
 		# One day that tyranny might end.
