@@ -57,12 +57,11 @@ def run():
 	
 	# Environment variables needed by talon - TALON_SHELL must be bash; the other two can be arbitrary.
 	os.environ["TALON_SHELL"]=bash
-	os.environ["TALON_BUILDID"]=str(t.id)
+	os.environ["TALON_BUILDID"]="{0}_{1}".format("talon_buildid", os.getpid())
 	os.environ["TALON_RECIPEATTRIBUTES"]="component=talontest"
 
 	# First part of test - command line
 	t.name = "talon_test command line"
-	t.id = "100a"
 	t.command = "%s -c %s" % (talon, commandline)
 	t.targets = []
 	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\+ echo Command line invocation output" + 

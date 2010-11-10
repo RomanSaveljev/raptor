@@ -21,8 +21,7 @@ def run():
 	t.description = "This testcase tests all mmp keywords including new implementation of 'paged/unpaged code/data'"
 	t.usebash = True
 	
-	t.id = "75a"
-	t.name = "mmp_1"
+	t.name = "mmp_paging_keywords"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp1/group/bld.inf -c armv5 -f-"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/shutdownsrv.dll",
@@ -46,8 +45,7 @@ def run():
 	]
 	t.run()
 
-	t.id = "75b"
-	t.name = "mmp_2"
+	t.name = "mmp_option_armcc_and_armasm"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp2/group/bld.inf -c armv5 -f-"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/imageprocessorperf.lib",
@@ -71,7 +69,6 @@ def run():
 	t.warnings = 2
 	t.run()
 	
-	t.id = "75c"
 	t.name = "mmp_3"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp3/bld.inf -c armv5 -c winscw -f-"
 	t.targets = [
@@ -113,8 +110,7 @@ def run():
 	t.warnings = 0
 	t.run()
 	
-	t.id = "75d"
-	t.name = "mmp_4"
+	t.name = "mmp_basedefault"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp4/group/bld.inf -c winscw"
 	t.targets = [			
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/d_newldd.ldd",
@@ -161,8 +157,7 @@ def run():
 	t.run()
 	
 	# Test keywords: version, firstlib, nocompresstarget
-	t.id = "75e"
-	t.name = "mmp_5"
+	t.name = "mmp_version_firstlib_nocompresstarget"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp5/bld.inf -c armv5"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/fuzzv5.exe",
@@ -180,8 +175,7 @@ def run():
 		])
 	t.run()
 
-	t.id = "75f"
-	t.name = "mmp_6"
+	t.name = "mmp_diagsuppress_armlibs"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp6_7/bld.inf -c armv5 -k -p diagsuppress.mmp -f-"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/diagsuppress_test.dll",
@@ -193,8 +187,7 @@ def run():
 					]
 	t.run()
 	
-	t.id = "75g"
-	t.name = "mmp_7"
+	t.name = "mmp_diagsuppress_no_armlibs"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp6_7/bld.inf -c armv5 -k -p diagsuppress_noarmlibs.mmp -f-"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/diagsuppress_noarmlibs_test.dll",
@@ -205,8 +198,7 @@ def run():
 	t.run()
 
 	# Test keyword: version
-	t.id = "75h"
-	t.name = "mmp_8"
+	t.name = "mmp_version_keyword"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp8/bld.inf"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test_mmp_version.exe",
@@ -220,9 +212,8 @@ def run():
 	t.run()
 
 	# Test keyword: armfpu softvfp|vfpv2
-	# Both armv5 RVCT (9a+b) and GCCE (10) builds, as they differ in behaviour.
-	t.id = "75i"
-	t.name = "mmp_9a"
+	# Both armv5 RVCT and GCCE builds are covered, as they differ in behaviour.
+	t.name = "mmp_armfpu_softvfp_rvct"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf -p armfpu_soft.mmp -c armv5_urel -f-"			
 	t.targets = []
 	t.mustmatch = ["--fpu softvfp", "--fpu=softvfp"]
@@ -230,8 +221,7 @@ def run():
 	t.warnings = 0
 	t.run()
 		
-	t.id = "75j"
-	t.name = "mmp_9b"
+	t.name = "mmp_armfpu_vfpv2_rvct"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf -c armv5_urel REALLYCLEAN &&" \
 			+ " sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf -p armfpu_vfpv2.mmp -c armv5_urel -f-"
 
@@ -239,8 +229,7 @@ def run():
 	t.mustnotmatch = ["--fpu softvfp", "--fpu=softvfp"]	
 	t.run()
 	
-	t.id = "75ja"
-	t.name = "mmp_9c"
+	t.name = "mmp_armfpu_softvfp+vfpv2_rvct"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf -c armv5_urel REALLYCLEAN &&" \
 			+ " sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf -p \"armfpu_soft+vfpv2.mmp\" -c armv5_urel -f-"
 
@@ -248,8 +237,7 @@ def run():
 	t.mustnotmatch = ["--fpu vfpv2", "--fpu softvfp ", "--fpu=softvfp"]
 	t.run()
 
-	t.id = "75k"
-	t.name = "mmp_10"
+	t.name = "mmp_armfpu_softvfp+vfpv2_gcce"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf  -c armv5_urel_gcce4_3_2 REALLYCLEAN &&" \
 			+ " sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld.inf -c armv5_urel_gcce4_3_2 -f-"
 	t.countmatch = [
@@ -260,9 +248,35 @@ def run():
 	t.mustnotmatch = ["--fpu=vfpv2", "--fpu=softvfp\+"]
 	t.run()
 	
+	
+	##########################################################
+	
+	t.name = "mmp_armfpu_softvfp+vfpv3_rvct"
+	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld2.inf -c arm.v5.urel.rvct4_0 REALLYCLEAN &&" \
+			+ " sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld2.inf -c arm.v5.urel.rvct4_0 -f- --mo=-n"
+	t.countmatch = [
+		["elf2e32.*--fpu=vfpv3", 1],
+		["armcc.*--fpu.softvfp\+vfpv3", 1]
+	]
+	t.mustmatch = []
+	t.mustnotmatch = ["--fpu=vfpv2", "--fpu=softvfp\+"]
+	t.run()
+	
+	t.name = "mmp_armfpu_softvfp+vfpv3_gcce"
+	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld2.inf  -c armv5_urel_gcce4_4_1 REALLYCLEAN &&" \
+			+ " sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld2.inf -c armv5_urel_gcce4_4_1 -f- --mo=-n"
+	t.countmatch = [
+		["g\+\+.*-mfloat-abi=soft", 1],
+		["elf2e32.*--fpu=softvfp", 1] # gcce doesn't vary according to ARMFPU currently
+	]
+	t.mustmatch = []
+	t.mustnotmatch = ["--fpu=vfpv2", "--fpu=softvfp\+"]
+	t.run()
+	
+	##############################################
+
 	# Test keywords: compresstarget, nocompresstarget, bytepaircompresstarget, inflatecompresstarget
-	t.id = "75l"
-	t.name = "mmp_11"
+	t.name = "byte_compression_target_keywords"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp11/bld.inf -c armv5_urel -f-"
 	t.mustmatch_singleline = [
 		"elf2e32.*--output.*\/compress\.exe.*--compressionmethod=inflate",
@@ -280,8 +294,7 @@ def run():
 	t.run()
 
 	# Test keyword: APPLY
-	t.id = "75m"
-	t.name = "apply"
+	t.name = "mmp_apply"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/apply/bld.inf -f- -k --configpath=test/config"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test_mmp_apply.exe",
@@ -298,8 +311,7 @@ def run():
 	t.run()
 
 	# Test keyword: EPOCNESTEDEXCEPTIONS
-	t.id = "75n"
-	t.name = "epocnestedexceptions"
+	t.name = "mmp_epocnestedexceptions"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/epocnestedexceptions/bld.inf -c armv5_udeb -f-"
 
 	# When EPOCNESTEDEXCEPTIONS is specified in the MMP file, a different static
@@ -317,7 +329,6 @@ def run():
 	t.run()
 	
 	# Test keyword: DOCUMENT
-	t.id = "75o"
 	t.name = "mmp_keyword_document"
 	# Note: in t.command, the makefile is cat'd through sed to remove the .DEFAULT double-colon rule's <warning> tag to ensure that t.run succeeds.
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp1/group/bld.inf -c armv5 reallyclean; " + \
@@ -335,7 +346,6 @@ def run():
 	
 	t.run()
 	
-	t.id = "75"
 	t.name = "mmp_keywords"
 	t.print_result()
 	return t
