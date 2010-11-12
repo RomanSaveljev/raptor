@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -293,6 +293,7 @@ class Suite(TestRun):
 				
 				end_time = datetime.datetime.now()
 				
+				# No millisecond function, so need to use microseconds/1000	
 				start_milliseconds = start_time.microsecond
 				end_milliseconds = end_time.microsecond
 		

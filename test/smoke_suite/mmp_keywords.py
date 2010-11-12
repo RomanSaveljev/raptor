@@ -69,7 +69,7 @@ def run():
 	t.warnings = 2
 	t.run()
 	
-	t.name = "mmp_3"
+	t.name = "mmp_debuglibrary"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp3/bld.inf -c armv5 -c winscw -f-"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/tbm.exe",
@@ -248,9 +248,6 @@ def run():
 	t.mustnotmatch = ["--fpu=vfpv2", "--fpu=softvfp\+"]
 	t.run()
 	
-	
-	##########################################################
-	
 	t.name = "mmp_armfpu_softvfp+vfpv3_rvct"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld2.inf -c arm.v5.urel.rvct4_0 REALLYCLEAN &&" \
 			+ " sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp9_10/bld2.inf -c arm.v5.urel.rvct4_0 -f- --mo=-n"
@@ -273,10 +270,8 @@ def run():
 	t.mustnotmatch = ["--fpu=vfpv2", "--fpu=softvfp\+"]
 	t.run()
 	
-	##############################################
-
 	# Test keywords: compresstarget, nocompresstarget, bytepaircompresstarget, inflatecompresstarget
-	t.name = "byte_compression_target_keywords"
+	t.name = "mmp_byte_compression_target_keywords"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/mmp/mmp11/bld.inf -c armv5_urel -f-"
 	t.mustmatch_singleline = [
 		"elf2e32.*--output.*\/compress\.exe.*--compressionmethod=inflate",
