@@ -183,7 +183,7 @@ parser.add_option("--nozip", dest="nozip", help="Do not create a zip archive of 
 (options, args) = parser.parse_args()
 
 # Required directories inside the win32-support directory (i.e. the win32-support repository).
-win32supportdirs = {"bv":"bv", "cygwin":"cygwin", "mingw":"mingw", "python":"python264"}
+win32supportdirs = {"bv":"bv", "cygwin":"cygwin", "mingw":"mingw", "python":"python27"}
 
 if options.sbshome == None:
 	print "ERROR: no SBS_HOME passed in. Exiting..."

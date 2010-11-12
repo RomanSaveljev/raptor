@@ -32,7 +32,7 @@
 @REM 2. the python shipped locally with Raptor (if present)
 @REM 3. the python on the system PATH and the PYTHONPATH set in the system environment
 
-@SET __LOCAL_PYTHON__=%SBS_HOME%\win32\python264\python.exe
+@SET __LOCAL_PYTHON__=%SBS_HOME%\win32\python27\python.exe
 @IF NOT "%SBS_PYTHON%"=="" GOTO sbspython
 @IF EXIST %__LOCAL_PYTHON__% GOTO localpython
 @SET __PYTHON__=python.exe
