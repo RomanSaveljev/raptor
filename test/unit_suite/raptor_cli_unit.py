@@ -155,6 +155,10 @@ class TestRaptorCli(unittest.TestCase):
 		self.pp=onoroff
 		return True
 
+	def SetIncrementalParsing(self, onoroff):
+		self.incremental_parsing=onoroff
+		return True
+
 	def AddProject(self, project):
 		return True
 

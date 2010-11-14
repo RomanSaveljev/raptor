@@ -216,7 +216,7 @@ class ModelNode(object):
 		metadepsfilename = makefile + ".metadeps"
 		try:
 			with open(metadepsfilename,"w+") as f:
-				build.Debug("Layer Deps: {0} with {1} children depfile {2}".format(self.id, len(self.children),build.metadepfile))
+				build.Debug("Layer Deps: {0} with {1} children depfile {2}".format(self.id, len(self.children),metadepsfilename))
 				for d in self.alldeps():
 					f.write("dep: {0}\n".format(d))
 				for d in self.alldepfiles():
@@ -938,7 +938,6 @@ class Raptor(object):
 
 		self.fatalErrorState = False
 
-		self.metadepfile = None # Don't write a dependency file by default
 		self.incremental_parsing = False
 
 		if self.load_defaults:
@@ -1178,15 +1177,7 @@ class Raptor(object):
 
 		return True
 
-	def SetMetadepfile(self, filename):
-		try:
-			self.metadepfile = generic_path.Path(filename)
-		except Exception,e:
-			self.Error("--metadepfile  option was not a valid filename: {0}".format(filename))
-			return False
-		return True
-
-	def SetIncremental(self, type):
+	def SetIncrementalParsing(self, type):
 		if type == "on":
 			self.incremental_parsing = True
 		elif type == "off":
@@ -1195,7 +1186,6 @@ class Raptor(object):
 			self.Warn(" incremental parsing option must be either 'on' or 'off' (was %s)"  % type)
 			return False
 		return  True
-
 
 	def AddProject(self, projectName):
 		self.projects.add(projectName.lower())
