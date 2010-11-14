@@ -904,13 +904,14 @@ include {0}
 							   filenamebase = str(toplevel_makefile_name.File()),
 							   prologue = "",
 							   epilogue = "",
-							   defaulttargets = self.defaultTargets)
+							   defaulttargets = self.defaultTargets,
+							   readonly = True)
 
 		except Exception,e:
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
-			self.raptor.Error("Failed to generate makefileset '{0}': {1} : {2}".format(str(toplevel_makefile_name),str(e),tb))
+			self.raptor.Error("Failed to generate makefileset %s", "'{0}': {1} : {2}".format(str(toplevel_makefile_name),str(e),tb))
 			makefileset = None
 
 		return makefileset

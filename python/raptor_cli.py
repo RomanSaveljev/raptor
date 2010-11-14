@@ -181,8 +181,8 @@ parser.add_option("--metadepfile",action="store",dest="metadepfile",
 				help="""This option is only for use by parent-invocations of raptor to communicate to child-invocations.  It is a filename that indicates where to write dependency information for the makefiles in this build.  The file should be in GNU make format, containing a rule of the form: "$(PARSETARGET) :  <dep1> <dep2> ... <depn>"
 """)
 
-parser.add_option("--incremental",action="store_true",dest="incremental",
-				help="Reuse makefiles from previous builds if they are still relevant. i.e if no bld.infs/mmps or other metadata has changed and if the environment has not altered either.  This option can improve raptor's performance but it is possible that it may sometimes be too optimistic and reuse makefiles that really should be regenerated.")
+parser.add_option("--ip",action="store",dest="incremental_parsing",
+				help="Reuse makefiles from previous builds if they are still relevant. i.e if no bld.infs/mmps or other metadata has changed and if the environment has not altered either.  This option can improve raptor's performance but it is possible that it may sometimes be too optimistic and reuse makefiles that really should be regenerated.  It cannot currently be used with the parallel parsing option (--pp=on). It is not likely to save time when the --qtpro option is used as there is no way to get the dependencies of a .pro file so qmake must always reparse them and regenerate their bld.inf files.")
 
 
 def GetArgs(Raptor, args):
@@ -259,7 +259,7 @@ def DoRaptor(Raptor, args):
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
 				 'metadepfile' : Raptor.SetMetadepfile,
-				 'incremental' : Raptor.SetIncremental,
+				 'incremental_parsing' : Raptor.SetIncremental,
 			 	 'version' : Raptor.PrintVersion
 				}
 

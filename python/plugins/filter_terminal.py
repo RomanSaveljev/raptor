@@ -310,10 +310,10 @@ class FilterTerminal(filter_interface.Filter):
 							reason="(timeout)"
 
 						sys.stderr.write("\n FAILED {0} {1} for {2}: {3}\n".format( \
-								(self.recipe_dict['name'],
+								self.recipe_dict['name'],
 								reason,
 								self.recipe_dict['config'],
-								self.recipe_dict['name_to_user'])))
+								self.recipe_dict['name_to_user']))
 	
 						mmppath = generic_path.Path(self.recipe_dict['mmp']).From(generic_path.CurrentDir()).GetShellPath()
 						if mmppath is not "":
