@@ -69,6 +69,24 @@ def run():
 	t.warnings = 2
 	t.run()
 	
+	t.name = "mmp_option_gcce_linkeroption_gcce"
+	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c arm.v5.urel.gcce4_4_1.release_gcce -f-"
+	t.targets = [
+		"$(EPOCROOT)/epoc32/release/gcce/urel/test.exe",
+	]
+	t.mustmatch = []
+	t.mustmatch_singleline = [
+		".*g\+\+.*-c.*-O3.*-fvisibility-inlines-hidden.*",
+		".*g\+\+.* -Wl,--verbose -Wl,-pie .*"
+	]
+	t.mustnotmatch = [
+		".*g\+\+.*-c.* -Wl,--verbose -Wl,-pie .*"
+	]
+	t.warnings = 0 
+	t.run()
+	
+	t.mustmatch_singleline = []
+	
 	t.name = "mmp_debuglibrary"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp3/bld.inf -c armv5 -c winscw -f-"
 	t.targets = [
