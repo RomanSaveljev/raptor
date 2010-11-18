@@ -96,10 +96,13 @@ ifeq ($(TOOLCHAIN),RVCT)
   OPTION_REPLACE_COMPILER:=$(OPTION_REPLACE_ARMCC)
 endif
 
+ifeq ($(TOOLCHAIN),GCCE)
+  LINKEROPTION:=$(addprefix -Wl$(CHAR_COMMA),$(LINKEROPTION_GCCE))
+  OPTION_COMPILER:=$(OPTION_GCCE)
+endif
+
 # "ARMFPU" overrides for 'fpu-ness' in compiler and postlinker calls in .mmp files are currently only
 # supported for RVCT-based builds, other builds always make use of the interface defined defaults.
 ifneq ($(TOOLCHAIN),RVCT)
   ARMFPU:=
-  LINKEROPTION:=$(addprefix -Wl$(CHAR_COMMA),$(LINKEROPTION_GCCE))
-  OPTION_COMPILER:=$(OPTION_GCCE)
 endif
