@@ -49,14 +49,15 @@ import pluginbox
 from xml.sax.saxutils import escape
 
 
-if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ:
-	print "Error: HOSTPLATFORM and HOSTPLATFORM_DIR must be set in the environment (this is usually done automatically by the startup script)."
+if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ or not "HOSTPLATFORM32_DIR" in os.environ:
+	print "Error: HOSTPLATFORM, HOSTPLATFORM_DIR and HOSTPLATFORM32_DIR must be set in the environment (this is usually done automatically by the startup script)."
 	sys.exit(1)
 
 hostplatform = set(os.environ["HOSTPLATFORM"].split(" "))
 unixplatforms = set(['linux','freebsd','darwin','sunos'])
 isunix = not hostplatform.isdisjoint(unixplatforms)
 hostplatform_dir = os.environ["HOSTPLATFORM_DIR"]
+hostplatform32_dir = os.environ["HOSTPLATFORM32_DIR"]
 
 # defaults can use EPOCROOT
 
@@ -626,8 +627,6 @@ class Layer(ModelNode):
 
 		if len(components) > 0:
 			try:
-
-
 				# create a MetaReader that is aware of the list of
 				# configurations that we are trying to build.
 				metaReader = raptor_meta.MetaReader(build, build.buildUnitsToBuild)
@@ -672,7 +671,6 @@ class Layer(ModelNode):
 		about this metaunit - i.e. one doesn't want to parse it immediately
 		but to create a makefile that will parse it.
 		In this case it allows bld.infs to be parsed in parallel by make."""
-
 
 		# insert the start time into the Makefile name?
 
@@ -721,23 +719,38 @@ class Layer(ModelNode):
 		for block in component_blocks:
 			loop_number += 1
 			specNode = raptor_data.Specification("metadata_" + self.name)
-
-			componentList = " ".join([str(c.bldinf_filename) for c in block])
-
+			
+			# root path for generated sysdef files and their partnering makefiles
 			makefile_path = str(build.topMakefile) + "_" + str(loop_number)
 
-			# Don't permit the reuse of makefiles 
 			try:
 				os.unlink(makefile_path)
 			except Exception:
 				pass
+			
+			pp_system_definition = makefile_path + ".sysdef.xml"
+			
+			try:
+				sys_def_writer = raptor_xml.SystemModel(build, aDoRead=False)
+				for component in block:
+					sys_def_writer.AddComponent(component)
+				sys_def_writer.Write(pp_system_definition)
+				build.Debug("Wrote intermediate parallel-parsing system definition file " + pp_system_definition)
+			except Exception as e:
+				build.Error("Failed to write intermediate parallel-parsing system definition file " + pp_system_definition)
+				raise
+
+
+			configList = " ".join([c.name for c in self.configs if c.name != "build" ])
+
 
 			# add some basic data in a component-wide variant
 			var = raptor_data.Variant()
-			var.AddOperation(raptor_data.Set("COMPONENT_PATHS", componentList))
+			var.AddOperation(raptor_data.Set("PP_SYSTEM_DEFINITION", pp_system_definition))
 			var.AddOperation(raptor_data.Set("MAKEFILE_PATH", makefile_path))
 			var.AddOperation(raptor_data.Set("CONFIGS", configList))
 			var.AddOperation(raptor_data.Set("CLI_OPTIONS", cli_options))
+
 
 			# Allow the flm to skip exports. Note: this parameter
 			doexport_str = '1'
@@ -775,9 +788,6 @@ class Layer(ModelNode):
 		b = build.Make(binding_makefiles)
 		build.InfoEndTime(object_type = "layer", task = "build",
 				key = str(build.topMakefile))
-
-
-
 		return b
 
 
@@ -930,6 +940,7 @@ class Raptor(object):
 		self.doCheck = False
 		self.doWhat = False
 		self.doParallelParsing = False
+		self.doCaseFolding_rsg = False
 		self.mission = Raptor.M_BUILD
 
 		# what platform and filesystem are we running on?
@@ -939,7 +950,10 @@ class Raptor(object):
 		self.toolset = None
 
 		self.starttime = time.time()
-		self.timestring = time.strftime("%Y-%m-%d-%H-%M-%S")
+		# Create a unique time id that combines millisecond part of start time
+		# and id of the process which Raptor python is running on 
+		timeid = str(round(self.starttime, 3)).split('.')[1] + '-' + str(os.getpid())
+		self.timestring = time.strftime("%Y-%m-%d-%H-%M-%S.") + timeid
 
 		self.fatalErrorState = False
 
@@ -1181,6 +1195,9 @@ class Raptor(object):
 			return False
 
 		return True
+	def SetRsgCaseFolding(self, TrueOrFalse):
+		self.doCaseFolding_rsg = TrueOrFalse
+		return True
 
 	def SetIncrementalParsing(self, type):
 		if type == "on":
@@ -1213,7 +1230,7 @@ class Raptor(object):
 		global name
 		print name, "version", raptor_version.fullversion()
 		self.mission = Raptor.M_VERSION
-		return False
+		return True
 
 	# worker methods
 
@@ -1325,24 +1342,29 @@ class Raptor(object):
 
 		return self.toolset.check(evaluator, configname)
 
-
 	def CheckConfigs(self, configs):
 		"""	Tool checking for all the buildable configurations
 			NB. We are allowed to use different tool versions for different
 			configurations."""
 
 		tools_ok = True
+		tool_problems = []
 		for b in configs:
 			self.Debug("Tool check for %s", b.name)
+			config_ok = False  #default
 			try:
 				evaluator = self.GetEvaluator(None, b, gathertools=True)
-				tools_ok = tools_ok and self.CheckToolset(evaluator, b.name)
+				config_ok = self.CheckToolset(evaluator, b.name)
 			except raptor_data.UninitialisedVariableException,e:
-				self.FatalError("The selected configuration (-c option) '{0}' is incomplete or invalid and cannot result in a successful build: {1}".format(b.name,str(e)))
+				tool_problems.append(b.name)
+				self.Error("{0} is a bad configuration: {1}".format(b.name,str(e)))
+
+			tools_ok = tools_ok and config_ok
+
+		if len(tool_problems) > 0:
+			self.FatalError("Build stopped because the following requested configurations are incomplete or invalid: {0}".format(", ".join(tool_problems)))
 
 		return tools_ok
-
-
 
 	def GatherSysModelLayers(self, systemModel, systemDefinitionRequestedLayers):
 		"""Return a list of lists of components to be built.
@@ -1687,6 +1709,7 @@ class Raptor(object):
 			# load the cache of configurations etc
 			self._load_cache()
 
+			# establish an object cache
 			self.AssertBuildOK()
 
 			# find out what configurations to build
@@ -1728,8 +1751,6 @@ class Raptor(object):
 					
 
 			self.AssertBuildOK()
-
-
 
 			# if self.doParallelParsing and not (len(layers) == 1 and len(layers[0]) == 1):
 			if self.doParallelParsing:

@@ -1,0 +1,36 @@
+There is a new log filter to generate a comma-separated-values (.csv) file
+listing all the errors, warnings, remarks etc. For example,
+
+sbs --filters=csv -f name
+
+will produce an output file "name.csv" in the current directory.
+
+Text in the Raptor logs is classified as Error, Critical, Warning or Remark
+using the list of regular expressions in the file,
+
+SBS_HOME/lib/config/logfile_regex.csv
+
+but this can be overriden by placing a file of the same name in the kit in
+its EPOCROOT/epoc32/sbs_config folder. This is exactly the same mechanism
+used by the HTML filter.
+
+The output .csv file can be sorted and then compared (using tools like diff
+or a spreadsheet viewer) to the results of a previous build.
+
+The format of the .csv file is: type,component,configuration,text
+
+where,
+
+* type is one of (ok, error, critical, warning, remark, missing)
+* component is the full path to the related bld.inf
+* configuration is the raptor build config name (e.g. armv5_urel)
+* text is the command run and its output (from the <recipe> element)
+
+Sometimes you may want to exclude some types of message from the .csv file.
+If the logs are very large you probably don't want to compare all the "ok"
+lines. So a list of message types to *ignore* can be passed as a parameter
+to the filter. For example,
+
+sbs --filters=csv[ok,remark] -f name
+
+will produce a .csv file without any "ok" or "remark" lines.

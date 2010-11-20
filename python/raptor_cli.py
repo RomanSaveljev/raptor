@@ -171,6 +171,12 @@ parser.add_option("--pp",action="store",dest="parallel_parsing",
 					"off" - Parse bld.infs serially 
 				     """)
 
+parser.add_option("--use-rsg-casefolding", action="store_true", dest="resource_rsg_casefolding",
+				help="""This option should not be used permanently to work around case issues on Linux. Case issues need to be fixed and this option should only be used before that has been done.
+
+					Generate resource rsg files in lowercase regardless what is specified in mmp file.
+				     """)
+
 parser.add_option("-v","--version",action="store_true",dest="version",
 				help="Print the version number and exit.")
 
@@ -255,6 +261,7 @@ def DoRaptor(Raptor, args):
 				 'source_target' : Raptor.AddSourceTarget,
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
+				 'resource_rsg_casefolding' : Raptor.SetRsgCaseFolding,
 				 'incremental_parsing' : Raptor.SetIncrementalParsing,
 			 	 'version' : Raptor.PrintVersion
 				}
@@ -263,11 +270,8 @@ def DoRaptor(Raptor, args):
 	if parser.values.quiet:
 		Raptor.RunQuietly(True)
 
-	# some options imply that Raptor should exit immediately (e.g. --version)
+	# only return True if there are no command-line errors
 	keepGoing = True
-
-	if parser.values.version:
-		keepGoing = False
 
 	# Parse through the command line arguments passed, and call the
 	# corresponding function with the correct parameter.
@@ -292,9 +296,4 @@ def CommandFile(file):
 	print raptor.name + ": error: command file '%s' was not expanded" % file
 	return False
 
-
-
-
 # end of the raptor_cli module
-
-

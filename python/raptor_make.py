@@ -77,6 +77,8 @@ def AnnoFileParseOutput(annofile):
 	inOutput = False
 
 	buildid = ""
+	duration = "unknown"
+	availability = "unknown"
 	for line in af:
 		line = line.rstrip("\n\r")
 
@@ -231,16 +233,19 @@ class MakeEngine(object):
 			# console output is lost.  The annotation file has a copy of this
 			# output in the "parse" job and it turns out to be uncorrupted.
 			self.copyLogFromAnnoFile = (evaluator.Get("copylogfromannofile") == "true")
-			self.annoFileName = None
+			self.emakeCm = (len([opt for opt in self.raptor.makeOptions if opt.startswith("--emake-cm")]) > 0)
+			self.annoFileName = None # store the anno file name
 
 			if self.copyLogFromAnnoFile:
-				for o in self.raptor.makeOptions:
-					self.annoFileName = string_following("--emake-annofile=", o)
-					if self.annoFileName:
-						self.raptor.Info("annofile: " + o)
-
-				if not self.annoFileName:
-					self.raptor.Info("Cannot copy log from annotation file as no annotation filename was specified via the option --mo=--emake-annofile=<filename>")
+				try:
+					self.annoFileName = string_following("--emake-annofile=", [opt for opt in self.raptor.makeOptions if opt.startswith("--emake-annofile")][0])
+					self.raptor.Info("annofile: " + self.annoFileName)
+				except IndexError, bad_index:
+					cannot_use_anno_msg = "Cannot copy log from annotation file as no annotation filename was specified via the option --mo=--emake-annofile=<filename>"
+					if self.emakeCm:
+						self.raptor.Error(cannot_use_anno_msg) # Only an error if requested use of cm
+					else:
+						self.raptor.Info(cannot_use_anno_msg)
 					self.copyLogFromAnnoFile = False
 
 			# buffering
@@ -325,6 +330,7 @@ USE_TALON:={2}
 		# global variables are set at the top of each makefile
 		self.global_make_variables['HOSTPLATFORM'] = " ".join(raptor.hostplatform)
 		self.global_make_variables['HOSTPLATFORM_DIR'] = raptor.hostplatform_dir
+		self.global_make_variables['HOSTPLATFORM32_DIR'] = raptor.hostplatform32_dir
 		self.global_make_variables['OSTYPE'] = self.raptor.filesystem
 		self.global_make_variables['FLMHOME'] = str(self.raptor.systemFLM)
 		self.global_make_variables['SHELL'] = self.shellpath
@@ -337,20 +343,22 @@ USE_TALON:={2}
 
 HOSTPLATFORM:={2}
 HOSTPLATFORM_DIR:={3}
-OSTYPE:={4}
-FLMHOME:={5}
-SHELL:={6}
+HOSTPLATFORM32_DIR:={4}
+OSTYPE:={5}
+FLMHOME:={6}
+SHELL:={7}
 THIS_FILENAME:=$(firstword $(MAKEFILE_LIST))
-DELETE_ON_FAILED_COMPILE:={7} 
+DELETE_ON_FAILED_COMPILE:={8} 
 
-{8}
-FLMDEBUG:={9}
+{9}
+FLMDEBUG:={10}
 
-include {10}
+include {11}
 
 """ .format(     raptor.name, raptor_version.fullversion(),
 		 self.global_make_variables['HOSTPLATFORM'],
 		 self.global_make_variables['HOSTPLATFORM_DIR'],
+		 self.global_make_variables['HOSTPLATFORM32_DIR'],
 		 self.global_make_variables['OSTYPE'],
 		 self.global_make_variables['FLMHOME'],
 		 self.global_make_variables['SHELL'],
@@ -363,7 +371,7 @@ include {10}
 		
 		# Unless dependency processing has been eschewed via the CLI, use a .DEFAULT target to
 		# trap missing dependencies (ignoring user config files that we know are usually absent)
-		if not (self.raptor.noDependGenerate or self.raptor.noDependInclude):
+		if not (elf.raptor.noDependGenerate or self.raptor.noDependInclude):
 			self.makefile_prologue += """
 
 $(FLMHOME)/user/final.mk:
@@ -444,7 +452,7 @@ include {0}
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
-			self.raptor.Error("Failed to write makefile '{0}': {1} : {2}".format(str(toplevel),str(e),tb))
+			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
 			makefileset = None
 
 		return makefileset
@@ -541,7 +549,7 @@ include {0}
 				guard = "guard_" + hash
 
 		# generate the call to the FLM
-		if iface is not None:
+		if iface is not None and not dupe:
 			# pickled interfaces save the parameters in a separate file
 			# and add a parameter which points at that file's location.
 			if pickled:
@@ -858,6 +866,7 @@ include {0}
 			end = ""
 
 		self.descrambler = str(self.raptor.home.Append(beginning, "sbs_descramble"+end))
+			
 		# generate a unique build number
 		random.seed()
 		looking = True

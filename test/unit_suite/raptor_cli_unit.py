@@ -159,6 +159,9 @@ class TestRaptorCli(unittest.TestCase):
 		self.incremental_parsing=onoroff
 		return True
 
+	def SetRsgCaseFolding(self, yesOrNo):
+		return True
+
 	def AddProject(self, project):
 		return True
 

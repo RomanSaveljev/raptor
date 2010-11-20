@@ -34,7 +34,9 @@ DOTEXE:=.exe
 TOOLPLATFORMDIR:=
 else
 DOTEXE:=
-TOOLPLATFORMDIR:=/$(HOSTPLATFORM_DIR)
+
+# For the time being tools are all 32-bit
+TOOLPLATFORMDIR:=/$(HOSTPLATFORM32_DIR)
 endif
 
 # addglobal(GlobalTargetName)
