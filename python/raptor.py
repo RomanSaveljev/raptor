@@ -215,6 +215,11 @@ class ModelNode(object):
 
 		metadepsfilename = makefile + ".metadeps"
 		try:
+			os.makedirs(str(generic_path.Path(makefile).Dir()))
+		except OSError,e:
+			pass # if the dir is already there
+
+		try:
 			with open(metadepsfilename,"w+") as f:
 				build.Debug("Layer Deps: {0} with {1} children depfile {2}".format(self.id, len(self.children),metadepsfilename))
 				for d in self.alldeps():
