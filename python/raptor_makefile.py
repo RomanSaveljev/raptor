@@ -19,8 +19,6 @@
 import re
 import os
 import generic_path
-import traceback
-import sys
 
 class MakefileSelector(object):
 	"""A "query" which is used to separate some flm interface calls
