@@ -371,7 +371,7 @@ class Component(ModelNode):
 		
 		# Extra metadata optionally supplied with system definition file gathered components
 		self.layername = layername
-		self.componentname = componentname
+		self.name = componentname
 
 	def render_bldinf(self, build):
 		raise Exception("Can't render a bld.inf from component {0} - don't know how".format(self.filename))
@@ -649,15 +649,16 @@ class Layer(ModelNode):
 		nc = len(self.children)
 		number_blocks = build.jobs
 		block_size = (nc / number_blocks) + 1
-		component_blocks = []
+		component_blocks = [] # list of mini-layers, split up for parallel parsing
 
 		b = 0
 		childlist = list(self.children)
 		while b < nc:
-			component_blocks.append(childlist[b:b+block_size])
+			l = Layer(self.name, childlist[b:b+block_size])
+			component_blocks.append(l)
 			b += block_size
 
-		while len(component_blocks[-1]) <= 0:
+		while len(component_blocks[-1].children) <= 0:
 			component_blocks.pop()
 			number_blocks -= 1
 
@@ -709,10 +710,7 @@ class Layer(ModelNode):
 		binding_makefiles = raptor_makefile.MakefileSet(str(tm.Dir()), build.maker.selectors, makefiles=None, filenamebase=str(tm.File()))
 		build.topMakefile = generic_path.Path(str(build.topMakefile) + "_pp")
 		
-
 		component_blocks = self._split_into_blocks(build)
-
-
 
 		spec_nodes = []
 		loop_number = 0
@@ -732,8 +730,7 @@ class Layer(ModelNode):
 			
 			try:
 				sys_def_writer = raptor_xml.SystemModel(build, aDoRead=False)
-				for component in block:
-					sys_def_writer.AddComponent(component)
+				sys_def_writer.AddLayer(block)
 				sys_def_writer.Write(pp_system_definition)
 				build.Debug("Wrote intermediate parallel-parsing system definition file " + pp_system_definition)
 			except Exception as e:

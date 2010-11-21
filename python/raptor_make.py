@@ -371,7 +371,7 @@ include {11}
 		
 		# Unless dependency processing has been eschewed via the CLI, use a .DEFAULT target to
 		# trap missing dependencies (ignoring user config files that we know are usually absent)
-		if not (elf.raptor.noDependGenerate or self.raptor.noDependInclude):
+		if not (self.raptor.noDependGenerate or self.raptor.noDependInclude):
 			self.makefile_prologue += """
 
 $(FLMHOME)/user/final.mk:

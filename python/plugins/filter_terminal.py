@@ -202,8 +202,10 @@ class FilterTerminal(filter_interface.Filter):
 		if self.raptor.quiet:
 			self.quiet = True
 		
-		# the build configurations which were reported
-		self.built_configs = []
+		# The build configurations which were reported.
+		# With parallel parsing there can be repetitions -
+		# hence the set().
+		self.built_configs = set() 
 		
 		# keep count of errors and warnings
 		self.err_count = 0
@@ -382,10 +384,13 @@ class FilterTerminal(filter_interface.Filter):
 						short_target = short_target.replace(self.epocroot,"")[1:]
 					short_target = generic_path.Path(short_target).GetShellPath()
 					sys.stdout.write(" {0}: {1}\n".format("export".ljust(FilterTerminal.recipewidth), short_target))
-			if text.startswith("<info>incremental makefile generation: "):
+			elif text.startswith("<info>incremental makefile generation: "):
 				message = text[text.find("<info>")+6:text.find("</info>")]
 				if not self.analyseonly and not self.quiet:
 					sys.stdout.write(" {0}\n".format(message))
+			elif text.startswith("<info>Buildable configuration '"):
+				# <info>Buildable configuration 'name'</info>
+				self.built_configs.add(text[30:-8])
 			return
 		elif text.find("<rm files") != -1 or text.find("<rmdir ") != -1:
 			# search for cleaning output but only if we 
@@ -410,9 +415,6 @@ class FilterTerminal(filter_interface.Filter):
 				self.recipeBody.append(text)
 			else:
 				self.recipelineExceeded += 1
-		elif text.startswith("<info>Buildable configuration '"):
-			# <info>Buildable configuration 'name'</info>
-			self.built_configs.append(text[30:-8])
 
 	def logit(self):
 		""" log a message """
@@ -457,7 +459,7 @@ class FilterTerminal(filter_interface.Filter):
 			sys.stdout.write("\nno warnings or errors\n\n")
 
 		for bc in self.built_configs:
-			sys.stdout.write("built " + bc + "\n")
+			sys.stdout.write("built {0}\n".format(bc))
 			
 		sys.stdout.write("\nRun time {0} seconds\n".format(self.raptor.runtime))
 		sys.stdout.write("\n")

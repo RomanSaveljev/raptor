@@ -2897,7 +2897,7 @@ class MetaReader(object):
 			# add some basic data in a component-wide variant
 			var = raptor_data.Variant(name='component-wide')
 			var.AddOperation(raptor_data.Set("COMPONENT_META", str(component.bldinf_filename)))
-			var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.componentname))
+			var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.name))
 			var.AddOperation(raptor_data.Set("COMPONENT_LAYER", component.layername))
 			specNode.AddVariant(var)
 
@@ -2934,7 +2934,7 @@ class MetaReader(object):
 				# add some basic data in a component-wide variant
 				var = raptor_data.Variant(name='component-wide-settings-' + plat)
 				var.AddOperation(raptor_data.Set("COMPONENT_META",str(component.bldinf_filename)))
-				var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.componentname))
+				var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.name))
 				var.AddOperation(raptor_data.Set("COMPONENT_LAYER", component.layername))
 				var.AddOperation(raptor_data.Set("MODULE", modulename))
 				var.AddOperation(raptor_data.Append("OUTPUTPATHOFFSET", outputDir, '/'))
