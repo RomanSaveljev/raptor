@@ -311,7 +311,7 @@ class ModelNode(object):
 		tm_file = str(tm.File())
 
 		if build.incremental_parsing:
-			uptodate = self.check_uptodate(build)
+			uptodate = build.build_record.uptodate and self.check_uptodate(build)
 
 		if build.incremental_parsing and uptodate:
 			build.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(build.build_record.topmakefilename))
@@ -504,7 +504,7 @@ class BuildRecord(object):
 		return br
 
 
-	def __equal__(self, other):
+	def __eq__(self, other):
 		""" Were the two builds done in a compatible 
 		    environment, similar targets and for the same platforms?
 		    i.e. should the makefiles be interchangeable?
@@ -512,9 +512,9 @@ class BuildRecord(object):
 		if self.elements == other.elements: 
 			if self.configlist == other.configlist:
 				if self.environment == other.environment:
-					return 1
+					return True
 		
-		return 0
+		return False
 
 	@classmethod
 	def matching_records(cls, adir, matching):
@@ -540,7 +540,7 @@ class BuildRecord(object):
 		for brt in brfiles_s:
 			b = brt[0]
 			br = cls.from_file(os.path.join(adir,b))
-			if br.__equal__(matching):
+			if br == matching:
 				yield br
 				rcount += 1
 				if rcount > BuildRecord.history_size:
@@ -559,7 +559,6 @@ class BuildRecord(object):
 			if oldbr.uptodate:
 				newbr.topmakefilename = oldbr.topmakefilename
 				newbr.uptodate = True
-
 		return newbr
 
 
