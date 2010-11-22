@@ -341,7 +341,6 @@ class SmokeTest(object):
 			tgt = os.path.normpath(ReplaceEnvs(t))
 
 			if os.path.exists(tgt):
-				print("Trying to remove {0}".format(tgt))
 				try:
 					os.chmod(tgt, stat.S_IRWXU)
 					if os.path.isdir(tgt):

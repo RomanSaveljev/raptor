@@ -33,7 +33,7 @@ def run():
 		environment (tools may change for example which may 
 		require that makefile be regenerated.)  """
 
-	command = "sbs -b smoke_suite/test_resources/simple/bld.inf --mo=-d -f ${SBSLOGFILE} "
+	command = "sbs -b smoke_suite/test_resources/simple/bld.inf -f ${SBSLOGFILE} "
 	targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test.exe",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test.exe.map",
@@ -71,12 +71,10 @@ def run():
 
 	if "SBS_BUILD_DIR" in os.environ:
 		old_sbs_build_dir = os.environ["SBS_BUILD_DIR"]
-		print("old_sbs_build_dir = {0}".format(old_sbs_build_dir))
 		os.environ["SBS_BUILD_DIR"] = os.path.join(old_sbs_build_dir, "incremental_parse")
 	else:
 		old_sbs_build_dir = None
 		os.environ["SBS_BUILD_DIR"] = os.path.join(ReplaceEnvs("$(EPOCROOT)"), "epoc32", "build", "incremental_parse")
-	print("sbs_build_dir = {0}".format(os.environ["SBS_BUILD_DIR"]))
 	t.sbs_build_dir = os.environ["SBS_BUILD_DIR"]
 
 	shutil.rmtree(os.environ["SBS_BUILD_DIR"], ignore_errors=True)
@@ -141,21 +139,44 @@ def run():
 	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", buildtargets)
 
 	t.mustmatch = [	
- incremental makefile generation: cannot reuse any pre-existing makefiles
+					"incremental makefile generation: cannot reuse any pre-existing makefiles",
 					"compile.*smoke_suite.test_resources.simple.test.cpp.*\[arm.v5.urel.gcce4_4_1\]",
-					"compile.*smoke_suite.test_resources.simple.test1.c++.*\[arm.v5.urel.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test1.c\+\+.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test.cia.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test2.cxx.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test3.Cpp.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test4.cc.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test5.CC.*\[arm.v5.urel.gcce4_4_1\]",
-					"compile.*smoke_suite.test_resources.simple.test6.C++.*\[arm.v5.urel.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test6.C\+\+.*\[arm.v5.urel.gcce4_4_1\]",
 					"target.*epoc32.release.armv5.urel.test.exe.*\[arm.v5.urel.gcce4_4_1\]"
 					]
 	t.mustnotmatch = []
 	t.run(noclean=True)
 
-	# Restore SBS_BUILD_DIR is needed
+	t.name = "incremental_changed_configuration"
+	t.id="1000001e"
+	t.description = """ do a straightforward incremental build having changed the configuration """
+	t.command = command + " -c arm.v5.udeb.gcce4_4_1 --ip=on"
+	# need udeb versions for this part of the test
+	t.targets = map(lambda x: x.replace("urel", "udeb"), targets)
+	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", map(lambda x: x.replace("urel", "udeb"), buildtargets))
+
+	t.mustmatch = [	
+					"incremental makefile generation: cannot reuse any pre-existing makefiles",
+					"compile.*smoke_suite.test_resources.simple.test.cpp.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test1.c\+\+.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test.cia.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test2.cxx.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test3.Cpp.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test4.cc.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test5.CC.*\[arm.v5.udeb.gcce4_4_1\]",
+					"compile.*smoke_suite.test_resources.simple.test6.C\+\+.*\[arm.v5.udeb.gcce4_4_1\]",
+					"target.*epoc32.release.armv5.udeb.test.exe.*\[arm.v5.udeb.gcce4_4_1\]"
+					]
+	t.mustnotmatch = []
+	t.run()
+
+	# Restore SBS_BUILD_DIR if needed
 	if old_sbs_build_dir != None:
 		os.environ["SBS_BUILD_DIR"] = old_sbs_build_dir
 	else:
