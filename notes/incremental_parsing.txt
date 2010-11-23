@@ -2,29 +2,30 @@ Incremental Parsing
 --------------------
 
 Incremental parsing is a feature where Raptor can avoid reparsing bld.infs,
-mmps etc (generally know as metadata files) when it determines that they
+mmps etc (generally known as metadata files) when it determines that they
 have not changed.  This means that the makefiles that were generated in a
 previous build may be reused.
 
 The primary benefit of this feature is to reduce the test-build-run cycle
 in situations where the same build is being repeated many times without
-changes to metadata files.  e.g. repeatedly changing a C++ source file and
+changes to metadata files, e.g. repeatedly changing a C++ source file and
 recompiling the project.
 
 Example:
 	sbs -b bld.inf --ip=on
 
 Old makefiles are only reused if they were aimed at building exactly the
-same components, for exactly the same platforms and in the same environment
-(raptor is currently sensitive to the PATH variable only).
+same components, for exactly the same platforms and in the same environment.
+The incremental parsing feature is currently sensitive to the PATH variable
+only but it may be desirable to reparse metadata in other situations also.
 
-The decision to re-parse is "all-or-nothing" - i.e. a change to any 
+At the moment, the decision to re-parse is "all-or-nothing" - i.e. a change to any 
 single bld.inf or mmp or any of their dependencies will result in a complete 
-re-parse of all of them.
+re-parse of all of them.  A more fine-grained approach may become possible in future.
 
 This feature is new and somewhat experimental - if you suspect that something
-should have been rebuilt but hasn'ti while you are using the feature then 
-simply remove the option from your incovation of sbs and rebuild.
+should have been rebuilt but hasn't while you are using the feature then 
+simply remove the option from your invocation of sbs and rebuild.
 
 
 Example:
@@ -54,7 +55,7 @@ the new code is built.
 Step 4)
 The user decides to build only for arm.v5.urel.rcvt4_0
 
-	sbs -b bld.inf --ip=on -c arm.v5.urel.rvct4
+	sbs -b bld.inf --ip=on -c arm.v5.urel.rvct4_0
 
 What happens: bld.infs and mmps are parsed because the configuration has
 changed even if arm.v5.urel.rvct4_0 is only a subset of the former builds,

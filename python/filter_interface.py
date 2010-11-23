@@ -845,7 +845,6 @@ class TaggedText(object):
 				value = attributes[attrib]
 				if value:
 					self.__dict__[attrib] = value
-
 		self.text = ""
 		self.time = 0.0
 		

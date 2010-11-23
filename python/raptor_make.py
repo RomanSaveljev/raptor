@@ -913,8 +913,8 @@ include {0}
 							   filenamebase = str(toplevel_makefile_name.File()),
 							   prologue = "",
 							   epilogue = "",
-							   defaulttargets = self.defaultTargets,
-							   readonly = True)
+							   defaulttargets=self.defaultTargets,
+							   readonly=True)
 
 		except Exception,e:
 			tb = traceback.format_exc()

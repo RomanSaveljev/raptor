@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -166,7 +166,7 @@ class MakefileSet(object):
 		MakefileSelector("default", '\.(?!export$|bitmap$|resource$).*$', "ALL")
 		]
 
-	def __init__(self, directory, selectors=defaultselectors, makefiles=None, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None, readonly = False):
+	def __init__(self, directory, selectors=defaultselectors, makefiles=None, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None, readonly=False):
 		self.directory = generic_path.Path(directory)
 		self.filenamebase = filenamebase
 		self.parent = parent
@@ -210,14 +210,14 @@ class MakefileSet(object):
 		   and write it to those (e.g. the exports makefile) """
 
 		if self.readonly:
-			pass
+			return
 		for f in self.makefiles:
 			f.addCall(specname, configname, ifname, useAllInterfaces, flmpath, parameters, guard)
 
 	def addInclude(self, makefilename):
 		"""include a makefile from each of the makefiles in the set - has the selector name appended to it."""
 		if self.readonly:
-			pass
+			return
 		for f in self.makefiles:
 			f.addInclude(makefilename)
 
@@ -237,12 +237,12 @@ class MakefileSet(object):
 
 	def close(self):
 		if self.readonly:
-			pass
+			return
 		for mf in self.makefiles:
 			mf.close()
 		self.groupermakefile.close()
 
 	def __del__(self):
 		if self.readonly:
-			pass
+			return
 		self.close()

@@ -212,6 +212,7 @@ class TestRaptorCli(unittest.TestCase):
 				'--source-target', 'some_source_file.cpp',
 				'--source-target', 'some_resource_file.rss',
 				'--pp', 'on',
+				'--ip', 'on',
 				'--no-depend-include',
 				'--no-depend-generate']
 		
