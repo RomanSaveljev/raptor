@@ -19,7 +19,6 @@
 # on command-line parameters, or by explicitly creating a raptor.Raptor
 # instance and calling its methods to set-up and perform a build.
 #
-
 name = "sbs"			# the public name for the raptor build tool
 env  = "SBS_HOME"		# the environment variable that locates us
 xml  = "sbs_init.xml"	# the primary initialisation file
@@ -722,20 +721,17 @@ class Layer(ModelNode):
 		if build.noDependGenerate == True:
 			cli_options += " --no-depend-generate"
 
-
 		tm = build.topMakefile.Absolute()
-
 
 		# List of all confgurations apart from "build" which 
 		# is used internally for generating makefiles for 
 		# parallel parsing
 		configList = " ".join([c.name for c in self.configs if c.name != "build" ])
 			
-			
 		# Cause the binding makefiles to have the toplevel makefile's
 		# name.  The bindee's have __pp appended.
 		binding_makefiles = raptor_makefile.MakefileSet(str(tm.Dir()), build.maker.selectors, makefiles=None, filenamebase=str(tm.File()))
-		build.topMakefile = generic_path.Path(str(build.topMakefile) + "_pp")
+		build.topMakefile = generic_path.Path(str(tm) + "_pp")
 		
 		component_blocks = self._split_into_blocks(build)
 
@@ -1776,6 +1772,12 @@ class Raptor(object):
 
 			self.AssertBuildOK()
 
+			###### insert the start time into the Makefile name
+			makefile = self.topMakefile.Absolute()
+			makefile.path = makefile.path.replace("%TIME", self.timestring)
+			self.topMakefile = makefile
+			######
+
 			# if self.doParallelParsing and not (len(layers) == 1 and len(layers[0]) == 1):
 			if self.doParallelParsing:
 				# Create a Makefile to parse components in parallel and build them
@@ -1791,11 +1793,6 @@ class Raptor(object):
 
 				# Create a build record as non-parallel parsed builds can take advantage of incremental
 				# makefile generation with some level of safety:
-				###### insert the start time into the Makefile name
-				makefile = self.topMakefile.Absolute()
-				makefile.path = makefile.path.replace("%TIME", self.timestring)
-				self.topMakefile = makefile
-				######
 				tm_dir = str(makefile.Dir())
 				tm_file = str(makefile.File())
 				configlist = " ".join([c.name for c in self.buildUnitsToBuild if c.name != "build" ])
