@@ -431,9 +431,16 @@ class LogMessageClassifier(FilterSAX):
 		pass
 		
 	def start_recipe(self, attributes):
-		self.recipe_tag = TaggedText(attributes)
+		print "START:",attributes
+		try:
+			self.recipe_tag = TaggedText(attributes)
+		except Exception,e:
+			print "EXCEPTION: ",dir(e), repr(e)
+		finally:
+			print "START222:", self.recipe_tag
 		
 	def char_recipe(self, char):
+		print "CHAR: ",char
 		self.recipe_tag.text += char
 		
 	def end_recipe(self):
@@ -841,11 +848,14 @@ class TaggedText(object):
 		
 		for attrib in ['bldinf', 'config']:
 			self.__dict__[attrib] = "unknown"
+			# It is not clear why addin .keys() prevented an exception
+			# on at least one machine
+			#if attrib in attributes.keys():
 			if attrib in attributes:
 				value = attributes[attrib]
 				if value:
 					self.__dict__[attrib] = value
-
+		print "HELLO7"
 		self.text = ""
 		self.time = 0.0
 		
