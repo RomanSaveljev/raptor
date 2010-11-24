@@ -27,3 +27,6 @@
 @%__PYTHON__% -tt %__TEST_SUITE__% %*
 
 @ENDLOCAL
+
+@CMD /C EXIT /B %ERRORLEVEL%
+
