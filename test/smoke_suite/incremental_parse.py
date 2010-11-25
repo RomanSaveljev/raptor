@@ -134,7 +134,7 @@ def run():
 	t.name = "incremental_touched_mmp_file"
 	t.id="1000001d"
 	t.description = """ do a straightforward incremental build having changed an mmp file """
-	t.command = "touch $SBS_HOME/test/smoke_suite/test_resources/simple/simple.mmp; " + command + " -c arm.v5.urel.gcce4_4_1 --ip=on"
+	t.command = "sleep 1; touch $SBS_HOME/test/smoke_suite/test_resources/simple/simple.mmp; sleep 1; " + command + " -c arm.v5.urel.gcce4_4_1 --ip=on"
 	t.targets = targets
 	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", buildtargets)
 
