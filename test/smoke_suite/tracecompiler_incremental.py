@@ -45,7 +45,7 @@ def run():
 
 	t.id = "114c"
 	t.name = "tracecompiler_incremental_rebuild"
-	t.command = "touch smoke_suite/test_resources/tracecompiler/testTC/src/wlanhwinit.cpp && sbs -b smoke_suite/test_resources/tracecompiler/testTC/group/bld.inf -c armv5_urel.tracecompiler -f - -m ${SBSMAKEFILE}"
+	t.command = "sleep 1; touch smoke_suite/test_resources/tracecompiler/testTC/src/wlanhwinit.cpp && sbs -b smoke_suite/test_resources/tracecompiler/testTC/group/bld.inf -c armv5_urel.tracecompiler -f - -m ${SBSMAKEFILE}"
 	t.countmatch = [ ["name='compile'",1] ]
 	t.targets = []
 	t.run()
