@@ -203,7 +203,7 @@ class FilterTerminal(filter_interface.Filter):
 			self.quiet = True
 		
 		# the build configurations which were reported
-		self.built_configs = []
+		self.built_configs = set([])
 		
 		# keep count of errors and warnings
 		self.err_count = 0
@@ -407,7 +407,7 @@ class FilterTerminal(filter_interface.Filter):
 				self.recipelineExceeded += 1
 		elif text.startswith("<info>Buildable configuration '"):
 			# <info>Buildable configuration 'name'</info>
-			self.built_configs.append(text[30:-8])
+			self.built_configs.add(text[30:-8])
 
 	def logit(self):
 		""" log a message """
@@ -451,7 +451,7 @@ class FilterTerminal(filter_interface.Filter):
 		else:
 			sys.stdout.write("\nno warnings or errors\n\n")
 
-		for bc in self.built_configs:
+		for bc in sorted(list(self.built_configs)):
 			sys.stdout.write("built " + bc + "\n")
 			
 		sys.stdout.write("\nRun time %d seconds\n" % self.raptor.runtime);

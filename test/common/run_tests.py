@@ -23,6 +23,8 @@ import datetime
 import traceback
 raptor_tests = imp.load_source("raptor_tests", "common/raptor_tests.py")
 
+test_run_start_time = datetime.datetime.now()
+
 # Command line options ########################################################
 from optparse import OptionParser
 
@@ -532,6 +534,9 @@ run_tests = SuiteRun(suitepattern = options.suite, testpattern = options.tests,
 		upload_location = options.upload)
 run_tests.run_tests()
 
+duration = datetime.datetime.now() - test_run_start_time
+print("\nTotal test run time: {0}\n".format(duration))
+
 if run_tests.suites_failed:
 	sys.exit(1)
-	
+

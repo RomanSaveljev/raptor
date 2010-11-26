@@ -22,7 +22,7 @@ def run():
 	result = SmokeTest.PASS
 
 	description = """This test covers parallel parsing."""
-	command = "mkdir -p $(EPOCROOT)/epoc32/build && cd $(SBS_HOME)/test/smoke_suite/test_resources/pp/ && sbs --command=$(SBS_HOME)/test/smoke_suite/test_resources/pp/ppbldinf_commandfile -c armv5 -c winscw --pp=on --noexport -m ${SBSMAKEFILE} -f - | grep recipe "
+	command = "mkdir -p $(EPOCROOT)/epoc32/build && cd $(SBS_HOME)/test/smoke_suite/test_resources/pp/ && sbs --command=$(SBS_HOME)/test/smoke_suite/test_resources/pp/ppbldinf_commandfile -c armv5 -c winscw --pp=on --noexport -m ${SBSMAKEFILE} -f - | grep progress "
 
 	mmpcount = 10 # how many mmps in this parallel parsing test
 
@@ -44,7 +44,7 @@ def run():
 			targets.append(atarget.replace('pp#','pp'+ str(num)))
 
 	mustmatch = [
-		".*<recipe .*name='makefile_generation.*",
+		".*<progress:start object_type='makefile' task='makefile_generation'.*"
 	]
 	mustnotmatch = [
 		".*<recipe .*name='makefile_generation_export.*",

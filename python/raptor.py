@@ -759,7 +759,7 @@ class Raptor(object):
 	def Introduction(self):
 		"""Print a header of useful information about Raptor"""
 
-		self.Info("%s: version %s\n", name, raptor_version.fullversion())
+		self.Info("%s: version %s", name, raptor_version.fullversion())
 
 		self.Info("%s %s", env, str(self.home))
 		self.Info("Set-up %s", str(self.raptorXML))
@@ -1415,6 +1415,7 @@ class BuildStats(object):
 		self.targets = raptor_instance.targets
 		self.runtime = 0
 		self.name = name
+		self.topMakefile = raptor_instance.topMakefile
 
 
 # raptor module functions
