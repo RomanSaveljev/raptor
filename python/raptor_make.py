@@ -625,9 +625,9 @@ include {0}
 				self.raptor.Error("Failed in %s", self.initCommand)
 				self.Tidy()
 				return False
-
 		# Save file names to a list, to allow the order to be reversed
-		fileName_list = list(makefileset.makefileNames())
+		filename_list = makefileset.nonempty_makefile_names()
+		self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str(filename_list)))
 
 		# Iterate through args passed to raptor, searching for CLEAN or REALLYCLEAN
 		clean_flag = False
@@ -638,17 +638,17 @@ include {0}
 		# Files should be deleted in the opposite order to the order
 		# they were built. So reverse file order if cleaning
 		if clean_flag:
-			fileName_list.reverse()
+			filename_list.reverse()
 
 		# Report number of makefiles to be built
-		self.raptor.InfoDiscovery(object_type = "makefile", count = len(fileName_list))
+		self.raptor.InfoDiscovery(object_type = "makefile", count = len(filename_list))
 
 
 		# Stores all the make processes that were executed:
 		make_processes = []
 
 		# Process each file in turn
-		for makefile in fileName_list:
+		for makefile in filename_list:
 
 			if not os.path.exists(makefile):
 				self.raptor.Info("Skipping makefile {0}".format(makefile))
@@ -900,29 +900,4 @@ include {0}
 				return False
 		return True
 	
-	def incremental_makefileset(self, toplevel_makefile_name):
-		""" return a makefile set object that will work with an existing set of makefiles.
-		    This is for use when one doesn't wish to regenerate a set of makefiles because
-		    they happen to still be valid/uptodate. """
-
-		makefileset = None
-
-		try:
-			makefileset = MakefileSet(directory = str(toplevel_makefile_name.Dir()),
-							   selectors = self.selectors,
-							   filenamebase = str(toplevel_makefile_name.File()),
-							   prologue = "",
-							   epilogue = "",
-							   defaulttargets=self.defaultTargets,
-							   readonly=True)
-
-		except Exception,e:
-			tb = traceback.format_exc()
-			if not self.raptor.debugOutput:
-				tb=""
-			self.raptor.Error("Failed to generate makefileset %s", "'{0}': {1} : {2}".format(str(toplevel_makefile_name),str(e),tb))
-			makefileset = None
-
-		return makefileset
-
 # end of the raptor_make module

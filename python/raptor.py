@@ -333,17 +333,6 @@ class ModelNode(object):
 		tm_dir = str(tm.Dir())
 		tm_file = str(tm.File())
 
-		if build.incremental_parsing:
-			uptodate = build.build_record.uptodate and self.check_uptodate(build)
-
-		if build.incremental_parsing and uptodate:
-			build.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(build.build_record.topmakefilename))
-			# Don't use the makefile name specified on the commmandline - use the one from the build record.
-			thisnode_makefile = self.makefile_name(build)
-			makefileset = build.maker.incremental_makefileset(generic_path.Path(thisnode_makefile))
-		else:
-			if build.incremental_parsing:
-				build.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")
 			# Must ensure that all children are unfurled at this point
 			self.unfurl_all(build)
 			sp = self.specs
@@ -356,6 +345,8 @@ class ModelNode(object):
 		build.InfoEndTime(object_type = "layer", task = "build",
 				key = (str(makefileset.directory) + "/" + str(makefileset.filenamebase)))
 
+		
+		build.build_record.record_makefiles(makefileset)
 
 		return result
 
@@ -487,10 +478,10 @@ class QtProComponent(BldinfComponent):
 class BuildRecord(object):
 	"""Information about a build which can be used for incremental makefile generation.
 	   Parameters must all be strings. """
-	stored_attrs = ['commandline', 'elements', 'environment', 'topmakefilename', 'configlist']
+	stored_attrs = ['commandline', 'elements', 'environment', 'topmakefilename', 'configlist', 'layers']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
 	history_size = 10
-	def __init__(self, commandline=None, elements=None, environment=None, topmakefilename=None, configlist=None):
+	def __init__(self, commandline=None, elements=None, environment=None, topmakefilename=None, configlist=None, makefiles=None):
 		
 		self.commandline = commandline
 		self.elements = elements
@@ -498,12 +489,49 @@ class BuildRecord(object):
 		self.topmakefilename = topmakefilename
 		self.configlist = configlist
 		self.uptodate = False # Do we need to regenerate the makefiles to reuse this build?
+		self.makefiles=makefiles # makefile,callcount makefile,callcount | makefile,callcount
 
 	def to_file(self, buildrecord_filename):
 		""" Write out the build record so that we can find it in future builds"""
 		with open(buildrecord_filename,"w") as f:
 			for a in BuildRecord.stored_attrs:
 				f.write("{0}={1}\n".format(a,self.__dict__[a]))
+
+
+	def record_makefiles(self, makefileset):
+		""" format the makefileset that was used in a 
+		    build so that it can be stored in the build record.
+		    This can be called repeatedly - e.g. once to record
+		    the makefiles for each layer in an ordered layers build.
+		"""
+		if self.makefiles is None:
+			self.makefiles = ""
+		else:
+			self.makefiles += "|"
+
+		self.makefiles += " ".join(["{0},{1}".format(str(mf.filename),str(mf.callcount)) for mf in makefileset.makefiles])
+
+	def makefilesets(self, build):
+		""" return a list of makefileset objects which the make engine 
+		    can build from - this can replicate an "ordered layers" build"""
+		layers = []
+		layers_text = self.makefiles.split("|")
+		
+		for lt in layers_text:
+			mf_pairs = self.makefiles.split(" ")
+			mf_set = raptor_makefile.BaseMakefileSet()
+		
+			for p in mf_pairs:
+				(makefilename, callcount) = p.split(",")
+				if callcount > 0:
+					# only load up make stages which actually call some flms:
+					mf_set.add_makefile(makefilename)
+
+			if len(mf_set) > 0:
+				layers.append(mf_set)
+
+		return layers
+		
 
 	@classmethod
 	def from_file(cls, filename):
@@ -515,6 +543,7 @@ class BuildRecord(object):
 				eq = l.find("=")
 				if eq  >= 0:
 					kargs[l[:eq]] = l[eq+1:]
+					print "KARGS: ",l[:eq] , l[eq+1:]
 					
 				else:
 					raise Exception("Bad build record format: line should be name=value but it was missing '=': {0}: {1}".format(l, filename))
@@ -524,6 +553,7 @@ class BuildRecord(object):
 			except TypeError,e:
 				raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}: {3}".format(BuildRecord.stored_attrs, str(kargs), filename, str(e)))
 
+		print "MAKEFILES:",br.makefiles
 		return br
 
 
@@ -1739,27 +1769,53 @@ class Raptor(object):
 			
 			self.buildUnitsToBuild = buildUnitsToBuild
 
-			# find out what components to build, and in what way
-			layers = []
-
-			self.AssertBuildOK()
-			if len(buildUnitsToBuild) >= 0:
-				layers = self.GetLayersFromCLI()
-
-			componentCount = reduce(lambda x,y : x + y, [len(cg) for cg in layers])
-
-			if not componentCount > 0:
-				raise BuildCannotProgressException("No components to build.")
-
-			# check the configurations (tools versions)
 			self.AssertBuildOK()
 
-			if self.toolcheck != 'off':
-				self.CheckConfigs(buildUnitsToBuild)
+			###### insert the start time into the Makefile name
+			makefile = self.topMakefile.Absolute()
+			makefile.path = makefile.path.replace("%TIME", self.timestring)
+			self.topMakefile = makefile
+			######
+
+
+
+			# is this a rebuild or are we going to do everything from scratch?
+			do_rebuild = False
+			if build.incremental_parsing:
+				do_rebuild = build.build_record.uptodate 
+
+			if do_rebuild:
+				build.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(build.build_record.topmakefilename))
+				# Don't use the makefile name specified on the commmandline - use the one from the build record.
+				thisnode_makefile = self.makefile_name(build)
+
+				print "BUILD",build.build_record
+				makefileset = build.build_record.makefilesets(build)
 			else:
-				self.Info("Not Checking Tool Versions")
+				if build.incremental_parsing:
+					build.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")
 
-			self.AssertBuildOK()
+				# find out what components to build, and in what way
+				layers = []
+
+				self.AssertBuildOK()
+				if len(buildUnitsToBuild) >= 0:
+					layers = self.GetLayersFromCLI()
+
+				componentCount = reduce(lambda x,y : x + y, [len(cg) for cg in layers])
+
+				if not componentCount > 0:
+					raise BuildCannotProgressException("No components to build.")
+
+				# check the configurations (tools versions)
+				self.AssertBuildOK()
+
+				if self.toolcheck != 'off':
+					self.CheckConfigs(buildUnitsToBuild)
+				else:
+					self.Info("Not Checking Tool Versions")
+
+				self.AssertBuildOK()
 
 			# Setup a make engine.
 			if not self.maker:
@@ -1771,13 +1827,11 @@ class Raptor(object):
 
 			self.AssertBuildOK()
 
-			###### insert the start time into the Makefile name
-			makefile = self.topMakefile.Absolute()
-			makefile.path = makefile.path.replace("%TIME", self.timestring)
-			self.topMakefile = makefile
-			######
+
 
 			# if self.doParallelParsing and not (len(layers) == 1 and len(layers[0]) == 1):
+			# rebuilding and parallel parsing are not compatible at the moment.  There is
+			# a validation check for that earlier.
 			if self.doParallelParsing:
 				# Create a Makefile to parse components in parallel and build them
 				for l in layers:
@@ -1815,8 +1869,9 @@ class Raptor(object):
 
 					self.topMakefile = generic_path.Path(self.build_record.topmakefilename).Absolute()
 				else:
-					self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, elements=elements, topmakefilename=str(makefile), configlist=configlist)
+					self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, elements=elements, topmakefilename=str(makefile), configlist=configlist, makefiles="")
 
+				print "SELFBUILDRECORD_makefiles:",self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, elements=elements, topmakefilename=str(makefile), configlist=configlist)
 				for l in layers:
 					# create specs for a specific group of components
 					l.realise(self)

@@ -52,6 +52,7 @@ class Makefile(object):
 		self.epilogue = epilogue
 		self.defaulttargets = defaulttargets
 		self.dead = False
+		self.callcount = 0 # Number of flm calls in this makefile
 
 	def open(self):
 		if self.dead:
@@ -114,9 +115,15 @@ class Makefile(object):
 			if ifmatch == None and useAllInterfaces == False:
 				return False
 
+		# A possibly justified way of telling if this is an flm call that
+		# "matters" to an incremental build or if it's a supporting call
+		# that's only needed when others are there.
+		if not ifname.endswith(".config.default"):
+			self.callcount += 1
+
 		self.open()
 		# now we can write the values into the makefile
-		self.file.write("# call %s\n" % flmpath)
+		self.file.write("# call %s, count %s\n" % (flmpath,self.callcount))
 		self.file.write("SBS_SPECIFICATION:=%s\n" % specname)
 		self.file.write("SBS_CONFIGURATION:=%s\n\n" % configname)
 
@@ -156,8 +163,26 @@ class Makefile(object):
 		self.close()
 			
 		
+class BaseMakefileSet(object):
+	def __init__(self):
+		self.makefiles = [] # list of Makefile()
 
-class MakefileSet(object):
+	def makefile_names(self):
+		for mf in self.makefiles:
+			print "MFCOUNT",str(mf.filename),mf.callcount
+		return [str(mf.filename) for mf in self.makefiles]
+	
+	def nonempty_makefile_names(self):
+		for mf in self.makefiles:
+			print "MFCOUNT",str(mf.filename),mf.callcount
+		return [str(mf.filename) for mf in self.makefiles if mf.callcount > 0]
+
+	def add_makefile(self, makefile):
+		self.makefiles.append(makefile)
+
+
+
+class MakefileSet(BaseMakefileSet):
 	grouperselector = MakefileSelector(name="")
 	defaultselectors = [ 
 		MakefileSelector("export", '\.export$', "EXPORT"),
@@ -167,6 +192,8 @@ class MakefileSet(object):
 		]
 
 	def __init__(self, directory, selectors=defaultselectors, makefiles=None, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None, readonly=False):
+		super(MakefileSet,self).__init__()
+
 		self.directory = generic_path.Path(directory)
 		self.filenamebase = filenamebase
 		self.parent = parent
@@ -221,10 +248,7 @@ class MakefileSet(object):
 		for f in self.makefiles:
 			f.addInclude(makefilename)
 
-	def makefileNames(self):
-		for mf in self.makefiles:
-			yield str(mf.filename)
-	
+
 	def ignoreTargets(self, makefile):
 		"""Get hold of a makefile's selector based on its name and
 		   determine whether it ignores targets based on a regexp."""
