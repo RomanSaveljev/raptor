@@ -64,11 +64,11 @@ def run():
 				"sbs: error: .*cpp.*test/smoke_suite/test_resources/pp/test01/bld.inf.*fatal error: this_file_does_not_exist.inf: No such file or directory",
 "sbs: error.*cpp.*compilation terminated.",
 "sbs: error: Preprocessor exception: ''Errors in .*test/smoke_suite/test_resources/pp/test01/bld.inf'' : in command.*cpp.*(component .*/test/smoke_suite/test_resources/pp/test01/bld.inf)",
-"sbs: error: .*cpp.*: .*/test/smoke_suite/test_resources/pp/test01/bld.inf:1: fatal error: this_file_does_not_exist.inf: No such file or directory"					
+"sbs: error: .*cpp.*: .*/test/smoke_suite/test_resources/pp/test01/bld.inf.*fatal error: this_file_does_not_exist.inf: No such file or directory"					
 					]
 	t.mustnotmatch = []
 	t.warnings = 5
-	t.errors = 9
+	t.errors = 9 if t.onWindows else 8
 	t.returncode = 1
 	t.run()
 	return t
