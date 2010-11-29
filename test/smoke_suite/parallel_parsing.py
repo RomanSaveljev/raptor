@@ -67,8 +67,8 @@ def run():
 									
 					]
 	t.mustnotmatch = []
-	t.warnings = 5
-	t.errors = 9 if t.onWindows else 6
+	t.warnings = -1
+	t.errors = -1
 	t.returncode = 1
 	t.run()
 	return t
