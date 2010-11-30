@@ -71,4 +71,7 @@ def run():
 	t.errors = -1
 	t.returncode = 1
 	t.run()
+
+	t.name = "parallel_parsing"
+	t.print_result()
 	return t

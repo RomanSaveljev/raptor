@@ -11,11 +11,10 @@
 #
 # Contributors:
 #
-# Description: 
-# PPMakefileGenFilter - a class for filtering log file output from sub-invocations
-# of Raptor in builds where parallel parsing is used. This class may not be useful
-# for generating log files on its own.
-#
+# Description:
+
+"""This module provides the PPMakefileGenFilter class for filtering log output 
+from sub-invocations of Raptor in builds where parallel parsing is used."""
 
 import errno
 import os
@@ -25,13 +24,19 @@ import raptor_timing
 import filter_interface
 
 class PPMakefileGenFilter(filter_interface.Filter):
+	"""A class for filtering log output from sub-invocations of Raptor 
+	in builds where parallel parsing is used. This class may not be useful
+	for generating log files on its own."""
+
 	def __init__(self):
 		super(PPMakefileGenFilter, self).__init__()
 		self.unwanted_lines = [
-							"<info>Environment", 
-							"<buildlog", 
+							"<?xml version=",
+							"<buildlog",
 							"</buildlog>",
-							"<info>SBS_HOME", "<info>Set-up", "<?xml version=",
+							"<info>Environment", 
+							"<info>SBS_HOME",
+							"<info>Set-up",
 							"<info>Current working directory",
 							"<info>sbs: version",
 							"<info>Duplicate variant",
@@ -75,13 +80,20 @@ class PPMakefileGenFilter(filter_interface.Filter):
 			self.out.write(timing_info)
 		
 		return True
+	
+	def is_wanted(self, line):
+		for fragment in self.unwanted_lines:
+			if line.startswith(fragment):
+				return False
+		return True
 
 	def write(self, text):
 		"""Write text into the log file"""
 		if self.out:
-			want_text = not reduce(lambda x, y: x or y, [fragment in text for fragment in self.unwanted_lines])
-			if want_text:
-				self.out.write(text)
+			lines = text.splitlines(True)
+			for line in lines:
+				if self.is_wanted(line):
+					self.out.write(line)
 		return True
 
 	def summary(self):
@@ -97,8 +109,7 @@ class PPMakefileGenFilter(filter_interface.Filter):
 			if self.out:
 				timing_info = raptor_timing.Timing.end_string(key = self.key, task = self.task, object_type = self.object_type)
 				self.out.write(timing_info)
-
-			self.out.close()
+				self.out.close()
 			return True
 		except:
 			self.out = None
