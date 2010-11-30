@@ -155,6 +155,10 @@ class TestRaptorCli(unittest.TestCase):
 		self.pp=onoroff
 		return True
 
+	def SetIncrementalParsing(self, onoroff):
+		self.incremental_parsing=onoroff
+		return True
+
 	def SetRsgCaseFolding(self, yesOrNo):
 		return True
 
@@ -208,6 +212,7 @@ class TestRaptorCli(unittest.TestCase):
 				'--source-target', 'some_source_file.cpp',
 				'--source-target', 'some_resource_file.rss',
 				'--pp', 'on',
+				'--ip', 'on',
 				'--no-depend-include',
 				'--no-depend-generate']
 		

@@ -235,6 +235,7 @@ class SmokeTest(object):
 		self.errors = 0
 		self.exceptions = 0
 		self.returncode = 0
+		self.noclean = False
 
 		self.onWindows = sys.platform.startswith("win")
 
@@ -260,7 +261,8 @@ class SmokeTest(object):
 		self.environ = {} # Allow tests to set the environment in which commands run.
 		self.sbs_build_dir = "$(EPOCROOT)/epoc32/build"
 
-	def run(self, platform = "all"):
+	def run(self, platform = "all", noclean=False):
+		self.noclean = noclean
 		previousResult = self.result
 		self.id = fix_id(self.id)
 		try:
@@ -356,14 +358,16 @@ class SmokeTest(object):
 
 		# flatten any lists first (only 1 level of flattenening expected)
 		# these indicate alternative files - one of them will exist after a build
-		removables = []
-		for i in self.targets:
-			if type(i) is not list:
-				removables.append(i)
-			else:
-				removables.extend(i)
+		if not self.noclean:
+			removables = []
+			for i in self.targets:
+				if type(i) is not list:
+					removables.append(i)
+				else:
+					removables.extend(i)
 				
-		return self.removeFiles(removables)
+			return self.removeFiles(removables)
+		return True
 
 	def pretest(self):
 		# what to do before the test runs
@@ -501,7 +505,7 @@ class SmokeTest(object):
 			if not re.search(expr, self.output, re.MULTILINE):
 				self.outputok = False
 				print "OUTPUTMISMATCH: output did not match: %s" % expr
-
+		
 		for expr in self.mustnotmatch_singleline + self.mustnotmatch:
 			if re.search(expr, self.output, re.MULTILINE):
 				self.outputok = False

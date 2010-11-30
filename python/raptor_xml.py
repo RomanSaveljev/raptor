@@ -211,15 +211,21 @@ class SystemModel(object):
 	def GetLayerNames(self):
 		return self.__LayerList
 
-	def AddComponent(self, aComponent):
+	def AddLayer(self, layer):
+		"""Add a layer with components to this system definition"""
+
+		for c in layer.children:
+			self.AddComponent(c, layer.name)
+
+	def AddComponent(self, aComponent, layername):
 		'''Add a dummy component, sufficient for the purposes of
 		writing a new system definition file. Argument is a Raptor
 		Component object.
 		'''
-		layername = aComponent.layername
 		if layername == '':
-			raise Exception("Can't add a component ("+str(aComponent.bldinf_filename)+") without a layer name to a system defintion file")
-		containers = {'layer':layername,'component':aComponent.componentname}
+			raise Exception("Can't add a component ({0}) without a layer name to a system defintion file".format(str(aComponent.bldinf_filename)))
+
+		containers = {'layer':layername,'component':aComponent.name}
 		component = SystemModelComponent(aComponent.bldinf_filename, layername, containers, self.__SystemDefinitionFile, self.__SystemDefinitionBase, self.__Version)
 
 		if not layername in self.__LayerList:

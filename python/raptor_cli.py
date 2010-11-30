@@ -93,6 +93,21 @@ parser.add_option("--filters",action="store",dest="filter_list",
 parser.add_option("-i","--ignore-os-detection",action="store_true",dest="ignore_os_detection",
 				help="Disables automatic application of OS variant based upon the OS version detected from each epoc32 tree.")
 
+parser.add_option("--ip",action="store",dest="incremental_parsing",
+				help=
+			"Reuse makefiles from previous builds if they are still "
+			"relevant. i.e if no bld.infs/mmps or other metadata has "
+			"changed and if the environment has not altered either. "
+			"This option can improve raptor's performance but it "
+			"is possible that it may sometimes be too optimistic "
+			"and reuse makefiles that really should be regenerated. "
+			"It cannot currently be used with the parallel parsing "
+			"option (--pp=on). It is not likely to save time when "
+			"the --qtpro option is used as there is no way to get the "
+			"dependencies of a .pro file so qmake must always reparse "
+			"them and regenerate their bld.inf files."
+			)
+
 parser.add_option("-j","--jobs",action="store",dest="number_of_jobs",
                 help="The maximum number of jobs that make should try and run in parallel (on a single machine).")
 
@@ -183,6 +198,9 @@ parser.add_option("-v","--version",action="store_true",dest="version",
 parser.add_option("--what",action="store_true",dest="what",
 				help="Print out the names of the files created by the build. Do not build anything.")
 
+
+
+
 def GetArgs(Raptor, args):
 	"Process command line arguments for a Raptor object"
 	return DoRaptor(Raptor,args)
@@ -257,6 +275,7 @@ def DoRaptor(Raptor, args):
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
 				 'resource_rsg_casefolding' : Raptor.SetRsgCaseFolding,
+				 'incremental_parsing' : Raptor.SetIncrementalParsing,
 			 	 'version' : Raptor.PrintVersion
 				}
 
