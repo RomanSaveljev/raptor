@@ -108,4 +108,28 @@
 
 		<append name="CDEFS" value="__ARMCC__"/>
 	</var>
+
+	<var name="rvct_base" extends="rvct">
+		<set name="CC.ARMV5" value="--cpu 5TE"/>
+		<set name="CC.ARMV6" value="--cpu 6"/>
+		<set name="CC.ARMV7" value="--cpu 7-A"/>
+
+		<set name="CC.NO_UNALIGNED_ACCESS" value="--no_unaligned_access"/>
+
+		<set name="CC.SOFTVFP_MAYBE_VFPV2" value="softvfp+vfpv2"/>
+		<set name="CC.SOFTVFP_MAYBE_VFPV3" value="softvfp+vfpv3"/>
+
+		<set name="NEED_ENTRYPOINT_LIBRARY" value="1"/>
+
+		<set name="OWN_LIBRARY_OPTION" value="--library_interface=aeabi_clib"/>
+
+		<set name="PL.SOFTVFP_MAYBE_VFPV2" value="vfpv2"/>
+		<!-- Not supported yet : <set name="PL.SOFTVFP_MAYBE_VFPV3" value="vfpv3"/> -->
+		<set name="PL.SOFTVFP_MAYBE_VFPV3" value="vfpv2"/>
+
+		<set name="RELOCATABLE_IMAGE_OPTION" value=""/>
+		<set name="SPLIT_OPTION" value=""/>
+		<set name="STATIC_LIBS_LIST" value=""/>
+	</var>
+
 </build>
