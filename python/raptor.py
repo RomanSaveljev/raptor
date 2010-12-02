@@ -121,9 +121,6 @@ class ModelNode(object):
 	    This is before they are produced into "build" specs.
 	"""
 
-	# Used in Metadeps files:
-	dep_prefix="dep:"
-	include_prefix="include "
 
 	def __init__(self, id, parent = None):
 		self.id = id
@@ -231,6 +228,8 @@ class ModelNode(object):
 		build.InfoStartTime(object_type = "layer", task = "parse",
 				key = makefile)
 		makefileset = build.maker.Write(generic_path.Path(makefile), specs, build.buildUnitsToBuild)
+
+		makefileset.write_metadeps(self.alldeps(), self.alldepfiles()) # ensure that this makefileset's dependency file has been written out
 		build.InfoEndTime(object_type = "layer", task = "parse",
 				key = makefile)
 
@@ -389,27 +388,28 @@ class QtProComponent(BldinfComponent):
 class BuildRecord(object):
 	"""Information about a build which can be used for incremental makefile generation.
 	   Parameters must all be strings. """
-	stored_attrs = ['commandline', 'environment', 'topmakefilename', 'configlist', 'layers']
+	stored_attrs = ['commandline', 'environment', 'topmakefilename']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
 	history_size = 10
-	def __init__(self, commandline=None, environment=None, topmakefilename=None, configlist=None, makefilesets=None):
+	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None):
 		
 		self.commandline = commandline
 		self.environment = environment
 		self.topmakefilename = topmakefilename
-		self.configlist = configlist
 		self.uptodate = False # Do we need to regenerate the makefiles to reuse this build?
 		self.makefilesets=makefilesets #  an array of raptor_makefile.BaseMakefileset Object
+		self.filename = self.topmakefilename + ".buildrecord"
+		self.isold = False
 
-	def to_file(self, buildrecord_filename):
+	def to_file(self):
 		""" Write out the build record so that we can find it in future builds"""
-		with open(buildrecord_filename,"w") as f:
+		with open(self.filename,"w") as f:
 			for a in BuildRecord.stored_attrs:
 				f.write("{0}={1}\n".format(a,self.__dict__[a]))
 
 			# [ "makefile,callcount makefile,callcount", "makefile,callcount" ]
-			for ms in safe.makefilesets:
-				f.write("makefileset={1}\n".format(a," ".join(["{0},{1},{2}".format(str(mf.filename),str(mf.callcount)) for mf in self.makefiles])))
+			for ms in self.makefilesets:
+				f.write("makefileset={0} {1}\n".format(ms.metadepsfilename," ".join(["{0},{1}".format(str(mf.filename),str(mf.callcount)) for mf in ms.makefiles])))
 
 
 	def record_makefileset(self, makefileset):
@@ -420,18 +420,19 @@ class BuildRecord(object):
 		"""
 		self.makefilesets.append(makefileset)
 
+	@classmethod
 	def _makefileset_from_str(self, makefileset_str):
 		""" return a list of makefileset objects which the make engine 
 		    can build from - this can replicate an "ordered layers" build"""
 		
-		mf_pairs = self.makefiles.split(" ")
-		mf_set = raptor_makefile.BaseMakefileSet()
-		
-		for p in mf_pairs:
+		mf_tokens = makefileset_str.split(" ")
+		mf_set = raptor_makefile.BaseMakefileSet(metadepsfilename = mf_tokens[0])
+
+		for p in mf_tokens[1:]:
 			(makefilename, callcount) = p.split(",")
 			if callcount > 0:
 				# only load up make stages which actually call some flms:
-				mf_set.add_makefile(makefilename)
+				mf_set.add_makefile(raptor_makefile.BaseMakefile(makefilename, callcount = callcount))
 
 		return mf_set
 
@@ -449,7 +450,7 @@ class BuildRecord(object):
 				
 					(name,value) = (l[:eq],l[eq+1:])
 					if name == "makefileset":
-						ms =  _makefileset_from_str(self, value)
+						ms =  BuildRecord._makefileset_from_str(value)
 						if len(ms) > 0:
 							makefilesets.append(ms)
 					else:
@@ -464,7 +465,9 @@ class BuildRecord(object):
 			except TypeError,e:
 				raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}: {3}".format(BuildRecord.stored_attrs, str(kargs), filename, str(e)))
 
-		print "MAKEFILES:",br.makefiles
+		print "MAKEFILES:",br.makefilesets
+		br.filename = filename
+
 		return br
 
 
@@ -473,10 +476,9 @@ class BuildRecord(object):
 		    environment, similar targets and for the same platforms?
 		    i.e. should the makefiles be interchangeable?
 		"""
-		if self.elements == other.elements: 
-			if self.commandline == other.commandline:
-				if self.environment == other.environment:
-					return True
+		if self.commandline == other.commandline:
+			if self.environment == other.environment:
+				return True
 		
 		return False
 
@@ -511,18 +513,19 @@ class BuildRecord(object):
 					break
 
 	@classmethod
-	def from_old(cls, nodes, adir, commandline, environment, elements, topmakefile, configlist):
+	def from_old(cls,  adir, commandline, environment, topmakefile):
 		"""Create a build record for this build. Try to make it from an older one 
 		   and use its existing makefiles if they are uptodate."""
 
-		newbr = cls(commandline, elements, environment, topmakefile, configlist)
+		newbr = cls(commandline, environment, topmakefile)
 		
 		# See if there is an old build record to reuse
 		for oldbr in cls.matching_records(adir, newbr):
-			oldbr.uptodate = all([n.check_uptodate for n in nodes])
-			if oldbr.uptodate:
+			if oldbr.check_uptodate():
 				newbr.topmakefilename = oldbr.topmakefilename
+				newbr.makefilesets = oldbr.makefilesets
 				newbr.uptodate = True
+				newbr.isold = True
 		return newbr
 
 
@@ -530,9 +533,15 @@ class BuildRecord(object):
 		#		if build.incremental_parsing:
 		#			build.Info("incremental makefile generation: {0}".format(str(e)))
 
-	def check_uptodate(self, build):
-		for mset in self.makefilesets:
-			mset.check_uptodate()
+	def check_uptodate(self):
+		try:
+			for mset in self.makefilesets:
+				mset.check_uptodate()
+			return True
+		except raptor_makefile.OutOfDateException,e:
+			pass
+
+		return False
 
 
 
@@ -1699,20 +1708,28 @@ class Raptor(object):
 			######
 
 
+			# Create a build record as non-parallel parsed builds can take advantage of incremental
+			# makefile generation with some level of safety:
+			tm_dir = str(makefile.Dir())
+			tm_file = str(makefile.File())
+			
+			environment = ";".join(["{0}={1}".format(k,os.environ[k]) for k in BuildRecord.sensed_environment_variables])
 
 			# is this a rebuild or are we going to do everything from scratch?
 			do_rebuild = False
-			if build.incremental_parsing:
-				self.build_record = BuildRecord.from_old(nodes = layers, adir = tm_dir, commandline=" ".join(self.args), environment = environment, topmakefile = str(makefile), configlist = configlist, [])
-				do_rebuild = not build.build_record.check_uptodate()
+			if self.incremental_parsing:
+				self.build_record = BuildRecord.from_old(adir = str(self.topMakefile.Dir()), commandline=" ".join(self.args), environment = environment, topmakefile = str(makefile))
+				do_rebuild = self.build_record.isold
+			else:
+				self.build_record = BuildRecord(commandline=" ".join(self.args), environment = environment, topmakefilename = str(makefile))
 
 			if do_rebuild:
-				build.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(build.build_record.topmakefilename))
+				self.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(self.build_record.topmakefilename))
 				# Don't use the makefile name specified on the commmandline - use the one from the build record.
-				print "BUILD",build.build_record
+				print "BUILD",self.build_record
 			else:
-				if build.incremental_parsing:
-					build.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")
+				if self.incremental_parsing:
+					self.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")
 
 				# find out what components to build, and in what way
 				layers = []
@@ -1757,6 +1774,13 @@ class Raptor(object):
 					l.meta_realise(self)
 			elif do_rebuild:
 
+				for makefileset in self.build_record.makefilesets:
+					self.InfoStartTime(object_type = "makefileset", task = "build",
+						key = makefileset.metadepsfilename)
+					result = self.Make(makefileset)
+					self.InfoEndTime(object_type = "makefileset", task = "build",
+							key = makefileset.metadepsfilename)
+				
 			else:
 				# Parse components serially, creating one set of makefiles
 				# create non-component specs
@@ -1765,20 +1789,14 @@ class Raptor(object):
 				self.AssertBuildOK()
 
 
-				# Create a build record as non-parallel parsed builds can take advantage of incremental
-				# makefile generation with some level of safety:
-				tm_dir = str(makefile.Dir())
-				tm_file = str(makefile.File())
-				configlist = " ".join([c.name for c in self.buildUnitsToBuild if c.name != "build" ])
-				environment = ";".join(["{0}={1}".format(k,os.environ[k]) for k in BuildRecord.sensed_environment_variables])
 
-				self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, topmakefilename=str(makefile), configlist=configlist, makefilesets=[])
+				self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, topmakefilename=str(makefile), makefilesets=[])
 
 				for l in layers:
 					# create specs for a specific group of components
 					l.realise(self)
 
-ç				self.build_record.to_file(self.build_record_filename)
+				self.build_record.to_file()
 
 		except BuildCannotProgressException,b:
 			if str(b) != "":

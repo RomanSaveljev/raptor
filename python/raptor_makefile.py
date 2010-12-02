@@ -19,6 +19,7 @@
 import re
 import os
 import generic_path
+import stat
 
 class MakefileSelector(object):
 	"""A "query" which is used to separate some flm interface calls
@@ -32,7 +33,15 @@ class MakefileSelector(object):
 		self.defaulttarget=defaulttarget
 		self.ignoretargets=ignoretargets
 
-class Makefile(object):
+class BaseMakefile(object):
+	def __init__(self, filename, callcount = 0):
+		self.filename = filename
+		self.callcount = callcount # Number of flm calls in this makefile
+
+	def ignore_targets(self):
+		return []
+
+class Makefile(BaseMakefile):
 	"""Representation of the file that is created from the build specification 
 	   tree.
 	"""
@@ -43,7 +52,9 @@ class Makefile(object):
 			extension = "." + selector.name
 		else:
 			extension = ""
-		self.filename = generic_path.Join(directory,filenamebase + extension)
+		filename = generic_path.Join(directory,filenamebase + extension)
+
+		super(Makefile,self).__init__(filename = filename)
 		self.selector = selector
 		self.parent = parent
 		self.childlist = []
@@ -52,7 +63,6 @@ class Makefile(object):
 		self.epilogue = epilogue
 		self.defaulttargets = defaulttargets
 		self.dead = False
-		self.callcount = 0 # Number of flm calls in this makefile
 
 	def open(self):
 		if self.dead:
@@ -167,12 +177,20 @@ class OutOfDateException(Exception):
 	pass
 
 class BaseMakefileSet(object):
+
+	# Used in Metadeps files:
+	dep_prefix="dep:"
+	include_prefix="include "
+
 	def __init__(self, metadepsfilename):
 		self.makefiles = [] # list of Makefile()
-		sef.metadepsfilename = metadepsfilename
+		self.metadepsfilename = metadepsfilename
 
 	def __len__(self):
-		return lenf(self.makefiles)
+		return len(self.makefiles)
+
+	def ignoreTargets(self, makefile):
+		return [] # this method is bad and needs to be removed in favor of accessing the makefiles objects and asking them directly what their "ignore" targets are.
 
 	def makefile_names(self):
 		for mf in self.makefiles:
@@ -190,7 +208,7 @@ class BaseMakefileSet(object):
 	def buildrec_str(self):
 		return " ".join(["{0},{1}".format(str(mf.filename),str(mf.callcount)) for mf in self.makefiles])
 
-	def write_metadeps(self, singledeps, makefiledeps)
+	def write_metadeps(self, singledeps, depfiles):
 		"""
 		The metadeps format looks like this:
 		
@@ -215,12 +233,12 @@ class BaseMakefileSet(object):
 		try:
 
 			with open(self.metadepsfilename,"w") as f:
-								for d in self.alldeps():
-					f.write("{0}{1}\n".format(ModelNode.dep_prefix,d))
-				for d in self.alldepfiles():
-					f.write("{0}{1}\n".format(ModelNode.include_prefix,d[0]))
+				for d in singledeps:
+					f.write("{0}{1}\n".format(BaseMakefileSet.dep_prefix,d))
+				for d in depfiles:
+					f.write("{0}{1}\n".format(BaseMakefileSet.include_prefix,d[0]))
 		except Exception,e:
-			build.Warn("Could not write metadepfile: {0} {1}".format(metadepsfilename, str(e)))
+			raise(IOError("Could not write metadepfile: {0} {1}".format(self.metadepsfilename, str(e))))
 
 
 	def check_uptodate(self):
@@ -232,7 +250,7 @@ class BaseMakefileSet(object):
 
 		# Don't check the entire makefile set - should all be 
 		# treated as one entity and the times should be similar
-		makefile = self.makefiles[0].name[]
+		makefile = self.makefiles[0].filename
 		makefile_mtime = 0
 		makefile_stat = 0
 
@@ -245,16 +263,16 @@ class BaseMakefileSet(object):
 		try:
 			with open(self.metadepsfilename,"r") as mdf:
 				for l in mdf:
-					if l.startswith(ModelNode.dep_prefix):
-						depfile = l[len(ModelNode.dep_prefix):].strip("\n\r ")
+					if l.startswith(BaseMakefileSet.dep_prefix):
+						depfile = l[len(BaseMakefileSet.dep_prefix):].strip("\n\r ")
 						depstat = os.stat(depfile)
 						deptime = depstat[stat.ST_MTIME]
 
 						if deptime > makefile_mtime:
 							raise(OutOfDateException("OUTOFDATE: metadata deps: {0}".format(depfile)))
 
-					if l.startswith(ModelNode.include_prefix):
-						gnudepfile = l[len(ModelNode.include_prefix):].strip("\r\n ")
+					if l.startswith(BaseMakefileSet.include_prefix):
+						gnudepfile = l[len(BaseMakefileSet.include_prefix):].strip("\r\n ")
 						
 						parsetarget = "$(PARSETARGET):"
 						with open(gnudepfile,"r") as gf:
@@ -271,11 +289,10 @@ class BaseMakefileSet(object):
 									deptime = depstat[stat.ST_MTIME]
 
 									if deptime > makefile_mtime:
-										raise(OutOfDateException("incremental makefile generation: outofdate {0} is newer than ".format(e.filename))
-										return False
-					
-		except IOError, e:
-			raise(OutOfDateException("incremental makefile generation: metadata is not uptodate: {0} doesn't exist or has been altered".format(e.filename))
+										raise(OutOfDateException("incremental makefile generation: outofdate {0} is newer than ".format(e.filename)))
+
+		except IOError,e:
+			raise(OutOfDateException("incremental makefile generation: metadata is not uptodate: {0} doesn't exist or has been altered".format(e.filename)))
 
 
 class MakefileSet(BaseMakefileSet):
