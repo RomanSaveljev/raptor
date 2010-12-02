@@ -52,6 +52,7 @@ def run():
 			" -c default.toolcheck --toolcheck=off"
 
 	t.id = "0092b"
+	t.name = "toolcheck_off"
 	t.mustmatch = []
 	t.mustnotmatch = [
 		".*TOOLCHECK1.*",
@@ -72,6 +73,7 @@ def run():
 			" -c default.toolcheck --toolcheck=forced"
 
 	t.id = "0092c"
+	t.name = "toolcheck_forced"
 	t.mustmatch = [
 		".*tool 'TOOLCHECK1' from config 'none' did not return version.*",
 		".*tool 'TOOLCHECK3' from config 'none' did not return version.*",

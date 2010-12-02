@@ -149,11 +149,6 @@ else
   CFLAGS:=$(CFLAGS) $(OPT.NOSTDINC)
 endif
 
-# get the compiler to generate dependencies for us?
-ifeq ($(NO_DEPEND_GENERATE),)
-  CFLAGS:=$(CFLAGS) $(OPT.DEPEND)
-endif
-
 # specifics relating to the base type of the target being processed
 ifeq ($(BASE_TYPE),dll)
   # Special case, although this should be dealt with in the wrapper FLM in a better way
@@ -380,17 +375,27 @@ ifneq ($(BASE_TYPE),importlib)
   # SED is used to (a) remove relatively pathed "object_file: source_file" references that can appear
   # with some versions of mwccsym2 and (b) convert slashes
   define win32compile2object
+  
+    # $(1) : source file
+    # $(2) : target file (optional)
+    # $(3) : type (optional) - "win32compile2object" [default] or "win32preprocess"
 
     $(eval DEPENDFILENAME:=$(call mapwin32file,$(1),.o.d))
     $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
+    $(eval TYPE:=$(if $(3),$(3),win32compile2object))
 
-    $(call mapwin32file,$(1),.o): $(1) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
-	  $(call startrule,win32compile2object,,$(1)) \
-	  $(CC) $$(if $$(filter %.C,$(1)),-lang c) $(CFLAGS) $(OPTION_CW) \
+    $(if $(2),$(2),$(call mapwin32file,$(1),.o)): $(1) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
+	  $(call startrule,$(TYPE),,$(1)) \
+	  $(CC) \
+	  $(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \
+	  $$(if $$(filter %.C,$(1)),-lang c) \
+	  $(CFLAGS) \
+	  $(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(OPT.DEPEND)) \
+	  $(OPTION_CW) \
 	  $(if $(STDCPP_BUILD),$$(if $$(filter %.c %.C,$(1)),,$$(call makemacrodef,$(OPT.DEFINE),$(STDCPP_WCHAR_DEF))),) \
 	  $(DEFINES) $(INCLUDES) $(OPT.OUT)"$$@" "$(1)" \
-	  $(if $(NO_DEPEND_GENERATE),,&& $(GNUSED) 's#\\\\\(.\)#/\1#g;s#/ #\\\ #g;s#\([A-Za-z]:\)\\\\#\1/#g;1,1s#.*: .* \(.\)\?$$$$#$(call mapwin32file,$(1),.o): $1 \1#' $(call mapwin32file,$(1),.dep) > $(call mapwin32file,$(1),.o.d)) \
-	  $(call endrule,win32compile2object)
+	  $(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,&& $(GNUSED) 's#\\\\\(.\)#/\1#g;s#/ #\\\ #g;s#\([A-Za-z]:\)\\\\#\1/#g;1,1s#.*: .* \(.\)\?$$$$#$(call mapwin32file,$(1),.o): $1 \1#' $(call mapwin32file,$(1),.dep) > $(call mapwin32file,$(1),.o.d)) \
+	  $(call endrule,$(TYPE))
 
     ifeq ($(NO_DEPEND_GENERATE),)
       CLEANTARGETS:=$$(CLEANTARGETS) $(call mapwin32file,$(1),.dep) $(DEPENDFILENAME)
@@ -408,6 +413,15 @@ ifneq ($(BASE_TYPE),importlib)
     SOURCETARGET_$(call sanitise,$(1)): $(call mapwin32file,$(1),.o)
 
   endef
+  
+  # Preprocess target, a variation of the standard compile
+  define win32preprocess
+    $(eval PREPROCESSTARGET:=$(1).$(VARIANTPLATFORM).$(VARIANTTYPE).pre)
+
+    PREPROCESS:: $(PREPROCESSTARGET)
+    $(call win32compile2object,$(1),$(PREPROCESSTARGET),win32preprocess)
+    CLEANTARGETS:=$$(CLEANTARGETS) $(PREPROCESSTARGET)
+  endef
 
   # List target, depends on object file
   define win32list
@@ -419,6 +433,7 @@ ifneq ($(BASE_TYPE),importlib)
 
   $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32compile2object,$(SRCFILE))))
   $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32list,$(SRCFILE))))
+  $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32preprocess,$(SRCFILE))))
 
   ######################
   ## RESOURCE COMPILE ##

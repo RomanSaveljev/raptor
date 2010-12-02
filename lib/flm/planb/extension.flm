@@ -1,0 +1,30 @@
+
+# a planb python extension
+#
+
+# the EXPORT phase generates Makefiles in parallel (and dependency files)
+#
+ifeq ($(MAKEFILE_GROUP),EXPORT)
+
+COMMAND:=$(PYTHON) $(SCRIPTDIR)/$(SCRIPT) $(PARAMS) --planb-dir=$(PLANBDIR)
+DEPEND:=$(PLANBDIR)/depend.mk
+TARGET:=$(PLANBDIR)/done
+
+EXPORT:: $(TARGET)
+
+$(call raptor_recipe,planb_extension_create,$(TARGET),,$(COMMAND))
+
+ifeq ($(NO_DEPEND_INCLUDE),)
+$(DEPEND):
+
+-include $(DEPEND)
+endif
+
+else
+# the other phases "process" the generated Makefiles
+
+$(PLANBDIR)/$(MAKEFILE_GROUP):
+
+-include $(PLANBDIR)/$(MAKEFILE_GROUP)
+
+endif

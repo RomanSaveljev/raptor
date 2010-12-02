@@ -892,8 +892,10 @@ class Extension(object):
 		# If the interface exists, this means it's not a Template Extension Makefile so don't look for a .meta file for it;
 		# so do nothing if it's not a template extension makefile
 		try:
+			self.__Raptor.Debug("Searching for interface: {0}".format(str(self.interface)))
 			self.__Raptor.cache.FindNamedInterface(str(self.interface), aBuildPlatform['CACHEID'])
 		except KeyError: # This means that this Raptor doesn't have the interface self.interface, so we are in a TEM
+			self.__Raptor.Debug("Interface {0} not found - assuming there's a TEM".format(str(self.interface)))
 			# Read extension meta file and get default options from it.  The use of TEM meta file is compulsory if TEM is used
 			metaFilename = "%s/epoc32/tools/makefile_templates/%s.meta" % (aBuildPlatform['EPOCROOT'], self.__RawMakefile)
 			metaFile = None
@@ -1486,6 +1488,9 @@ class MMPRaptorBackend(MMPBackend):
 
 		elif varname=='SYSTEMINCLUDE' or varname=='USERINCLUDE':
 			for path in toks[1]:
+				# includes are "symbian paths" (i.e. we translate them into absolute paths according
+				# to the common conventions in symbian) 
+
 				resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
 				self.BuildVariant.AddOperation(raptor_data.Append(varname,resolved))
 
@@ -2893,7 +2898,7 @@ class MetaReader(object):
 			# add some basic data in a component-wide variant
 			var = raptor_data.Variant(name='component-wide')
 			var.AddOperation(raptor_data.Set("COMPONENT_META", str(component.bldinf_filename)))
-			var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.componentname))
+			var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.name))
 			var.AddOperation(raptor_data.Set("COMPONENT_LAYER", component.layername))
 			specNode.AddVariant(var)
 
@@ -2930,7 +2935,7 @@ class MetaReader(object):
 				# add some basic data in a component-wide variant
 				var = raptor_data.Variant(name='component-wide-settings-' + plat)
 				var.AddOperation(raptor_data.Set("COMPONENT_META",str(component.bldinf_filename)))
-				var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.componentname))
+				var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.name))
 				var.AddOperation(raptor_data.Set("COMPONENT_LAYER", component.layername))
 				var.AddOperation(raptor_data.Set("MODULE", modulename))
 				var.AddOperation(raptor_data.Append("OUTPUTPATHOFFSET", outputDir, '/'))

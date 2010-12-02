@@ -116,3 +116,11 @@ else
 	export PATH LD_LIBRARY_PATH
 	export __PYTHON__=python
 fi
+
+# add the Raptor python modules to whatever PYTHONPATH we got
+if [ "$OSTYPE" == "cygwin" ]; then
+	PYTHONPATH=$($u "$PYTHONPATH;$SBS_HOME/python")
+else
+	PYTHONPATH=$PYTHONPATH:$SBS_HOME/python
+fi
+

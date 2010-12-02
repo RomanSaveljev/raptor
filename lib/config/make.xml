@@ -36,14 +36,14 @@
 
 		<!-- How to split out the makefiles -->
 		<set name="selectors" value="export,bitmap,resource_deps,resource,default"/>
-		<set name="export.selector.iface" value="\.export$"/>
+		<set name="export.selector.iface" value="\.(export|py)$"/>
 		<set name="export.selector.target" value="EXPORT"/>
-		<set name="bitmap.selector.iface" value="\.(bitmap|extension|mifconv)$"/>
+		<set name="bitmap.selector.iface" value="\.(bitmap|extension|mifconv|py)$"/>
 		<set name="bitmap.selector.target" value="BITMAP"/>
 		<set name="resource_deps.selector.iface" value="\.resource$"/>
 		<set name="resource_deps.selector.target" value="RESOURCE_DEPS"/>
 		<set name="resource_deps.selector.ignoretargets" value="^(RESOURCE|CLEAN|CLEANEXPORT|REALLYCLEAN)$"/>
-		<set name="resource.selector.iface" value="\.(resource|extension|mif2cdlindex|nativejava)$"/>
+		<set name="resource.selector.iface" value="\.(resource|extension|mif2cdlindex|nativejava|py)$"/>
 		<set name="resource.selector.target" value="RESOURCE"/>
 		<set name="default.selector.iface" value="\.(?!export$|bitmap$|resource$|mifconv$|mif2cdlindex$|nativejava$).*$"/>
 		<set name="default.selector.target" value="ALL"/>

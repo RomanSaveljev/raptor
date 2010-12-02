@@ -406,7 +406,6 @@ class Context(object):
 				variants.append( Product(v.name) )
 		variants.sort()	
 		return variants
-	
 class BadQuery(Exception):
 	pass
 

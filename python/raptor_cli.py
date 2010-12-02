@@ -39,6 +39,7 @@ FINAL          Allow extension makefiles to execute final commands
 FREEZE         Freeze exported functions in a .DEF file
 LIBRARY        Create import libraries from frozen .DEF files
 LISTING        Create assembler listing files for source files
+PREPROCESS     Create preprocessor output files alongside source files
 REALLYCLEAN    Same as CLEAN but also remove exported files
 RESOURCE       Create resource files
 ROMFILE        Create an IBY file to be included in a ROM
@@ -92,6 +93,21 @@ parser.add_option("--filters",action="store",dest="filter_list",
 parser.add_option("-i","--ignore-os-detection",action="store_true",dest="ignore_os_detection",
 				help="Disables automatic application of OS variant based upon the OS version detected from each epoc32 tree.")
 
+parser.add_option("--ip",action="store",dest="incremental_parsing",
+				help=
+			"Reuse makefiles from previous builds if they are still "
+			"relevant. i.e if no bld.infs/mmps or other metadata has "
+			"changed and if the environment has not altered either. "
+			"This option can improve raptor's performance but it "
+			"is possible that it may sometimes be too optimistic "
+			"and reuse makefiles that really should be regenerated. "
+			"It cannot currently be used with the parallel parsing "
+			"option (--pp=on). It is not likely to save time when "
+			"the --qtpro option is used as there is no way to get the "
+			"dependencies of a .pro file so qmake must always reparse "
+			"them and regenerate their bld.inf files."
+			)
+
 parser.add_option("-j","--jobs",action="store",dest="number_of_jobs",
                 help="The maximum number of jobs that make should try and run in parallel (on a single machine).")
 
@@ -124,6 +140,9 @@ parser.add_option("-p","--project",action="append",dest="project_name",
 
 parser.add_option("-q","--quiet",action="store_true",dest="quiet",
 				help="Run quietly, not generating output messages.")
+
+parser.add_option("--qtpro",action="append",dest="qt_pro_file",
+				help="Qt project (.pro) file name. Multiple --qtpro options can be given.")
 
 parser.add_option("--query",action="append",dest="query",
 				help="""Access various build settings and options using a basic API. The current options are:
@@ -179,6 +198,9 @@ parser.add_option("-v","--version",action="store_true",dest="version",
 parser.add_option("--what",action="store_true",dest="what",
 				help="Print out the names of the files created by the build. Do not build anything.")
 
+
+
+
 def GetArgs(Raptor, args):
 	"Process command line arguments for a Raptor object"
 	return DoRaptor(Raptor,args)
@@ -228,6 +250,7 @@ def DoRaptor(Raptor, args):
 				 'bld_inf_file' : Raptor.AddBuildInfoFile,
 				 'logfile' : Raptor.SetLogFileName,
 				 'makefile' : Raptor.SetTopMakefile,
+				 'qt_pro_file' : Raptor.AddQtProFile,
 				 'quiet' : Raptor.RunQuietly,
 				 'debugoutput' : Raptor.SetDebugOutput,
 				 'doExportOnly' : Raptor.SetExportOnly,
@@ -252,6 +275,7 @@ def DoRaptor(Raptor, args):
 				 'command_file' : CommandFile,
 				 'parallel_parsing' : Raptor.SetParallelParsing,
 				 'resource_rsg_casefolding' : Raptor.SetRsgCaseFolding,
+				 'incremental_parsing' : Raptor.SetIncrementalParsing,
 			 	 'version' : Raptor.PrintVersion
 				}
 
@@ -259,11 +283,8 @@ def DoRaptor(Raptor, args):
 	if parser.values.quiet:
 		Raptor.RunQuietly(True)
 
-	# some options imply that Raptor should exit immediately (e.g. --version)
+	# only return True if there are no command-line errors
 	keepGoing = True
-
-	if parser.values.version:
-		keepGoing = False
 
 	# Parse through the command line arguments passed, and call the
 	# corresponding function with the correct parameter.
@@ -288,9 +309,4 @@ def CommandFile(file):
 	print raptor.name + ": error: command file '%s' was not expanded" % file
 	return False
 
-
-
-
 # end of the raptor_cli module
-
-

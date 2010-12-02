@@ -18,6 +18,7 @@
 
 import hashlib
 import os
+import pickle
 import random
 import raptor
 import raptor_timing
@@ -124,13 +125,58 @@ def AnnoFileParseOutput(annofile):
 			if line != "":	
 				yield unescape(line)+'\n'
 
-	yield "Finished build: %s   Duration: %s (m:s)   Cluster availability: %s%%\n" %(buildid,duration,availability)
+	yield "Finished build: {0}   Duration: {1} (m:s)   Cluster availability: {2}%\n".format(buildid,duration,availability)
 	af.close()
 
 
+def run_make(make_process):
+	""" A function to run make command. This is in a standalone function so
+		Raptor could easily use multiprocess to run multiple make programs
+	"""
+	makeenv = os.environ.copy()
+	makeenv['TALON_RECIPEATTRIBUTES'] = make_process.talon_recipeattributes
+	makeenv['TALON_SHELL'] = make_process.talon_shell
+	makeenv['TALON_BUILDID'] = make_process.talon_buildid
+	makeenv['TALON_TIMEOUT'] = make_process.talon_timeout
+
+	if make_process.filesystem == "unix":
+		p = subprocess.Popen(
+				args = [make_process.command], 
+				bufsize = 65535,
+				stdout = subprocess.PIPE,
+				stderr = subprocess.STDOUT,
+				close_fds = True, 
+				shell = True,
+				env = makeenv)
+	else:
+		p = subprocess.Popen(
+				args = [make_process.shell, '-c', make_process.command],
+				bufsize = 65535,
+				stdout = subprocess.PIPE,
+				stderr = subprocess.STDOUT,
+				shell = False,
+				universal_newlines = True, 
+				env = makeenv)
+
+	# Log is redirected to stdout and stderr files
+	# This loop here prevents blocking of stdout pipe
+	# if redirection fails for any reason
+	stream = p.stdout
+	for l in stream:
+		pass  
+	  	       
+	returncode = p.wait()
+	return returncode
+
+
+
+class MakeProcess(object):
+	""" A process of make program """
+	def __init__(self, command):
+		self.command = command
+
 
 # raptor_make module classes
-
 class MakeEngine(object):
 
 	def __init__(self, Raptor, engine="make_engine"):
@@ -138,7 +184,8 @@ class MakeEngine(object):
 		self.valid = True
 		self.descrambler = None
 		self.descrambler_started = False
-
+		self.global_make_variables = {}
+		
 		# look for an alias first as this gives end-users a chance to modify
 		# the shipped variant rather than completely replacing it.
 		if engine in Raptor.cache.aliases:
@@ -146,10 +193,10 @@ class MakeEngine(object):
 		elif engine in Raptor.cache.variants:
 			avar = Raptor.cache.FindNamedVariant(engine)
 		else:
-			raise BadMakeEngineException("'%s' does not appear to be a make engine - no settings found for it" % engine)
+			raise BadMakeEngineException("'{0}' does not appear to be a make engine - no settings found for it".format(engine))
 
 		if not avar.isDerivedFrom("make_engine", Raptor.cache):
-			raise BadMakeEngineException("'%s' is not a build engine (it's a variant but it does not extend 'make_engine')" % engine)
+			raise BadMakeEngineException("'{0}' is not a build engine (it's a variant but it does not extend 'make_engine')".format(engine))
 					
 		# find the variant and extract the values
 		try:
@@ -158,8 +205,6 @@ class MakeEngine(object):
 
 			# shell
 			self.shellpath = evaluator.Get("DEFAULT_SHELL")
-			usetalon_s = evaluator.Get("USE_TALON") 
-			self.usetalon = usetalon_s is not None and usetalon_s != ""
 			self.talonshell = str(evaluator.Get("TALON_SHELL"))
 			self.talontimeout = str(evaluator.Get("TALON_TIMEOUT"))
 			self.talonretries = str(evaluator.Get("TALON_RETRIES"))
@@ -225,23 +270,28 @@ class MakeEngine(object):
 						ignoretargets = evaluator.Get(name.strip() + ".selector.ignoretargets")
 						self.selectors.append(MakefileSelector(name,pattern,target,ignoretargets))
 			except KeyError:
-				Raptor.Error("%s.selector.iface, %s.selector.target not found in make engine configuration", name, name)
+				Raptor.Error("{0}.selector.iface, {1}.selector.target not found in make engine configuration".format(name,name))
 				self.selectors = []
 
 		except KeyError:
 			self.valid = False
-			raise BadMakeEngineException("Bad '%s' configuration found." % engine)
+			raise BadMakeEngineException("Bad '{0}' configuration found.".format(engine))
 
 		# there must at least be a build command...
 		if not self.buildCommand:
 			self.valid = False
-			raise BadMakeEngineException("No build command for '%s'"% engine)
+			raise BadMakeEngineException("No build command for '{0}'".format(engine))
 
 
-		if self.usetalon:
-			talon_settings="""
-TALON_SHELL:=%s
-TALON_TIMEOUT:=%s
+	def Write(self, toplevel, specs, configs):
+		"""Generate a set of makefiles, or one big Makefile."""
+
+		if not self.valid:
+			return None
+
+		talon_settings="""
+TALON_SHELL:={0}
+TALON_TIMEOUT:={1}
 TALON_RECIPEATTRIBUTES:=\
  name='$$RECIPE'\
  target='$$TARGET'\
@@ -252,15 +302,9 @@ TALON_RECIPEATTRIBUTES:=\
  config='$$SBS_CONFIGURATION' platform='$$PLATFORM'\
  phase='$$MAKEFILE_GROUP' source='$$SOURCE'
 export TALON_RECIPEATTRIBUTES TALON_SHELL TALON_TIMEOUT
-USE_TALON:=%s
+USE_TALON:={2}
 
-""" % (self.talonshell, self.talontimeout, "1")
-		else:
-			talon_settings="""
-USE_TALON:=
-
-"""
-
+""".format(self.talonshell, self.talontimeout, "1")
 
 		timing_start = "$(info " + \
 				raptor_timing.Timing.custom_string(tag = "start",
@@ -283,36 +327,48 @@ USE_TALON:=
 		except KeyError:
 			flmdebug_setting = ""
 
+		# global variables are set at the top of each makefile
+		self.global_make_variables['HOSTPLATFORM'] = " ".join(raptor.hostplatform)
+		self.global_make_variables['HOSTPLATFORM_DIR'] = raptor.hostplatform_dir
+		self.global_make_variables['HOSTPLATFORM32_DIR'] = raptor.hostplatform32_dir
+		self.global_make_variables['OSTYPE'] = self.raptor.filesystem
+		self.global_make_variables['FLMHOME'] = str(self.raptor.systemFLM)
+		self.global_make_variables['SHELL'] = self.shellpath
+		self.global_make_variables['DELETE_ON_FAILED_COMPILE'] = raptor_utilities.make_bool_string(self.delete_on_failed_compile)
+		self.global_make_variables['NO_DEPEND_GENERATE'] = raptor_utilities.make_bool_string(self.raptor.noDependGenerate)
+		
 		self.makefile_prologue = """
 
-# generated by %s %s
+# generated by {0} {1}
 
-HOSTPLATFORM:=%s
-HOSTPLATFORM_DIR:=%s
-HOSTPLATFORM32_DIR:=%s
-OSTYPE:=%s
-FLMHOME:=%s
-SHELL:=%s
+HOSTPLATFORM:={2}
+HOSTPLATFORM_DIR:={3}
+HOSTPLATFORM32_DIR:={4}
+OSTYPE:={5}
+FLMHOME:={6}
+SHELL:={7}
 THIS_FILENAME:=$(firstword $(MAKEFILE_LIST))
-DELETE_ON_FAILED_COMPILE:=%s 
+DELETE_ON_FAILED_COMPILE:={8} 
 
-%s
-FLMDEBUG:=%s
+{9}
+FLMDEBUG:={10}
 
-include %s
+include {11}
 
-""" 		% (  raptor.name, raptor_version.fullversion(),
-			 " ".join(raptor.hostplatform),
-			 raptor.hostplatform_dir,
-			 raptor.hostplatform32_dir,
-			 self.raptor.filesystem,
-			 str(self.raptor.systemFLM),
-			 self.shellpath,
-			 self.delete_on_failed_compile,
-			 talon_settings,
-			 flmdebug_setting,
-			 self.raptor.systemFLM.Append('globals.mk') )
+""" .format(     raptor.name, raptor_version.fullversion(),
+		 self.global_make_variables['HOSTPLATFORM'],
+		 self.global_make_variables['HOSTPLATFORM_DIR'],
+		 self.global_make_variables['HOSTPLATFORM32_DIR'],
+		 self.global_make_variables['OSTYPE'],
+		 self.global_make_variables['FLMHOME'],
+		 self.global_make_variables['SHELL'],
+		 self.global_make_variables['DELETE_ON_FAILED_COMPILE'],
+		 talon_settings,
+		 flmdebug_setting,
+		 self.raptor.systemFLM.Append('globals.mk') )
 
+		
+		
 		# Unless dependency processing has been eschewed via the CLI, use a .DEFAULT target to
 		# trap missing dependencies (ignoring user config files that we know are usually absent)
 		if not (self.raptor.noDependGenerate or self.raptor.noDependInclude):
@@ -340,17 +396,12 @@ $(FLMHOME)/user/globals.mk:
 
 		self.makefile_epilogue += """
 
-include %s
+include {0} 
 
-""" 			% (self.raptor.systemFLM.Append('final.mk') )
+""".format(self.raptor.systemFLM.Append('final.mk') )
 
-	def Write(self, toplevel, specs, configs):
-		"""Generate a set of makefiles, or one big Makefile."""
 
-		if not self.valid:
-			return None
-
-		self.raptor.Debug("Writing Makefile '%s'" % (str(toplevel)))
+		self.raptor.Debug("Writing Makefile '{0}'".format(str(toplevel)))
 
 		self.toplevel = toplevel
 
@@ -401,7 +452,7 @@ include %s
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
-			self.raptor.Error("Failed to write makefile '%s': %s : %s" % (str(toplevel),str(e),tb))
+			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
 			makefileset = None
 
 		return makefileset
@@ -417,6 +468,7 @@ include %s
 
 		parameters = []
 		dupe = True
+		pickled = False
 		iface = None
 		guard = None
 		if hasInterface:
@@ -425,12 +477,12 @@ include %s
 				iface = spec.GetInterface(self.raptor.cache)
 
 			except raptor_data.MissingInterfaceError, e:	
-				self.raptor.Error("No interface for '%s'", spec.name)
+				self.raptor.Error("No interface for '{0}'".format(spec.name))
 				return
 
 			if iface.abstract:
-				self.raptor.Error("Abstract interface '%s' for '%s'",
-								  iface.name, spec.name)
+				self.raptor.Error("Abstract interface '{0}' for '{1}'".format(
+								  iface.name, spec.name))
 				return
 
 			# we need to guard the FLM call with a hash based on all the
@@ -449,8 +501,8 @@ include %s
 					if p.default != None:
 						value = p.default
 					else:
-						self.raptor.Error("%s undefined for '%s'",
-										  k, spec.name)
+						self.raptor.Error("{0} undefined for '{1}'".format(
+										  k, spec.name))
 						value = ""
 
 				parameters.append((k, value))
@@ -470,7 +522,15 @@ include %s
 			dupe = hash in self.hashes
 
 			self.hashes.add(hash)
-
+			
+			# pickled interfaces need the bld.inf output directory even
+			# if it is not an FLM parameter (and it normally isn't)
+			pickled = iface.isPickled(self.raptor.cache)
+			if pickled:
+				bldinfop = evaluator.Resolve("BLDINF_OUTPUTPATH")
+				if not bldinfop:
+					self.raptor.Error("BLDINF_OUTPUTPATH is required in {0} for pickled interfaces".format(config.name))
+					
 		# we only create a Makefile if we have a new FLM call to contribute,
 		# OR we are not pruning duplicates (guarding instead)
 		# OR we have some child specs that need something to include them.
@@ -490,6 +550,12 @@ include %s
 
 		# generate the call to the FLM
 		if iface is not None and not dupe:
+			# pickled interfaces save the parameters in a separate file
+			# and add a parameter which points at that file's location.
+			if pickled:
+				self.pickleParameters(parameters, hash, bldinfop)
+				
+			# add the FLM call to the selected makefiles
 			makefileset.addCall(spec.name, config.name, iface.name, useAllInterfaces, iface.GetFLMIncludePath(self.raptor.cache), parameters, guard)
 
 		# recursive includes
@@ -500,30 +566,61 @@ include %s
 		if self.many:
 			makefileset.close() # close child set of makefiles as we'll never see them again.
 
+	def pickleParameters(self, parameters, hash, directory):
+		"""write a pickle of the parameter dictionary to directory/hash/pickle."""
+		if not parameters or not hash or not directory:
+			return
+		
+		dictionary = dict(parameters)
+		
+		# create a combined hash of the FLM parameters and the global variables
+		# as we add the globals to the parameter dictionary we just made.
+		md5hash = hashlib.md5()
+		md5hash.update(hash)
+		
+		for k in sorted(self.global_make_variables.keys()):
+			value = self.global_make_variables[k]
+			md5hash.update(k + value)
+			dictionary[k] = value
+			
+		planbdir = directory + "/" + md5hash.hexdigest()
+		if not os.path.isdir(planbdir):
+			try:
+				os.makedirs(planbdir)
+			except:
+				self.raptor.Error("could not create directory " + planbdir)
+				return
+		
+		filename = os.path.join(planbdir, "pickle")
+		
+		# if the file already exists then it is automatically up to date
+		# because the name contains a hash of the contents.
+		if not os.path.isfile(filename):
+			
+			try:
+				file = open(filename, "wb")
+				pickle.dump(dictionary, file, protocol=2)
+				file.close()
+			except:
+				self.raptor.Error("could not create file " + filename)
+			
+		parameters.append(("PLANBDIR", planbdir))
+		
 	def Make(self, makefileset):
 		"run the make command"
 
 		if not self.valid:
 			return False
 	
-		if self.usetalon:
-			# Always use Talon since it does the XML not
-			# just descrambling
-			if not self.StartTalon() and not self.raptor.keepGoing:
-				self.Tidy()
-				return False
-		else:
-			# use the descrambler if we are doing a parallel build on
-			# a make engine which does not buffer each agent's output
-			if self.raptor.jobs > 1 and self.scrambled:
-				self.StartDescrambler()
-				if  not self.descrambler_started and not self.raptor.keepGoing:
-					self.Tidy()
-					return False
+		# Always use Talon since it does the XML not
+		# just descrambling
+		if not self.StartTalon() and not self.raptor.keepGoing:
+			self.Tidy()
+			return False
 			
 		# run any initialisation script
 		if self.initCommand:
-			self.raptor.Info("Running %s", self.initCommand)
+			self.raptor.Info("Running {0}".format(self.initCommand))
 			if os.system(self.initCommand) != 0:
 				self.raptor.Error("Failed in %s", self.initCommand)
 				self.Tidy()
@@ -546,12 +643,17 @@ include %s
 		# Report number of makefiles to be built
 		self.raptor.InfoDiscovery(object_type = "makefile", count = len(fileName_list))
 
+
+		# Stores all the make processes that were executed:
+		make_processes = []
+
 		# Process each file in turn
 		for makefile in fileName_list:
+
 			if not os.path.exists(makefile):
-				self.raptor.Info("Skipping makefile %s", makefile)
+				self.raptor.Info("Skipping makefile {0}".format(makefile))
 				continue
-			self.raptor.Info("Making %s", makefile)
+			self.raptor.Info("Making {0}".format(makefile))
 			# assemble the build command line
 			command = self.buildCommand
 
@@ -583,16 +685,11 @@ include %s
 			if self.raptor.noDependGenerate:
 				command += " NO_DEPEND_GENERATE=1"
 			
-			if self.usetalon:
-				# use the descrambler if we set it up
-				command += ' TALON_DESCRAMBLE=' 
-				if self.scrambled:
-					command += '1 '
-				else:
-					command += '0 '
+			command += ' TALON_DESCRAMBLE=' 
+			if self.scrambled:
+				command += '1 '
 			else:
-				if self.descrambler_started:
-					command += ' DESCRAMBLE="' + self.descrambler + '"'
+				command += '0 '
 			
 			# use the retry mechanism if requested
 			if self.raptor.tries > 1:
@@ -621,95 +718,93 @@ include %s
 			# annofile - so that we can trap the problem that
 			# makes the copy-log-from-annofile workaround necessary
 			# and perhaps determine when we can remove it.
-			if self.copyLogFromAnnoFile:
-				command += " >'%s' " % stdoutfilename
+			command += " >'%s' " % stdoutfilename
 
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
 			command = command.replace("#MAKEFILE#", str(makefile))
 
-			self.raptor.Info("Executing '%s'", command)
+			self.raptor.Info("Executing '{0}'".format(command))
 
+			# Create a process of make program
+			mproc = MakeProcess(command)
+			mproc.makefile = str(makefile)
+			mproc.talon_recipeattributes = "none"
+			mproc.talon_shell = self.talonshell
+			mproc.talon_buildid = str(self.buildID)
+			mproc.talon_timeout = str(self.talontimeout)
+			mproc.filesystem = self.raptor.filesystem
+			mproc.logstream = self.raptor.out
+			mproc.copyLogFromAnnoFile = self.copyLogFromAnnoFile
+			mproc.stderrfilename = stderrfilename
+			mproc.stdoutfilename = stdoutfilename
+			mproc.shell = raptor_data.ToolSet.shell
+
+			make_processes.append(mproc)
+
+			if self.copyLogFromAnnoFile:
+				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
+			
+			
 			# execute the build.
 			# the actual call differs between Windows and Unix.
 			# bufsize=1 means "line buffered"
-			#
 			try:
 				# Time the build
 				self.raptor.InfoStartTime(object_type = "makefile",
-						task = "build", key = str(makefile))
+					task = "build", key = str(makefile))
+
+				returncode = run_make(mproc)
 				
-				makeenv=os.environ.copy()
-				if self.usetalon:
-					makeenv['TALON_RECIPEATTRIBUTES']="none"
-					makeenv['TALON_SHELL']=self.talonshell
-					makeenv['TALON_BUILDID']=str(self.buildID)
-					makeenv['TALON_TIMEOUT']=str(self.talontimeout)
-
-				if self.raptor.filesystem == "unix":
-					p = subprocess.Popen([command], bufsize=65535,
-						stdout=subprocess.PIPE,
-						stderr=subprocess.STDOUT,
-						close_fds=True, env=makeenv, shell=True)
-				else:
-					p = subprocess.Popen(args = 
-						[raptor_data.ToolSet.shell, '-c', command],
-						bufsize=65535,
-						stdout=subprocess.PIPE,
-						stderr=subprocess.STDOUT,
-						shell = False,
-						universal_newlines=True, env=makeenv)
-				stream = p.stdout
-
-				inRecipe = False
-
-				if not self.copyLogFromAnnoFile:
-					for l in XMLEscapeLog(stream):
-						self.raptor.out.write(l)
-
-					returncode = p.wait()
-				else:
-					returncode = p.wait()
-
-					annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
-					self.raptor.Info("copylogfromannofile: Copying log from annotation file %s to work around a potential problem with the console output", annofilename)
-					try:
-						for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
-							self.raptor.out.write(l)
-					except Exception,e:
-						self.raptor.Error("Couldn't complete stdout output from annofile %s for %s - '%s'", annofilename, command, str(e))
-
-
-				# Take all the stderr output that went into the .stderr file
-				# and put it back into the log, but safely so it can't mess up
-				# xml parsers.
-				try:
-					e = open(stderrfilename,"r")
-					for line in e:
-						self.raptor.out.write(escape(line))
-					e.close()
-				except Exception,e:
-					self.raptor.Error("Couldn't complete stderr output for %s - '%s'", command, str(e))
-				# Report end-time of the build
-				self.raptor.InfoEndTime(object_type = "makefile",
-						task = "build", key = str(makefile))
-
-				if returncode != 0  and not self.raptor.keepGoing:
-					self.Tidy()
-					return False
-
 			except Exception,e:
-				self.raptor.Error("Exception '%s' during '%s'", str(e), command)
+				self.raptor.Error("Exception '{0}' during '{1}'".format(str(e), command))
 				self.Tidy()
+				break
+			finally:
 				# Still report end-time of the build
-				self.raptor.InfoEndTime(object_type = "Building", task = "Makefile",
-						key = str(makefile))
-				return False
+				self.raptor.InfoEndTime(object_type = "makefile", task = "build",
+									    key = str(makefile))
 
+
+		# Getting all the log output copied into files
+		for mproc in make_processes:		
+			if self.copyLogFromAnnoFile:
+				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefile)
+				self.raptor.Info("copylogfromannofile: Copying log from annotation file {0} to work around a potential problem with the console output".format(annofilename))
+				try:
+					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
+						mproc.logstream.write(l)
+				except Exception,e:
+					errorlist.append("Couldn't complete stdout output from annofile {0} for {1} - '{2}'".format(annofilename, command, str(e)))
+			else:
+				try:
+					with open(mproc.stdoutfilename, "r") as makeoutput:
+						for l in XMLEscapeLog(makeoutput):
+							mproc.logstream.write(l)
+				except Exception,e:
+					errorlist.append("Couldn't complete stdout output {0} for {1} - '{2}'".format(mproc.stdoutfilename, command, str(e)))
+
+				
+			# Take all the stderr output that went into the .stderr file
+			# and put it back into the log, but safely so it can't mess up
+			# xml parsers.
+			try:
+				e = open(mproc.stderrfilename,"r")
+				for line in e:
+					self.raptor.out.write(escape(line))
+				e.close()
+			except Exception,e:
+				errorlist.append("Couldn't complete stderr output for {0} - '{1}'".format(mproc.command, str(e)))
+			# Report end-time of the build
+
+		if returncode != 0  and not self.raptor.keepGoing:
+			self.Tidy()
+			return False
+			
 		# run any shutdown script
 		if self.shutdownCommand != None and self.shutdownCommand != "":
-			self.raptor.Info("Running %s", self.shutdownCommand)
+			self.raptor.Info("Running {0}".format(self.shutdownCommand))
 			if os.system(self.shutdownCommand) != 0:
-				self.raptor.Error("Failed in %s", self.shutdownCommand)
+				self.raptor.Error("Failed in {0}".format(self.shutdownCommand))
 				self.Tidy()
 				return False
 
@@ -717,11 +812,8 @@ include %s
 		return True
 
 	def Tidy(self):
-		if self.usetalon:
-			self.StopTalon() 
-		else:
-			"clean up after the make command"
-			self.StopDescrambler()
+		"clean up after the make command"
+		self.StopTalon() 
 
 	def StartTalon(self):
 		# the talon command
@@ -760,7 +852,7 @@ include %s
 			
 			self.raptor.Info("Running %s", command)
 			if os.system(command) != 0:
-				self.raptor.Error("Failed in %s", command)
+				self.raptor.Error("Failed in {0}".format(command))
 				return False
 			
 		return True
@@ -783,7 +875,7 @@ include %s
 			buildID = raptor.name + str(random.getrandbits(32))
 
 			command = self.descrambler + " " + buildID + " start"
-			self.raptor.Info("Running %s", command)
+			self.raptor.Info("Running {0}".format(command))
 			looking = (os.system(command) != 0)
 			tries += 1
 
@@ -802,15 +894,35 @@ include %s
 			command = self.descrambler + " stop"
 			self.descrambler = ""
 
-			self.raptor.Info("Running %s", command)
+			self.raptor.Info("Running {0}".format(command))
 			if os.system(command) != 0:
-				self.raptor.Error("Failed in %s", command)
+				self.raptor.Error("Failed in {0}".format(command))
 				return False
 		return True
+	
+	def incremental_makefileset(self, toplevel_makefile_name):
+		""" return a makefile set object that will work with an existing set of makefiles.
+		    This is for use when one doesn't wish to regenerate a set of makefiles because
+		    they happen to still be valid/uptodate. """
 
+		makefileset = None
 
+		try:
+			makefileset = MakefileSet(directory = str(toplevel_makefile_name.Dir()),
+							   selectors = self.selectors,
+							   filenamebase = str(toplevel_makefile_name.File()),
+							   prologue = "",
+							   epilogue = "",
+							   defaulttargets=self.defaultTargets,
+							   readonly=True)
 
-# raptor_make module functions
+		except Exception,e:
+			tb = traceback.format_exc()
+			if not self.raptor.debugOutput:
+				tb=""
+			self.raptor.Error("Failed to generate makefileset %s", "'{0}': {1} : {2}".format(str(toplevel_makefile_name),str(e),tb))
+			makefileset = None
 
+		return makefileset
 
 # end of the raptor_make module

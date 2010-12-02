@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<build xmlns="http://symbian.com/xml/build"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://symbian.com/xml/build build/2_0.xsd">
+
+ <!-- defaults for planb testing -->
+
+ <var name="defaults.init">
+   <!-- use all the default options -->
+ </var>
+
+ <var name="t_planb">
+  <set name='INTERFACE.exe' value='planb.Tools.exe.py'/>
+ </var>
+ <alias name="tools2_rel" meaning="tools2_base.t_rel.t_planb"/>
+ <alias name="tools2_deb" meaning="tools2_base.t_deb.t_planb"/>
+
+</build>
