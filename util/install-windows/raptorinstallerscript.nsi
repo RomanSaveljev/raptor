@@ -126,7 +126,7 @@ Section "Install Raptor" INSTALLRAPTOR
     File /r /x distribution.policy.s60 /x .hg ${CYGWIN_LOCATION}\*.*
     SetOutPath "$INSTDIR\win32\mingw"
     File /r /x distribution.policy.s60 /x .hg ${MINGW_LOCATION}\*.*
-    SetOutPath "$INSTDIR\win32\python264"
+    SetOutPath "$INSTDIR\win32\python27"
     File /r /x distribution.policy.s60 /x .hg ${PYTHON_LOCATION}\*.*
     
     SetOutPath "$INSTDIR"

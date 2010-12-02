@@ -1,0 +1,24 @@
+<SystemDefinition name="MCL" schema="2.0.0" > 
+	<systemModel>
+	    <layer name="Parallel Parsing Layer">
+			<component name="test 01 - a bld.inf that includes a non-existent file">
+				<unit bldFile="smoke_suite/test_resources/pp/test01" />
+			</component>
+			<component name="test 02">
+				<unit bldFile="smoke_suite/test_resources/pp/test02" />
+			</component>
+			<component name="test 03">
+				<unit bldFile="smoke_suite/test_resources/pp/test03" />
+			</component>
+			<component name="test 04">
+				<unit bldFile="smoke_suite/test_resources/pp/test04" />
+			</component>
+			<component name="test 05 - a bld.inf that also includes a non-existent file">
+				<unit bldFile="smoke_suite/test_resources/pp/test05" />
+			</component>
+			<component name="test 06">
+				<unit bldFile="smoke_suite/test_resources/pp/test06" />
+			</component>
+		</layer>
+	</systemModel>
+</SystemDefinition>

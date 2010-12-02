@@ -33,9 +33,9 @@ endif
 
 define doexports
 PP_EXPORTS::
-	$(call startrule,makefile_generation_exports) \
-	$(SBS) --toolcheck=off --export-only $(pp_system_definition) $(config_list) -f- -m $(MAKEFILE_PATH).exports $(CLI_OPTIONS)  \
-	$(call endrule,makefile_generation_exports)
+	$(call startrule,makefile_generation_exports,rawoutput) \
+	$(SBS) --toolcheck=off --export-only $(pp_system_definition) $(config_list) --filters=PPMakefileGenFilter -f- -m $(MAKEFILE_PATH).exports $(CLI_OPTIONS) \
+	$(call endrule,makefile_generation_exports,rawoutput)
 
 CLEANTARGETS:=$$(CLEANTARGETS) $(MAKEFILE_PATH).exports 
 endef
@@ -47,9 +47,9 @@ define generate_makefiles
 ALL:: $(MAKEFILE_PATH)
 
 $(MAKEFILE_PATH): $(COMPONENT_PATHS) $(if $(DOEXPORT),| PP_EXPORTS )
-	$(call startrule,makefile_generation) \
-	$(SBS) --noexport --toolcheck=off -n $(CLI_OPTIONS) $(pp_system_definition) $(config_list) -m $$@ -f- \
-	$(call endrule,makefile_generation)
+	$(call startrule,makefile_generation,rawoutput) \
+	$(SBS) --noexport --toolcheck=off -n $(CLI_OPTIONS) $(pp_system_definition) $(config_list) --filters=PPMakefileGenFilter -m $$@ -f- \
+	$(call endrule,makefile_generation,rawoutput)
 
 CLEANTARGETS:=$$(CLEANTARGETS) $(MAKEFILE_PATH) 
 

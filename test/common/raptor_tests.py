@@ -193,10 +193,6 @@ def clean_epocroot():
 	
 	print "Epocroot Cleaned"
 
-def fix_id(input_id):
-	return input_id.zfill(4)
-
-
 def grep(file, string):
 	return
 
@@ -224,8 +220,6 @@ class SmokeTest(object):
 	SKIP = "skip"	
 
 	def __init__(self):
-		
-		self.id = "0"
 		self.name = "smoketest"
 		self.description = ""
 		self.command = "sbs --do_what_i_want"
@@ -262,7 +256,6 @@ class SmokeTest(object):
 
 	def run(self, platform = "all"):
 		previousResult = self.result
-		self.id = fix_id(self.id)
 		try:
 			if self.runnable(platform):
 				
@@ -368,8 +361,7 @@ class SmokeTest(object):
 	def pretest(self):
 		# what to do before the test runs
 		
-		print "\nID:", self.id
-		print "TEST:", self.name
+		print "\nTEST:", self.name
 		print "LOGFILE:", self.logfile()
 
 		return self.clean()

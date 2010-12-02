@@ -83,7 +83,8 @@ endif
 
 # "OPTION" metadata from the front-end can potentially be supplied simultaneously for both GCCE and RVCT,
 # so we need to make a decision on what we make use of based on the TOOLCHAIN in use.
-# Currently we only support changes to RVCT tool calls.
+# Currently we only fully support changes to RVCT tool calls; for GCCE, only "OPTION GCCE" and 
+# "LINKEROPTION GCCE" are available.
 
 LINKEROPTION:=
 OPTION_COMPILER:=
@@ -93,6 +94,11 @@ ifeq ($(TOOLCHAIN),RVCT)
   LINKEROPTION:=$(LINKEROPTION_ARMCC)
   OPTION_COMPILER:=$(OPTION_ARMCC)
   OPTION_REPLACE_COMPILER:=$(OPTION_REPLACE_ARMCC)
+endif
+
+ifeq ($(TOOLCHAIN),GCCE)
+  LINKEROPTION:=$(addprefix -Wl$(CHAR_COMMA),$(LINKEROPTION_GCCE))
+  OPTION_COMPILER:=$(OPTION_GCCE)
 endif
 
 # "ARMFPU" overrides for 'fpu-ness' in compiler and postlinker calls in .mmp files are currently only

@@ -57,8 +57,8 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	SBS_HOME=${SBS_HOME//\\//}
 
 	__MINGW__=${SBS_MINGW:-$SBS_HOME/$HOSTPLATFORM_DIR/mingw}
-	__PYTHON__=${SBS_PYTHON:-$SBS_HOME/$HOSTPLATFORM_DIR/python264/python.exe}
-	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/python264}
+	__PYTHON__=${SBS_PYTHON:-$SBS_HOME/$HOSTPLATFORM_DIR/python27/python.exe}
+	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/python27}
 			
 	# work out which version of Cygwin to use
 	# use SBS_CYGWIN17 if set and assume 1.7,
@@ -90,7 +90,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	#  2. the python shipped locally with Raptor (if present)
 	#  3. the python on the system PATH and the PYTHONPATH set in the system environment
 
-	__LOCAL_PYTHON__=$SBS_HOME/win32/python264/python.exe
+	__LOCAL_PYTHON__=$SBS_HOME/win32/python27/python.exe
 
 	if [ -n "$SBS_PYTHON" ]; then
 		export __PYTHON__=$SBS_PYTHON

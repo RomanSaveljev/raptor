@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -57,12 +57,11 @@ def run():
 	
 	# Environment variables needed by talon - TALON_SHELL must be bash; the other two can be arbitrary.
 	os.environ["TALON_SHELL"]=bash
-	os.environ["TALON_BUILDID"]=str(t.id)
+	os.environ["TALON_BUILDID"]="{0}_{1}".format("talon_buildid", os.getpid())
 	os.environ["TALON_RECIPEATTRIBUTES"]="component=talontest"
 
 	# First part of test - command line
 	t.name = "talon_test command line"
-	t.id = "100a"
 	t.command = "%s -c %s" % (talon, commandline)
 	t.targets = []
 	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\+ echo Command line invocation output" + 
@@ -70,12 +69,9 @@ def run():
 			".*<status exit='ok' attempt='1' />.*</recipe>"]
 
 	t.run()
-	if t.result == SmokeTest.FAIL:
-		result = SmokeTest.FAIL
 
 	# Second part of test - script file
 	t.name = "talon_test script file"
-	t.id = "100b"
 	t.command = "%s %s" % (talon, scriptfile)
 	t.targets = []
 	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\+ echo Script file output" + 
@@ -83,13 +79,9 @@ def run():
 			".*<status exit='ok' attempt='1' />.*</recipe>"]
 
 	t.run()
-	if t.result == SmokeTest.FAIL:
-		result = SmokeTest.FAIL
-	
 
 	# Print final result
 	t.name = "talon_test"
-	t.id = "100"
 	t.print_result()
 
 	# Delete the added environment variables

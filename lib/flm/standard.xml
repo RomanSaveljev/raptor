@@ -24,6 +24,7 @@
 		<param name='FIRSTLIB' default=''/>
 		<param name='INFLATECOMPRESSTARGET' default=''/>
 		<param name='LINKEROPTION_ARMCC' default=''/>
+		<param name='LINKEROPTION_GCCE' default=''/>
 		<param name='LISTING_OPTION' default='-S'/>
 		<param name='MMPDEFS' default=''/>
 		<param name='NOCOMPRESSTARGET' default=''/>
@@ -52,6 +53,7 @@
 		<param name='VENDORID' default=''/>
 		<param name='USERINCLUDE'/>
 		<param name='OPTION_ARMCC' default=''/>
+		<param name='OPTION_GCCE' default=''/>
 		<param name='OPTION_REPLACE_ARMCC' default=''/>
 		<param name='DEBUGLIBRARY' default=''/>
 		<param name='DEFFILE'/>

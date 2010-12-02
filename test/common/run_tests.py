@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -22,6 +22,8 @@ import imp
 import datetime
 import traceback
 raptor_tests = imp.load_source("raptor_tests", "common/raptor_tests.py")
+
+test_run_start_time = datetime.datetime.now()
 
 # Command line options ########################################################
 from optparse import OptionParser
@@ -293,10 +295,7 @@ class Suite(TestRun):
 				
 				end_time = datetime.datetime.now()
 				
-				# Add leading 0s
-				test_object.id = raptor_tests.fix_id(test_object.id)
-
-				# No millisecond function, so need to use microseconds/1000
+				# No millisecond function, so need to use microseconds/1000	
 				start_milliseconds = start_time.microsecond
 				end_milliseconds = end_time.microsecond
 		
@@ -306,10 +305,10 @@ class Suite(TestRun):
 				end_milliseconds = \
 						format_milliseconds(end_milliseconds)
 		
-				self.start_times[test_object.id] = \
+				self.start_times[test_object.name] = \
 						start_time.strftime("%H:%M:%S:" +
 						str(start_milliseconds))
-				self.end_times[test_object.id] = \
+				self.end_times[test_object.name] = \
 						end_time.strftime("%H:%M:%S:" + \
 						str(end_milliseconds))
 				
@@ -321,10 +320,10 @@ class Suite(TestRun):
 				# Add to pass/fail count and save result to dictionary
 				if test_object.result == raptor_tests.SmokeTest.PASS:
 					self.pass_total += 1
-					self.results[test_object.id] = "Passed"
+					self.results[test_object.name] = "Passed"
 				elif test_object.result == raptor_tests.SmokeTest.FAIL:
 					self.fail_total += 1
-					self.results[test_object.id] = "Failed"
+					self.results[test_object.name] = "Failed"
 					self.failed_tests.append(test_object.name)
 				elif test_object.result == raptor_tests.SmokeTest.SKIP:
 					self.skip_total += 1
@@ -535,6 +534,9 @@ run_tests = SuiteRun(suitepattern = options.suite, testpattern = options.tests,
 		upload_location = options.upload)
 run_tests.run_tests()
 
+duration = datetime.datetime.now() - test_run_start_time
+print("\nTotal test run time: {0}\n".format(duration))
+
 if run_tests.suites_failed:
 	sys.exit(1)
-	
+
