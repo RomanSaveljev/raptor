@@ -17,6 +17,8 @@
 """
 Gather up all the raptor XML logs in a given directory and convert them
 into a single sorted .csv file.
+
+Works on Linux; and on Windows with Cygwin.
 """
 
 import optparse
@@ -55,6 +57,9 @@ parser.add_option("--totals", default="raptor_totals.csv", help =
 for leftover in leftover_args:
 	sys.stderr.write("warning: unexpected argument '%s'\n" % leftover)
 
+# on windows we need to explicitly add "bash -c" to the command
+add_shell = sys.platform.startswith("win")
+
 def is_raptor_log(path):
 	try:
 		with open(path, "r") as f:
@@ -65,13 +70,20 @@ def is_raptor_log(path):
 		return False
 
 def join_dir(filename):
-	return os.path.join(options.directory, filename)
+	return os.path.join(options.directory, filename.replace("\\", "/"))
+
+def bash_script(script):
+	if add_shell:
+		return 'bash -c "{0}"'.format(script)
+	return script
 
 # search the given directory for a list of raptor log files
 logs = filter(is_raptor_log, map(join_dir, os.listdir(options.directory)))
 
 print "found", len(logs), "raptor log files"
-
+if len(logs) < 1:
+	sys.exit(0)
+	
 # run the CSV filter on each log file
 cmd_template = "sbs_filter --filters=csv[{0}] -f {1} < {2}"
 tmp_template = "/tmp/csv_gather_{0}.csv"
@@ -79,28 +91,28 @@ tmp_template = "/tmp/csv_gather_{0}.csv"
 csvs = []
 for i,f in enumerate(logs):
 	tmpfile = tmp_template.format(i)
-	command = cmd_template.format(options.params, tmpfile, f)
+	command = bash_script(cmd_template.format(options.params, tmpfile, f))
 	print command
-	returncode = subprocess.call(command, shell=True)
+	returncode = subprocess.call(command, shell=not add_shell)
 	if returncode != 0:
 		sys.stderr.write("FAILED: {0}\n".format(command))
 		sys.exit(1)
 	csvs.append(tmpfile)
 	
 # cat all the temporary CSV files together and output the sorted result
-catsort = "cat {0} | sort > {1}".format(" ".join(csvs), options.output)
+catsort = bash_script("cat {0} | sort > {1}".format(" ".join(csvs), options.output))
 print catsort
 				
-returncode = subprocess.call(catsort, shell=True)
+returncode = subprocess.call(catsort, shell=not add_shell)
 if returncode != 0:
 	sys.stderr.write("FAILED: {0}\n".format(catsort))
 	sys.exit(1)
 
 # run csv_totals on the "big" file to create an easier starting point
-csvtotals = "csv_totals.py < {0} | sort > {1}".format(options.output, options.totals)
+csvtotals = bash_script("csv_totals.py < {0} | sort > {1}".format(options.output, options.totals))
 print csvtotals
 				
-returncode = subprocess.call(csvtotals, shell=True)
+returncode = subprocess.call(csvtotals, shell=not add_shell)
 if returncode != 0:
 	sys.stderr.write("FAILED: {0}\n".format(csvtotals))
 	sys.exit(1)
