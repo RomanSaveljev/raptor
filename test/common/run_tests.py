@@ -20,6 +20,7 @@ import sys
 import re
 import imp
 import datetime
+import stat
 import traceback
 raptor_tests = imp.load_source("raptor_tests", "common/raptor_tests.py")
 
@@ -211,11 +212,11 @@ class TestRun(object):
 		else:
 			# If there were no failing tests this time, remove any previous file
 			try:
-				os.remove("what_failed")
+				os.unlink("what_failed")
 			except:
 				try:
-					os.chmod("what_failed", stat.S_IRWXU)
-					os.remove("what_failed")
+					os.chmod("what_failed", stat.S_IWRITE)
+					os.unlink("what_failed")
 				except:
 					pass
 					
@@ -265,9 +266,7 @@ class Suite(TestRun):
 								(raptor_tests.ReplaceEnvs(self.suite_dir
 								+ "/" + test))))
 					except:
-						print "\n", (sys.exc_type.__name__ + ":"), \
-								sys.exc_value, "\n", \
-								traceback.print_tb(sys.exc_traceback)
+						traceback.print_exc(None, sys.stdout)    # None => all levels
 	
 		test_number = 0
 		test_total = len(self.test_set)
@@ -334,9 +333,7 @@ class Suite(TestRun):
 					
 			except:
 				print "\nTEST ERROR:"
-				print (sys.exc_type.__name__ + ":"), \
-						sys.exc_value, "\n", \
-						traceback.print_tb(sys.exc_traceback)
+				traceback.print_exc(None, sys.stdout)    # None => all levels
 				self.exception_total += 1
 				self.error_tests.append(str(self.test_set[test_number - 1]))
 								

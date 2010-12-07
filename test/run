@@ -15,34 +15,20 @@
 # Test Suite execution file for linux
 #
 
-# Ensure that the host type is set for Raptor:
-eval $($SBS_HOME/bin/gethost.sh -e)
-
-if [ -z "$HOSTPLATFORM" ]; then
-	echo "Error: HOSTPLATFORM could not be determined."
-	exit 1
+# If SBS_HOME is not set in the environment then work it out
+# from the path to this script
+if [ -z "$SBS_HOME" ] ; then
+	temp=$0
+	SBS_HOME=$(cd ${temp%/*} && echo $PWD)
+	export SBS_HOME
 fi
 
+# Call sbs_env script
+source $SBS_HOME/bin/sbs_env
+
+# Tests also need EPOCROOT conditioned nicely
 if [ "$OSTYPE" == "cygwin" ]; then
-
-	SBS_HOME=${SBS_HOME//\\//}
-
-	__CYGWIN__=${SBS_CYGWIN:-$SBS_HOME/$HOSTPLATFORM_DIR/cygwin}
-	__PYTHON__=${SBS_PYTHON:-$SBS_HOME/$HOSTPLATFORM_DIR/python264/python.exe}
-
-	# Unify paths.
-
-	u="$__CYGWIN__/bin/cygpath.exe -m"
-
-	SBS_HOME=$($u "$SBS_HOME")
 	EPOCROOT=$($u "$EPOCROOT")
-
-	__PYTHON__=$($u "$__PYTHON__")
-else
-	LD_LIBRARY_PATH=$SBS_HOME/$HOSTPLATFORM_DIR/bv/lib:$LD_LIBRARY_PATH
-
-	export PATH LD_LIBRARY_PATH
-	__PYTHON__=python
 fi
 
 # Call run_tests.py with the arguments

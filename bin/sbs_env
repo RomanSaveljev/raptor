@@ -68,9 +68,9 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	if [ -z "$SBS_CYGWIN17" ]; then
 			__CYGWIN__=$SBS_CYGWIN
 			export CYGWIN='nontsec nosmbntsec'
-			
 	else
 			__CYGWIN__=$SBS_CYGWIN17
+			export SBS_CYGWIN=$SBS_CYGWIN17
 			export CYGWIN=nodosfilewarning
 			__MOUNTOPTIONS__='-o noacl -o user'
 			__UMOUNTOPTIONS__=

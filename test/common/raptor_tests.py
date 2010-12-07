@@ -167,10 +167,7 @@ def clean_epocroot():
 							os.remove(name)
 						except:							
 							print "\nEPOCROOT-CLEAN ERROR:"
-							print (sys.exc_type.__name__ + ":"), \
-									sys.exc_value
-							if sys.exc_type.__name__ != "WindowsError":
-								print traceback.print_tb(sys.exc_traceback)
+							traceback.print_exc(None, sys.stdout)
 									
 			# This loop handles folders
 			for name in dirs:
@@ -184,10 +181,7 @@ def clean_epocroot():
 						rmtree(ReplaceEnvs(name))
 					except:
 						print "\nEPOCROOT-CLEAN ERROR:"
-						print (sys.exc_type.__name__ + ":"), \
-								sys.exc_value
-						if sys.exc_type.__name__ != "WindowsError":
-							print traceback.print_tb(sys.exc_traceback)
+						traceback.print_exc(None, sys.stdout)
 	except IOError,e:
 		print e
 	
@@ -413,7 +407,10 @@ class SmokeTest(object):
 			shellenv['SBSLOGFILE']=ReplaceEnvs(self.logfile())
 			shellenv['PATH']=shellpath
 			shellenv['PYTHON_HOME'] = ""
-			shellenv['CYGWIN']="nontsec nosmbntsec"
+			if 'SBS_CYGWIN17' in shellenv:
+				shellenv['CYGWIN']="nodosfilewarning"
+			else:
+				shellenv['CYGWIN']="nontsec nosmbntsec"
 
 			p = subprocess.Popen(args=[BASH, '-c', command], 
 					stdout=subprocess.PIPE,
