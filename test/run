@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -15,31 +15,10 @@
 # Test Suite execution file for linux
 #
 
-# If SBS_HOME is not set in the environment then work it out
-# from the path to this script
-if [ -z "$SBS_HOME" ] ; then
-	temp=$0
-	SBS_HOME=$(cd ${temp%/*} && echo $PWD)
-	export SBS_HOME
-fi
-
 # Call sbs_env script
 source $SBS_HOME/bin/sbs_env
-
-# Tests also need EPOCROOT conditioned nicely
-if [ "$OSTYPE" == "cygwin" ]; then
-	EPOCROOT=$($u "$EPOCROOT")
-fi
 
 # Call run_tests.py with the arguments
 TEST_SUITE_PY="$SBS_HOME/test/common/run_tests.py"
 
-if [ -e "$TEST_SUITE_PY" ]; then
-	# run the source version
-	$__PYTHON__ -tt "$TEST_SUITE_PY" "$@"
-elif [ -e "$TEST_SUITE_PY"c ]; then
-	# run the compiled version
-	$__PYTHON__ -tt "$TEST_SUITE_PY"c "$@"
-else
-	echo "Cannot run Test Suite - $TEST_SUITE_PY not found" 1>&2
-fi
+$__PYTHON__ -tt "$TEST_SUITE_PY" "$@"

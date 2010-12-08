@@ -84,4 +84,3 @@
 @mount %__MOUNTOPTIONS__% %TEMP% /tmp >NUL 2>NUL
 @umount %__UMOUNTOPTIONS__% / >NUL  2>NUL
 @mount %__MOUNTOPTIONS__% %__CYGWIN__% / >NUL 2>NUL
-

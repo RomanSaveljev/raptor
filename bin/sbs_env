@@ -123,4 +123,3 @@ if [ "$OSTYPE" == "cygwin" ]; then
 else
 	PYTHONPATH=$PYTHONPATH:$SBS_HOME/python
 fi
-

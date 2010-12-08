@@ -536,4 +536,3 @@ print("\nTotal test run time: {0}\n".format(duration))
 
 if run_tests.suites_failed:
 	sys.exit(1)
-

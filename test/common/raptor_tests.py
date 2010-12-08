@@ -377,15 +377,12 @@ class SmokeTest(object):
 	
 		print "COMMAND:", command
 
-
 		# Any environment settings specific to this test
 		shellenv = os.environ.copy()
 		for ev in self.environ:
 			shellenv[ev] = self.environ[ev]
 
 		if self.usebash:
-			shellpath = shellenv['PATH']
-			
 			if 'SBS_SHELL' in os.environ:
 				BASH = os.environ['SBS_SHELL']
 			else:
@@ -397,20 +394,8 @@ class SmokeTest(object):
 				else:
 					BASH = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/bash")
 				
-			if self.onWindows:
-				if 'SBS_CYGWIN' in shellenv:
-					shellpath = ReplaceEnvs("$(SBS_CYGWIN)/bin") + ";" + shellpath
-				else:
-					shellpath = ReplaceEnvs("$(SBS_HOME)/win32/cygwin/bin") + ";" + shellpath
-
 			shellenv['SBSMAKEFILE']=ReplaceEnvs(self.makefile())
 			shellenv['SBSLOGFILE']=ReplaceEnvs(self.logfile())
-			shellenv['PATH']=shellpath
-			shellenv['PYTHON_HOME'] = ""
-			if 'SBS_CYGWIN17' in shellenv:
-				shellenv['CYGWIN']="nodosfilewarning"
-			else:
-				shellenv['CYGWIN']="nontsec nosmbntsec"
 
 			p = subprocess.Popen(args=[BASH, '-c', command], 
 					stdout=subprocess.PIPE,
