@@ -53,44 +53,54 @@ EOERROR
 fi
 
 if [ "$OSTYPE" == "cygwin" ]; then
-
-	SBS_HOME=${SBS_HOME//\\//}
-
-	__MINGW__=${SBS_MINGW:-$SBS_HOME/$HOSTPLATFORM_DIR/mingw}
-	__PYTHON__=${SBS_PYTHON:-$SBS_HOME/$HOSTPLATFORM_DIR/python27/python.exe}
-	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/python27}
+	
+	# under Cygwin environment variables in "Windows form" should just be left
+	# as they are. But, the PATH should be filled with /cygdrive/c "Unix form"
+	# filenames, as Cygwin modifies that dynamically for each program.
+	
+	# Command for unixifying path strings. For example, "c:\some\path" and
+    # "/cygdrive/c/some/path" are converted into "/cygdrive/c/some/path".
+	u="/bin/cygpath.exe -u"
+	
+	__SBS__=$($u "$SBS_HOME")
+	
+	# use the internal MinGW unless SBS_MINGW is set
+	
+	__MINGW__=$($u "${SBS_MINGW:-$__SBS__/$HOSTPLATFORM_DIR/mingw}")
 			
 	# work out which version of Cygwin to use
 	# use SBS_CYGWIN17 if set and assume 1.7,
 	# otherwise use SBS_CYGWIN and assume 1.5
+	
 	# Tell Cygwin 1.5 not to map unix security attributes to windows to
-	# prevent raptor from potentially creating read-only files:
+	# prevent raptor from potentially creating read-only files
+	
 	if [ -z "$SBS_CYGWIN17" ]; then
-			__CYGWIN__=$SBS_CYGWIN
+			__CYGWIN__=$($u "$SBS_CYGWIN")
 			export CYGWIN='nontsec nosmbntsec'
 	else
-			__CYGWIN__=$SBS_CYGWIN17
+			__CYGWIN__=$($u "$SBS_CYGWIN17")
 			export SBS_CYGWIN=$SBS_CYGWIN17
 			export CYGWIN=nodosfilewarning
 			__MOUNTOPTIONS__='-o noacl -o user'
 			__UMOUNTOPTIONS__=
 	fi
-    # Command for unifying path strings. For example, "c:\some\path" and
-    # "/cygdrive/c/some/path" will both be converted into "c:/some/path".
-	u="$__CYGWIN__/bin/cygpath.exe -m"
-
-	__MINGW__=$($u "$__MINGW__")
-	
-	export SBS_HOME=$($u "$SBS_HOME")
-
-	export PATH=${__MINGW__}/bin:${__CYGWIN__}/bin:$SBS_HOME/$HOSTPLATFORM_DIR/bin:$PATH
+    
+	export PATH=$__MINGW__/bin:$__CYGWIN__/bin:$__SBS__/$HOSTPLATFORM_DIR/bin:$PATH
 	
 	# The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
 	#  1. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
 	#  2. the python shipped locally with Raptor (if present)
 	#  3. the python on the system PATH and the PYTHONPATH set in the system environment
 
-	__LOCAL_PYTHON__=$SBS_HOME/win32/python27/python.exe
+	# Python variables need to run in Cygwin but be understandable to a
+	# windows-centric interpreter, so we must use "mixed form" filenames.
+	
+	# Command for mixifying path strings. For example, "c:\some\path" and
+    # "/cygdrive/c/some/path" are converted into "c:/some/path".
+	m="/bin/cygpath.exe -m"
+	
+	__LOCAL_PYTHON__=$($m $SBS_HOME/win32/python27/python.exe)
 
 	if [ -n "$SBS_PYTHON" ]; then
 		export __PYTHON__=$SBS_PYTHON
@@ -101,10 +111,10 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	else
 		export __PYTHON__=python.exe
 	fi
-	export __PYTHON__=$($u "$__PYTHON__")		
-
+	export __PYTHON__=$($m "$__PYTHON__")		
+	
 	if [ -n "$SBS_PYTHONPATH" ]; then
-		export PYTHONPATH=$($u "$SBS_PYTHONPATH")
+		export PYTHONPATH=$SBS_PYTHONPATH
 	fi
 
 else	
@@ -119,7 +129,7 @@ fi
 
 # add the Raptor python modules to whatever PYTHONPATH we got
 if [ "$OSTYPE" == "cygwin" ]; then
-	PYTHONPATH=$($u "$PYTHONPATH;$SBS_HOME/python")
+	PYTHONPATH=$PYTHONPATH;$($m "$SBS_HOME/python")
 else
 	PYTHONPATH=$PYTHONPATH:$SBS_HOME/python
 fi

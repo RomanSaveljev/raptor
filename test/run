@@ -22,3 +22,5 @@ source $SBS_HOME/bin/sbs_env
 TEST_SUITE_PY="$SBS_HOME/test/common/run_tests.py"
 
 $__PYTHON__ -tt "$TEST_SUITE_PY" "$@"
+
+exit $?
