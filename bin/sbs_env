@@ -59,7 +59,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	# filenames, as Cygwin modifies that dynamically for each program.
 	
 	# Command for unixifying path strings. For example, "c:\some\path" and
-    # "/cygdrive/c/some/path" are converted into "/cygdrive/c/some/path".
+	# "/cygdrive/c/some/path" are converted into "/cygdrive/c/some/path".
 	u="/bin/cygpath.exe -u"
 	
 	__SBS__=$($u "$SBS_HOME")
@@ -68,26 +68,25 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	
 	__MINGW__=$($u "${SBS_MINGW:-$__SBS__/$HOSTPLATFORM_DIR/mingw}")
 			
-	# work out which version of Cygwin to use
-	# use SBS_CYGWIN17 if set and assume 1.7,
-	# otherwise use SBS_CYGWIN and assume 1.5
-	
-	# Tell Cygwin 1.5 not to map unix security attributes to windows to
-	# prevent raptor from potentially creating read-only files
+	# work out which version of Cygwin is in use.
+	# if SBS_CYGWIN17 is set then assume 1.7, otherwise assume 1.5
 	
 	if [ -z "$SBS_CYGWIN17" ]; then
-			__CYGWIN__=$($u "$SBS_CYGWIN")
-			export CYGWIN='nontsec nosmbntsec'
+		# Tell Cygwin 1.5 not to map unix security attributes to
+		# windows to prevent raptor from creating read-only files
+		export CYGWIN='nontsec nosmbntsec'
 	else
-			__CYGWIN__=$($u "$SBS_CYGWIN17")
-			export SBS_CYGWIN=$SBS_CYGWIN17
-			export CYGWIN=nodosfilewarning
-			__MOUNTOPTIONS__='-o noacl -o user'
-			__UMOUNTOPTIONS__=
+		# Tell Cygwin 1.7 not to complain about using DOS style
+		# filenames instead of /cygdrive ones.
+		# Make sure SBS_CYGWIN is the same as SBS_CYGWIN17
+		export SBS_CYGWIN=$SBS_CYGWIN17
+		export CYGWIN=nodosfilewarning
+		__MOUNTOPTIONS__='-o noacl -o user'
+		__UMOUNTOPTIONS__=
 	fi
-    
-	export PATH=$__MINGW__/bin:$__CYGWIN__/bin:$__SBS__/$HOSTPLATFORM_DIR/bin:$PATH
-	
+
+	export PATH=$__MINGW__/bin:/bin:$__SBS__/$HOSTPLATFORM_DIR/bin:$PATH
+
 	# The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
 	#  1. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
 	#  2. the python shipped locally with Raptor (if present)
@@ -97,7 +96,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	# windows-centric interpreter, so we must use "mixed form" filenames.
 	
 	# Command for mixifying path strings. For example, "c:\some\path" and
-    # "/cygdrive/c/some/path" are converted into "c:/some/path".
+	# "/cygdrive/c/some/path" are converted into "c:/some/path".
 	m="/bin/cygpath.exe -m"
 	
 	__LOCAL_PYTHON__=$($m $SBS_HOME/win32/python27/python.exe)
@@ -116,20 +115,13 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	if [ -n "$SBS_PYTHONPATH" ]; then
 		export PYTHONPATH=$SBS_PYTHONPATH
 	fi
-
+	export PYTHONPATH=$PYTHONPATH;$($m "$SBS_HOME/python")
 else	
 	PYDIR=python27 # not exported on purpose
-	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}
+	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}:$SBS_HOME/python
 	PATH=$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/bin:$SBS_HOME/$HOSTPLATFORM_DIR/bin:$PATH
 	LD_LIBRARY_PATH=$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib:$SBS_HOME/$HOSTPLATFORM_DIR/bv/lib:$LD_LIBRARY_PATH
 
 	export PATH LD_LIBRARY_PATH
 	export __PYTHON__=python
-fi
-
-# add the Raptor python modules to whatever PYTHONPATH we got
-if [ "$OSTYPE" == "cygwin" ]; then
-	PYTHONPATH=$PYTHONPATH;$($m "$SBS_HOME/python")
-else
-	PYTHONPATH=$PYTHONPATH:$SBS_HOME/python
 fi
