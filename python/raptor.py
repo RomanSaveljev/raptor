@@ -1653,7 +1653,7 @@ class Raptor(object):
 				self.systemDefinitionFile = self.FindSysDefIn(cwd)
 				if self.systemDefinitionFile == None:
 					aComponent = self.FindComponentIn(cwd)
-					if aComponent:
+					if aComponent is not None:
 						layers.append(Layer('default',[aComponent]))
 			else:
 				aComponent = self.FindComponentIn(cwd)
