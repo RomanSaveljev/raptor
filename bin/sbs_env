@@ -81,8 +81,6 @@ if [ "$OSTYPE" == "cygwin" ]; then
 		# Make sure SBS_CYGWIN is the same as SBS_CYGWIN17
 		export SBS_CYGWIN=$SBS_CYGWIN17
 		export CYGWIN=nodosfilewarning
-		__MOUNTOPTIONS__='-o noacl -o user'
-		__UMOUNTOPTIONS__=
 	fi
 
 	export PATH=$__MINGW__/bin:/bin:$__SBS__/$HOSTPLATFORM_DIR/bin:$PATH
@@ -102,20 +100,20 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	__LOCAL_PYTHON__=$($m $SBS_HOME/win32/python27/python.exe)
 
 	if [ -n "$SBS_PYTHON" ]; then
-		export __PYTHON__=$SBS_PYTHON
+		__PYTHON__=$SBS_PYTHON
 	elif [ -f "$__LOCAL_PYTHON__" ]; then
-		export __PYTHON__=$__LOCAL_PYTHON__
+		__PYTHON__=$__LOCAL_PYTHON__
 		export SBS_PYTHON=$__PYTHON__
 		export PYTHONPATH=
 	else
-		export __PYTHON__=python.exe
+		__PYTHON__=python.exe
 	fi
 	export __PYTHON__=$($m "$__PYTHON__")		
 	
 	if [ -n "$SBS_PYTHONPATH" ]; then
 		export PYTHONPATH=$SBS_PYTHONPATH
 	fi
-	export PYTHONPATH=$PYTHONPATH;$($m "$SBS_HOME/python")
+	export PYTHONPATH="$PYTHONPATH;$($m "$SBS_HOME/python")"
 else	
 	PYDIR=python27 # not exported on purpose
 	export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}:$SBS_HOME/python
