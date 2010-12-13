@@ -65,7 +65,7 @@
 
 		<env name='SBS_GNUCPP' default='$(MINGWBINDIR)/cpp.exe' type='tool'/>
 		<env name='SBS_GNUDATE' default='$(COREUTILSBINDIR)/date.exe' type='tool'/>
-		<env name='SBS_GNUMAKE38' default='$(MINGWBINDIR)/make.exe' type='tool'/>
+		<env name='SBS_GNUMAKE38' default='$(MINGWBINDIR)/mingw32-make.exe' type='tool'/>
 		<env name='SBS_GNUSED' default='$(COREUTILSBINDIR)/sed.exe' type='tool'/>
 		<env name='SBS_GNUMKDIR' default='$(COREUTILSBINDIR)/mkdir.exe' type='tool'/>
 		<env name='SBS_GNUCP' default='$(COREUTILSBINDIR)/cp.exe' type='tool'/>
