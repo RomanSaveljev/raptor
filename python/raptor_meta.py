@@ -2861,20 +2861,33 @@ class MetaReader(object):
 		# everything is specified
 		return exportNodes + platformNodes
 
-	def ModuleName(self,aBldInfPath):
-		"""Calculate the name of the ROM/emulator batch files that run the tests"""
+	def ModuleDir(self, bldinf_file):
+		"""Calculate a module-based directory name, from bld.inf location, into which ROM/emulator .iby
+		and .bat files can be generated."""
 
 		epocroot = str(self.ExportPlatforms[0]['EPOCROOT'])
-		modulePath = os.path.dirname(aBldInfPath).replace(epocroot, '', 1).lower().replace('group', '')
+		relevant_path = os.path.dirname(bldinf_file).replace(epocroot, '', 1).lower().replace('group', '')
 		# Only join the last 3 folder names in case the path is very long
-		moduleName = '_'.join([i for i in modulePath.split('/') if i][-3:])
+		module_dir = '_'.join([i for i in relevant_path.split('/') if i][-3:])
 		
-		# Ensure that ModuleName does not return blank, if the above calculation determines
-		# that moduleName is blank
-		if moduleName == "" or moduleName.endswith(":"):
-			moduleName = "module"
-		return moduleName
+		# If we can't calculate a directory name using our logic, return a generic name
+		if module_dir == "" or module_dir.endswith(":"):
+			module_dir = "module"
+		return module_dir
+	
+	def ModuleName(self, bldinf_file):
+		"""Calculate a module name from bld.inf location.
+		Note that we use ABLD-logic here: the module name is the name of the directory in which
+		the bld.inf sits *unless* that directory is called "group".  If it is, then the  module name is the
+		name of the directory in which "group" sits."""
+		
+		relevant_path = os.path.dirname(bldinf_file).lower().replace('/group', '')
+		module_name = relevant_path.split("/").pop()
 
+		# If we can't calculate a module name using our logic, return a generic name
+		if module_name == "" or module_name.endswith(":"):
+			module_name = "module"
+		return module_name
 
 	def AddComponentNodes(self, component, exportNodes, platformNodes):	
 		"""Add Specification nodes for a bld.inf to the appropriate platforms."""
@@ -2911,8 +2924,9 @@ class MetaReader(object):
 
 		outputDir = BldInfFile.outputPathFragment(component.bldinf_filename)
 
-		# Calculate "module name"
-		modulename = self.ModuleName(str(component.bldinf_filename))
+		# Calculate module name and a generation directory based on the bld.inf file location
+		module_name = self.ModuleName(str(component.bldinf_filename))
+		module_dir = self.ModuleDir(str(component.bldinf_filename))
 
 		for i,bp in enumerate(self.BuildPlatforms):
 			plat = bp['PLATFORM']
@@ -2932,7 +2946,8 @@ class MetaReader(object):
 				var.AddOperation(raptor_data.Set("COMPONENT_META",str(component.bldinf_filename)))
 				var.AddOperation(raptor_data.Set("COMPONENT_NAME", component.componentname))
 				var.AddOperation(raptor_data.Set("COMPONENT_LAYER", component.layername))
-				var.AddOperation(raptor_data.Set("MODULE", modulename))
+				var.AddOperation(raptor_data.Set("MODULE_DIR", module_dir))
+				var.AddOperation(raptor_data.Set("MODULE_NAME", module_name))
 				var.AddOperation(raptor_data.Append("OUTPUTPATHOFFSET", outputDir, '/'))
 				var.AddOperation(raptor_data.Append("OUTPUTPATH", outputDir, '/'))
 				var.AddOperation(raptor_data.Append("BLDINF_OUTPUTPATH",outputDir, '/'))

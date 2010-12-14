@@ -211,7 +211,8 @@
 		<param name='USE_TRACE_COMPILER' default=''/>
 		<param name='TRANASM'/>
 		<param name='INSTRUCTION_SET'/>
-		<param name='MODULE'/>
+		<param name='MODULE_DIR'/>
+		<param name='MODULE_NAME'/>
 		<param name='USER_LIBS_PATH_OPTION'/>
 		<param name='VARIANTPLATFORM'/>
 		<param name='PLATFORM' default='$(VARIANTPLATFORM)'/>

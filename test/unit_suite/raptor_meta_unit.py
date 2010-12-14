@@ -908,26 +908,51 @@ class TestRaptorMeta(unittest.TestCase):
 		results = mockBackend.resolveOptionReplace('--assignmentArgU=value1 --assignmentArgV=value2')
 		self.__assertEqualStringList(results, ['--assignmentArgU=value1<->--assignmentArgV=value2'])
 	
-	def testModuleName(self):
+	def testModuleDir(self):
 		self.dummyMetaReader()
 
-		# Test how we resolve known permutations of values given to the .mmp file OPTION_REPLACE keyword
+		# Test how we use bld.inf locations to come up with a module-based directory name that's likely to be unique
 		mockBackend = raptor_meta.MetaReader(self.raptor)
 		
-		resultsDictList = [ {"bldinf":"Z:/src/Romfile/group/tb92/GROUP/bld.inf", 'epocroot': 'Z:', "result":"src_romfile_tb92"},
-				    {"bldinf":"/home/src/roMfile/group/tb92/GROUP/bld.inf", 'epocroot': '/home', "result":"src_romfile_tb92"},
-				    {"bldinf":"Z:/src/romFile/tb92/GROUP/another.inf", 'epocroot': 'Z:', "result":"src_romfile_tb92"},
-				    {"bldinf":"X:/some/path/that/is/much/longer/than/expected/bld.inf", 'epocroot': 'X:', "result":"longer_than_expected"},
-				    {"bldinf":"w:/contacts/ONgoing/group/bld.inf", 'epocroot': 'w:', "result":"contacts_ongoing"},
-				    {"bldinf":"p:/group/bld.inf", 'epocroot': 'p:', "result":"module"},
-				    {"bldinf":"/home/group/bld.inf", 'epocroot': '/home', "result":"module"}
+		resultsDictList = [ {"bldinf":"Z:/src/Romfile/group/tb92/GROUP/bld.inf", 'epocroot':'Z:', "result":"src_romfile_tb92"},
+				    {"bldinf":"/home/src/roMfile/group/tb92/GROUP/bld.inf", 'epocroot':'/home', "result":"src_romfile_tb92"},
+				    {"bldinf":"Z:/src/romFile/tb92/GROUP/another.inf", 'epocroot':'Z:', "result":"src_romfile_tb92"},
+				    {"bldinf":"M:/src/sf/os/kernelhwsrv/kerneltest/e32test/group/bld.inf", 'epocroot':'M:/', "result":"kernelhwsrv_kerneltest_e32test"},
+				    {"bldinf":"X:/some/path/that/is/much/longer/than/expected/bld.inf", 'epocroot':'X:', "result":"longer_than_expected"},
+				    {"bldinf":"w:/contacts/ONgoing/group/bld.inf", 'epocroot':'w:', "result":"contacts_ongoing"},
+				    {"bldinf":"M:/src/os/boardsupport/naviengine/navienginebspflexible/test/bld.inf", 'epocroot':'M:/builds/', "result":"naviengine_navienginebspflexible_test"},
+				    {"bldinf":"p:/group/bld.inf", 'epocroot':'p:', "result":"module"},
+				    {"bldinf":"/home/group/bld.inf", 'epocroot':'/home', "result":"module"}
 				]
 
 		for result in resultsDictList:
 			mockBackend.ExportPlatforms.append({'EPOCROOT': result['epocroot']})
-			moduleName = mockBackend.ModuleName(result["bldinf"])
+			moduleName = mockBackend.ModuleDir(result["bldinf"])
 			self.assertEquals(moduleName, result["result"])
 			mockBackend.ExportPlatforms.pop()
+
+		self.restoreMetaReader()
+		
+	def testModuleName(self):
+		self.dummyMetaReader()
+
+		# Test how we use bld.inf locations to come up with a module name for target-side .bat files in generated .iby files
+		mockBackend = raptor_meta.MetaReader(self.raptor)
+		
+		resultsDictList = [ {"bldinf":"Z:/src/Romfile/group/tb92/GROUP/bld.inf", "result":"tb92"},
+				    {"bldinf":"/home/src/roMfile/group/tb92/GROUP/bld.inf", "result":"tb92"},
+				    {"bldinf":"Z:/src/romFile/tb92/GROUP/another.inf", "result":"tb92"},
+				    {"bldinf":"M:/src/sf/os/kernelhwsrv/kerneltest/e32test/group/bld.inf", "result":"e32test"},
+				    {"bldinf":"X:/some/path/that/is/much/longer/than/expected/bld.inf", "result":"expected"},
+				    {"bldinf":"w:/contacts/ONgoing/group/bld.inf", "result":"ongoing"},
+				    {"bldinf":"M:/src/os/boardsupport/naviengine/navienginebspflexible/test/bld.inf", "result":"test"},
+				    {"bldinf":"p:/group/bld.inf", "result":"module"},
+				    {"bldinf":"/home/group/bld.inf", "result":"home"}
+				]
+
+		for result in resultsDictList:
+			moduleName = mockBackend.ModuleName(result["bldinf"])
+			self.assertEquals(moduleName, result["result"])
 
 		self.restoreMetaReader()
 
