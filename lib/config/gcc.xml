@@ -55,7 +55,8 @@
 		<set name='OPT.SYSTEMINCLUDE' value='-isystem '/>
 		<set name='OPT.USERINCLUDE' value='-I '/>
 
-		<!-- always use stlport headers -->
+		<!-- always use stlport headers; when the move to STLport 5.2 is made, the SBS_STLPORTINCDIR 
+			 default should be updated to $(EPOCINCLUDE)/tools/stlport5.2 -->
 		<env name='SBS_STLPORTINCDIR' default='$(EPOCINCLUDE)/tools/stlport' type='path'/>
 		<set name='SYSTEMINCLUDE' value='$(SBS_STLPORTINCDIR)'/>
 
