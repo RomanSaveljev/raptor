@@ -783,8 +783,7 @@ include {0}
 					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
 						mproc.logstream.write(l)
 				except Exception,e:
-					#errorlist.append("Couldn't complete stdout output from annofile {0} for {1} - '{2}'".format(annofilename, command, str(e)))
-					pass
+					sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, command, str(e)))
 				
 			# Take all the stderr output that went into the .stderr file
 			# and put it back into the log, but safely so it can't mess up
@@ -795,8 +794,7 @@ include {0}
 					self.raptor.out.write(escape(line))
 				e.close()
 			except Exception,e:
-				#errorlist.append("Couldn't complete stderr output for {0} - '{1}'".format(mproc.command, str(e)))
-				pass
+				sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(mproc.command, str(e)))
 			
 		if returncode != 0  and not self.raptor.keepGoing:
 			self.Tidy()
