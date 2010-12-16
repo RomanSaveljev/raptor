@@ -52,8 +52,6 @@ STL_DEB_LIB_PATH:=$(STL_DIR)/lib/libstlportg.a
 REL_LIB:=$(RELEASE_DIR_REL)/$(STL_REL_LIB_NAME)
 DEB_LIB:=$(RELEASE_DIR_DEB)/$(STL_REL_LIB_NAME)
 
-STL_HEADERS_PATH:=$(EPOCROOT)/epoc32/include/tools/stlport
-
 CLEANTARGETS:=
 CREATABLEPATHS:=
 
@@ -62,6 +60,7 @@ define stlportcommon
 $(UNZIPPED): $(SOURCE_ARCHIVE) 
 	$(call startrule,unzip) \
 	$(UNZIP) -aa -o $(SOURCE_ARCHIVE) -d $(EXTRACT_DIR) && \
+	echo $(if $(TOOLS2WIN32),"TARGET_OS:=$$$${SBS_MINGW_LINUX_PREFIX}"," ")  > "$(BUILD_DIR)/../Makefiles/gmake/config.mak" && \
 	echo "SHELL:=$$$${SHELL}" > "$(BUILD_DIR)/raptor_gcc.mak" && \
 	$(GNUCAT) $(BUILD_DIR)/gcc.mak >> "$(BUILD_DIR)/raptor_gcc.mak" && \
 	$(GNUTOUCH) $(UNZIPPED) \

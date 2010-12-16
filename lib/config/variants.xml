@@ -28,6 +28,7 @@
 	<var name="stlport5_2">
 		<set name='STLPORTLIBRARY' value='stlport.5.2'/>
 		<env name='SBS_STLPORTINCDIR' default='$(EPOCINCLUDE)/tools/stlport5.2' type='path'/>
+		<env name='SBS_STLPORTINCDIR_WIN32' default='$(EPOCINCLUDE)/tools/stlport5.2' type='path' host='lin.*'/>
 	</var>
 	
 	<!-- This variant enables STLport v 5.1 for tools2 builds - it is not needed to build STLport 
@@ -36,6 +37,7 @@
 	<var name="stlport5_1">
 		<set name='STLPORTLIBRARY' value='stlport.5.1'/>
 		<env name='SBS_STLPORTINCDIR' default='$(EPOCINCLUDE)/tools/stlport' type='path'/>
+		<env name='SBS_STLPORTINCDIR_WIN32' default='$(EPOCINCLUDE)/tools/stlport' type='path' host='lin.*'/>
 	</var>
 
 	<!-- This variant turns debug info on for arm only -->
