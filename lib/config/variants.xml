@@ -16,11 +16,28 @@
 		<env name='RANLIB' default='$(SBS_MINGW_LINUX_BIN)/$(SBS_MINGW_LINUX_PREFIX)-ranlib' type='tool'/>
 		<env name='SBS_STLPORTINCDIR_WIN32' default='$(EPOCINCLUDE)/tools/stlport' type='path'/>
 		<env name='SBS_STLPORTBINDIR_WIN32' default='$(EPOCROOT)/epoc32/release/tools2' type='path'/>
-                <set name='STLPORTBINDIR' value='$(SBS_STLPORTBINDIR_WIN32)/$(VARIANTTYPE)'/>
+ 		<set name='STLPORTBINDIR' value='$(SBS_STLPORTBINDIR_WIN32)/$(VARIANTTYPE)'/>
 		<set name='SYSTEMINCLUDE' value='$(SBS_STLPORTINCDIR_WIN32)'/>
 		<set name='RELEASEPATH' value='$(EPOCROOT)/epoc32/release/tools2/$(VARIANTTYPE)'/>
 		<set name='DOTEXE' value='.exe'/>
 		<set name='PLATMACROS.LINUX' value='$(PLATMACROS.WINDOWS)'/>
+	</var>
+	
+	<!-- This variant enables STLport v 5.2 for tools2 builds - it is not needed to build STLport 
+		 itself but only tools that link against it. -->
+	<var name="stlport5_2">
+		<set name='STLPORTLIBRARY' value='stlport.5.2'/>
+		<env name='SBS_STLPORTINCDIR' default='$(EPOCINCLUDE)/tools/stlport5.2' type='path'/>
+		<env name='SBS_STLPORTINCDIR_WIN32' default='$(EPOCINCLUDE)/tools/stlport5.2' type='path' host='lin.*'/>
+	</var>
+	
+	<!-- This variant enables STLport v 5.1 for tools2 builds - it is not needed to build STLport 
+		 itself but only tools that link against it; this will be useful when STLport 5.2 is the
+		 default STLport version in tools2 builds. -->
+	<var name="stlport5_1">
+		<set name='STLPORTLIBRARY' value='stlport.5.1'/>
+		<env name='SBS_STLPORTINCDIR' default='$(EPOCINCLUDE)/tools/stlport' type='path'/>
+		<env name='SBS_STLPORTINCDIR_WIN32' default='$(EPOCINCLUDE)/tools/stlport' type='path' host='lin.*'/>
 	</var>
 
 	<!-- This variant turns debug info on for arm only -->
