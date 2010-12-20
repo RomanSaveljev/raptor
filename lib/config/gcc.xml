@@ -29,7 +29,7 @@
 		<!-- link to bld.inf and mmp platform names -->
 		<set name='TRADITIONAL_PLATFORM' value='TOOLS2'/>
 
-		<set name='CFLAGS' value='-fdefer-pop -fmerge-constants -fthread-jumps -floop-optimize -fif-conversion -fif-conversion2 -fguess-branch-probability -fcprop-registers -foptimize-sibling-calls -fstrength-reduce -fcse-follow-jumps -fcse-skip-blocks -frerun-cse-after-loop -frerun-loop-opt -fgcse -fgcse-lm -fgcse-sm -fgcse-las -fdelete-null-pointer-checks -fexpensive-optimizations -fregmove -fschedule-insns -fschedule-insns2 -fsched-interblock -fsched-spec -fcaller-saves -fpeephole2 -freorder-blocks -freorder-functions -fstrict-aliasing -funit-at-a-time -falign-functions -falign-jumps -falign-loops -falign-labels -fcrossjumping -pipe -Wall -Wno-ctor-dtor-privacy -Wno-unknown-pragmas -m32'/>
+		<set name='CFLAGS' value='-static-libgcc -fdefer-pop -fmerge-constants -fthread-jumps -floop-optimize -fif-conversion -fif-conversion2 -fguess-branch-probability -fcprop-registers -foptimize-sibling-calls -fstrength-reduce -fcse-follow-jumps -fcse-skip-blocks -frerun-cse-after-loop -frerun-loop-opt -fgcse -fgcse-lm -fgcse-sm -fgcse-las -fdelete-null-pointer-checks -fexpensive-optimizations -fregmove -fschedule-insns -fschedule-insns2 -fsched-interblock -fsched-spec -fcaller-saves -fpeephole2 -freorder-blocks -freorder-functions -fstrict-aliasing -funit-at-a-time -falign-functions -falign-jumps -falign-loops -falign-labels -fcrossjumping -pipe -Wall -Wno-ctor-dtor-privacy -Wno-unknown-pragmas -m32'/>
 		
 		<set name='VARIANTPLATFORM' value='tools2'/>
 
@@ -55,7 +55,8 @@
 		<set name='OPT.SYSTEMINCLUDE' value='-isystem '/>
 		<set name='OPT.USERINCLUDE' value='-I '/>
 
-		<!-- always use stlport headers -->
+		<!-- always use stlport headers; when the move to STLport 5.2 is made, the SBS_STLPORTINCDIR 
+			 default should be updated to $(EPOCINCLUDE)/tools/stlport5.2 -->
 		<env name='SBS_STLPORTINCDIR' default='$(EPOCINCLUDE)/tools/stlport' type='path'/>
 		<set name='SYSTEMINCLUDE' value='$(SBS_STLPORTINCDIR)'/>
 

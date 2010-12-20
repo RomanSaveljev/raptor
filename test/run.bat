@@ -17,11 +17,7 @@
 @SETLOCAL
 @CALL %SBS_HOME%\bin\sbs_env.bat
 
-@SET __TEST_SUITE__=%~dp0common\run_tests.pyc
-@SET __TEST_SUITE_PY__=%~dp0common\run_tests.py
-
-@REM If the Python source exists, use it. Else use the byte-compiled Python code
-@IF EXIST %__TEST_SUITE_PY__% SET __TEST_SUITE__=%__TEST_SUITE_PY__%
+@SET __TEST_SUITE__=%SBS_HOME%\test\common\run_tests.py
 
 @REM Then run the test suite with all the arguments
 @%__PYTHON__% -tt %__TEST_SUITE__% %*
@@ -29,4 +25,3 @@
 @ENDLOCAL
 
 @CMD /C EXIT /B %ERRORLEVEL%
-
