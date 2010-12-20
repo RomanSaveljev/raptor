@@ -1108,10 +1108,10 @@ endif
 ifneq ($(TESTPATH),)
 
     CREATABLEPATHS:=$(CREATABLEPATHS) $(EPOCROOT)/epoc32/data/z/test/
-    $(eval $(call MakeTestBatchFiles,$(TARGET),$(EPOCROOT)/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).$(TESTPATH)))
-    BATCHFILE_CREATED_$(EPOCROOT)/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).$(TESTPATH):=1
-    TARGET_CREATED_$(EPOCROOT)/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).$(TESTPATH)_$(TARGET):=1
-    WHATRELEASE:=$(WHATRELEASE) $(EPOCROOT)/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).$(TESTPATH)
+    $(eval $(call MakeTestBatchFiles,$(TARGET),$(EPOCROOT)/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).$(TESTPATH)))
+    BATCHFILE_CREATED_$(EPOCROOT)/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).$(TESTPATH):=1
+    TARGET_CREATED_$(EPOCROOT)/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).$(TESTPATH)_$(TARGET):=1
+    WHATRELEASE:=$(WHATRELEASE) $(EPOCROOT)/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).$(TESTPATH)
 endif
 
 ###################### End of Build ROMFILE target ######################

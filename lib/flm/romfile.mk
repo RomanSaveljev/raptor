@@ -81,10 +81,10 @@ ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
     	# Add 'TEST' to the .iby filename
     	ROMTEST:=test
         ifeq ($(TEST_OPTION),BOTH)
-            DATATEXT:="data=/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).auto.bat test/$(VARIANTPLATFORM).auto.bat"\n"data=/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).manual.bat test/$(VARIANTPLATFORM).manual.bat"
+            DATATEXT:="data=/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).auto.bat test/$(MODULE_NAME).auto.bat"\n"data=/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).manual.bat test/$(MODULE_NAME).manual.bat"
         else
             ifneq ($(TEST_OPTION),NONE)
-                DATATEXT:="data=/epoc32/data/z/test/$(MODULE)/$(VARIANTPLATFORM).$(TEST_OPTION).bat test/$(VARIANTPLATFORM).$(TEST_OPTION).bat"
+                DATATEXT:="data=/epoc32/data/z/test/$(MODULE_DIR)/$(VARIANTPLATFORM).$(TEST_OPTION).bat test/$(MODULE_NAME).$(TEST_OPTION).bat"
             endif
         endif
     endif

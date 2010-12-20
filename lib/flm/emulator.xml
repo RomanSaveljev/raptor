@@ -114,7 +114,8 @@
 		<param name='OPT.WCHAR'/>
 		<param name='PREPDEF'/>
 		<param name='RC'/>
-		<param name='MODULE'/>
+		<param name='MODULE_DIR'/>
+		<param name='MODULE_NAME'/>
 	</interface>
 
 	<interface name="Emulator.exe" extends="Emulator.win32" flm="win32exe.flm">
