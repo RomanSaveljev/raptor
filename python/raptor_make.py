@@ -752,7 +752,7 @@ include {0}
 			make_processes.append(mproc)
 
 			if self.copyLogFromAnnoFile:
-				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
+				mproc.annoFileName = self.annoFileName.replace("#MAKEFILE#", makefile)
 			
 			# execute the build.
 			# the actual call differs between Windows and Unix.
