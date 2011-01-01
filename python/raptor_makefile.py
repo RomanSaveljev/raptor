@@ -189,6 +189,9 @@ class BaseMakefileSet(object):
 	def __len__(self):
 		return len(self.makefiles)
 
+	def __getitem__(self,b):
+		return self.makefiles[b]
+
 	def ignoreTargets(self, makefile):
 		return [] # this method is bad and needs to be removed in favor of accessing the makefiles objects and asking them directly what their "ignore" targets are.
 
@@ -197,10 +200,13 @@ class BaseMakefileSet(object):
 			print "MFCOUNT",str(mf.filename),mf.callcount
 		return [str(mf.filename) for mf in self.makefiles]
 	
-	def nonempty_makefile_names(self):
+	def nonempty_makefiles(self):
 		for mf in self.makefiles:
 			print "MFCOUNT",str(mf.filename),mf.callcount
-		return [str(mf.filename) for mf in self.makefiles if mf.callcount > 0]
+		return [mf for mf in self.makefiles if mf.callcount > 0]
+
+	def nonempty_makefile_names(self):
+		return [str(mf.filename) for mf in self.nonempty_makefiles]
 
 	def add_makefile(self, makefile):
 		self.makefiles.append(makefile)

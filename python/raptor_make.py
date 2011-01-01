@@ -626,8 +626,8 @@ include {0}
 				self.Tidy()
 				return False
 		# Save file names to a list, to allow the order to be reversed
-		filename_list = makefileset.nonempty_makefile_names()
-		self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str(filename_list)))
+		makefile_sequence = makefileset.nonempty_makefiles()
+		self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str([f.filename for f in makefile_sequence])))
 
 		# Iterate through args passed to raptor, searching for CLEAN or REALLYCLEAN
 		clean_flag = False
@@ -638,27 +638,28 @@ include {0}
 		# Files should be deleted in the opposite order to the order
 		# they were built. So reverse file order if cleaning
 		if clean_flag:
-			filename_list.reverse()
+			makefile_sequence = reversed(makefile_sequence)
 
 		# Report number of makefiles to be built
-		self.raptor.InfoDiscovery(object_type = "makefile", count = len(filename_list))
+		self.raptor.InfoDiscovery(object_type = "makefile", count = len(makefile_sequence))
 
 
 		# Stores all the make processes that were executed:
 		make_processes = []
 
 		# Process each file in turn
-		for makefile in filename_list:
+		for makefile in makefile_sequence:
+			makefilename = str(makefile.filename)
 
-			if not os.path.exists(makefile):
-				self.raptor.Info("Skipping makefile {0}".format(makefile))
+			if not os.path.exists(makefilename):
+				self.raptor.Info("Skipping makefile {0}".format(makefilename))
 				continue
-			self.raptor.Info("Making {0}".format(makefile))
+			self.raptor.Info("Making {0}".format(makefilename))
 			# assemble the build command line
 			command = self.buildCommand
 
 			if self.makefileOption:
-				command += " " + self.makefileOption + " " + ' "' + str(makefile) + '" '
+				command += " " + self.makefileOption + " " + ' "' + str(makefilename) + '" '
 
 			if self.raptor.keepGoing and self.keepGoingOption:
 				command += " " + self.keepGoingOption
@@ -698,7 +699,7 @@ include {0}
 
 			# targets go at the end, if the makefile supports them
 			addTargets = self.raptor.targets[:]
-			ignoreTargets = makefileset.ignoreTargets(makefile)
+			ignoreTargets = makefile.selector.ignoretargets
 			if addTargets and ignoreTargets:
 				for target in self.raptor.targets:
 					if re.match(ignoreTargets, target):
@@ -710,8 +711,8 @@ include {0}
 			# Send stderr to a file so that it can't mess up the log (e.g.
 			# clock skew messages from some build engines scatter their
 			# output across our xml.
-			stderrfilename = makefile+'.stderr'
-			stdoutfilename = makefile+'.stdout'
+			stderrfilename = makefilename+'.stderr'
+			stdoutfilename = makefilename+'.stdout'
 			command += " 2>'%s' " % stderrfilename
 
 			# Keep a copy of the stdout too in the case of using the 
@@ -721,13 +722,13 @@ include {0}
 			command += " >'%s' " % stdoutfilename
 
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
-			command = command.replace("#MAKEFILE#", str(makefile))
+			command = command.replace("#MAKEFILE#", str(makefilename))
 
 			self.raptor.Info("Executing '{0}'".format(command))
 
 			# Create a process of make program
 			mproc = MakeProcess(command)
-			mproc.makefile = str(makefile)
+			mproc.makefile = str(makefilename)
 			mproc.talon_recipeattributes = "none"
 			mproc.talon_shell = self.talonshell
 			mproc.talon_buildid = str(self.buildID)
@@ -742,7 +743,7 @@ include {0}
 			make_processes.append(mproc)
 
 			if self.copyLogFromAnnoFile:
-				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefile)
+				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefilename)
 			
 			
 			# execute the build.
@@ -751,7 +752,7 @@ include {0}
 			try:
 				# Time the build
 				self.raptor.InfoStartTime(object_type = "makefile",
-					task = "build", key = str(makefile))
+					task = "build", key = str(makefilename))
 
 				returncode = run_make(mproc)
 				
@@ -762,13 +763,13 @@ include {0}
 			finally:
 				# Still report end-time of the build
 				self.raptor.InfoEndTime(object_type = "makefile", task = "build",
-									    key = str(makefile))
+									    key = str(makefilename))
 
 
 		# Getting all the log output copied into files
 		for mproc in make_processes:		
 			if self.copyLogFromAnnoFile:
-				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefile)
+				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefilename)
 				self.raptor.Info("copylogfromannofile: Copying log from annotation file {0} to work around a potential problem with the console output".format(annofilename))
 				try:
 					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
