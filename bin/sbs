@@ -20,7 +20,7 @@
 # from the path to this script
 if [ -z "$SBS_HOME" ] ; then
 	temp=$0
-	SBS_HOME=$(cd ${temp%/*} && echo $PWD)
+	SBS_HOME=$(cd ${temp%/*}/.. && echo $PWD)
 	export SBS_HOME
 fi
 
