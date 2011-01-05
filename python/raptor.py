@@ -46,6 +46,7 @@ import time
 import traceback
 import pluginbox
 from xml.sax.saxutils import escape
+import json
 
 
 if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ or not "HOSTPLATFORM32_DIR" in os.environ:
@@ -404,12 +405,18 @@ class BuildRecord(object):
 	def to_file(self):
 		""" Write out the build record so that we can find it in future builds"""
 		with open(self.filename,"w") as f:
+			json_br = {}
 			for a in BuildRecord.stored_attrs:
-				f.write("{0}={1}\n".format(a,self.__dict__[a]))
+				json_br[a] = self.__dict__[a]
 
-			# [ "makefile,callcount makefile,callcount", "makefile,callcount" ]
+			json_makefilesets = []
 			for ms in self.makefilesets:
-				f.write("makefileset={0} {1}\n".format(ms.metadepsfilename," ".join(["{0},{1}".format(str(mf.filename),str(mf.callcount)) for mf in ms.makefiles])))
+				json_makefilesets.append(json.dumps(ms.json()))
+
+			json_structure = {'buildrecord': json_br , 'makefilesets': json_makefilesets}
+			json_str = json.dumps(json_structure)
+
+			f.write("{0}\n".format(json_str))
 
 
 	def record_makefileset(self, makefileset):
@@ -421,44 +428,29 @@ class BuildRecord(object):
 		self.makefilesets.append(makefileset)
 
 	@classmethod
-	def _makefileset_from_str(self, makefileset_str):
-		""" return a list of makefileset objects which the make engine 
-		    can build from - this can replicate an "ordered layers" build"""
-		
-		mf_tokens = makefileset_str.split(" ")
-		mf_set = raptor_makefile.BaseMakefileSet(metadepsfilename = mf_tokens[0])
-
-		for p in mf_tokens[1:]:
-			(makefilename, callcount) = p.split(",")
-			if callcount > 0:
-				# only load up make stages which actually call some flms:
-				mf_set.add_makefile(raptor_makefile.BaseMakefile(makefilename, callcount = callcount))
-
-		return mf_set
-
-	@classmethod
 	def from_file(cls, filename):
 		""" Create a build record from a .buildrecord file"""
-		makefilesets = []
 		with open(filename,"r") as f:
-			kargs = {'makefilesets' : makefilesets}
-			for l in f:
-				l = l.strip("\n\r ")
-				eq = l.find("=")
-				if eq  >= 0:
+			try:
+				json_str = f.read().strip("\n\r ")
+				json_structure  = json.loads(json_str)
+			except Exception,e:
+				raise Exception("Bad build record format - json deserialisation failed.")
 
-				
-					(name,value) = (l[:eq],l[eq+1:])
-					if name == "makefileset":
-						ms =  BuildRecord._makefileset_from_str(value)
-						if len(ms) > 0:
-							makefilesets.append(ms)
-					else:
-						kargs[name] = value
-					print "KARGS: ",name , value
-					
-				else:
-					raise Exception("Bad build record format: line should be name=value but it was missing '=': {0}: {1}".format(l, filename))
+			try:
+				kargs = json_structure['buildrecord']
+			except Exception,e:
+				raise Exception("Bad build record format - buildrecord property not found in buildrecord file.")
+
+			# the json structure matches what must be passed into the constructor
+			# quite well except for the makefilesets
+
+			makefilesets = []
+			for json_makefileset in kargs['makefilesets']: 
+				makefilesets.append(BaseMakefileSet.from_json(json_makefileset))
+
+			# replace the json structure for makefilesets with real BaseMakefileSet() instances
+			kargs['makefilesets'] = makefilesets
 
 			try:
 				br = BuildRecord(**kargs)

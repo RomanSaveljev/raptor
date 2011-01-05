@@ -20,6 +20,7 @@ import re
 import os
 import generic_path
 import stat
+import json
 
 class MakefileSelector(object):
 	"""A "query" which is used to separate some flm interface calls
@@ -34,12 +35,26 @@ class MakefileSelector(object):
 		self.ignoretargets=ignoretargets
 
 class BaseMakefile(object):
-	def __init__(self, filename, callcount = 0):
+	def __init__(self, filename, callcount = 0, defaulttargets=[], ignoretargets=[]):
 		self.filename = filename
 		self.callcount = callcount # Number of flm calls in this makefile
+		self.defaulttargets=defaulttargets
+		self.ignoretargets=ignoretargets
 
-	def ignore_targets(self):
-		return []
+	def json(self):
+		"""Enables json serialisation of this object. Returns a structure in a format that the json module can render to text easily"""
+		return json.dumps({ 'makefile' : { 'filename': str(self.filename), 'defaulttargets': self.defaulttargets, 'ignoretargets': self.ignoretargets }})
+
+	@classmethod
+	def from_json(self,json_structure):
+		"""Deserialise an instance of this class from a data structure produced by the json parser"""
+		try:
+			mf_ = json_structure['makefile']
+			mf = BaseMakefile(mf_['filename'], mf_['callcount'], mf_['defaulttargets'])
+		except KeyError, e:	
+			raise Exception("Makefile deserialised from json was invalid: {0}".format(str(json_structure))) 
+
+		return mf
 
 class Makefile(BaseMakefile):
 	"""Representation of the file that is created from the build specification 
@@ -54,14 +69,13 @@ class Makefile(BaseMakefile):
 			extension = ""
 		filename = generic_path.Join(directory,filenamebase + extension)
 
-		super(Makefile,self).__init__(filename = filename)
+		super(Makefile,self).__init__(filename = filename, defaulttargets = defaulttargets)
 		self.selector = selector
 		self.parent = parent
 		self.childlist = []
 		self.file = None
 		self.prologue = prologue
 		self.epilogue = epilogue
-		self.defaulttargets = defaulttargets
 		self.dead = False
 
 	def open(self):
@@ -181,19 +195,32 @@ class BaseMakefileSet(object):
 	# Used in Metadeps files:
 	dep_prefix="dep:"
 	include_prefix="include "
+	record_prefix="makefileset="
 
 	def __init__(self, metadepsfilename):
 		self.makefiles = [] # list of Makefile()
 		self.metadepsfilename = metadepsfilename
+
+	def json(self):
+		"""Enables json serialisation of this object. Returns a structure in a format that the json module can render to text easily"""
+		return json.dumps({ 'makefileset' : { 'metadeps': self.metadepsfilename, 'makefiles': [m.json() for m in self.makefiles]}})
+
+	@classmethod
+	def from_json(self,json_structure):
+		"""Deserialise an instance of this class from a data structure produced by the json parser"""
+		try:
+			mfset_ = json_structure['makefileset']
+			mfset = BaseMakefileSet(mfset_['metadeps'])
+			for makefile_ in mfset_['makefiles']:
+				self.makefiles.append(BaseMakefile.from_json(makefile_))
+		except Exception,e:
+			raise Exception("Makefile set deserialised from json was invalid: {0}".format(str(json_structure))) 
 
 	def __len__(self):
 		return len(self.makefiles)
 
 	def __getitem__(self,b):
 		return self.makefiles[b]
-
-	def ignoreTargets(self, makefile):
-		return [] # this method is bad and needs to be removed in favor of accessing the makefiles objects and asking them directly what their "ignore" targets are.
 
 	def makefile_names(self):
 		for mf in self.makefiles:
