@@ -35,15 +35,16 @@ class MakefileSelector(object):
 		self.ignoretargets=ignoretargets
 
 class BaseMakefile(object):
-	def __init__(self, filename, callcount = 0, defaulttargets=[], ignoretargets=[]):
+	def __init__(self, filename, callcount = 0, defaulttargets=[], ignoretargets=None, name=''):
 		self.filename = filename
 		self.callcount = callcount # Number of flm calls in this makefile
-		self.defaulttargets=defaulttargets
-		self.ignoretargets=ignoretargets
+		self.defaulttargets = defaulttargets
+		self.ignoretargets = ignoretargets
+		self.name = name
 
 	def json(self):
 		"""Enables json serialisation of this object. Returns a structure in a format that the json module can render to text easily"""
-		return json.dumps({ 'makefile' : { 'filename': str(self.filename), 'defaulttargets': self.defaulttargets, 'ignoretargets': self.ignoretargets }})
+		return { 'makefile' : { 'filename': str(self.filename), 'defaulttargets': self.defaulttargets, 'ignoretargets': self.ignoretargets, 'name': self.name }}
 
 	@classmethod
 	def from_json(self,json_structure):
@@ -68,8 +69,9 @@ class Makefile(BaseMakefile):
 		else:
 			extension = ""
 		filename = generic_path.Join(directory,filenamebase + extension)
+		
 
-		super(Makefile,self).__init__(filename = filename, defaulttargets = defaulttargets)
+		super(Makefile,self).__init__(filename = filename, defaulttargets = defaulttargets, ignoretargets = selector.ignoretargets, name = selector.name)
 		self.selector = selector
 		self.parent = parent
 		self.childlist = []
@@ -203,7 +205,7 @@ class BaseMakefileSet(object):
 
 	def json(self):
 		"""Enables json serialisation of this object. Returns a structure in a format that the json module can render to text easily"""
-		return json.dumps({ 'makefileset' : { 'metadeps': self.metadepsfilename, 'makefiles': [m.json() for m in self.makefiles]}})
+		return { 'makefileset' : { 'metadeps': self.metadepsfilename, 'makefiles': [m.json() for m in self.makefiles]}}
 
 	@classmethod
 	def from_json(self,json_structure):
@@ -395,14 +397,6 @@ class MakefileSet(BaseMakefileSet):
 			f.addInclude(makefilename)
 
 
-	def ignoreTargets(self, makefile):
-		"""Get hold of a makefile's selector based on its name and
-		   determine whether it ignores targets based on a regexp."""
-		for mf in self.makefiles:
-			filename = str(mf.filename)			
-			if filename == makefile:
-				return mf.selector.ignoretargets 
-		return None
 
 
 	def close(self):

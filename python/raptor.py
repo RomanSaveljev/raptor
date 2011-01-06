@@ -411,7 +411,7 @@ class BuildRecord(object):
 
 			json_makefilesets = []
 			for ms in self.makefilesets:
-				json_makefilesets.append(json.dumps(ms.json()))
+				json_makefilesets.append(ms.json())
 
 			json_structure = {'buildrecord': json_br , 'makefilesets': json_makefilesets}
 			json_str = json.dumps(json_structure)

@@ -699,7 +699,7 @@ include {0}
 
 			# targets go at the end, if the makefile supports them
 			addTargets = self.raptor.targets[:]
-			ignoreTargets = makefile.selector.ignoretargets
+			ignoreTargets = makefile.ignoretargets
 			if addTargets and ignoreTargets:
 				for target in self.raptor.targets:
 					if re.match(ignoreTargets, target):
