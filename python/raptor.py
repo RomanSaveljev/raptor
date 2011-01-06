@@ -392,6 +392,7 @@ class BuildRecord(object):
 	stored_attrs = ['commandline', 'environment', 'topmakefilename']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
 	history_size = 10
+	parsefails = []
 	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None):
 		
 		self.commandline = commandline
@@ -413,7 +414,8 @@ class BuildRecord(object):
 			for ms in self.makefilesets:
 				json_makefilesets.append(ms.json())
 
-			json_structure = {'buildrecord': json_br , 'makefilesets': json_makefilesets}
+			json_br['makefilesets'] = json_makefilesets
+			json_structure = {'buildrecord': json_br }
 			json_str = json.dumps(json_structure)
 
 			f.write("{0}\n".format(json_str))
@@ -444,10 +446,13 @@ class BuildRecord(object):
 
 			# the json structure matches what must be passed into the constructor
 			# quite well except for the makefilesets
-
-			makefilesets = []
-			for json_makefileset in kargs['makefilesets']: 
-				makefilesets.append(BaseMakefileSet.from_json(json_makefileset))
+			try:
+				makefilesets = []
+				for json_makefileset in kargs['makefilesets']: 
+					makefilesets.append(raptor_makefile.BaseMakefileSet.from_json(json_makefileset))
+			except raptor_makefile.JsonMakefileDecodeError,e:
+				raise Exception("Bad build record format: makefilesets element did not decode: {0}".format(str(e)))
+			
 
 			# replace the json structure for makefilesets with real BaseMakefileSet() instances
 			kargs['makefilesets'] = makefilesets
@@ -457,7 +462,7 @@ class BuildRecord(object):
 			except TypeError,e:
 				raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}: {3}".format(BuildRecord.stored_attrs, str(kargs), filename, str(e)))
 
-		print "MAKEFILES:",br.makefilesets
+
 		br.filename = filename
 
 		return br
@@ -492,17 +497,21 @@ class BuildRecord(object):
 		# sort so newest are first
 		brfiles_s = sorted(brfiles,key=lambda f:f[1], reverse=True)
 
-		# yeild up build records if they are "equal".  Don't 
+		# yield up build records if they are "equal".  Don't 
 		# look infinitely far back as it might take a long time
 		rcount = 0
 		for brt in brfiles_s:
 			b = brt[0]
-			br = cls.from_file(os.path.join(adir,b))
-			if br == matching:
-				yield br
-				rcount += 1
-				if rcount > BuildRecord.history_size:
-					break
+			try:
+				br = cls.from_file(os.path.join(adir,b))
+				if br == matching:
+					yield br
+					rcount += 1
+					if rcount > BuildRecord.history_size:
+						break
+			except Exception,e:
+				print(e)
+				BuildRecord.parsefails.append(e)	# parse errors should not be fatal - just means that the build record is from an old version of raptor.  There is no way to report the fact that they happened though and that's not so nice.  This exception list just makes it feasible to debug a problem if one occurs.
 
 	@classmethod
 	def from_old(cls,  adir, commandline, environment, topmakefile):
@@ -1718,7 +1727,6 @@ class Raptor(object):
 			if do_rebuild:
 				self.Info("incremental makefile generation: pre-existing makefiles will be reused: {0}".format(self.build_record.topmakefilename))
 				# Don't use the makefile name specified on the commmandline - use the one from the build record.
-				print "BUILD",self.build_record
 			else:
 				if self.incremental_parsing:
 					self.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")

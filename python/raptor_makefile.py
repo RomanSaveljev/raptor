@@ -22,6 +22,9 @@ import generic_path
 import stat
 import json
 
+class JsonMakefileDecodeError(Exception):
+	pass
+
 class MakefileSelector(object):
 	"""A "query" which is used to separate some flm interface calls
 	  into separate makefile trees."""
@@ -44,16 +47,16 @@ class BaseMakefile(object):
 
 	def json(self):
 		"""Enables json serialisation of this object. Returns a structure in a format that the json module can render to text easily"""
-		return { 'makefile' : { 'filename': str(self.filename), 'defaulttargets': self.defaulttargets, 'ignoretargets': self.ignoretargets, 'name': self.name }}
+		return { 'makefile' : { 'filename': str(self.filename), 'defaulttargets': self.defaulttargets, 'ignoretargets': self.ignoretargets, 'name': self.name , 'callcount': self.callcount}}
 
 	@classmethod
-	def from_json(self,json_structure):
+	def from_json(cls,json_structure):
 		"""Deserialise an instance of this class from a data structure produced by the json parser"""
 		try:
 			mf_ = json_structure['makefile']
-			mf = BaseMakefile(mf_['filename'], mf_['callcount'], mf_['defaulttargets'])
+			mf = cls(mf_['filename'], mf_['callcount'], mf_['defaulttargets'])
 		except KeyError, e:	
-			raise Exception("Makefile deserialised from json was invalid: {0}".format(str(json_structure))) 
+			raise JsonMakefileDecodeError("Makefile deserialised from json was invalid: keyerror on {0} :: {1}  ".format(str(e), str(json_structure))) 
 
 		return mf
 
@@ -208,15 +211,16 @@ class BaseMakefileSet(object):
 		return { 'makefileset' : { 'metadeps': self.metadepsfilename, 'makefiles': [m.json() for m in self.makefiles]}}
 
 	@classmethod
-	def from_json(self,json_structure):
+	def from_json(cls,json_structure):
 		"""Deserialise an instance of this class from a data structure produced by the json parser"""
 		try:
 			mfset_ = json_structure['makefileset']
-			mfset = BaseMakefileSet(mfset_['metadeps'])
+			mfset = cls(mfset_['metadeps'])
 			for makefile_ in mfset_['makefiles']:
-				self.makefiles.append(BaseMakefile.from_json(makefile_))
+				mfset.makefiles.append(BaseMakefile.from_json(makefile_))
 		except Exception,e:
-			raise Exception("Makefile set deserialised from json was invalid: {0}".format(str(json_structure))) 
+			raise JsonMakefileDecodeError("Makefile set deserialised from json was invalid: {0} {1}  ".format(str(e),str(json_structure))) 
+		return mfset
 
 	def __len__(self):
 		return len(self.makefiles)
@@ -225,13 +229,9 @@ class BaseMakefileSet(object):
 		return self.makefiles[b]
 
 	def makefile_names(self):
-		for mf in self.makefiles:
-			print "MFCOUNT",str(mf.filename),mf.callcount
 		return [str(mf.filename) for mf in self.makefiles]
 	
 	def nonempty_makefiles(self):
-		for mf in self.makefiles:
-			print "MFCOUNT",str(mf.filename),mf.callcount
 		return [mf for mf in self.makefiles if mf.callcount > 0]
 
 	def nonempty_makefile_names(self):
