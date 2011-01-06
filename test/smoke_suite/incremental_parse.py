@@ -104,9 +104,8 @@ def run():
 	t.command = command + " -c arm.v5.urel.gcce4_4_1 --ip=on"
 	t.targets = targets
 	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", buildtargets)
-	t.mustmatch = [	"incremental makefile generation: the makefile for the Layer named 'all' is uptodate", 
-					"incremental makefile generation: pre-existing makefiles will be reused:.*",
-					]
+	t.mustmatch = [	"incremental makefile generation: pre-existing makefiles will be reused:.*",
+			]
 	t.run(noclean=True)
 
 	t.name = "incremental_touched_source_file"
@@ -116,7 +115,7 @@ def run():
 	t.targets = targets
 	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", buildtargets)
 
-	t.mustmatch = [	"incremental makefile generation: the makefile for the Layer named 'all' is uptodate", 
+	t.mustmatch = [	
 					"incremental makefile generation: pre-existing makefiles will be reused:.*",
 					"compile.*smoke_suite.test_resources.simple.test.cpp.*\[arm.v5.urel.gcce4_4_1\]",
 					"target.*epoc32.release.armv5.urel.test.exe.*\[arm.v5.urel.gcce4_4_1\]",

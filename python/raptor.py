@@ -402,6 +402,7 @@ class BuildRecord(object):
 		self.makefilesets=makefilesets #  an array of raptor_makefile.BaseMakefileset Object
 		self.filename = self.topmakefilename + ".buildrecord"
 		self.isold = False
+		self.outofdateitems = "" #record what was out of date in a user-readable form
 
 	def to_file(self):
 		""" Write out the build record so that we can find it in future builds"""
@@ -468,12 +469,44 @@ class BuildRecord(object):
 		return br
 
 
+	def _commandline_key(self):
+		"""Strip a commandline of things that don't affect the
+		   makefiles e.g. the name of the logfile. This is used
+		   to decide if we need new makefiles or if the old ones
+		   are ok. Obviously this kind of method is "appoximate" and
+		   will make some commandlines that are really equivalent seem
+		   different e.g. options in a different order. The main thing
+		   though is that it is a kind of "overcautious" mechanism
+		   which is ok for an initial implementation of incremental
+		   makefile generation."""
+		sc = self.commandline.split(" ")
+
+		# cut out non-relevant stuff
+		skipcount = 0
+		nsc = []
+		for s in sc:
+			if skipcount > 0:
+				skipcount -= 1
+				continue
+			elif s ==  "--ip=on":
+				continue
+			elif s == "-f": # skip logfilenames
+				skipcount = 1
+				continue
+
+			nsc.append(s)
+
+		return " ".join(nsc)
+
+			
 	def __eq__(self, other):
 		""" Were the two builds done in a compatible 
 		    environment, similar targets and for the same platforms?
 		    i.e. should the makefiles be interchangeable?
 		"""
-		if self.commandline == other.commandline:
+		sc =  self._commandline_key()
+		oc = other._commandline_key()
+		if sc == oc:
 			if self.environment == other.environment:
 				return True
 		
@@ -540,7 +573,7 @@ class BuildRecord(object):
 				mset.check_uptodate()
 			return True
 		except raptor_makefile.OutOfDateException,e:
-			pass
+			self.outofdateitems+= " " + mset.metadepsfilename
 
 		return False
 
@@ -1721,6 +1754,8 @@ class Raptor(object):
 			if self.incremental_parsing:
 				self.build_record = BuildRecord.from_old(adir = str(self.topMakefile.Dir()), commandline=" ".join(self.args), environment = environment, topmakefile = str(makefile))
 				do_rebuild = self.build_record.isold
+				if not do_rebuild:
+					self.Info("incremental makefile generation: out of date items:" + self.build_record.outofdateitems)
 			else:
 				self.build_record = BuildRecord(commandline=" ".join(self.args), environment = environment, topmakefilename = str(makefile))
 
