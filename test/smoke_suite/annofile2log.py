@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -18,8 +18,7 @@ from raptor_tests import SmokeTest
 
 def run():
 	t = SmokeTest()
-	t.id = "43563"
-	t.name = "annofile2log"
+	t.name = "annofile2log_copy_from_log"
 	t.description = "test workaround for log corruption from a make engine whose name begins with 'e'"
 	
 	t.usebash = True
@@ -32,8 +31,22 @@ def run():
 		"^ *.?"
                 ]
 
+	t.run()
+	
+	t.name = "annofile2log_new_format_annofile"
+	t.description = "test "
+	t.usebash = True
+	t.errors = 0
+	t.returncode = 0
+	t.exceptions = 0
+	t.command = 'cd smoke_suite/test_resources/annofile2log && ( FROMANNO="`mktemp`" ; bzip2 -dc scrubbed_ncp_dfs_resource_new.anno.bz2 | python testanno2log.py  >"${FROMANNO}" && FROMSTDOUT="`mktemp`"; bzip2 -dc scrubbed_ncp_dfs_resource_new.stdout.bz2 > "${FROMSTDOUT}" && diff -wB "${FROMANNO}" "${FROMSTDOUT}"; RET=$? ; rm "${FROMANNO}" "${FROMSTDOUT}"; exit $RET )'
+	
+	t.mustmatch_multiline = [ 
+		"^ *.?"
+                ]
+
 
 	t.run()
-
+	
 	t.print_result()
 	return t
