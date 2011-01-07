@@ -165,8 +165,10 @@ def run_make(make_process):
 	for l in stream:
 		pass  
 	  	       
-	returncode = p.wait()
-	return returncode
+	make_process.returncode = p.wait()
+	make_process.hasrun = True
+
+	return make_process.returncode
 
 
 
@@ -174,6 +176,8 @@ class MakeProcess(object):
 	""" A process of make program """
 	def __init__(self, command):
 		self.command = command
+		self.hasrun = False # Has this process been executed
+		self.returncode = 255 # default to error
 
 
 # raptor_make module classes
@@ -611,6 +615,7 @@ include {0}
 
 		if not self.valid:
 			return False
+
 	
 		# Always use Talon since it does the XML not
 		# just descrambling
@@ -636,9 +641,11 @@ include {0}
 			            ("REALLYCLEAN" in self.raptor.args)
 
 		# Files should be deleted in the opposite order to the order
-		# they were built. So reverse file order if cleaning
+		# they were built. So reverse file order if cleaning.
+		# For len() etc to work we need to create a list 
+		# - not just an iterator which is what reversed() returns.
 		if clean_flag:
-			makefile_sequence = reversed(makefile_sequence)
+			makefile_sequence = [m for m in reversed(makefile_sequence)]
 
 		# Report number of makefiles to be built
 		self.raptor.InfoDiscovery(object_type = "makefile", count = len(makefile_sequence))
@@ -646,6 +653,8 @@ include {0}
 
 		# Stores all the make processes that were executed:
 		make_processes = []
+		
+		return_state = True
 
 		# Process each file in turn
 		for makefile in makefile_sequence:
@@ -754,11 +763,16 @@ include {0}
 				self.raptor.InfoStartTime(object_type = "makefile",
 					task = "build", key = str(makefilename))
 
-				returncode = run_make(mproc)
+				run_make(mproc)
+
+				if mproc.returncode != 0:
+					return_state = False
+					if not self.raptor.keepGoing:
+						break
 				
 			except Exception,e:
 				self.raptor.Error("Exception '{0}' during '{1}'".format(str(e), command))
-				self.Tidy()
+				return_state = False
 				break
 			finally:
 				# Still report end-time of the build
@@ -767,7 +781,11 @@ include {0}
 
 
 		# Getting all the log output copied into files
-		for mproc in make_processes:		
+		for mproc in make_processes:
+			# Don't try to get log results if we never actually ran make.
+			if not mproc.hasrun:
+				continue 
+
 			if self.copyLogFromAnnoFile:
 				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefilename)
 				self.raptor.Info("copylogfromannofile: Copying log from annotation file {0} to work around a potential problem with the console output".format(annofilename))
@@ -795,22 +813,16 @@ include {0}
 				e.close()
 			except Exception,e:
 				errorlist.append("Couldn't complete stderr output for {0} - '{1}'".format(mproc.command, str(e)))
-			# Report end-time of the build
 
-		if returncode != 0  and not self.raptor.keepGoing:
-			self.Tidy()
-			return False
-			
 		# run any shutdown script
 		if self.shutdownCommand != None and self.shutdownCommand != "":
 			self.raptor.Info("Running {0}".format(self.shutdownCommand))
 			if os.system(self.shutdownCommand) != 0:
 				self.raptor.Error("Failed in {0}".format(self.shutdownCommand))
-				self.Tidy()
-				return False
+				return_state = false
 
 		self.Tidy()
-		return True
+		return return_state
 
 	def Tidy(self):
 		"clean up after the make command"
