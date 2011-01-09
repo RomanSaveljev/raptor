@@ -772,7 +772,6 @@ include {0}
 				
 			except Exception,e:
 				self.raptor.Error("Exception '{0}' during '{1}'".format(str(e), command))
-				return_state = False
 				break
 			finally:
 				# Still report end-time of the build
