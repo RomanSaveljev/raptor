@@ -47,6 +47,7 @@ def run():
 		"$(EPOCROOT)/epoc32/build/retry_2.3",
 		"$(EPOCROOT)/epoc32/build/retry_3.ok"
 	]
+	t.errors = 1 # make fails! must be an error
 	t.returncode = 1
 	t.run()
 	return t

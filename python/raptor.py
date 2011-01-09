@@ -423,8 +423,7 @@ class BuildRecord(object):
 
 
 	def record_makefileset(self, makefileset):
-		""" format the makefileset that was used in a 
-		    build so that it can be stored in the build record.
+		""" Add a makefileset to the list of sets "executed" in the build. 
 		    This can be called repeatedly - e.g. once to record
 		    the makefiles for each layer in an ordered layers build.
 		"""
@@ -790,17 +789,18 @@ class Layer(ModelNode):
 				key = str(build.topMakefile))
 
 		# Generate the makefileset and build it
-		m = self.realise_makefile(build, spec_nodes)
-		m.close()
-		gen_result = build.Make(m)
+		mset = self.realise_makefile(build, spec_nodes)
+		mset.close()
+		gen_result = build.Make(mset)
 
 		build.InfoEndTime(object_type = "layer", task = "parse",
 				key = str(build.topMakefile))
 		build.InfoStartTime(object_type = "layer", task = "build",
 				key = str(build.topMakefile))
+
 		build.Debug("Binding Makefile base name is %s ", binding_makefiles.filenamebase)
 		binding_makefiles.close()
-		b = build.Make(binding_makefiles)
+		b = build.Make(binding_makefiles,build_zero_flmcall_makefiles = True)
 		build.InfoEndTime(object_type = "layer", task = "build",
 				key = str(build.topMakefile))
 		return b
@@ -1472,9 +1472,9 @@ class Raptor(object):
 		return raptor_data.Evaluator(specification, configuration, gathertools=gathertools, cache = self.cache)
 
 
-	def Make(self, makefileset):
+	def Make(self, makefileset, build_zero_flmcall_makefiles = False):
 		if not self.noBuild and makefileset is not None:
-			if self.maker.Make(makefileset):
+			if self.maker.Make(makefileset, build_zero_flmcall_makefiles):
 				self.Info("The make-engine exited successfully.")
 				return True
 			else:
@@ -1805,6 +1805,7 @@ class Raptor(object):
 			# a validation check for that earlier.
 			if self.doParallelParsing:
 				# Create a Makefile to parse components in parallel and build them
+				self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, topmakefilename=str(makefile), makefilesets=[])
 				for l in layers:
 					l.meta_realise(self)
 			elif do_rebuild:
@@ -1829,9 +1830,15 @@ class Raptor(object):
 
 				for l in layers:
 					# create specs for a specific group of components
-					l.realise(self)
-
-				self.build_record.to_file()
+					try:
+						l.realise(self)
+					except raptor_make.CannotWriteMakefileException,e:
+						pass # raptor_make will report
+						
+				try:
+					self.build_record.to_file()
+				except Exception,e:
+					self.Info("Couldn't write build record file: {0}".format(str(e)))
 
 		except BuildCannotProgressException,b:
 			if str(b) != "":

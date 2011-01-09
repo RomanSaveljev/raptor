@@ -25,6 +25,7 @@ def run():
 	t.usebash = True
 	t.command = "sbs -k -b smoke_suite/test_resources/oe/group/bld.inf -c armv5 -c winscw " + \
 		"-m ${SBSMAKEFILE} -f ${SBSLOGFILE}; grep -E \"(armlink|checklib|mwldsym2)\" ${SBSLOGFILE}"
+	t.errors = 1 # The test has errors so make will return a fail code and raptor will report this
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/t_oedll.dll.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/symbian_test.lib",

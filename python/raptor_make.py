@@ -38,6 +38,9 @@ from xml.sax.saxutils import unescape
 class BadMakeEngineException(Exception):
 	pass
 
+class CannotWriteMakefileException(Exception):
+	pass
+
 def string_following(prefix, str):
 	"""If str starts with prefix then return the rest of str, otherwise None"""
 	if str.startswith(prefix):
@@ -466,7 +469,7 @@ include {0}
 			if not self.raptor.debugOutput:
 				tb=""
 			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
-			makefileset = None
+			raise CannotWriteMakefileException(str(e))
 
 		return makefileset
 
@@ -619,7 +622,7 @@ include {0}
 			
 		parameters.append(("PLANBDIR", planbdir))
 		
-	def Make(self, makefileset):
+	def Make(self, makefileset, build_zero_flmcall_makefiles = False):
 		"run the make command"
 
 		if not self.valid:
@@ -640,8 +643,12 @@ include {0}
 				return False
 
 		# Save file names to a list, to allow the order to be reversed
-		makefile_sequence = makefileset.nonempty_makefiles()
-		self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str([f.filename for f in makefile_sequence])))
+		if build_zero_flmcall_makefiles:
+			makefile_sequence = makefileset.makefiles
+			self.raptor.Debug ("Makefiles to build: {0}".format(str([f.filename for f in makefile_sequence])))
+		else:
+			makefile_sequence = makefileset.nonempty_makefiles()
+			self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str([f.filename for f in makefile_sequence])))
 
 		# Iterate through args passed to raptor, searching for CLEAN or REALLYCLEAN
 		clean_flag = False

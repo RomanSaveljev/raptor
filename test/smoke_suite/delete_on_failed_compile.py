@@ -28,7 +28,6 @@ def run():
 	
 	t.id = "116a" # Ensure everything is reallyclean before the test
 	t.name = "delete_on_failed_compile_reallyclean_01"
-	t.errors = 0
 	t.returncode = 0
 	t.antitargets = [ ]
 	t.command = base_command + " reallyclean"
@@ -36,7 +35,7 @@ def run():
 	
 	t.id = "116b"  # Object files should *not* be present after this forced failed compile
 	t.name = "delete_on_failed_compile_build"
-	t.errors = 0
+	t.errors = 1
 	t.returncode = 1
 	# None of these files should be present
 	t.addbuildantitargets('smoke_suite/test_resources/simple/bld.inf', 
@@ -69,7 +68,7 @@ def run():
 	
 	t.id = "116d"  # Use a redefined make_engine variant - object files *should* be present
 	t.name = "delete_on_failed_compile_build_redefined_make_engine"
-	t.errors = 0
+	t.errors = 1
 	t.returncode = 1
 	t.antitargets = [] # Remove the list of anti-targets
 	# All of these files should be present
