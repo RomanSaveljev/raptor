@@ -13,12 +13,25 @@
 <li><a href="notes/preprocess_target.txt">New PREPROCESS global target</a></li>
 <li><a href="notes/filter_csv.txt">Log summary in CSV format</a></li>
 <li><a href="notes/incremental_parsing.txt">Incremental parsing (--ip=on) speeds up raptor by not regenerating makefiles if they are uptodate</a></li>
+<li>Support for RVCT 4.1</li>
+</ul>
+
+<h3>Engineering Changes</h2>
+<ul>
+<li>Move to using Python 2.7 when defaulting to an internally shipped Python on Windows and when generating a Windows installer</li>
 </ul>
 
 <h3>Defect Fixes</h3>
 <ul>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3150">SF Bug 3150</a> - SBS v2 should display errors using \ rather than /</li>
+<li>SF Bug 3150 - SBS v2 should display errors using \ rather than /</li>
 <li>Talon output text can have missing lines due to write() with zero bytes</li>
+<li>SF Bug 2614 - OPTION GCCE does not work</li>
+<li>SF Bug 3884 - ARMFPU softvfp+vfpv3 not supported in Raptor</li>
+<li>SF Bug 2679 - raptor log hides errors in &lt;![CDATA[ sections of successful recipes </li>
+<li>SF Bug 3936 - sbs no longer picks up .\bld.inf by default</li>
+<li>SF Bug 3973 - Console output is "buffered" when it shouldn't be</li>
+<li>SF Bug 3774 - Move to MinGW with GCC4.4 (or higher)</li>
+<li>SF Bug 3729 - Make Raptor compatible with default mingw install</li>
 </ul>
 
 <h2>version 2.15.3</h2>
@@ -33,17 +46,17 @@
 <ul>
 <li>Fix: correct calculation of build duration and cluster availability</li>
 <li>Fix: correct parsing for anno file</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3687">SF Bug 3687</a> make 32-bit tools2 binaries appear in 32-bit release locations even when built on a 64-bit machine e.g. release/tools2/linux-i386-libc2_5 rather than linux-x86_64-libc2_5</li>
+<li>SF Bug 3687 make 32-bit tools2 binaries appear in 32-bit release locations even when built on a 64-bit machine e.g. release/tools2/linux-i386-libc2_5 rather than linux-x86_64-libc2_5</li>
 <li>Fix: in some cases, tools2 build omits STLport when linking</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3766">SF Bug 3766</a> - [Raptor] Missing -c option to g++ in expgen recipes when using GCCE</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3778">SF Bug 3778</a> - [GCCE] Raptor 2.15 gcce.xml config breaks gcce kernel builds.</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2745">SF Bug 2745</a> - Generated .bat files are incorrect</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3511">SF Bug 3511</a> - sbs shell script ignores SBS_CYGWIN17</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3388">SF Bug 3388</a> - Configuration of python paths confused in sbs_filter</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3246">SF Bug 3246</a> - Improve a cryptic error message</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3608">SF Bug 3608</a> - Compile fails on mixed case Qt projects</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3848">SF Bug 3848</a> - [Raptor] - parallel parsing in 2.15.3 - sysdef files for blocks don't have unique names</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3807">SF Bug 3807</a> - [Raptor] "Child" invocations of Raptor fail with parallel parsing (--pp=on) on some linuxes - unknown hostplatform</li>
+<li>SF Bug 3766 - [Raptor] Missing -c option to g++ in expgen recipes when using GCCE</li>
+<li>SF Bug 3778 - [GCCE] Raptor 2.15 gcce.xml config breaks gcce kernel builds.</li>
+<li>SF Bug 2745 - Generated .bat files are incorrect</li>
+<li>SF Bug 3511 - sbs shell script ignores SBS_CYGWIN17</li>
+<li>SF Bug 3388 - Configuration of python paths confused in sbs_filter</li>
+<li>SF Bug 3246 - Improve a cryptic error message</li>
+<li>SF Bug 3608 - Compile fails on mixed case Qt projects</li>
+<li>SF Bug 3848 - [Raptor] - parallel parsing in 2.15.3 - sysdef files for blocks don't have unique names</li>
+<li>SF Bug 3807 - [Raptor] "Child" invocations of Raptor fail with parallel parsing (--pp=on) on some linuxes - unknown hostplatform</li>
 </ul>
 
 <h2>version 2.15.2</h2>
@@ -57,17 +70,17 @@
 <h3>Defect Fixes</h3>
 <ul>
 <li><a href="notes/filter_html.txt">Report no-rule-to-make errors correctly in the HTML log filter</a></li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2412">SF Bug 2412</a> - createvmap fails when the list of source files becomes too long</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2437">SF Bug 2437</a> - End-user installation script does not fully describe or report missing build dependencies (libbz2-dev, etc. needed)</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3647">SF Bug 3647</a> - Raptor retains read-only attribute when exporting files</li>
+<li>SF Bug 2412 - createvmap fails when the list of source files becomes too long</li>
+<li>SF Bug 2437 - End-user installation script does not fully describe or report missing build dependencies (libbz2-dev, etc. needed)</li>
+<li>SF Bug 3647 - Raptor retains read-only attribute when exporting files</li>
 </ul>
 
 <h2>version 2.15.1</h2>
 
 <h3>Defect Fixes</h3>
 <ul>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3523">SF Bug 3523</a> - gnumakefile.flm workaround for romstuff.mke changes uses wrong output file</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3374">SF Bug 3374</a> -  Issues with Raptor support for X86 prototype (2.15)</li>
+<li>SF Bug 3523 - gnumakefile.flm workaround for romstuff.mke changes uses wrong output file</li>
+<li>SF Bug 3374 -  Issues with Raptor support for X86 prototype (2.15)</li>
 <li>Fix resource header generation - was being done for every language thus causing clashes in parallel builds</li>
 </ul>
 
@@ -86,12 +99,12 @@
 
 <h3>Defect Fixes</h3>
 <ul>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2617">SF Bug 2617</a> - SBS2 [Raptor] does not support the DOCUMENT keyword in mmp files</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=1405">SF Bug 1405</a> - GCCE: Raptor passing unknown option -mapcs to the assembler</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2979">SF Bug 2979</a> - [GCCE] elf2e32 --dump generates RVCT assembly.</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3221">SF Bug 3221</a> - [Raptor] ROMFILE creation results in incorrect entries in iby file</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2735">SF Bug 2735</a> - [Raptor] Relative unit paths in pkgdefs are not handled correctly - ammendment to fix in 2.14.2</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3360">SF Bug 3360</a> - HTML filter breaks if FilterTerminal specified first</li>
+<li>SF Bug 2617 - SBS2 [Raptor] does not support the DOCUMENT keyword in mmp files</li>
+<li>SF Bug 1405 - GCCE: Raptor passing unknown option -mapcs to the assembler</li>
+<li>SF Bug 2979 - [GCCE] elf2e32 --dump generates RVCT assembly.</li>
+<li>SF Bug 3221 - [Raptor] ROMFILE creation results in incorrect entries in iby file</li>
+<li>SF Bug 2735 - [Raptor] Relative unit paths in pkgdefs are not handled correctly - ammendment to fix in 2.14.2</li>
+<li>SF Bug 3360 - HTML filter breaks if FilterTerminal specified first</li>
 </ul>
 
 <h2>version 2.14.2</h2>
@@ -99,19 +112,19 @@
 <h3>Defect Fixes</h3>
 <ul>
 <li>Fix: minor change: tracecompiler trace folder rename</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2886">SF Bug 2886</a> - [Raptor] STDEXE targets cannot be built with GCC-E</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2713">SF Bug 2713</a> - [Raptor] Terminal filter needs to allow more make errors through</li>
+<li>SF Bug 2886 - [Raptor] STDEXE targets cannot be built with GCC-E</li>
+<li>SF Bug 2713 - [Raptor] Terminal filter needs to allow more make errors through</li>
 <li>Fix: smoketests fail for emake and rvct 4</li>
 <li>Fix permissions for exported files with group ownership on Linux</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2697">SF Bug 2697</a> - [Raptor] Macro __SYMBIAN_STDCPP_SUPPORT__ not automatically defined for STD targets</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2712">SF Bug 2712</a> - [Raptor] STDEXE and STDDLL targets: euser.lib not automatically included for UDEB builds</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2735">SF Bug 2735</a> - [Raptor] Relative unit paths in pkgdefs are not handled correctly</li>
+<li>SF Bug 2697 - [Raptor] Macro __SYMBIAN_STDCPP_SUPPORT__ not automatically defined for STD targets</li>
+<li>SF Bug 2712 - [Raptor] STDEXE and STDDLL targets: euser.lib not automatically included for UDEB builds</li>
+<li>SF Bug 2735 - [Raptor] Relative unit paths in pkgdefs are not handled correctly</li>
 <li>Fix: resources with headeronly can fail because of an invalid dependency</li>
 <li>Fix: ARMFPU softvfp+vfpv2 for postlinker and RVCT only</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2276">SF Bug 2276</a> - [Raptor] ZIP exports from deep directory hierarchies fail</li>
-<li><a href="notes/emulatorstacksize.txt"> Reduction of emulator stack size to 512KB </a>; see also the enhancement <a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2605"> SF Bug 2606 </a> - [Raptor] Can we use a smaller stack size for the emulator </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=3091">SF Bug 3091</a> - [Raptor] When reporting missing bld.inf's from a Sys def a / can be missing</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2825">SF Bug 2825</a> - [Raptor] Meta elements should be ignored when processing a sysdef</li>
+<li>SF Bug 2276 - [Raptor] ZIP exports from deep directory hierarchies fail</li>
+<li><a href="notes/emulatorstacksize.txt"> Reduction of emulator stack size to 512KB </a>; see also the enhancement SF Bug 2606 - [Raptor] Can we use a smaller stack size for the emulator </li>
+<li>SF Bug 3091 - [Raptor] When reporting missing bld.inf's from a Sys def a / can be missing</li>
+<li>SF Bug 2825 - [Raptor] Meta elements should be ignored when processing a sysdef</li>
 <li><a href="notes/tcom_allbefore.txt">Trace all source files in a component before compiling any file</a>. Helps prevent build breaks in some situations where an asset change is really needed.</li>
 </ul>
 
@@ -120,12 +133,12 @@
 <h3>Defect Fixes</h3>
 <ul>
 
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2203"> SF Bug 2203 </a> - [Raptor] Building extension makefile with SBS_BUILD_DIR set to another drive</li>
+<li>SF Bug 2203 - [Raptor] Building extension makefile with SBS_BUILD_DIR set to another drive</li>
 <li>Fix : tracecompiler.mk caused poor makefile parse performance due to use of $(shell)</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2561">SF Bug 2561</a> - [Raptor] creates incorrect .iby files w.r.t target file versions &amp; ramtargets</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2562">SF Bug 2562</a> - [Raptor] adds incorrect entries into .iby files w.r.t file paths</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2809">SF Bug 2809</a> - [Raptor] Intermediate Resource Filenames not unique (2.14.0 only), rom fails to boot</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=1859">SF Bug 1859</a> - [Raptor] Traceback when TARGET missing from MMP file</li>
+<li>SF Bug 2561 - [Raptor] creates incorrect .iby files w.r.t target file versions &amp; ramtargets</li>
+<li>SF Bug 2562 - [Raptor] adds incorrect entries into .iby files w.r.t file paths</li>
+<li>SF Bug 2809 - [Raptor] Intermediate Resource Filenames not unique (2.14.0 only), rom fails to boot</li>
+<li>SF Bug 1859 - [Raptor] Traceback when TARGET missing from MMP file</li>
 </ul>
 
 <h2>version 2.14.0</h2>
@@ -143,11 +156,11 @@
 <h3>Defect Fixes</h3>
 <ul>
 
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2605"> SF Bug 2605 </a> - [Raptor] ROMFILE creation using Raptor is not clean </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2495"> SF Bug 2495 </a> - [Raptor] KDLL TARGETTYPEs do not support .def file freezing </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2420"> SF Bug 2420 </a> - [Raptor] Output from recipes is mis-recognised as "what" output </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2297"> SF Bug 2297 </a> Python exception in raptor_meta.py when processing bld.inf file </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2174"> SF Bug 2174 </a> - [Raptor] -- layer option shows errors when bld.inf missing in another layer </li>
+<li>SF Bug 2605 - [Raptor] ROMFILE creation using Raptor is not clean </li>
+<li>SF Bug 2495 - [Raptor] KDLL TARGETTYPEs do not support .def file freezing </li>
+<li>SF Bug 2420 - [Raptor] Output from recipes is mis-recognised as "what" output </li>
+<li>SF Bug 2297 Python exception in raptor_meta.py when processing bld.inf file </li>
+<li>SF Bug 2174 - [Raptor] -- layer option shows errors when bld.inf missing in another layer </li>
 <li><a href="notes/tcomsupport.txt">Fix: ensure trace paths exist before build starts to avoid clashes during the build with some make engines    </a></li>
 <li><a href="notes/tcomsupport.txt">Fix: permit traces header directory to be specified in systemincludes - helps Qt    </a></li>
 <li><a href="notes/localresourcecopying.txt">Fix: (performance in cluster builds) do resource copying on local host.</a></li>
@@ -176,15 +189,15 @@
 <li>DPDEF143018      - Raptor doesn't handle spaces in GCCE installation directory correctly                                                </li>
 <li>DPDEF143101      - GCC-E isn't tested as part of the tool checking mechanism                                                            </li>
 <li>DPDEF141195      - Raptor doesn't handle spaces in tool paths                                                                           </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2172"> SF Bug 2172 </a> - [Raptor] Resource builds warn on encountering trigraph-like strings                                                  </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2308"> SF Bug 2308 </a> - [Raptor] PLUGIN3 TARGETTYPEs don't set resource output offsets correctly                                             </li>
+<li>SF Bug 2172 - [Raptor] Resource builds warn on encountering trigraph-like strings                                                  </li>
+<li>SF Bug 2308 - [Raptor] PLUGIN3 TARGETTYPEs don't set resource output offsets correctly                                             </li>
 <li>Fix: in copylogfromannofile mode, ensure that the build id and duration are included in the log.  These are not critical but are useful </li>
 <li>Fix: remove unnecessary empty lines in log output in copylogfromannofile mode                                                           </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=1939"> SF Bug 1939 </a> - [Raptor] PAGED keyword in MMP files should imply byte pair compressed                                                </li>
+<li>SF Bug 1939 - [Raptor] PAGED keyword in MMP files should imply byte pair compressed                                                </li>
 <li>DPDEF144648      - Raptor failed to build tools_deb objects under Windows XP                                                            </li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2134"> SF Bug 2134 </a> - [Raptor] Raptor does not pass overridden make variables into its makefiles                                           </li>
+<li>SF Bug 2134 - [Raptor] Raptor does not pass overridden make variables into its makefiles                                           </li>
 <li>Fix : do not allow data to be paged implicitly</li>
-<li><a href="http://developer.symbian.org/bugs/show_bug.cgi?id=2302"> SF Bug 2302 </a> - sbs_filter refers to python.exe in win32/python264/                                                                  </li>
+<li>SF Bug 2302 - sbs_filter refers to python.exe in win32/python264/                                                                  </li>
 <li>Fix : Makefile Parse Performance in Resource stage is poor. Large size of included dependency files is a factor. In --no-depend-generate mode, create dependency files which only refer to other rsg/mbg files that are yet to be built - store no other dependencies.</li>
 <li>Fix : ensure that FLMDEBUG is empty by default</li>
 </ul>

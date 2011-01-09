@@ -158,13 +158,22 @@ def run_make(make_process):
 				universal_newlines = True, 
 				env = makeenv)
 
-	# Log is redirected to stdout and stderr files
-	# This loop here prevents blocking of stdout pipe
-	# if redirection fails for any reason
+	# When using an [emake] annotation file all the output from make is redirected
+	# to .stdout and .stderr files. Those files are read when the make process exits
+	# and only then is the output passed on to the filters. We still read from the
+	# subprocess pipe here in case there is any unexpected output from the shell
+	# that might block the subprocess.
+	#
+	# Without an annotation file, make errors are still redirected to a .stderr
+	# file since we don't really care about seeing them immediately. But standard
+	# output is not redirected, it is read from the subprocess pipe and passed
+	# to the filters immediately so that users can see the build progressing.
+	
 	stream = p.stdout
-	for l in stream:
-		pass  
-	  	       
+	for line in XMLEscapeLog(stream):
+		if not make_process.copyLogFromAnnoFile:
+			make_process.logstream.write(line)
+  
 	make_process.returncode = p.wait()
 	make_process.hasrun = True
 
@@ -615,7 +624,6 @@ include {0}
 
 		if not self.valid:
 			return False
-
 	
 		# Always use Talon since it does the XML not
 		# just descrambling
@@ -630,6 +638,7 @@ include {0}
 				self.raptor.Error("Failed in %s", self.initCommand)
 				self.Tidy()
 				return False
+
 		# Save file names to a list, to allow the order to be reversed
 		makefile_sequence = makefileset.nonempty_makefiles()
 		self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str([f.filename for f in makefile_sequence])))
@@ -728,7 +737,8 @@ include {0}
 			# annofile - so that we can trap the problem that
 			# makes the copy-log-from-annofile workaround necessary
 			# and perhaps determine when we can remove it.
-			command += " >'%s' " % stdoutfilename
+			if self.copyLogFromAnnoFile:
+				command += " >'{0}' ".format(stdoutfilename)
 
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
 			command = command.replace("#MAKEFILE#", str(makefilename))
@@ -753,7 +763,6 @@ include {0}
 
 			if self.copyLogFromAnnoFile:
 				mproc.annofilename = self.annoFileName.replace("#MAKEFILE#", makefilename)
-			
 			
 			# execute the build.
 			# the actual call differs between Windows and Unix.
@@ -792,15 +801,7 @@ include {0}
 					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
 						mproc.logstream.write(l)
 				except Exception,e:
-					errorlist.append("Couldn't complete stdout output from annofile {0} for {1} - '{2}'".format(annofilename, command, str(e)))
-			else:
-				try:
-					with open(mproc.stdoutfilename, "r") as makeoutput:
-						for l in XMLEscapeLog(makeoutput):
-							mproc.logstream.write(l)
-				except Exception,e:
-					errorlist.append("Couldn't complete stdout output {0} for {1} - '{2}'".format(mproc.stdoutfilename, command, str(e)))
-
+					sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, command, str(e)))
 				
 			# Take all the stderr output that went into the .stderr file
 			# and put it back into the log, but safely so it can't mess up
@@ -811,7 +812,7 @@ include {0}
 					self.raptor.out.write(escape(line))
 				e.close()
 			except Exception,e:
-				errorlist.append("Couldn't complete stderr output for {0} - '{1}'".format(mproc.command, str(e)))
+				sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(mproc.command, str(e)))
 
 		# run any shutdown script
 		if self.shutdownCommand != None and self.shutdownCommand != "":

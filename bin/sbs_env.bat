@@ -32,7 +32,7 @@
 @REM 2. the python shipped locally with Raptor (if present)
 @REM 3. the python on the system PATH and the PYTHONPATH set in the system environment
 
-@SET __LOCAL_PYTHON__=%SBS_HOME%\win32\python264\python.exe
+@SET __LOCAL_PYTHON__=%SBS_HOME%\win32\python27\python.exe
 @IF NOT "%SBS_PYTHON%"=="" GOTO sbspython
 @IF EXIST %__LOCAL_PYTHON__% GOTO localpython
 @SET __PYTHON__=python.exe
@@ -66,7 +66,7 @@
 
 @REM If SBS_CYGWIN17 is set, we are using Cygwin 1.7, so change the mount/umount 
 @REM options to the 1.7 CLI and set SBS_CYGWIN to the value of SBS_CYGWIN17
-@IF NOT "%SBS_CYGWIN17%" == "" SET CYGWIN=nodosfilewarning && SET "SBS_CYGWIN=%SBS_CYGWIN17%" && SET __MOUNTOPTIONS__=-o noacl -o user && SET __UMOUNTOPTIONS__=
+@IF NOT "%SBS_CYGWIN17%" == "" SET CYGWIN=nodosfilewarning && SET "SBS_CYGWIN=%SBS_CYGWIN17%"
 
 @REM Use the Cygwin set by the environment (from SBS_CYGWIN or SBS_CYGWIN17) if possible
 @SET __CYGWIN__=%SBS_CYGWIN%
@@ -79,9 +79,10 @@
 @SET PATH=%PATH_TEMP%
 @SET PATH_TEMP=
 
-@REM Make sure that /tmp is not set incorrectly for sbs. 
-@umount %__UMOUNTOPTIONS__% /tmp >NUL  2>NUL
+@REM Make sure that /tmp is not set incorrectly for sbs in cygwin 1.5
+@IF NOT "%SBS_CYGWIN17%"=="" GOTO nomount
+@umount %__UMOUNTOPTIONS__% /tmp >NUL 2>NUL
 @mount %__MOUNTOPTIONS__% %TEMP% /tmp >NUL 2>NUL
-@umount %__UMOUNTOPTIONS__% / >NUL  2>NUL
+@umount %__UMOUNTOPTIONS__% / >NUL 2>NUL
 @mount %__MOUNTOPTIONS__% %__CYGWIN__% / >NUL 2>NUL
-
+:nomount

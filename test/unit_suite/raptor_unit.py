@@ -143,18 +143,6 @@ class TestRaptor(unittest.TestCase):
 		
 		self.assertTrue(self.r.out.warningWritten())
 
-		d = tempfile.mkdtemp(prefix='raptor_test') 
-		cdir = os.getcwd()
-		os.chdir(d)
-		f = open("bld.inf","w")
-		f.close()
-		layers = self.r.GetLayersFromCLI()
-		os.unlink("bld.inf")
-		os.chdir(cdir) # go back
-		os.rmdir(d)
-
-		self.assertTrue(self.r.out.warningWritten())
-
 	def testNoWarningIfSystemDefinitionFileExists(self): 
 		self.r.out = OutputMock()
 
@@ -165,6 +153,21 @@ class TestRaptor(unittest.TestCase):
 		f.close()
 		layers = self.r.GetLayersFromCLI()
 		os.unlink("System_Definition.xml")
+		os.chdir(cdir) # go back
+		os.rmdir(d)
+
+		self.assertFalse(self.r.out.warningWritten())
+	
+	def testNoWarningIfBldInfFileExists(self):
+		self.r.out = OutputMock()
+
+		d = tempfile.mkdtemp(prefix='raptor_test') 
+		cdir = os.getcwd()
+		os.chdir(d)
+		f = open("bld.inf","w")
+		f.close()
+		layers = self.r.GetLayersFromCLI()
+		os.unlink("bld.inf")
 		os.chdir(cdir) # go back
 		os.rmdir(d)
 

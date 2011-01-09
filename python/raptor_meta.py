@@ -1257,7 +1257,8 @@ class MMPRaptorBackend(MMPBackend):
 	armfpu_options = [
 		'softvfp',
 		'vfpv2',
-		'softvfp+vfpv2'
+		'softvfp+vfpv2',
+		'softvfp+vfpv3'
 		]
 
 	library_re = re.compile(r"^(?P<name>[^{]+?)(?P<version>{(?P<major>[0-9]+)\.(?P<minor>[0-9]+)})?(\.(lib|dso))?$",re.I)

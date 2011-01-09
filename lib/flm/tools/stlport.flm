@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -28,12 +28,12 @@ endif
 
 SOURCE_ARCHIVE:=$(EXTENSION_ROOT)/$(SOURCE_ARCHIVE)
 
-EXTRACT_DIR:=$(EPOCBLD)$(TOOLPLATFORMDIR)
+EXTRACT_DIR:=$(EPOCBLD)$(TOOLPLATFORMDIR)$(if $(TOOLS2WIN32),-win32)
 STL_DIR:=$(EXTRACT_DIR)/STLport-$(STLPORT_VERSION)
 BUILD_DIR:=$(STL_DIR)/build/lib
 UNZIPPED:=$(STL_DIR)/unzipped.ok
 
-RELEASE_DIR:=$(EPOCROOT)/epoc32/release/tools2$(TOOLPLATFORMDIR)
+RELEASE_DIR:=$(EPOCROOT)/epoc32/release/tools2$(if $(TOOLS2WIN32),,$(TOOLPLATFORMDIR))
 RELEASE_DIR_REL:=$(RELEASE_DIR)/rel
 RELEASE_DIR_DEB:=$(RELEASE_DIR)/deb
 WHATFLM:=
@@ -46,13 +46,11 @@ STLPORT.OPT:=-O2
 STLPORT.CXXFLAGS:=
 endif
 
-STL_REL_LIB_PATH:=$(STL_DIR)/lib/libstlport.a
-STL_DEB_LIB_PATH:=$(STL_DIR)/lib/libstlportg.a
+STL_REL_LIB_PATH:=$(STL_DIR)/$(if $(TOOLS2WIN32),$(SBS_MINGW_LINUX_PREFIX)-)lib/libstlport.a
+STL_DEB_LIB_PATH:=$(STL_DIR)/$(if $(TOOLS2WIN32),$(SBS_MINGW_LINUX_PREFIX)-)lib/libstlportg.a
 
 REL_LIB:=$(RELEASE_DIR_REL)/$(STL_REL_LIB_NAME)
 DEB_LIB:=$(RELEASE_DIR_DEB)/$(STL_REL_LIB_NAME)
-
-STL_HEADERS_PATH:=$(EPOCROOT)/epoc32/include/tools/stlport
 
 CLEANTARGETS:=
 CREATABLEPATHS:=
@@ -62,6 +60,7 @@ define stlportcommon
 $(UNZIPPED): $(SOURCE_ARCHIVE) 
 	$(call startrule,unzip) \
 	$(UNZIP) -aa -o $(SOURCE_ARCHIVE) -d $(EXTRACT_DIR) && \
+	echo $(if $(TOOLS2WIN32),"TARGET_OS:=$${SBS_MINGW_LINUX_PREFIX}"," ")  > "$(BUILD_DIR)/../Makefiles/gmake/config.mak" && \
 	echo "SHELL:=$$$${SHELL}" > "$(BUILD_DIR)/raptor_gcc.mak" && \
 	$(GNUCAT) $(BUILD_DIR)/gcc.mak >> "$(BUILD_DIR)/raptor_gcc.mak" && \
 	$(GNUTOUCH) $(UNZIPPED) \
@@ -95,7 +94,7 @@ $(REL_LIB): $(STL_REL_LIB_PATH)
 
 $(STL_REL_LIB_PATH): $(UNZIPPED)
 	$(call startrule,make) \
-	$(GNUMAKE38) -C "$(BUILD_DIR)" -fraptor_gcc.mak install-release-static LIB_SUFFIX= BASE_INSTALL_DIR=../.. EXTRA_CXXFLAGS='$(STLPORT.CXXFLAGS)' OPT='$(STLPORT.OPT)' \
+	$(if $(TOOLS2WIN32),COMPILER_PREFIX=$(SBS_MINGW_LINUX_PREFIX)) $(GNUMAKE38) -C "$(BUILD_DIR)" -fraptor_gcc.mak install-release-static LIB_SUFFIX= BASE_INSTALL_DIR=../.. EXTRA_CXXFLAGS='$(STLPORT.CXXFLAGS)' OPT='$(STLPORT.OPT)' \
 	$(call endrule,make)
 
 CREATABLEPATHS:=$$(CREATABLEPATHS) $(dir $(REL_LIB))
@@ -118,7 +117,7 @@ $(DEB_LIB): $(STL_DEB_LIB_PATH)
 
 $(STL_DEB_LIB_PATH):  $(UNZIPPED)
 	$(call startrule,make) \
-	$(GNUMAKE38) -C "$(BUILD_DIR)" -fraptor_gcc.mak install-dbg-static LIB_SUFFIX= BASE_INSTALL_DIR=../.. EXTRA_CXXFLAGS='$(STLPORT.CXXFLAGS)' OPT='$(STLPORT.OPT)' \
+	$(if $(TOOLS2WIN32),COMPILER_PREFIX=$(SBS_MINGW_LINUX_PREFIX)) $(GNUMAKE38) -C "$(BUILD_DIR)" -fraptor_gcc.mak install-dbg-static LIB_SUFFIX= BASE_INSTALL_DIR=../.. EXTRA_CXXFLAGS='$(STLPORT.CXXFLAGS)' OPT='$(STLPORT.OPT)' \
 	$(call endrule,make)
 
 	

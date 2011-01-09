@@ -167,10 +167,7 @@ def clean_epocroot():
 							os.remove(name)
 						except:							
 							print "\nEPOCROOT-CLEAN ERROR:"
-							print (sys.exc_type.__name__ + ":"), \
-									sys.exc_value
-							if sys.exc_type.__name__ != "WindowsError":
-								print traceback.print_tb(sys.exc_traceback)
+							traceback.print_exc(None, sys.stdout)
 									
 			# This loop handles folders
 			for name in dirs:
@@ -184,18 +181,11 @@ def clean_epocroot():
 						rmtree(ReplaceEnvs(name))
 					except:
 						print "\nEPOCROOT-CLEAN ERROR:"
-						print (sys.exc_type.__name__ + ":"), \
-								sys.exc_value
-						if sys.exc_type.__name__ != "WindowsError":
-							print traceback.print_tb(sys.exc_traceback)
+						traceback.print_exc(None, sys.stdout)
 	except IOError,e:
 		print e
 	
 	print "Epocroot Cleaned"
-
-def fix_id(input_id):
-	return input_id.zfill(4)
-
 
 def grep(file, string):
 	return
@@ -224,8 +214,6 @@ class SmokeTest(object):
 	SKIP = "skip"	
 
 	def __init__(self):
-		
-		self.id = "0"
 		self.name = "smoketest"
 		self.description = ""
 		self.command = "sbs --do_what_i_want"
@@ -264,7 +252,6 @@ class SmokeTest(object):
 	def run(self, platform = "all", noclean=False):
 		self.noclean = noclean
 		previousResult = self.result
-		self.id = fix_id(self.id)
 		try:
 			if self.runnable(platform):
 				
@@ -372,8 +359,7 @@ class SmokeTest(object):
 	def pretest(self):
 		# what to do before the test runs
 		
-		print "\nID:", self.id
-		print "TEST:", self.name
+		print "\nTEST:", self.name
 		print "LOGFILE:", self.logfile()
 
 		return self.clean()
@@ -391,15 +377,12 @@ class SmokeTest(object):
 	
 		print "COMMAND:", command
 
-
 		# Any environment settings specific to this test
 		shellenv = os.environ.copy()
 		for ev in self.environ:
 			shellenv[ev] = self.environ[ev]
 
 		if self.usebash:
-			shellpath = shellenv['PATH']
-			
 			if 'SBS_SHELL' in os.environ:
 				BASH = os.environ['SBS_SHELL']
 			else:
@@ -411,17 +394,8 @@ class SmokeTest(object):
 				else:
 					BASH = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/bash")
 				
-			if self.onWindows:
-				if 'SBS_CYGWIN' in shellenv:
-					shellpath = ReplaceEnvs("$(SBS_CYGWIN)/bin") + ";" + shellpath
-				else:
-					shellpath = ReplaceEnvs("$(SBS_HOME)/win32/cygwin/bin") + ";" + shellpath
-
 			shellenv['SBSMAKEFILE']=ReplaceEnvs(self.makefile())
 			shellenv['SBSLOGFILE']=ReplaceEnvs(self.logfile())
-			shellenv['PATH']=shellpath
-			shellenv['PYTHON_HOME'] = ""
-			shellenv['CYGWIN']="nontsec nosmbntsec"
 
 			p = subprocess.Popen(args=[BASH, '-c', command], 
 					stdout=subprocess.PIPE,

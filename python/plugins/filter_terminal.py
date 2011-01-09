@@ -458,7 +458,7 @@ class FilterTerminal(filter_interface.Filter):
 		else:
 			sys.stdout.write("\nno warnings or errors\n\n")
 
-		for bc in self.built_configs:
+		for bc in sorted(list(self.built_configs)):
 			sys.stdout.write("built {0}\n".format(bc))
 			
 		sys.stdout.write("\nRun time {0} seconds\n".format(self.raptor.runtime))

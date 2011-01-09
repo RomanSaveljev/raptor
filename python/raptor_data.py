@@ -1365,20 +1365,20 @@ class ToolSet(object):
 
 										ce[name] = val
 									self.__toolcheckcache[toolhistory[0]] = ce
-								log.Info("Loaded toolcheck cache: %s\n", self.cachefilename)
+								log.Info("Loaded toolcheck cache: %s", self.cachefilename)
 							except Exception, e:
-								log.Info("Ignoring garbled toolcheck cache: %s (%s)\n", self.cachefilename, str(e))
+								log.Info("Ignoring garbled toolcheck cache: %s (%s)", self.cachefilename, str(e))
 								self.__toolcheckcache = {}
 									
 						else:
-							log.Info("Toolcheck cache %s ignored - environment changed\n", self.cachefilename)
+							log.Info("Toolcheck cache %s ignored - environment changed", self.cachefilename)
 					else:
-						log.Info("Toolcheck cache not loaded = marker missing: %s %s\n", self.cachefilename, ToolSet.filemarker)
+						log.Info("Toolcheck cache not loaded = marker missing: %s %s", self.cachefilename, ToolSet.filemarker)
 					f.close()
 				except IOError, e:
-					log.Info("Failed to load toolcheck cache: %s\n", self.cachefilename)
+					log.Info("Failed to load toolcheck cache: %s", self.cachefilename)
 		else:
-			log.Debug("Toolcheck cachefile not created because EPOCROOT not set in environment.\n")
+			log.Debug("Toolcheck cachefile not created because EPOCROOT not set in environment.")
 
 	def check_shell(self):
 		# The command shell is a critical tool because all the other tools run
