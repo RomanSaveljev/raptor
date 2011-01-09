@@ -417,9 +417,8 @@ class BuildRecord(object):
 
 			json_br['makefilesets'] = json_makefilesets
 			json_structure = {'buildrecord': json_br }
-			json_str = json.dumps(json_structure)
 
-			f.write("{0}\n".format(json_str))
+			json.dump(json_structure,f, indent = 4)
 
 
 	def record_makefileset(self, makefileset):
@@ -434,33 +433,32 @@ class BuildRecord(object):
 		""" Create a build record from a .buildrecord file"""
 		with open(filename,"r") as f:
 			try:
-				json_str = f.read().strip("\n\r ")
-				json_structure  = json.loads(json_str)
+				json_structure  = json.load(f)
 			except Exception,e:
 				raise Exception("Bad build record format - json deserialisation failed.")
 
-			try:
-				kargs = json_structure['buildrecord']
-			except Exception,e:
-				raise Exception("Bad build record format - buildrecord property not found in buildrecord file.")
+		try:
+			kargs = json_structure['buildrecord']
+		except Exception,e:
+			raise Exception("Bad build record format - buildrecord property not found in buildrecord file.")
 
-			# the json structure matches what must be passed into the constructor
-			# quite well except for the makefilesets
-			try:
-				makefilesets = []
-				for json_makefileset in kargs['makefilesets']: 
-					makefilesets.append(raptor_makefile.BaseMakefileSet.from_json(json_makefileset))
-			except raptor_makefile.JsonMakefileDecodeError,e:
-				raise Exception("Bad build record format: makefilesets element did not decode: {0}".format(str(e)))
-			
+		# the json structure matches what must be passed into the constructor
+		# quite well except for the makefilesets
+		try:
+			makefilesets = []
+			for json_makefileset in kargs['makefilesets']: 
+				makefilesets.append(raptor_makefile.BaseMakefileSet.from_json(json_makefileset))
+		except raptor_makefile.JsonMakefileDecodeError,e:
+			raise Exception("Bad build record format: makefilesets element did not decode: {0}".format(str(e)))
+		
 
-			# replace the json structure for makefilesets with real BaseMakefileSet() instances
-			kargs['makefilesets'] = makefilesets
+		# replace the json structure for makefilesets with real BaseMakefileSet() instances
+		kargs['makefilesets'] = makefilesets
 
-			try:
-				br = BuildRecord(**kargs)
-			except TypeError,e:
-				raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}: {3}".format(BuildRecord.stored_attrs, str(kargs), filename, str(e)))
+		try:
+			br = BuildRecord(**kargs)
+		except TypeError,e:
+			raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}: {3}".format(BuildRecord.stored_attrs, str(kargs), filename, str(e)))
 
 
 		br.filename = filename
@@ -487,7 +485,7 @@ class BuildRecord(object):
 			if skipcount > 0:
 				skipcount -= 1
 				continue
-			elif s ==  "--ip=on":
+			elif s ==  "--ip=on" or s == "clean":
 				continue
 			elif s == "-f": # skip logfilenames
 				skipcount = 1
