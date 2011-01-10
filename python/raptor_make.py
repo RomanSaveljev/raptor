@@ -101,9 +101,9 @@ def AnnoFileParseOutput(annofile):
 
 			o = string_following('<metric name="duration">', line)
 			if o:
-				secs = int(float(o[:o.find('<')]))
-				if secs != 0:
-					duration = "{0}:{1}".format(secs/60, secs % 60)
+				total_secs = int(float(o[:o.find('<')]))
+				if total_secs != 0:
+					duration = "{mins}:{secs}".format(mins = total_secs/60, secs = total_secs % 60)
 				else:
 					duration = "0:0"
 				continue 
