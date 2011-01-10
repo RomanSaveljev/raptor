@@ -20,22 +20,25 @@ def run():
 	t = SmokeTest()
 	t.name = "annofile2log_copy_from_log"
 	t.description = "test workaround for log corruption from a make engine whose name begins with 'e'"
+	command = 'cd smoke_suite/test_resources/annofile2log && ( FROMANNO="`mktemp`" ; bzip2 -dc {test_file_basename}.anno.bz2 ' \
+			  ' | python testanno2log.py  >"${{FROMANNO}}" && FROMSTDOUT="`mktemp`"; bzip2 -dc {test_file_basename}.stdout.bz2 > ' \
+			  '"${{FROMSTDOUT}}" && diff -wB "${{FROMANNO}}" "${{FROMSTDOUT}}"; RET=$? ; rm "${{FROMANNO}}" "${{FROMSTDOUT}}"; exit $RET )'
 	
 	t.usebash = True
 	t.errors = 0
 	t.returncode = 0
 	t.exceptions = 0
-	t.command = 'cd smoke_suite/test_resources/annofile2log && ( FROMANNO="`mktemp`" ; bzip2 -dc scrubbed_ncp_dfs_resource.anno.bz2 | python testanno2log.py  >"${FROMANNO}" && FROMSTDOUT="`mktemp`"; bzip2 -dc scrubbed_ncp_dfs_resource.stdout.bz2 > "${FROMSTDOUT}" && diff -wB "${FROMANNO}" "${FROMSTDOUT}"; RET=$? ; rm "${FROMANNO}" "${FROMSTDOUT}"; exit $RET )'
+	t.command = command.format(test_file_basename = "scrubbed_ncp_dfs_resource") 
 	
 	t.run()
 	
 	t.name = "annofile2log_new_format_annofile"
-	t.description = "test "
+	t.description = "test new format of annofile"
 	t.usebash = True
 	t.errors = 0
 	t.returncode = 0
 	t.exceptions = 0
-	t.command = 'cd smoke_suite/test_resources/annofile2log && ( FROMANNO="`mktemp`" ; bzip2 -dc scrubbed_ncp_dfs_resource_new.anno.bz2 | python testanno2log.py  >"${FROMANNO}" && FROMSTDOUT="`mktemp`"; bzip2 -dc scrubbed_ncp_dfs_resource_new.stdout.bz2 > "${FROMSTDOUT}" && diff -wB "${FROMANNO}" "${FROMSTDOUT}"; RET=$? ; rm "${FROMANNO}" "${FROMSTDOUT}"; exit $RET )'
+	t.command = command.format(test_file_basename = "scrubbed_ncp_dfs_resource_new") 
 	
 	t.run()
 	
