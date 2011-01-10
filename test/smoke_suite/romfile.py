@@ -49,8 +49,8 @@ def run():
 		r".*// epoc32/rom/src/ongoing/group/romfile/armv5test\.iby\n.*",
 
 		# The batch files that are added by the build system.
-		r".*\ndata=/epoc32/data/z/test/src_ongoing_romfile/armv5\.auto\.bat test/armv5\.auto\.bat\n.*",
-		r".*\ndata=/epoc32/data/z/test/src_ongoing_romfile/armv5\.manual\.bat test/armv5\.manual\.bat\n.*",
+		r".*\ndata=/epoc32/data/z/test/src_ongoing_romfile/armv5\.auto\.bat test/romfile\.auto\.bat\n.*",
+		r".*\ndata=/epoc32/data/z/test/src_ongoing_romfile/armv5\.manual\.bat test/romfile\.manual\.bat\n.*",
 
 		# Some normal files.
 		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_rand\.exe\s+sys/bin/t_rand\.exe\n.*",

@@ -6,7 +6,7 @@
 
 <h1>Release Notes for Symbian Build System v2</h1>
 
-<h2>next version</h2>
+<h2>version 2.16.0</h2>
 
 <h3>New Features</h3>
 <ul>
@@ -14,11 +14,13 @@
 <li><a href="notes/filter_csv.txt">Log summary in CSV format</a></li>
 <li><a href="notes/incremental_parsing.txt">Incremental parsing (--ip=on) speeds up raptor by not regenerating makefiles if they are uptodate</a></li>
 <li>Support for RVCT 4.1</li>
+<li>Improved support for Cygwin 1.7</li>
 </ul>
 
 <h3>Engineering Changes</h2>
 <ul>
 <li>Move to using Python 2.7 when defaulting to an internally shipped Python on Windows and when generating a Windows installer</li>
+<li>Work better with pydoc</li>
 </ul>
 
 <h3>Defect Fixes</h3>
@@ -32,6 +34,7 @@
 <li>SF Bug 3973 - Console output is "buffered" when it shouldn't be</li>
 <li>SF Bug 3774 - Move to MinGW with GCC4.4 (or higher)</li>
 <li>SF Bug 3729 - Make Raptor compatible with default mingw install</li>
+<li>SF Bug 3985 - Problems building kernel tests with 2.15.3</li>
 </ul>
 
 <h2>version 2.15.3</h2>
