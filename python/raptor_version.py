@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -19,7 +19,7 @@
 #
 # both of these are done automatically by the installer builder.
 
-version=(2,16,0,"ISODATE","symbian build system","CHANGESET")
+version=(2,17,0,"ISODATE","symbian build system","CHANGESET")
 
 def numericversion():
 	"""Raptor version string"""
