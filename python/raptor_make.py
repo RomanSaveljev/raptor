@@ -103,7 +103,7 @@ def AnnoFileParseOutput(annofile):
 			if o:
 				total_secs = int(float(o[:o.find('<')]))
 				if total_secs != 0:
-					duration = "{mins}:{secs}".format(mins = total_secs/60, secs = total_secs % 60)
+					duration = "{mins:.0f}:{secs}".format(mins = total_secs/60, secs = total_secs % 60)
 				else:
 					duration = "0:0"
 				continue 
