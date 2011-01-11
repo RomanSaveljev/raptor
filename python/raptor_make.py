@@ -38,6 +38,9 @@ from xml.sax.saxutils import unescape
 class BadMakeEngineException(Exception):
 	pass
 
+class CannotWriteMakefileException(Exception):
+	pass
+
 def string_following(prefix, str):
 	"""If str starts with prefix then return the rest of str, otherwise None"""
 	if str.startswith(prefix):
@@ -173,9 +176,11 @@ def run_make(make_process):
 	for line in XMLEscapeLog(stream):
 		if not make_process.copyLogFromAnnoFile:
 			make_process.logstream.write(line)
+  
+	make_process.returncode = p.wait()
+	make_process.hasrun = True
 
-	returncode = p.wait()
-	return returncode
+	return make_process.returncode
 
 
 
@@ -183,6 +188,8 @@ class MakeProcess(object):
 	""" A process of make program """
 	def __init__(self, command):
 		self.command = command
+		self.hasrun = False # Has this process been executed
+		self.returncode = 255 # default to error
 
 
 # raptor_make module classes
@@ -462,7 +469,7 @@ include {0}
 			if not self.raptor.debugOutput:
 				tb=""
 			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
-			makefileset = None
+			raise CannotWriteMakefileException(str(e))
 
 		return makefileset
 
@@ -615,7 +622,7 @@ include {0}
 			
 		parameters.append(("PLANBDIR", planbdir))
 		
-	def Make(self, makefileset):
+	def Make(self, makefileset, build_zero_flmcall_makefiles = False):
 		"run the make command"
 
 		if not self.valid:
@@ -636,7 +643,12 @@ include {0}
 				return False
 
 		# Save file names to a list, to allow the order to be reversed
-		fileName_list = list(makefileset.makefileNames())
+		if build_zero_flmcall_makefiles:
+			makefile_sequence = makefileset.makefiles
+			self.raptor.Debug ("Makefiles to build: {0}".format(str([f.filename for f in makefile_sequence])))
+		else:
+			makefile_sequence = makefileset.nonempty_makefiles()
+			self.raptor.Debug ("Makefiles with non-zero flm call counts: {0}".format(str([f.filename for f in makefile_sequence])))
 
 		# Iterate through args passed to raptor, searching for CLEAN or REALLYCLEAN
 		clean_flag = False
@@ -645,29 +657,34 @@ include {0}
 			            ("REALLYCLEAN" in self.raptor.args)
 
 		# Files should be deleted in the opposite order to the order
-		# they were built. So reverse file order if cleaning
+		# they were built. So reverse file order if cleaning.
+		# For len() etc to work we need to create a list 
+		# - not just an iterator which is what reversed() returns.
 		if clean_flag:
-			fileName_list.reverse()
+			makefile_sequence = [m for m in reversed(makefile_sequence)]
 
 		# Report number of makefiles to be built
-		self.raptor.InfoDiscovery(object_type = "makefile", count = len(fileName_list))
+		self.raptor.InfoDiscovery(object_type = "makefile", count = len(makefile_sequence))
 
 
 		# Stores all the make processes that were executed:
 		make_processes = []
+		
+		return_state = True
 
 		# Process each file in turn
-		for makefile in fileName_list:
+		for makefile in makefile_sequence:
+			makefilename = str(makefile.filename)
 
-			if not os.path.exists(makefile):
-				self.raptor.Info("Skipping makefile {0}".format(makefile))
+			if not os.path.exists(makefilename):
+				self.raptor.Info("Skipping makefile {0}".format(makefilename))
 				continue
-			self.raptor.Info("Making {0}".format(makefile))
+			self.raptor.Info("Making {0}".format(makefilename))
 			# assemble the build command line
 			command = self.buildCommand
 
 			if self.makefileOption:
-				command += " " + self.makefileOption + " " + ' "' + str(makefile) + '" '
+				command += " " + self.makefileOption + " " + ' "' + str(makefilename) + '" '
 
 			if self.raptor.keepGoing and self.keepGoingOption:
 				command += " " + self.keepGoingOption
@@ -707,7 +724,7 @@ include {0}
 
 			# targets go at the end, if the makefile supports them
 			addTargets = self.raptor.targets[:]
-			ignoreTargets = makefileset.ignoreTargets(makefile)
+			ignoreTargets = makefile.ignoretargets
 			if addTargets and ignoreTargets:
 				for target in self.raptor.targets:
 					if re.match(ignoreTargets, target):
@@ -719,8 +736,8 @@ include {0}
 			# Send stderr to a file so that it can't mess up the log (e.g.
 			# clock skew messages from some build engines scatter their
 			# output across our xml.
-			stderrfilename = makefile+'.stderr'
-			stdoutfilename = makefile+'.stdout'
+			stderrfilename = makefilename+'.stderr'
+			stdoutfilename = makefilename+'.stdout'
 			command += " 2>'%s' " % stderrfilename
 
 			# Keep a copy of the stdout too in the case of using the 
@@ -731,13 +748,13 @@ include {0}
 				command += " >'{0}' ".format(stdoutfilename)
 
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
-			command = command.replace("#MAKEFILE#", str(makefile))
+			command = command.replace("#MAKEFILE#", str(makefilename))
 
 			self.raptor.Info("Executing '{0}'".format(command))
 
 			# Create a process of make program
 			mproc = MakeProcess(command)
-			mproc.makefile = str(makefile)
+			mproc.makefile = str(makefilename)
 			mproc.talon_recipeattributes = "none"
 			mproc.talon_shell = self.talonshell
 			mproc.talon_buildid = str(self.buildID)
@@ -760,24 +777,32 @@ include {0}
 			try:
 				# Time the build
 				self.raptor.InfoStartTime(object_type = "makefile",
-					task = "build", key = str(makefile))
+					task = "build", key = str(makefilename))
 
-				returncode = run_make(mproc)
+				run_make(mproc)
+
+				if mproc.returncode != 0:
+					return_state = False
+					if not self.raptor.keepGoing:
+						break
 				
 			except Exception,e:
 				self.raptor.Error("Exception '{0}' during '{1}'".format(str(e), command))
-				self.Tidy()
 				break
 			finally:
 				# Still report end-time of the build
 				self.raptor.InfoEndTime(object_type = "makefile", task = "build",
-									    key = str(makefile))
+									    key = str(makefilename))
 
 
 		# Getting all the log output copied into files
-		for mproc in make_processes:		
+		for mproc in make_processes:
+			# Don't try to get log results if we never actually ran make.
+			if not mproc.hasrun:
+				continue 
+
 			if self.copyLogFromAnnoFile:
-				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefile)
+				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefilename)
 				self.raptor.Info("copylogfromannofile: Copying log from annotation file {0} to work around a potential problem with the console output".format(annofilename))
 				try:
 					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
@@ -795,21 +820,16 @@ include {0}
 				e.close()
 			except Exception,e:
 				sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(mproc.command, str(e)))
-			
-		if returncode != 0  and not self.raptor.keepGoing:
-			self.Tidy()
-			return False
-			
+
 		# run any shutdown script
 		if self.shutdownCommand != None and self.shutdownCommand != "":
 			self.raptor.Info("Running {0}".format(self.shutdownCommand))
 			if os.system(self.shutdownCommand) != 0:
 				self.raptor.Error("Failed in {0}".format(self.shutdownCommand))
-				self.Tidy()
-				return False
+				return_state = false
 
 		self.Tidy()
-		return True
+		return return_state
 
 	def Tidy(self):
 		"clean up after the make command"
@@ -900,29 +920,4 @@ include {0}
 				return False
 		return True
 	
-	def incremental_makefileset(self, toplevel_makefile_name):
-		""" return a makefile set object that will work with an existing set of makefiles.
-		    This is for use when one doesn't wish to regenerate a set of makefiles because
-		    they happen to still be valid/uptodate. """
-
-		makefileset = None
-
-		try:
-			makefileset = MakefileSet(directory = str(toplevel_makefile_name.Dir()),
-							   selectors = self.selectors,
-							   filenamebase = str(toplevel_makefile_name.File()),
-							   prologue = "",
-							   epilogue = "",
-							   defaulttargets=self.defaultTargets,
-							   readonly=True)
-
-		except Exception,e:
-			tb = traceback.format_exc()
-			if not self.raptor.debugOutput:
-				tb=""
-			self.raptor.Error("Failed to generate makefileset %s", "'{0}': {1} : {2}".format(str(toplevel_makefile_name),str(e),tb))
-			makefileset = None
-
-		return makefileset
-
 # end of the raptor_make module

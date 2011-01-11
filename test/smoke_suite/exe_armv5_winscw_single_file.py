@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -127,7 +127,7 @@ def run():
 	t.command = "sbs -f - --source-target=smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp --source-target=smoke_suite/test_resources/simple_gui/HelloWorld.rss -b smoke_suite/test_resources/simple_gui/Bld.inf"
 	t.mustmatch = []
 	t.countmatch = [
-		[".*make.*Nothing to be done for.*SOURCETARGET_.*", 10]
+		[".*make.*Nothing to be done for.*SOURCETARGET_.*", 8]
 	]
 	t.mustnotmatch = [
 		".*recipe name='(resourcecompile|win32compile2object|compile|win32simplelink|postlink|link)'.*"

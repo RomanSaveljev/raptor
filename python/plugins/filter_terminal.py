@@ -162,6 +162,8 @@ class FilterTerminal(filter_interface.Filter):
 
 		# list of strings to catch recipe warnings (must be lowercase)
 		self.recipe_warning_expr = ["warning:"]
+
+		self.make_returned_error = False
 		
 	def isMakeWarning(self, text):
                 """A simple test for warnings.
@@ -221,7 +223,10 @@ class FilterTerminal(filter_interface.Filter):
 		if text.startswith("<error"):
 			start = text.find(">")
 			end = text.rfind("<")
-			self.err_count += 1
+			if text.find("The make-engine exited with errors") > 0:
+				self.make_returned_error = True
+			else:
+				self.err_count += 1
 			if not self.analyseonly:
 				m = FilterTerminal.attribute_re.findall(text, 0, start)
 				component = ""
@@ -449,6 +454,12 @@ class FilterTerminal(filter_interface.Filter):
 
 		if self.cleaned != 0:
 			sys.stdout.write("\n\n")
+
+		# If make fails, only treat that as an error if we found
+		# no other problems. i.e. we only count it if it isn't
+		# redundant
+		if self.err_count == 0 and self.make_returned_error:
+			self.err_count += 1
 
 		if self.warn_count > 0 or self.err_count > 0:
 			sys.stdout.write("\n{0} : warnings: {1}\n".format(raptor.name,
