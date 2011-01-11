@@ -18,7 +18,7 @@
 
 #include <iscapi.h>
 #include "gendebug.h"
-#include <IscNokiaDefinitions.h>
+#include <iscnokiadefinitions.h>
 #include <pn_const.h>
 #include <tisi.h>
 #include <infoisi.h>

@@ -40,7 +40,8 @@ class PPMakefileGenFilter(filter_interface.Filter):
 							"<info>Current working directory",
 							"<info>sbs: version",
 							"<info>Duplicate variant",
-							"<info>Buildable configuration"]
+							"<info>Buildable configuration",
+							"<info>Run time"]
 		self.task = "makefile_generation"
 		self.object_type = "makefile"
 		self.key = ""

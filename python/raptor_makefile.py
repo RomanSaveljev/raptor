@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -166,42 +166,58 @@ class MakefileSet(object):
 		MakefileSelector("default", '\.(?!export$|bitmap$|resource$).*$', "ALL")
 		]
 
-	def __init__(self, directory, selectors=defaultselectors, makefiles=None, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None):
+	def __init__(self, directory, selectors=defaultselectors, makefiles=None, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None, readonly=False):
 		self.directory = generic_path.Path(directory)
 		self.filenamebase = filenamebase
 		self.parent = parent
+		self.readonly = readonly
+
 		if makefiles is not None:
 			self.makefiles = makefiles
 		else:
 			self.makefiles = []
 			for sel in selectors:
-				self.makefiles.append(Makefile(directory, sel, None, filenamebase, prologue, epilogue, defaulttargets))
+				mf = Makefile(directory, sel, None, filenamebase, prologue, epilogue, defaulttargets)
+				if readonly:
+					mf.dead = True
+				self.makefiles.append(mf)
+					
 		self.groupermakefile = Makefile(directory, MakefileSet.grouperselector, None, filenamebase, "# GROUPER MAKEFILE\n\nALL::\n\n", "\n")
 		
-		for mf in self.makefiles:
-			self.groupermakefile.addChild(mf)
 
+		if readonly:
+			self.groupermakefile.dead = True 
+		else:
+			for mf in self.makefiles:
+				self.groupermakefile.addChild(mf)
 
 	def createChild(self, subdir):
 		"""Create a set of "sub" makefiles that are included by this set."""
-		newmakefiles = []
-		for mf in self.makefiles:
-			newmf = mf.createChild(subdir)
-			newmakefiles.append(newmf)
+		if not self.readonly:
+			newmakefiles = []
+			for mf in self.makefiles:
+				newmf = mf.createChild(subdir)
+				newmakefiles.append(newmf)
 
-		newset = MakefileSet(str(self.directory.Append(subdir)), None, newmakefiles, self, self.filenamebase)
-		self.groupermakefile.addChild(newset.groupermakefile)
+		newset = MakefileSet(str(self.directory.Append(subdir)), None, newmakefiles, self, self.filenamebase, readonly=self.readonly)
+		if not self.readonly:
+			self.groupermakefile.addChild(newset.groupermakefile)
 
 		return newset
 
 	def addCall(self, specname, configname, ifname, useAllInterfaces, flmpath, parameters, guard = None):
 		"""Find out which makefiles to write this FLM call to 
 		   and write it to those (e.g. the exports makefile) """
+
+		if self.readonly:
+			return
 		for f in self.makefiles:
 			f.addCall(specname, configname, ifname, useAllInterfaces, flmpath, parameters, guard)
 
 	def addInclude(self, makefilename):
 		"""include a makefile from each of the makefiles in the set - has the selector name appended to it."""
+		if self.readonly:
+			return
 		for f in self.makefiles:
 			f.addInclude(makefilename)
 
@@ -218,10 +234,15 @@ class MakefileSet(object):
 				return mf.selector.ignoretargets 
 		return None
 
+
 	def close(self):
+		if self.readonly:
+			return
 		for mf in self.makefiles:
 			mf.close()
 		self.groupermakefile.close()
 
 	def __del__(self):
+		if self.readonly:
+			return
 		self.close()

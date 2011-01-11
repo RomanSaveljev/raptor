@@ -32,6 +32,7 @@ class TestRaptorCli(unittest.TestCase):
 		self.whatDir = sbsHome + "/test/simple"
 		self.listconfig=[]
 		self.bldinfvalue=[]
+		self.qtprovalue=[]
 		self.makeoptions=[]
 		self.sysdeflayers=[]
 		self.sysdeforderlayers = True
@@ -92,6 +93,10 @@ class TestRaptorCli(unittest.TestCase):
 		self.bldinfvalue.append(bldinf)
 		return True
 
+	def AddQtProFile(self,qt_pro_file):
+		self.qtprovalue.append(qt_pro_file)
+		return True
+	
 	def RunQuietly(self,QuietMode):
 		self.RunningQuiet = QuietMode
 		return True
@@ -150,6 +155,10 @@ class TestRaptorCli(unittest.TestCase):
 		self.pp=onoroff
 		return True
 
+	def SetIncrementalParsing(self, onoroff):
+		self.incremental_parsing=onoroff
+		return True
+
 	def SetRsgCaseFolding(self, yesOrNo):
 		return True
 
@@ -193,6 +202,8 @@ class TestRaptorCli(unittest.TestCase):
 				'--layer', 'b_layer',
 				'-b', 'bld1.inf',
 				'--bldinf', 'bld2.inf',
+				'--qtpro', 'qt1.pro',
+				'--qt', 'qt2.pro',
 				'-f', 'a_log_file.log',
 				'-m', 'top.mk',
 				'--makefile', '/home/Makefile',
@@ -201,6 +212,7 @@ class TestRaptorCli(unittest.TestCase):
 				'--source-target', 'some_source_file.cpp',
 				'--source-target', 'some_resource_file.rss',
 				'--pp', 'on',
+				'--ip', 'on',
 				'--no-depend-include',
 				'--no-depend-generate']
 		
@@ -214,6 +226,8 @@ class TestRaptorCli(unittest.TestCase):
 		self.assertEqual(self.sysdeflayers[1],'b_layer')
 		self.assertEqual(self.bldinfvalue[0],'bld1.inf')
 		self.assertEqual(self.bldinfvalue[1],'bld2.inf')
+		self.assertEqual(self.qtprovalue[0],'qt1.pro')
+		self.assertEqual(self.qtprovalue[1],'qt2.pro')
 		self.assertEqual(self.topmake,'/home/Makefile')
 		self.assertEqual(self.logFileName,'a_log_file.log')
 		self.assertEqual(self.filterList,'filter_01,filter_02')

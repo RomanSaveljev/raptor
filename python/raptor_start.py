@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -28,15 +28,16 @@ if os.environ.has_key('SBS_PROFILE_BASENAME'):
 # Main takes the command-line (ignoring argv[0] which is the name of
 # this script) and returns the exit code.
 #
-try:	
-	if profile_basename is not None:
-		sys.exit(cProfile.run('raptor.Main(sys.argv[1:])',profile_basename))
-	else:
-		sys.exit(raptor.Main(sys.argv[1:]))
-except KeyboardInterrupt:
-	sys.stderr.write("ERROR: sbs: Terminated by control-c or break\n")
-	sys.exit(255)
-except ValueError, exc:
-	sys.stderr.write("ERROR: sbs: %s" % str(exc))
-	sys.exit(255)
+if __name__ == "__main__":
+	try:	
+		if profile_basename is not None:
+			sys.exit(cProfile.run('raptor.Main(sys.argv[1:])',profile_basename))
+		else:
+			sys.exit(raptor.Main(sys.argv[1:]))
+	except KeyboardInterrupt:
+		sys.stderr.write("ERROR: sbs: Terminated by control-c or break\n")
+		sys.exit(255)
+	except ValueError, exc:
+		sys.stderr.write("ERROR: sbs: %s" % str(exc))
+		sys.exit(255)
 

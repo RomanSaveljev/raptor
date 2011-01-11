@@ -1,0 +1,17 @@
+Qt .pro file Support
+---------------------
+
+This feature is under developement and may not work as expected in a number of situations.
+
+The "--qtpro <filename.pro>" option causes Raptor to build Qt projects directly without
+having to use qmake to generate bld.inf and mmp files first.
+
+It does this by running qmake itself automatically.
+
+For any ".pro" file such as "XXX.pro" raptor will generate a bld.inf in the same directory 
+and then use it to build the project.
+
+Limitations:
+1) Does not yet work with the parallel parsing option (-pp=on)
+2) There is no support for system definitions which have ".pro" components listed in them.
+3) There is no support for cleaning up the files that qmake generates.

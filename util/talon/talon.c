@@ -598,8 +598,6 @@ int main(int argc, char *argv[])
 
 				prependattributes(p->output, attributes);
 			
-			if (dotagging) {
-			}
 				buffer_append(p->output, "\n]]>", 4);
 				buffer_append(p->output, timestat, strlen(timestat));
 				buffer_append(p->output, status, strlen(status));
@@ -607,13 +605,19 @@ int main(int argc, char *argv[])
 			}
 		
 			unsigned int iterator = 0;
+			unsigned int written = 0;
 			byteblock *bb;
 		
 			if (descramble)	
 				sema_wait(&talon_sem);
 			while ((bb = buffer_getbytes(p->output, &iterator)))
 			{
-				write(STDOUT_FILENO, &bb->byte0, bb->fill);
+				if (bb->fill > 0)
+				{
+					written = write(STDOUT_FILENO, &bb->byte0, bb->fill);
+
+					DEBUG(("talon: wrote %d bytes out of %d\n", written, bb->fill));
+				}
 			}
 			if (descramble)	
 				sema_release(&talon_sem);

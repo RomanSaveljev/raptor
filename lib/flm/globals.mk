@@ -71,6 +71,7 @@ $(call addglobal,FREEZE)
 $(call addglobal,LIBRARY)
 $(call addglobal,LISTING)
 $(call addglobal,MAKEFILE)
+$(call addglobal,PREPROCESS)
 $(call addglobal,REALLYCLEAN)
 $(call addglobal,BITMAP)
 $(call addglobal,RESOURCE)
@@ -130,6 +131,8 @@ WHATARMV5::
 WHATEXPORTS::
 
 LISTING::
+
+PREPROCESS::
 
 CLEAN::
 

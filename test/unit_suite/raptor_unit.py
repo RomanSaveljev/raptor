@@ -35,8 +35,12 @@ class TestRaptor(unittest.TestCase):
 	def testHome(self):
 		r = raptor.Raptor()
 		self.failUnless(r.home)
-		r = raptor.Raptor("dirname")
-		self.failUnless(r.errorCode == 1) # picked up that dirname doesn't exist
+		try:
+			r = raptor.Raptor("dirname")
+			self.fail() # should have had an exception
+		except raptor.BuildCannotProgressException,e:
+			# picked up that dirname doesn't exist
+			pass
 		
 
 	def testVersion(self):
@@ -69,25 +73,20 @@ class TestRaptor(unittest.TestCase):
 				'test/smoke_suite/test_resources/simple_gui/Bld.inf',
 				'TOOLS2 SHOULD NOT APPEAR IN THE OUTPUT']
 		
-		r = raptor.Raptor()
-		null_log_instance = raptor_utilities.NullLog()
-		r.Info = null_log_instance.Info 
-		r.Debug = null_log_instance.Debug
-		r.Warn = null_log_instance.Warn
-		r.ConfigFile()
-		r.ProcessConfig()
-		# Note that tools2/bld.inf specifies tools2 as the only supported
-		# platform, so it should not appear in the component list at the end
-		r.CommandLine([
+		commandline = [
 				'-b', 'smoke_suite/test_resources/simple/bld.inf',
 				'-b', 'smoke_suite/test_resources/simple_dll/bld.inf',
 				'-b', 'smoke_suite/test_resources/simple_export/bld.inf',
 				'-b', 'smoke_suite/test_resources/simple_extension/bld.inf',
 				'-b', 'smoke_suite/test_resources/simple_gui/Bld.inf',
 				'-b', 'smoke_suite/test_resources/tools2/bld.inf',
-				'-c', 'armv5'])
+				'-c', 'armv5']
+		null_log_instance = raptor_utilities.NullLog()
+		r = raptor.Raptor(commandline=commandline, logger = null_log_instance)
+		# Note that tools2/bld.inf specifies tools2 as the only supported
+		# platform, so it should not appear in the component list at the end
 		# establish an object cache
-		r.LoadCache()
+		r._load_cache()
 		buildUnitsToBuild = r.GetBuildUnitsToBuild(r.configNames)
 		# find out what components to build, and in what way
 		layers = []
@@ -144,18 +143,6 @@ class TestRaptor(unittest.TestCase):
 		
 		self.assertTrue(self.r.out.warningWritten())
 
-		d = tempfile.mkdtemp(prefix='raptor_test') 
-		cdir = os.getcwd()
-		os.chdir(d)
-		f = open("bld.inf","w")
-		f.close()
-		layers = self.r.GetLayersFromCLI()
-		os.unlink("bld.inf")
-		os.chdir(cdir) # go back
-		os.rmdir(d)
-
-		self.assertTrue(self.r.out.warningWritten())
-
 	def testNoWarningIfSystemDefinitionFileExists(self): 
 		self.r.out = OutputMock()
 
@@ -166,6 +153,21 @@ class TestRaptor(unittest.TestCase):
 		f.close()
 		layers = self.r.GetLayersFromCLI()
 		os.unlink("System_Definition.xml")
+		os.chdir(cdir) # go back
+		os.rmdir(d)
+
+		self.assertFalse(self.r.out.warningWritten())
+	
+	def testNoWarningIfBldInfFileExists(self):
+		self.r.out = OutputMock()
+
+		d = tempfile.mkdtemp(prefix='raptor_test') 
+		cdir = os.getcwd()
+		os.chdir(d)
+		f = open("bld.inf","w")
+		f.close()
+		layers = self.r.GetLayersFromCLI()
+		os.unlink("bld.inf")
 		os.chdir(cdir) # go back
 		os.rmdir(d)
 

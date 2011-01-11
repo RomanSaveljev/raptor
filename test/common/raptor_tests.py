@@ -167,10 +167,7 @@ def clean_epocroot():
 							os.remove(name)
 						except:							
 							print "\nEPOCROOT-CLEAN ERROR:"
-							print (sys.exc_type.__name__ + ":"), \
-									sys.exc_value
-							if sys.exc_type.__name__ != "WindowsError":
-								print traceback.print_tb(sys.exc_traceback)
+							traceback.print_exc(None, sys.stdout)
 									
 			# This loop handles folders
 			for name in dirs:
@@ -184,10 +181,7 @@ def clean_epocroot():
 						rmtree(ReplaceEnvs(name))
 					except:
 						print "\nEPOCROOT-CLEAN ERROR:"
-						print (sys.exc_type.__name__ + ":"), \
-								sys.exc_value
-						if sys.exc_type.__name__ != "WindowsError":
-							print traceback.print_tb(sys.exc_traceback)
+						traceback.print_exc(None, sys.stdout)
 	except IOError,e:
 		print e
 	
@@ -229,6 +223,7 @@ class SmokeTest(object):
 		self.errors = 0
 		self.exceptions = 0
 		self.returncode = 0
+		self.noclean = False
 
 		self.onWindows = sys.platform.startswith("win")
 
@@ -254,7 +249,8 @@ class SmokeTest(object):
 		self.environ = {} # Allow tests to set the environment in which commands run.
 		self.sbs_build_dir = "$(EPOCROOT)/epoc32/build"
 
-	def run(self, platform = "all"):
+	def run(self, platform = "all", noclean=False):
+		self.noclean = noclean
 		previousResult = self.result
 		try:
 			if self.runnable(platform):
@@ -349,14 +345,16 @@ class SmokeTest(object):
 
 		# flatten any lists first (only 1 level of flattenening expected)
 		# these indicate alternative files - one of them will exist after a build
-		removables = []
-		for i in self.targets:
-			if type(i) is not list:
-				removables.append(i)
-			else:
-				removables.extend(i)
+		if not self.noclean:
+			removables = []
+			for i in self.targets:
+				if type(i) is not list:
+					removables.append(i)
+				else:
+					removables.extend(i)
 				
-		return self.removeFiles(removables)
+			return self.removeFiles(removables)
+		return True
 
 	def pretest(self):
 		# what to do before the test runs
@@ -379,15 +377,12 @@ class SmokeTest(object):
 	
 		print "COMMAND:", command
 
-
 		# Any environment settings specific to this test
 		shellenv = os.environ.copy()
 		for ev in self.environ:
 			shellenv[ev] = self.environ[ev]
 
 		if self.usebash:
-			shellpath = shellenv['PATH']
-			
 			if 'SBS_SHELL' in os.environ:
 				BASH = os.environ['SBS_SHELL']
 			else:
@@ -399,17 +394,8 @@ class SmokeTest(object):
 				else:
 					BASH = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/bash")
 				
-			if self.onWindows:
-				if 'SBS_CYGWIN' in shellenv:
-					shellpath = ReplaceEnvs("$(SBS_CYGWIN)/bin") + ";" + shellpath
-				else:
-					shellpath = ReplaceEnvs("$(SBS_HOME)/win32/cygwin/bin") + ";" + shellpath
-
 			shellenv['SBSMAKEFILE']=ReplaceEnvs(self.makefile())
 			shellenv['SBSLOGFILE']=ReplaceEnvs(self.logfile())
-			shellenv['PATH']=shellpath
-			shellenv['PYTHON_HOME'] = ""
-			shellenv['CYGWIN']="nontsec nosmbntsec"
 
 			p = subprocess.Popen(args=[BASH, '-c', command], 
 					stdout=subprocess.PIPE,
@@ -493,7 +479,7 @@ class SmokeTest(object):
 			if not re.search(expr, self.output, re.MULTILINE):
 				self.outputok = False
 				print "OUTPUTMISMATCH: output did not match: %s" % expr
-
+		
 		for expr in self.mustnotmatch_singleline + self.mustnotmatch:
 			if re.search(expr, self.output, re.MULTILINE):
 				self.outputok = False

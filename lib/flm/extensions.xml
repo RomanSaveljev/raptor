@@ -27,6 +27,8 @@
 		<param name="STL_REL_LIB_NAME"/>
 		<param name="STL_DEB_LIB_NAME"/>
 		<param name="SOURCE_ARCHIVE"/>
+		<param name="TOOLS2WIN32" default=""/>
+		<param name="SBS_MINGW_LINUX_PREFIX" default=""/>
 	</interface>
 
 	<interface name="converged-comms.createcommdbs" extends="Symbian.UserFLM" flm="converged-comms/createcommdbs.flm">
