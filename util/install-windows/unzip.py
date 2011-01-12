@@ -22,7 +22,7 @@
 #
 
 """ unzip.py
-    Version: 1.1
+    Version: 1.2
 
     Extract a zip file to the directory provided
     It first creates the directory structure to house the files
@@ -46,6 +46,7 @@
     Taken from http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/252508
     
     Updated by Daniel Jacobs to be OS-neutral and more stable.
+    2011 - Updated by Daniel Jacobs to be readier for porting to Python 3.
 """
 
 import sys
@@ -79,10 +80,10 @@ class unzip:
         for i, name in enumerate(zf.namelist()):
 
             if self.verbose == True:
-                print "Extracting %s" % name
+                print("Extracting {0}".format(name))
             elif perc > 0 and (i % perc) == 0 and i > 0:
                 complete = int (i / perc) * percent
-                print "%s%% complete" % complete
+                print("{0}% complete".format(complete))
 
             if not name.endswith('/'):
                 # Normalise the path so that it is correct for the current OS
@@ -124,7 +125,7 @@ class unzip:
             # has been made in the meantime. Catch this exception.
             try:
                 os.makedirs(directory)
-            except OSError, aOSError:
+            except OSError(aOSError):
                 # If the OSError is that the file exists then we are OK - this
                 # might occur in a multi-threaded or multi-process environment;
                 # otherwise re-raise the exception since it's something else bad.
@@ -142,14 +143,14 @@ class unzip:
         for name in zf.namelist():
             if name.endswith('/'):
                 if self.verbose == True:
-                    print "Directory \"" + name + "\" will be made."
+                    print("Directory \"{0}\" will be made.".format(name))
                 dirs.append(name)
         
         zf.close()
         return dirs
 
 def usage():
-    print """usage: unzip.py -z <zipfile> -o <targetdir>
+    print("""usage: unzip.py -z <zipfile> -o <targetdir>
     <zipfile> is the source zipfile to extract
     <targetdir> is the target destination
 
@@ -162,7 +163,7 @@ def usage():
     --verbose
     --percent=10
     --zipfile=<zipfile>
-    --outdir=<targetdir>"""
+    --outdir=<targetdir>""")
     
 
 def main():
