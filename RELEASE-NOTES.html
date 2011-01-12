@@ -8,6 +8,20 @@
 
 <h2>next version</h2>
 
+<h3>New Features</h3>
+<ul>
+<li><a href="notes/naming_output_files.txt">Enable the name of the make stage to be inserted into output filenames. '#STAGE#' is replaced with the stage name - similar to  '#MAKEFILE#'. One use case is to enable there to be a history file for each make stage.</a></li>
+</ul>
+
+<h3>Engineering Changes</h3>
+<ul><li><a href="notes/incremental_parsing.txt">Incremental parsing #2 - refactoring to permit #STAGE# feature and improve performance</a></li>
+</ul>
+
+<h3>Defect Fixes</h3>
+<ul>
+<li></li>
+</ul>
+
 <h2>version 2.16.0</h2>
 
 <h3>New Features</h3>
@@ -19,7 +33,7 @@
 <li>Improved support for Cygwin 1.7</li>
 </ul>
 
-<h3>Engineering Changes</h2>
+<h3>Engineering Changes</h3>
 <ul>
 <li>Move to using Python 2.7 when defaulting to an internally shipped Python on Windows and when generating a Windows installer</li>
 <li>Work better with pydoc</li>
@@ -41,7 +55,7 @@
 
 <h2>version 2.15.3</h2>
 
-<h3>Engineering Changes</h2>
+<h3>Engineering Changes</h3>
 <ul>
 <li><a href="notes/filter_exes.txt">New filter_exes filter for listing generated executable files from a build</a></li>
 <li><a href="notes/per_component_flm.txt">Hook for including an FLM for each component</a></li>

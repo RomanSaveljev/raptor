@@ -748,7 +748,12 @@ include {0}
 				command += " >'{0}' ".format(stdoutfilename)
 
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
-			command = command.replace("#MAKEFILE#", str(makefilename))
+			command = command.replace("#MAKEFILE#", makefilename)
+
+			# Substitute the makefile stage for any occurrence of #STAGE#
+			# e.g. --history=ncp_#STAGE#.hist might become
+			#      --history=ncp_export.hist
+			command = command.replace("#STAGE#", makefile.name)
 
 			self.raptor.Info("Executing '{0}'".format(command))
 
@@ -769,7 +774,7 @@ include {0}
 			make_processes.append(mproc)
 
 			if self.copyLogFromAnnoFile:
-				mproc.annoFileName = self.annoFileName.replace("#MAKEFILE#", makefile)
+				mproc.annoFileName = self.annoFileName.replace("#MAKEFILE#", makefilename)
 			
 			# execute the build.
 			# the actual call differs between Windows and Unix.

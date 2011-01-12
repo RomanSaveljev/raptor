@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -38,7 +38,15 @@ class MakefileSelector(object):
 		self.ignoretargets=ignoretargets
 
 class BaseMakefile(object):
+	"""A class representing a makefile.  In general it's not meant to be used for creating makefiles
+	   but for representing makefiles that already exist."""
 	def __init__(self, filename, callcount = 0, defaulttargets=[], ignoretargets=None, name=''):
+		""" filename -- should be a generic_path.Path()
+		    callcount -- is the number of FLM calls in the makefile.
+		    defaulttargets -- variable indicates what targets to supply when running the makefile without
+			any user specified targets.
+		"""
+		    
 		self.filename = filename
 		self.callcount = callcount # Number of flm calls in this makefile
 		self.defaulttargets = defaulttargets
@@ -51,7 +59,9 @@ class BaseMakefile(object):
 
 	@classmethod
 	def from_json(cls,json_structure):
-		"""Deserialise an instance of this class from a data structure produced by the json parser"""
+		"""Deserialise an instance of this class from a data structure produced by the json parser
+		   json_structure -- a python data structure that the json module has deserialised from a text file.
+		"""
 		try:
 			mf_ = json_structure['makefile']
 			mf = cls(mf_['filename'], mf_['callcount'], mf_['defaulttargets'])
@@ -62,7 +72,7 @@ class BaseMakefile(object):
 
 class Makefile(BaseMakefile):
 	"""Representation of the file that is created from the build specification 
-	   tree.
+	   tree.  This is used for *creating* new makefiles and addinf FLM calls into them.
 	"""
 	def __init__(self, directory, selector, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None):
 		self.filenamebase = filenamebase
@@ -196,6 +206,9 @@ class OutOfDateException(Exception):
 	pass
 
 class BaseMakefileSet(object):
+	"""Represents a "sequence" of makefiles that make up a build (e.g. export, bitmap, resource, resource_deps, default).
+	   It is used generally to represent existing makefiles - not as a way to create new ones.
+	"""
 
 	# Used in Metadeps files:
 	dep_prefix="dep:"
@@ -245,6 +258,9 @@ class BaseMakefileSet(object):
 
 	def write_metadeps(self, singledeps, depfiles):
 		"""
+		Write out the dependencies of this set of makefiles - i.e. the filenames of all the 
+		metadata from which the makefile was generated.
+
 		The metadeps format looks like this:
 		
 		dep: /tracecompiler/testTC/group/bld2.inf
@@ -331,6 +347,7 @@ class BaseMakefileSet(object):
 
 
 class MakefileSet(BaseMakefileSet):
+	""" A sequence of makefiles that make up a build of a "layer". """
 	grouperselector = MakefileSelector(name="")
 	defaultselectors = [ 
 		MakefileSelector("export", '\.export$', "EXPORT"),
