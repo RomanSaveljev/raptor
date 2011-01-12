@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -20,13 +20,14 @@ ifneq ($(filter plugin plugin3,$(TARGETTYPE)),)
 BASE_TYPE:=dll
 CW_STATIC_RUNTIME:=1
 FIRST_STATLIB:=
-FIXED_EXPORT:=?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z
 SUPPORTS_IMPORT_LIBRARY:=0
 SYSTEM_TARGET:=0
 
 UID2_DEFAULT:=10009D8D
+FIXED_EXPORT:=?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z
 ifeq ($(TARGETTYPE),plugin3)
 UID2_DEFAULT:=10009D93
+FIXED_EXPORT:=?ImplementationGroupProxy@@YAPBUTImplementationProxy3@@AAH@Z
 endif
 
 # Use the general win32 FLM 
