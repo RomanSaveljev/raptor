@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -416,7 +416,7 @@ ifneq ($(BASE_TYPE),importlib)
   
   # Preprocess target, a variation of the standard compile
   define win32preprocess
-    $(eval PREPROCESSTARGET:=$(1).$(VARIANTPLATFORM).$(VARIANTTYPE).pre)
+    $(eval PREPROCESSTARGET:=$(1).$(VARIANTPLATFORM).$(VARIANTTYPE).$(TARGET).$(TARGETEXT).pre)
 
     PREPROCESS:: $(PREPROCESSTARGET)
     $(call win32compile2object,$(1),$(PREPROCESSTARGET),win32preprocess)
@@ -433,7 +433,11 @@ ifneq ($(BASE_TYPE),importlib)
 
   $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32compile2object,$(SRCFILE))))
   $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32list,$(SRCFILE))))
-  $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32preprocess,$(SRCFILE))))
+  
+  # Only generate preprocess targets if they are requested
+  ifneq ($(filter PREPROCESS,$(call uppercase,$(MAKECMDGOALS))),)
+    $(foreach SRCFILE,$(SRCFILES) $(SRCFILES_OE),$(eval $(call win32preprocess,$(SRCFILE))))
+  endif
 
   ######################
   ## RESOURCE COMPILE ##

@@ -5,10 +5,12 @@ would normally be invoked in the build to generate preprocessed versions of
 a component's source files.  These files are generated into the source tree
 alongside the source files themselves, and have filenames that are
 appropriately tagged based on the configurations used.  No further build is
-performed.
+performed.  The general format of the generated filenames is as follows:
 
-An example, based on the build of a component using the default winscw and
-armv5 configurations:
+    source_filename.build_platform.build_variant.target_name.pre
+
+An example, based on the build of a helloworld.exe component using the default
+winscw and armv5 configurations:
 
     G:\HelloWorld>dir /b
     bld.inf
@@ -20,10 +22,10 @@ armv5 configurations:
     G:\HelloWorld>dir /b
     bld.inf
     HelloWorld.cpp
-    HelloWorld.cpp.armv5.udeb.pre
-    HelloWorld.cpp.armv5.urel.pre
-    HelloWorld.cpp.winscw.udeb.pre
-    HelloWorld.cpp.winscw.urel.pre
+    HelloWorld.cpp.armv5.udeb.helloworld.exe.pre
+    HelloWorld.cpp.armv5.urel.helloworld.exe.pre
+    HelloWorld.cpp.winscw.udeb.helloworld.exe.pre
+    HelloWorld.cpp.winscw.urel.helloworld.exe.pre
     HelloWorld.mmp
 
 The PREPROCESS target currently works for files listed in .mmp files using
@@ -41,3 +43,6 @@ Notes:
    PREPROCESS target is used.
 *  For configurations where PREPROCESS is not currently supported, it will
    simply do nothing.
+*  TARGET name is used in generated filenames in order to support distinct
+   preprocessor output for source files that are built from more than one .mmp
+   file.
