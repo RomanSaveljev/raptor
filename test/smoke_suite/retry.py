@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -18,7 +18,6 @@ from raptor_tests import AntiTargetSmokeTest
 
 def run():
 	t = AntiTargetSmokeTest()
-	t.id = "59"
 	t.name = "retry"
 	#
 	# -t 3 means try each recipe up to 3 times, if it fails.

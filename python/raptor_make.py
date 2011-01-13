@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -684,13 +684,13 @@ include {0}
 			command = self.buildCommand
 
 			if self.makefileOption:
-				command += " " + self.makefileOption + " " + ' "' + str(makefilename) + '" '
+				command += ' {0}  "{1}" '.format(self.makefileOption, makefilename)
 
 			if self.raptor.keepGoing and self.keepGoingOption:
 				command += " " + self.keepGoingOption
 
 			if self.raptor.jobs > 1 and self.jobsOption:
-				command += " " + self.jobsOption +" "+ str(self.raptor.jobs)
+				command += " {0} {1}".format(self.jobsOption,str(self.raptor.jobs))
 
 			# Set default options first so that they can be overridden by
 			# ones set by the --mo option on the raptor commandline:
@@ -699,9 +699,9 @@ include {0}
 			if len(self.raptor.makeOptions) > 0:
 				for o in self.raptor.makeOptions:
 					if o.find(";") != -1 or  o.find("\\") != -1:
-						command += "  " + "'" + o + "'"
+						command += "  '{0}'".format(o)
 					else:
-						command += "  " + o
+						command += "  {0}".format(o)
 
 			# Switch off dependency file including?
 			if self.raptor.noDependInclude or self.raptor.noDependGenerate:
@@ -719,8 +719,8 @@ include {0}
 			
 			# use the retry mechanism if requested
 			if self.raptor.tries > 1:
-				command += ' RECIPETRIES=' + str(self.raptor.tries)
-				command += ' TALON_RETRIES=' + str(self.raptor.tries - 1)
+				command += ' RECIPETRIES={0}'.format(self.raptor.tries)
+				command += ' TALON_RETRIES={0}'.format(self.raptor.tries - 1)
 
 			# targets go at the end, if the makefile supports them
 			addTargets = self.raptor.targets[:]
@@ -738,7 +738,7 @@ include {0}
 			# output across our xml.
 			stderrfilename = makefilename+'.stderr'
 			stdoutfilename = makefilename+'.stdout'
-			command += " 2>'%s' " % stderrfilename
+			command += " 2>'{0}' ".format(stderrfilename)
 
 			# Keep a copy of the stdout too in the case of using the 
 			# annofile - so that we can trap the problem that
@@ -831,7 +831,7 @@ include {0}
 			self.raptor.Info("Running {0}".format(self.shutdownCommand))
 			if os.system(self.shutdownCommand) != 0:
 				self.raptor.Error("Failed in {0}".format(self.shutdownCommand))
-				return_state = false
+				return_state = False
 
 		self.Tidy()
 		return return_state
@@ -860,7 +860,7 @@ include {0}
 			command = self.talonctl + " start"
 
 			os.environ["TALON_BUILDID"] = self.buildID
-			self.raptor.Info("Running %s", command)
+			self.raptor.Info("Running {0}".format(command))
 			looking = (os.system(command) != 0)
 			tries += 1
 		if looking:
@@ -875,7 +875,7 @@ include {0}
 			command = self.talonctl + " stop"
 			self.talonctl = ""
 			
-			self.raptor.Info("Running %s", command)
+			self.raptor.Info("Running {0}".format(command))
 			if os.system(command) != 0:
 				self.raptor.Error("Failed in {0}".format(command))
 				return False

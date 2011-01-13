@@ -23,7 +23,6 @@ def run():
 	t.name = "exe_armv5_winscw_single_file_baseline_build"
 
 	# Build component
-	t.id = "0089a"
 	t.command = "sbs -b smoke_suite/test_resources/simple_gui/Bld.inf -c armv5 -c winscw"
 	t.addbuildtargets('smoke_suite/test_resources/simple_gui/Bld.inf', [
 		"helloworld_exe/helloworld.mbm_bmconvcommands",
@@ -104,7 +103,6 @@ def run():
 	t.usebash = True
 
 	# Touch both a straight source and a resource file and confirm we can recompile in isolation without additional impact
-	t.id = "0089b"
 	t.name = "exe_armv5_winscw_single_file_touch_rebuild"
 	t.command = """
 		sleep 1
@@ -122,7 +120,6 @@ def run():
 	t.run()
 
 	# Attempt separate source and resource file compile where nothing should be done
-	t.id = "0089c"
 	t.name = "exe_armv5_winscw_single_file_notouch_rebuild"
 	t.command = "sbs -f - --source-target=smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp --source-target=smoke_suite/test_resources/simple_gui/HelloWorld.rss -b smoke_suite/test_resources/simple_gui/Bld.inf"
 	t.mustmatch = []
