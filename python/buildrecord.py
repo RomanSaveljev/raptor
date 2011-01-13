@@ -22,35 +22,36 @@ import raptor_makefile
 class BuildRecord(object):
 	"""Information about a build which can be used, amongst other purposes,
 	to assist incremental makefile generation.
-
+	
 	A new file is created in every build with the name #MAKEFILE#.buildrecord.
 	This file records of the names of the makefiles involved in a build and
 	the corresponding commandline that was given to raptor when it created
 	them.
-
+	
 	Raptor uses these records to determine if the current build can reuse
 	existing makefiles.  If the current build attempt's commandline and
-	"environment" match those of an existing record then the makefiles
+	'environment' match those of an existing record then the makefiles
 	referenced by the record can be reused.
-
-	Each layer in a build can produce a "makefileset" with makefiles for
+	
+	Each layer in a build can produce a 'makefileset' with makefiles for
 	all the stages of a build (export,bitmap,resource_deps,resource,default).
-	Hence buildrecords contain a list with one "set" for each layer and 
+	Hence buildrecords contain a list with one 'set' for each layer and 
 	each set is itself a list of makefiles, one per stage.
-
-	Build records also store the filenames of "metadeps" files (short for
+	
+	Build records also store the filenames of 'metadeps' files (short for
 	"Metadata Dependencies")  which list the metadata that each makefileset
 	depends on (e.g. the bld.infs and mmps that correspond to that makefileset).
 	"""
-
+	
 	stored_attrs = ['commandline', 'environment', 'topmakefilename']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
 	history_size = 10
 	parsefails = []
 	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None):
-	   	""" Create a new record of a build that is about to happen (in which case the default parameters
-		    maye be used) or a build that is complete.  Parameters must all be strings. """
-		
+		""" 	Create a new record of a build that is about to happen (in which case the default parameters
+			may be used) or a build that is complete.  Parameters must all be strings. 
+		"""
+
 		self.commandline = commandline
 		self.environment = environment
 		self.topmakefilename = topmakefilename
@@ -134,8 +135,6 @@ class BuildRecord(object):
 		sc = self.commandline.split(" ")
 
 		# cut out non-relevant stuff
-	"environment" match those of an existing record then 
-	the makefiles referenced by the record can be reused.
 		skipcount = 0
 		nsc = []
 		for s in sc:
@@ -214,8 +213,7 @@ class BuildRecord(object):
 				newbr.makefilesets = oldbr.makefilesets
 				newbr.uptodate = True
 				newbr.isold = True
-		return newbr	"environment" match those of an existing record then 
-	the makefiles referenced by the record can be reused.
+		return newbr
 
 
 

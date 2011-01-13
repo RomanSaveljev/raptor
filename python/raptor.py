@@ -612,7 +612,7 @@ class Layer(ModelNode):
 
 		build.Debug("Binding Makefile base name is %s ", binding_makefiles.filenamebase)
 		binding_makefiles.close()
-		b = build.Make(binding_makefiles,build_zero_flmcall_makefiles = True)
+		b = build.Make(binding_makefiles)
 		build.InfoEndTime(object_type = "layer", task = "build",
 				key = str(build.topMakefile))
 		return b
@@ -1290,10 +1290,9 @@ class Raptor(object):
 		return raptor_data.Evaluator(specification, configuration, gathertools=gathertools, cache = self.cache)
 
 
-	def Make(self, makefileset, build_zero_flmcall_makefiles = not self.ignore_zero_flmcall_makefiles)
-):
+	def Make(self, makefileset):
 		if not self.noBuild and makefileset is not None:
-			if self.maker.Make(makefileset, build_zero_flmcall_makefiles):
+			if self.maker.Make(makefileset, not self.ignore_zero_flmcall_makefiles):
 				self.Info("The make-engine exited successfully.")
 				return True
 			else:
