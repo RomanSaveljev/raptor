@@ -17,6 +17,9 @@
 """ Module for creating/manipulating an "audit trail" of builds """
 
 import raptor_makefile
+import os
+import stat
+import json
 
 
 class BuildRecord(object):
@@ -58,8 +61,8 @@ class BuildRecord(object):
 		self.uptodate = False # Do we need to regenerate the makefiles to reuse this build?
 		self.makefilesets=makefilesets #  an array of raptor_makefile.BaseMakefileset Object
 		self.filename = self.topmakefilename + ".buildrecord"
-		self.isold = False
-		self.outofdateitems = "" #record what was out of date in a user-readable form
+		self.reused = False
+		self.new_metadata = [] # record what was out of date
 
 	def to_file(self):
 		""" Write out the build record so that we can find it in future builds"""
@@ -102,7 +105,7 @@ class BuildRecord(object):
 		# the json structure matches what must be passed into the constructor
 		# quite well except for the makefilesets
 		try:
-			makefilesets = [ makefilesets.append(raptor_makefile.BaseMakefileSet.from_json(json_makefileset)) 
+			makefilesets = [ raptor_makefile.BaseMakefileSet.from_json(json_makefileset) 
 					 for json_makefileset in kargs['makefilesets']]
 		except raptor_makefile.JsonMakefileDecodeError,e:
 			raise Exception("Bad build record format: makefilesets element did not decode: {0}".format(str(e)))
@@ -208,23 +211,28 @@ class BuildRecord(object):
 		
 		# See if there is an old build record to reuse
 		for oldbr in cls.matching_records(adir, newbr):
-			if oldbr.check_uptodate():
+			if oldbr.check_uptodate(newbr.new_metadata):
 				newbr.topmakefilename = oldbr.topmakefilename
 				newbr.makefilesets = oldbr.makefilesets
 				newbr.uptodate = True
-				newbr.isold = True
+				newbr.reused = True
 		return newbr
 
 
 
-	def check_uptodate(self):
-		""" Return False if any of the metadata which th
+	def check_uptodate(self,triggers=[]):
+		""" Return False if any of the metadata is out of date
+		    update the list of triggers parameter with any
+	 	    items that are not uptodate. Logic is short-circuit.
 		"""
 		try:
+			# Loop gives a chance for exception to be thrown
 			for mset in self.makefilesets:
 				mset.check_uptodate()
+
+			# No exception so all must be uptodate
 			return True
 		except raptor_makefile.OutOfDateException,e:
-			self.outofdateitems+= " " + mset.metadepsfilename
+			triggers.extend(e.items)
 
 		return False

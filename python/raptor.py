@@ -1570,11 +1570,12 @@ class Raptor(object):
 			must_create_makefiles = True
 			if self.incremental_parsing:
 				self.build_record = BuildRecord.from_old(adir = str(self.topMakefile.Dir()), commandline=" ".join(self.args), environment = environment, topmakefile = str(makefile))
-				must_create_makefiles = self.build_record.isold
-				if create_makefiles:
-					self.Info("incremental makefile generation: out of date items:" + self.build_record.outofdateitems)
+				must_create_makefiles = not self.build_record.reused
+				if must_create_makefiles:
+					if len(self.build_record.new_metadata) > 0:
+						self.Info("incremental makefile generation: out of date items:  {0}".format("  ".join(set(self.build_record.new_metadata))))
 			else:
-				self.build_record = BuildRecord(commandline=" ".join(self.args), environment = environment, topmakefilename = str(makefile))
+				self.build_record = BuildRecord(commandline=" ".join(self.args), environment = environment, topmakefilename = str(makefile), makefilesets=[])
 
 			if must_create_makefiles:
 				if self.incremental_parsing:
