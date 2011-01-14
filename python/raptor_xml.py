@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -74,7 +74,7 @@ def Read(Raptor, filename):
 
 	# check that the file matches the expected schema
 	if not fileVersion.endswith(xsdVersion):
-		Raptor.Warn("file '%s' uses schema '%s' which does not end with the expected version '%s'", filename, fileVersion, xsdVersion)
+		Raptor.Warn("file '{0}' uses schema '{1}' which does not end with the expected version '{2}'".format(filename, fileVersion, xsdVersion))
 
 	# create a Data Model object from each sub-element
 	for child in build.childNodes:
@@ -85,7 +85,7 @@ def Read(Raptor, filename):
 				if o is not None:
 					objects.append(o)
 			except raptor_data.InvalidChildError:
-				Raptor.Warn("Invalid element %s in %s", child.localName, filename)
+				Raptor.Warn("Invalid element {0} in {1}".format(child.localName, filename))
 
 	# discard the XML
 	dom.unlink()
@@ -100,7 +100,7 @@ def XMLtoDataModel(Raptor, node):
 		constructor = _constructors[node.localName]
 
 	except KeyError:
-		Raptor.Warn("Unknown element %s", node.localName)
+		Raptor.Warn("Unknown element {0}".format(node.localName))
 		return
 
 	model = constructor()
@@ -262,11 +262,11 @@ class SystemModel(object):
 		return components
 	def DumpLayerInfo(self, aLayer):
 		if self.HasLayer(aLayer):
-			self.__Logger.Info("Found %d bld.inf references in layer \"%s\"", len(self.GetLayerComponents(aLayer)), aLayer)
+			self.__Logger.Info("Found {0} bld.inf references in layer \"{1}\"".format(len(self.GetLayerComponents(aLayer)), aLayer))
 
 	def DumpInfo(self):
-		self.__Logger.Info("Found %d bld.inf references in %s within %d layers:", len(self.GetAllComponents()), self.__SystemDefinitionFile, len(self.GetLayerNames()))
-		self.__Logger.Info("\t%s", ", ".join(self.GetLayerNames()))
+		self.__Logger.Info("Found {0} bld.inf references in {1} within {2} layers:".format(len(self.GetAllComponents()), self.__SystemDefinitionFile, len(self.GetLayerNames())))
+		self.__Logger.Info("\t{0}".format(", ".join(self.GetLayerNames())))
 		self.__Logger.InfoDiscovery(object_type = "layers",
 				count = len(self.GetLayerNames()))
 		self.__Logger.InfoDiscovery(object_type = "bld.inf references",
@@ -313,17 +313,17 @@ class SystemModel(object):
 
 	def __Read(self):
 		if not os.path.exists(self.__SystemDefinitionFile):
-			self.__Logger.Error("System Definition file %s does not exist", self.__SystemDefinitionFile)
+			self.__Logger.Error("System Definition file {0} does not exist".format(self.__SystemDefinitionFile))
 			return False
 
-		self.__Logger.Info("System Definition file %s", self.__SystemDefinitionFile)
+		self.__Logger.Info("System Definition file {0}".format(self.__SystemDefinitionFile))
 
 		# try to read the XML file
 		try:
 			self.__DOM = xml.dom.minidom.parse(self.__SystemDefinitionFile)
 
 		except: # a whole bag of exceptions can be raised here
-			self.__Logger.Error("Failed to parse XML file %s", self.__SystemDefinitionFile)
+			self.__Logger.Error("Failed to parse XML file {0}".format(self.__SystemDefinitionFile))
 			return False
 
 		# <SystemDefinition> is always the root element

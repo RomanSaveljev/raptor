@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -1124,7 +1124,7 @@ def GetBuildUnits(configNames, cache, logger):
 		elif base in cache.variants:
 			x = cache.FindNamedVariant(base)
 		else:
-			logger.Error("Unknown build configuration '%s'" % base)
+			logger.Error("Unknown build configuration '{0}'".format(base))
 			continue
 
 		x.ClearModifiers()
@@ -1133,7 +1133,7 @@ def GetBuildUnits(configNames, cache, logger):
 			if m in cache.variants:
 				x.AddModifier( cache.FindNamedVariant(m) )
 			else:
-				logger.Error("Unknown build variant '%s'" % m)
+				logger.Error("Unknown build variant '{0}'".format(m))
 				ok = False
 				
 		if ok:
@@ -1166,7 +1166,7 @@ def GetBuildUnits(configNames, cache, logger):
 					modObj = copy.copy(obj)
 					modObj.modifiers = x.GetModifiers(cache)
 				except BadReferenceError,e:
-					logger.Error("Unknown reference '%s'" % str(e))
+					logger.Error("Unknown reference '{0}'".format(str(e)))
 				else:
 					models.append(modObj)
 		except Exception, e:
@@ -1238,7 +1238,7 @@ class Tool(object):
 			self.date = testfile_stat.st_mtime
 		except Exception,e:
 			# We really don't mind if the tool could not be dated - for any reason
-			Tool.log.Debug("toolcheck: '%s=%s' cannot be dated - this is ok, but the toolcheck won't be able to tell when a new version of the tool is installed. (%s)", self.name, self.command, str(e))
+			Tool.log.Debug("toolcheck: '{0}={1}' cannot be dated - this is ok, but the toolcheck won't be able to tell when a new version of the tool is installed. ({2})".format(self.name, self.command, str(e)))
 			pass
 	
 			
@@ -1247,9 +1247,9 @@ class Tool(object):
 		self.vre = re.compile(self.versionresult)
 
 		try:
-			self.log.Debug("Pre toolcheck: '%s' for version '%s'", self.name, self.versionresult)
+			self.log.Debug("Pre toolcheck: '{0}' for version '{1}'".format(self.name, self.versionresult))
 			p = subprocess.Popen(args=[shell, "-c", self.versioncommand], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-			log.Debug("Checking tool '%s' for version '%s'", self.name, self.versionresult)
+			log.Debug("Checking tool '{0}' for version '{1}'".format(self.name, self.versionresult))
 			versionoutput,err = p.communicate()
 		except Exception,e:
 			versionoutput=None
@@ -1260,7 +1260,7 @@ class Tool(object):
 		versionoutput_a = versionoutput.translate(Tool.identity_chartable,"")
 
 		if versionoutput_a and self.vre.search(versionoutput_a) != None:
-			log.Debug("tool '%s' returned an acceptable version '%s'", self.name, versionoutput_a)
+			log.Debug("tool '{0}' returned an acceptable version '{1}'".format(self.name, versionoutput_a))
 			self.valid = True
 		else:
 			self.valid = False
@@ -1365,18 +1365,18 @@ class ToolSet(object):
 
 										ce[name] = val
 									self.__toolcheckcache[toolhistory[0]] = ce
-								log.Info("Loaded toolcheck cache: %s", self.cachefilename)
+								log.Info("Loaded toolcheck cache: {0}".format(self.cachefilename))
 							except Exception, e:
-								log.Info("Ignoring garbled toolcheck cache: %s (%s)", self.cachefilename, str(e))
+								log.Info("Ignoring garbled toolcheck cache: {0} ({1})".format(self.cachefilename, str(e)))
 								self.__toolcheckcache = {}
 									
 						else:
-							log.Info("Toolcheck cache %s ignored - environment changed", self.cachefilename)
+							log.Info("Toolcheck cache {0} ignored - environment changed".format(self.cachefilename))
 					else:
-						log.Info("Toolcheck cache not loaded = marker missing: %s %s", self.cachefilename, ToolSet.filemarker)
+						log.Info("Toolcheck cache not loaded = marker missing: {0} {1}".format(self.cachefilename, ToolSet.filemarker))
 					f.close()
 				except IOError, e:
-					log.Info("Failed to load toolcheck cache: %s", self.cachefilename)
+					log.Info("Failed to load toolcheck cache: {0}".format(self.cachefilename))
 		else:
 			log.Debug("Toolcheck cachefile not created because EPOCROOT not set in environment.")
 
@@ -1388,10 +1388,10 @@ class ToolSet(object):
 			p = subprocess.Popen(args=[ToolSet.shell, '--version'], bufsize=1024, shell = False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 			shellversion_out, errtxt = p.communicate()
 			if ToolSet.shell_re.search(shellversion_out) == None:
-				self.log.Error("A critical tool, '%s', did not return the required version '%s':\n%s\nPlease check that '%s' is in the path.", ToolSet.shell, ToolSet.shell_version, shellversion_out, ToolSet.shell)
+				self.log.Error("A critical tool, '{0}', did not return the required version '{1}':\n{2}\nPlease check that '{3}' is in the path.".format(ToolSet.shell, ToolSet.shell_version, shellversion_out, ToolSet.shell))
 				self.valid = False
 		except Exception,e:
-			self.log.Error("A critical tool could not be found.\nPlease check that '%s' is in the path. (%s)", ToolSet.shell,  str(e))
+			self.log.Error("A critical tool could not be found.\nPlease check that '{0}' is in the path. ({1})".format(ToolSet.shell,  str(e)))
 			self.valid = False
 
 		return self.valid
@@ -1421,21 +1421,21 @@ class ToolSet(object):
 					# if the cache has an entry for the tool then see if the date on
 					# the tool has changed (assuming the tool is a simple executable file)
 					if t.has_key('date') and (tool.date is None or (tool.date - t['date'] > 0.1))  :
-						self.log.Debug("toolcheck forced: '%s'  changed since the last check: %s < %s", tool.command, str(t['date']), str(tool.date))
+						self.log.Debug("toolcheck forced: '{0}'  changed since the last check: {1} < {2}".format(tool.command, str(t['date']), str(tool.date)))
 					else:
 						t['age'] = 0 # we used it so it's obviously needed
 						self.valid = self.valid and t['valid']
-						self.log.Debug("toolcheck saved on: '%s'", tool.name)
+						self.log.Debug("toolcheck saved on: '{0}'".format(tool.name))
 						continue
 
 
-			self.log.Debug("toolcheck done: %s -key: %s" % (tool.name, tool.key))
+			self.log.Debug("toolcheck done: {0} -key: {1}".format(tool.name, tool.key))
 
 			try:
 				tool.check(ToolSet.shell, evaluator, log = self.log)
 			except ToolErrorException, e:
 				self.valid = False
-				self.log.Error("%s\n" % str(e))
+				self.log.Error("{0}\n".format(str(e)))
 
 			# Tool failures are cached just like successes - don't want to repeat them
 			cache[tool.key] =  { "name" : tool.name, "valid" : tool.valid, "age" : 0 , "date" : tool.date }
@@ -1450,7 +1450,7 @@ class ToolSet(object):
 
 		# Write out the cache.
 		if self.checked and ToolSet.cachefile_basename:
-			self.log.Debug("Saving toolcache: %s", self.cachefilename)
+			self.log.Debug("Saving toolcache: {0}".format(self.cachefilename))
 			try:
 				f = open(self.cachefilename, "w+")
 				f.write(ToolSet.filemarker+"\n")
@@ -1469,9 +1469,9 @@ class ToolSet(object):
 							f.write("%s=%s," % (n,str(v)))
 					f.write("\n")
 				f.close()
-				self.log.Info("Created/Updated toolcheck cache: %s\n", self.cachefilename)
+				self.log.Info("Created/Updated toolcheck cache: {0}\n".format(self.cachefilename))
 			except Exception, e:
-				self.log.Info("Could not write toolcheck cache: %s", str(e))
+				self.log.Info("Could not write toolcheck cache: {0}".format(str(e)))
 		return self.valid
 
 class UninitialisedVariableException(Exception):

@@ -461,7 +461,7 @@ include {0}
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
-			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
+			self.raptor.Error("Failed to write makefile '{0}': {1} : {2}".format(str(toplevel),str(e),tb))
 			makefileset = None
 
 		return makefileset
@@ -631,7 +631,7 @@ include {0}
 		if self.initCommand:
 			self.raptor.Info("Running {0}".format(self.initCommand))
 			if os.system(self.initCommand) != 0:
-				self.raptor.Error("Failed in %s", self.initCommand)
+				self.raptor.Error("Failed in {0}".format(self.initCommand))
 				self.Tidy()
 				return False
 
@@ -721,7 +721,7 @@ include {0}
 			# output across our xml.
 			stderrfilename = makefile+'.stderr'
 			stdoutfilename = makefile+'.stdout'
-			command += " 2>'{0}' ".format(stderrfilename)
+			command += " 2>'%s' " % stderrfilename
 
 			# Keep a copy of the stdout too in the case of using the 
 			# annofile - so that we can trap the problem that
@@ -835,7 +835,7 @@ include {0}
 			command = self.talonctl + " start"
 
 			os.environ["TALON_BUILDID"] = self.buildID
-			self.raptor.Info("Running %s", command)
+			self.raptor.Info("Running {0}".format(command))
 			looking = (os.system(command) != 0)
 			tries += 1
 		if looking:
@@ -850,7 +850,7 @@ include {0}
 			command = self.talonctl + " stop"
 			self.talonctl = ""
 			
-			self.raptor.Info("Running %s", command)
+			self.raptor.Info("Running {0}".format(command))
 			if os.system(command) != 0:
 				self.raptor.Error("Failed in {0}".format(command))
 				return False
