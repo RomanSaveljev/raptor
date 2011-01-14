@@ -46,7 +46,7 @@ import time
 import traceback
 import pluginbox
 from xml.sax.saxutils import escape
-from buildrecord import *
+from buildrecord import BuildRecord
 import json
 
 
