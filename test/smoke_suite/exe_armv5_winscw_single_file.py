@@ -124,14 +124,13 @@ def run():
 	t.command = "sbs -f - --source-target=smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp --source-target=smoke_suite/test_resources/simple_gui/HelloWorld.rss -b smoke_suite/test_resources/simple_gui/Bld.inf"
 	t.mustmatch = []
 	t.countmatch = [
-		[".*make.*Nothing to be done for.*SOURCETARGET_.*", 8]
+		[".*make.*Nothing to be done for.*SOURCETARGET_.*", 10]
 	]
 	t.mustnotmatch = [
 		".*recipe name='(resourcecompile|win32compile2object|compile|win32simplelink|postlink|link)'.*"
 	]
 	t.run()
 
-	t.id = "89"
 	t.name = "exe_armv5_winscw_single_file"
 	t.description = """Builds a component and tests single file compilation for straight source and resource files"""
 	t.print_result()
