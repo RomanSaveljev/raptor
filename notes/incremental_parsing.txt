@@ -34,11 +34,15 @@ The judgement about whether a set of makefiles can be reused is made on two crit
 
   1) The environment: currently only the "EPOCROOT" and "PATH"
   environment variables are compared between two builds - if these differ
-  then the builds are not equivalent.
+  then the builds are not equivalent. This attempts to ensure that 
+  two builds are building against the same SDK with the same tools but 
+  since not all tools have to be on the path there is room for some
+  degree of error e.g. if you upgraded tools or the SDK itself between
+  two builds.
 
   2) The commandline: if the commandline for two builds is different then
   the makefiles are considered different.  This *very* conservative but
-  that seems the right with a build system.  There are 3 exceptions.
+  that seems right with a build system.  There are 3 exceptions.
       i) The "--ip=on" command itself is not considered to count as a 
          difference
      ii) The "clean" target is ignored.  This means that building code and 
@@ -63,8 +67,8 @@ them.
 
 Raptor uses these records to determine if the current build can reuse
 existing makefiles.  If the current build attempt's commandline and
-"environment" match those of an existing record then 
-the makefiles referenced by the record can be reused.
+"environment" match those of an existing record then the makefiles
+referenced by the record can be reused.
 
 Build record files are written in JSON format.
 

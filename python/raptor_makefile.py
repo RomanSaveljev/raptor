@@ -45,6 +45,15 @@ class BaseMakefile(object):
 		    callcount -- is the number of FLM calls in the makefile.
 		    defaulttargets -- variable indicates what targets to supply when running the makefile without
 			any user specified targets.
+		    ignoretargets -- A regular expression string that can be used to indicate what makefile targets
+			should be removed from the make commandline when building this makefile.
+			It is essentially a way of saying that if an overall build is being done and the overall
+			target is, for example, "EXPORT" that this particular makefile doesn't and never will 
+			supply that target and that therefore one should not ask it to produce such a target.
+			In some situations this allows one to avoid having errors in logfiles which 
+			make the user think, incorrectly, that there was some problem.
+		    name -- A name that might be used to identify this makefile within some list of makefiles 
+			(e.g. the name of a build stage or similar).
 		"""
 		    
 		self.filename = filename
@@ -204,7 +213,7 @@ class Makefile(BaseMakefile):
 		
 class OutOfDateException(Exception):
 	def __init__(self, text="", items=[]):
-		""" items - strings representing files or other itens that are out of date"""
+		""" items - strings representing files or other items that are out of date"""
 		super(OutOfDateException,self).__init__(text)
 		self.items = items
 

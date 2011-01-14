@@ -218,12 +218,15 @@ class BuildRecord(object):
 				newbr.reused = True
 		return newbr
 
-
-
 	def check_uptodate(self,triggers=[]):
-		""" Return False if any of the metadata is out of date
-		    update the list of triggers parameter with any
-	 	    items that are not uptodate. Logic is short-circuit.
+		""" Return False if any of the metadata is out of date.
+		    triggers -- a list which will be extended with 
+			some number of metadata filenames that are
+			out of date.  The list will be unaltered if
+			all metadata is uptodate and any additions
+			to the list cannot be considered to be a
+			comprehensive list of what's out of date.
+			The list could conceivably become very long.
 		"""
 		try:
 			# Loop gives a chance for exception to be thrown

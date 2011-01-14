@@ -1,6 +1,15 @@
 Naming Output Files
 --------------------
 
+This document describes how to cause output files from a build
+to be named so that they are  related (so one can group them)
+but distinguished (so that they don't overwrite each other).
+
+Examples would be logfiles, annotation files, history files etc.
+
+
+Multiple Builds
+----------------
 In a situation where several builds are done, one after the other by
 some automation system, the makefiles and log files are named so that
 they don't clash - this way it is possible for the logs and makefiles
@@ -51,17 +60,24 @@ make for every invocation of raptor:
   winscw_01012010.mk.resource
   winscw_01012010.mk.default
 
+Ask can be seen, Raptor takes the argument to "-m" as a "base" for the 
+filename of the makefiles it generates.
+
 If we had a hypothetical build engine, called "wmake" for example,
 and it offered an annotation feature then we could tell it to create
-the files with a unique name by piggy-backing on the makefile name e.g.
+the annotation files with a unique name by copying the makefile 
+name we supplied to "-m" e.g.
 
   sbs -e wmake -m ncp_01012010.mk -c all_variants --mo=--annofile=ncp_01012010.anno
 
 This would work badly, however, because Raptor actually runs make 5 times
 - once for each stage and each of these stages has a different makefile
-with different recipes so the annotation file would get overwritten 4
-times and we would be left with only the data from the "default" stage -
-no annotation data for "resource" or "bitmap".
+with different recipes.  Raptor knows how to create unique makefiles 
+automatically but it doesn't understand the "--annofile" option which is 
+being passed through to wmake so it has no way of also making that unique.
+The annotation file would get overwritten 4 times and we would be left
+with only the data from the "default" stage - no annotation data for
+"resource" or "bitmap".
 
 So Raptor provides a feature which replaces the string "#MAKEFILE#"
 with the full makefile name, including the stage:
