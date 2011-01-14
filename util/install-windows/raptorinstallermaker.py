@@ -229,21 +229,12 @@ if __name__ == "__main__":
 
 	if not options.noexe:
 		makensispath = unzipnsis("." + os.sep + "NSIS.zip")
-		# On Windows, the command line switches have the form
-		# /D and on Linux they have the form -D
-		if "win" in sys.platform.lower():
-			switch="/"
-		else:
-			switch="-"
-
-		nsiscommand = (makensispath + " " \
-					"{switch_char}DRAPTOR_LOCATION={sbs_home} " \
-					"{switch_char}DBV_LOCATION={bv} " \
-					"{switch_char}DCYGWIN_LOCATION={cygwin} " \
-					"{switch_char}DMINGW_LOCATION={mingw} " \
-					"{switch_char}DPYTHON_LOCATION={python} "  \
-					"{switch_char}DRAPTOR_VERSION={sbs_version} " \
-					"{nsis_script}").format(switch_char = switch, 
+		command_string = "{makensis} -DRAPTOR_LOCATION={sbs_home} " \
+					"-DBV_LOCATION={bv} -DCYGWIN_LOCATION={cygwin} " \
+					"-DMINGW_LOCATION={mingw} -DPYTHON_LOCATION={python} "  \
+					"-DRAPTOR_VERSION={sbs_version} {nsis_script}"
+		
+		nsiscommand = command_string.format(makensis = makensispath,
 					sbs_home = options.sbshome, 
 					bv = win32supportdirs["bv"], 
 					cygwin = win32supportdirs["cygwin"],
