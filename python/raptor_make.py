@@ -721,7 +721,7 @@ include {0}
 			# output across our xml.
 			stderrfilename = makefile+'.stderr'
 			stdoutfilename = makefile+'.stdout'
-			command += " 2>'%s' " % stderrfilename
+			command += " 2>'{0}' ".format(stderrfilename)
 
 			# Keep a copy of the stdout too in the case of using the 
 			# annofile - so that we can trap the problem that

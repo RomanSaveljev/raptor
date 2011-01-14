@@ -114,8 +114,7 @@ def XMLtoDataModel(Raptor, node):
 				model.SetProperty(attribute.localName, attribute.value)
 
 			except raptor_data.InvalidPropertyError:
-				Raptor.Warn("Can't set attribute %s for element %s",
-							 attribute.localName, node.localName)
+				Raptor.Warn("Can't set attribute {0} for element {1}".format(attribute.localName, node.localName))
 
 	# add the sub-elements
 	for child in node.childNodes:
@@ -127,8 +126,7 @@ def XMLtoDataModel(Raptor, node):
 					model.AddChild(gc)
 
 			except raptor_data.InvalidChildError:
-				Raptor.Warn("Can't add child %s to element %s",
-							 child.localName, node.localName)
+				Raptor.Warn("Can't add child {0} to element {1}".format(child.localName, node.localName))
 
 	# only return a valid object (or raise error)
 	if model.Valid():
@@ -223,7 +221,8 @@ class SystemModel(object):
 		Component object.
 		'''
 		if layername == '':
-			raise Exception("Can't add a component ({0}) without a layer name to a system defintion file".format(str(aComponent.bldinf_filename)))
+			raise Exception("Can't add a component ({0}) without a layer name"
+                                        " to a system defintion file".format(str(aComponent.bldinf_filename)))
 
 		containers = {'layer':layername,'component':aComponent.name}
 		component = SystemModelComponent(aComponent.bldinf_filename, layername, containers, self.__SystemDefinitionFile, self.__SystemDefinitionBase, self.__Version)
@@ -237,7 +236,7 @@ class SystemModel(object):
 
 	def GetLayerComponents(self, aLayer):
 		if not self.HasLayer(aLayer):
-			self.__Logger.Error("System Definition layer \"%s\" does not exist in %s", aLayer, self.__SystemDefinitionFile)
+			self.__Logger.Error("System Definition layer \"{0}\" does not exist in {1}".format(aLayer, self.__SystemDefinitionFile))
 			return []
 
 		return self.__LayerDetails[aLayer]
@@ -245,8 +244,9 @@ class SystemModel(object):
 	def IsLayerBuildable(self, aLayer):
 		if aLayer in self.__MissingBldInfs:
 			for missingbldinf in self.__MissingBldInfs[aLayer]:
-				self.__Logger.Error("System Definition layer \"%s\" from system definition file \"%s\" " + \
-								    "refers to non existent bld.inf file %s", aLayer, self.__SystemDefinitionFile, missingbldinf)
+				self.__Logger.Error("System Definition layer \"{0}\""
+                                                    " from system definition file \"{1}\""
+                                                    " refers to non existent bld.inf file {2}".format(aLayer, self.__SystemDefinitionFile, missingbldinf))
 
 		if len(self.GetLayerComponents(aLayer)):
 			return True
@@ -338,7 +338,7 @@ class SystemModel(object):
 		version = re.match(r'(?P<MAJOR>\d)\.(?P<MID>\d)(\.(?P<MINOR>\d))?', self.__SystemDefinitionElement.getAttribute("schema"))
 
 		if not version:
-			self.__Logger.Error("Cannot determine schema version of XML file %s", self.__SystemDefinitionFile)
+			self.__Logger.Error("Cannot determine schema version of XML file {0}".format(self.__SystemDefinitionFile))
 			return False
 
 		self.__Version['MAJOR'] = int(version.group('MAJOR'))
@@ -364,11 +364,13 @@ class SystemModel(object):
 			if self.__SystemDefinitionBase and self.__SystemDefinitionBase != ".":
 				self.__ComponentRoot = self.__SystemDefinitionBase
 				if os.environ.has_key('SRCROOT'):
-					self.__Logger.Info("Command line specified System Definition file base \'%s\' overriding environment SRCROOT \'%s\'", self.__SystemDefinitionBase, os.environ['SRCROOT'])
+					self.__Logger.Info("Command line specified System Definition file base \'{0}\'"
+                                                           " overriding environment SRCROOT \'{1}\'".format(self.__SystemDefinitionBase, os.environ['SRCROOT']))
 				elif os.environ.has_key('SOURCEROOT'):
-					self.__Logger.Info("Command line specified System Definition file base \'%s\' overriding environment SOURCEROOT \'%s\'", self.__SystemDefinitionBase, os.environ['SOURCEROOT'])
+					self.__Logger.Info("Command line specified System Definition file base \'{0}\'"
+                                                           " overriding environment SOURCEROOT \'{1}\'".format(self.__SystemDefinitionBase, os.environ['SOURCEROOT']))
 		else:
-			self.__Logger.Error("Cannot process schema version %s of file %s", version.string, self.__SystemDefinitionFile)
+			self.__Logger.Error("Cannot process schema version {0} of file {1}".format(version.string, self.__SystemDefinitionFile))
 			return False
 
 		if self.__Version['MAJOR'] >= 3:
@@ -457,7 +459,7 @@ class SystemModel(object):
 						else:
 							# Assume that this is an error i.e. don't attempt to resolve in relation to SOURCEROOT
 							bldInfRoot = None
-							self.__Logger.Error("Cannot resolve \'root\' attribute value \"%s\" in %s", rootValue, self.__SystemDefinitionFile)
+							self.__Logger.Error("Cannot resolve \'root\' attribute value \"{0}\" in {1}".format(rootValue, self.__SystemDefinitionFile))
 							return
 
 				bldinfval = generic_path.Path(bldFileValue)
@@ -497,7 +499,7 @@ class SystemModel(object):
 						self.__LayerDetails[layer].append(component)
 						self.__TotalComponents += 1
 					else:
-						self.__Logger.Error("No containing layer found for %s in %s", str(bldinf), self.__SystemDefinitionFile)
+						self.__Logger.Error("No containing layer found for {0} in {1}".format(str(bldinf), self.__SystemDefinitionFile))
 
 		# search the sub-elements
 		for child in aElement.childNodes:

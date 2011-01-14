@@ -1067,7 +1067,7 @@ class Raptor(object):
 
 	def AddTarget(self, target):
 		if self.doCheck or self.doWhat:
-			self.Warn("ignoring target {0} because --what or --check is specified.\n".formatt(target))
+			self.Warn("ignoring target {0} because --what or --check is specified.\n".format(target))
 		else:
 			self.targets.append(target)
 
@@ -1498,7 +1498,7 @@ class Raptor(object):
 		self.endtime = time.time()
 		self.runtime = int(0.5 + self.endtime - self.starttime)
 		self.raptor_params.runtime = self.runtime
-		self.Info("Run time %s seconds" % self.runtime)
+		self.Info("Run time {0} seconds".format(self.runtime))
 
 	def AssertBuildOK(self):
 		"""Raise a BuildCannotProgressException if no further processing is required
@@ -1540,8 +1540,9 @@ class Raptor(object):
 			progress_namespace = "http://symbian.com/xml/build/log/progress"
 			schema = "http://symbian.com/xml/build/log/1_0.xsd"
 
-			self.out.write("<buildlog sbs_version=\"%s\" xmlns=\"%s\" xmlns:progress=\"%s\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"%s %s\">\n"
-						   % (raptor_version.fullversion(), namespace, progress_namespace, namespace, schema))
+			self.out.write("<buildlog sbs_version=\"{0}\" xmlns=\"{1}\" xmlns:progress=\"{2}\""
+                                       " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"{3} {4}\">\n".format(
+				       raptor_version.fullversion(), namespace, progress_namespace, namespace, schema))
 			self.logOpen = True
 		except Exception,e:
 			self.out = sys.stdout # make sure that we can actually get errors out.
@@ -1701,7 +1702,7 @@ class Raptor(object):
 		import raptor_api
 		api = raptor_api.Context(self)
 		
-		print "<sbs version='%s'>" % raptor_version.numericversion()
+		print "<sbs version='{0}'>".format(raptor_version.numericversion())
 		
 		for q in self.queries:
 			try:
