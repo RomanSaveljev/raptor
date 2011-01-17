@@ -2364,26 +2364,32 @@ class MMPRaptorBackend(MMPBackend):
 		# Specifying both a PAGED* and its opposite UNPAGED* keyword in a .mmp file
 		# will generate a warning and the last keyword specified will take effect.
 		self.__pageConflict.reverse()
+		self.__explicitpagedcode = False
 		if "PAGEDCODE" in self.__pageConflict and "UNPAGEDCODE" in self.__pageConflict:
 			for x in self.__pageConflict:
 				if x == "PAGEDCODE" or x == "UNPAGEDCODE":
 					self.__Raptor.Warn("Both PAGEDCODE and UNPAGEDCODE are specified. The last one {0} will take effect".format(x))
 					if x == "PAGEDCODE":
-						self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
+						self.__explicitpagedcode = True
 					break
 		elif "PAGEDCODE" in self.__pageConflict:
-			self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
+			self.__explicitpagedcode = True
 				
 		if "PAGEDDATA" in self.__pageConflict and "UNPAGEDDATA" in self.__pageConflict:
 			for x in self.__pageConflict:
 				if x == "PAGEDDATA" or x == "UNPAGEDDATA":
 					self.__Raptor.Warn("Both PAGEDDATA and UNPAGEDDATA are specified. The last one {0} will take effect".format(x))
-					if x == "PAGEDDATA":
-						self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
 					break
-		elif "PAGEDDATA" in self.__pageConflict:
-			self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
 
+		# Validate "compression" keywords against "paging" keywords
+		if self.__compressionKeyword:
+			if self.__explicitpagedcode:
+				if self.__compressionKeyword in ["COMPRESSTARGET", "INFLATECOMPRESSTARGET"]:
+					self.__Raptor.Warn("Cannot use {0} with PAGEDCODE, forcing BYTEPAIRCOMPRESSTARGET instead".format(self.__compressionKeyword))
+					self.__compressionKeyword = "BYTEPAIRCOMPRESSTARGET"
+			self.__debug("Set switch " + self.__compressionKeyword + " ON")
+			self.BuildVariant.AddOperation(raptor_data.Set(self.__compressionKeyword, "1"))
+		
 		# Set Debuggable
 		self.BuildVariant.AddOperation(raptor_data.Set("DEBUGGABLE", self.__debuggable))
 
@@ -2428,16 +2434,12 @@ class MMPRaptorBackend(MMPBackend):
 		return self.__targettype.lower()
 
 	def resolveCompressionKeyword(self, aCompressionKeyword):
-		"""If a compression keyword is set more than once either explicitly
-		or implicitly a warning is given and the last one takes effect 
+		"""If a compression keyword is set more than once then a warning is 
+		given and the last one takes effect.
 		"""
 		if self.__compressionKeyword and self.__compressionKeyword != aCompressionKeyword:
 			self.__Raptor.Warn("{0} keyword in {1} overrides earlier use of {2}".format
 						(aCompressionKeyword, self.__currentMmpFile, self.__compressionKeyword))
-			self.BuildVariant.AddOperation(raptor_data.Set(self.__compressionKeyword, ""))
-			self.__debug( "Set switch " + self.__compressionKeyword + " OFF")
-		self.BuildVariant.AddOperation(raptor_data.Set(aCompressionKeyword,"1"))
-		self.__debug( "Set switch " + aCompressionKeyword + " ON")
 		self.__compressionKeyword = aCompressionKeyword
 
 	def checkImplibDefFile(self, defFile):

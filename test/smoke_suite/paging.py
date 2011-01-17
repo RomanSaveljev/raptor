@@ -131,6 +131,104 @@ def run():
 	t.warnings = 0
 	t.run()
 	
+	t.name = "paging_unpagedcode_compress"
+	t.command = cmd_prefix + "-p unpagedcode_compress.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=unpaged", 
+			"--datapaging=default",
+			"--compressionmethod=inflate"
+			]
+	t.mustnotmatch = [
+			"--compressionmethod=bytepair",
+			"--uncompressed"
+			]
+	t.warnings = 0
+	t.run()
+	
+	t.name = "paging_pagedcode_uncompress"
+	t.command = cmd_prefix + "-p pagedcode_uncompress.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=paged", 
+			"--datapaging=default",
+			"--uncompressed"
+			]
+	t.mustnotmatch = [
+			"--compressionmethod=bytepair",
+			"--compressionmethod=inflate"
+			]
+	t.warnings = 0
+	t.run()
+	
+	t.name = "paging_unpagedcode_uncompress"
+	t.command = cmd_prefix + "-p unpagedcode_uncompress.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=unpaged", 
+			"--datapaging=default",
+			"--uncompressed"
+			]
+	t.mustnotmatch = [
+			"--compressionmethod=bytepair",
+			"--compressionmethod=inflate"
+			]
+	t.warnings = 0
+	t.run()
+	
+	t.name = "paging_pagedcode_bytepair"
+	t.command = cmd_prefix + "-p pagedcode_bytepair.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=paged", 
+			"--datapaging=default",
+			"--compressionmethod=bytepair"
+			]
+	t.mustnotmatch = [
+			"--compressionmethod=inflate",
+			"--uncompressed"
+			]
+	t.warnings = 0
+	t.run()
+	
+	t.name = "paging_unpagedcode_bytepair"
+	t.command = cmd_prefix + "-p unpagedcode_bytepair.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=unpaged", 
+			"--datapaging=default",
+			"--compressionmethod=bytepair"
+			]
+	t.mustnotmatch = [
+			"--uncompressed",
+			"--compressionmethod=inflate"
+			]
+	t.warnings = 0
+	t.run()
+	
+	t.name = "paging_pagedcode_inflate"
+	t.command = cmd_prefix + "-p pagedcode_inflate.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=paged", 
+			"--datapaging=default",
+			"--compressionmethod=bytepair"
+			]
+	t.mustnotmatch = [
+			"--compressionmethod=inflate",
+			"--uncompressed"
+			]
+	t.warnings = 1
+	t.run()
+	
+	t.name = "paging_unpagedcode_inflate"
+	t.command = cmd_prefix + "-p unpagedcode_inflate.mmp" + cmd_suffix
+	t.mustmatch_singleline = [
+			"--codepaging=unpaged", 
+			"--datapaging=default",
+			"--compressionmethod=inflate"
+			]
+	t.mustnotmatch = [
+			"--uncompressed",
+			"--compressionmethod=bytepair"
+			]
+	t.warnings = 0
+	t.run()
+	
 	# test the pre-WDP paging options --paged and --unpaged
 	# there is an os_properties.xml file in test/config that
 	# turns POSTLINKER_SUPPORTS_WDP off
