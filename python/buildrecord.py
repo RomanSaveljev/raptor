@@ -205,7 +205,7 @@ class BuildRecord(object):
 	@classmethod
 	def from_old(cls,  adir, commandline, environment, topmakefile):
 		"""Create a build record for this build. Try to make it from an older one 
-		   and use its existing makefiles if they are uptodate."""
+		   and use its existing makefiles if they are up-to-date."""
 
 		newbr = cls(commandline, environment, topmakefile)
 		
@@ -219,21 +219,24 @@ class BuildRecord(object):
 		return newbr
 
 	def check_uptodate(self,triggers=[]):
-		""" Return False if any of the metadata is out of date.
-		    triggers -- a list which will be extended with 
-			some number of metadata filenames that are
-			out of date.  The list will be unaltered if
-			all metadata is uptodate and any additions
-			to the list cannot be considered to be a
-			comprehensive list of what's out of date.
-			The list could conceivably become very long.
+		""" 
+			Return False if any of the metadata is out of date.
+
+		    triggers -- a list which will be extended with
+			  some number of metadata filenames that are out of date.
+			  The list will be unaltered if all metadata is up-to-date.
+			  Any additions to the list cannot be considered to
+			  be a comprehensive list of what's out-of-date.  The list
+			  could conceivably become very long so care should be
+			  taken to ensure that a user is not overwhelmed with 
+			  any reporting based on this list.
 		"""
 		try:
 			# Loop gives a chance for exception to be thrown
 			for mset in self.makefilesets:
 				mset.check_uptodate()
 
-			# No exception so all must be uptodate
+			# No exception so all must be up-to-date
 			return True
 		except raptor_makefile.OutOfDateException,e:
 			triggers.extend(e.items)

@@ -23,7 +23,7 @@ As a convenience, if the SBS_HOME is not set then the sbs startup
 scripts will try to guess it - they normally reside in SBS_HOME/bin
 so they assume that SBS_HOME is the directory one up from where they
 themselves are located.  This makes it easier to set up Raptor as one only
-has to add the raptor "/bin" directory to the users PATH environment
+has to add the raptor "/bin" directory to the user's PATH environment
 variable - something that has to be done anyhow.
 
 
