@@ -32,3 +32,14 @@ pagedcode_defaultdata.mmp
 
 paged_unpaged.mmp
 
+pagedcode_compress.mmp
+unpagedcode_compress.mmp
+
+pagedcode_uncompress.mmp
+unpagedcode_uncompress.mmp
+
+pagedcode_bytepair.mmp
+unpagedcode_bytepair.mmp
+
+pagedcode_inflate.mmp
+unpagedcode_inflate.mmp
