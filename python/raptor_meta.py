@@ -2382,7 +2382,7 @@ class MMPRaptorBackend(MMPBackend):
 					break
 
 		# Validate "compression" keywords against "paging" keywords
-		# PAGEDCODE only supports BYTEPAIRCOMPRESSTARGET and UNCOMPRESSTARGET
+		# PAGEDCODE only supports BYTEPAIRCOMPRESSTARGET and NOCOMPRESSTARGET
 		if self.__explicitpagedcode:
 			if self.__compressionKeyword:
 				if self.__compressionKeyword in ["COMPRESSTARGET", "INFLATECOMPRESSTARGET"]:

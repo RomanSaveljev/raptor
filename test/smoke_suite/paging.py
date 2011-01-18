@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -115,7 +115,7 @@ def run():
 	# now we test that the "compression" keywords interact correctly with
 	# the "code paging" keywords.
 	#
-	# PAGEDCODE can only support BYTEPAIRCOMPRESSTARGET or UNCOMPRESSTARGET
+	# PAGEDCODE can only support BYTEPAIRCOMPRESSTARGET or NOCOMPRESSTARGET
 	
 	t.name = "paging_pagedcode_compress"
 	t.command = cmd_prefix + "-p pagedcode_compress.mmp" + cmd_suffix
