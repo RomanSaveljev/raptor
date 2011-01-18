@@ -1285,9 +1285,8 @@ class MMPRaptorBackend(MMPBackend):
 		self.__bitmapSourcepath = self.__sourcepath
 		self.__current_resource = ""
 		self.__resourceFiles = []
-		self.__pageConflict = []
+		self.__resolved_keywords = {}
 		self.__debuggable = ""
-		self.__compressionKeyword = ""
 		self.sources = []
 		self.capabilities = []
 		self.documents = []
@@ -1359,43 +1358,19 @@ class MMPRaptorBackend(MMPBackend):
 			self.BuildVariant.AddOperation(raptor_data.Set(prefix+varname, "1"))
 
 		elif varname == 'PAGED':
-			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
-			self.__debug( "Set switch PAGE ON")
 			# PAGED is equivalent to PAGEDCODE
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "paged"))
-			self.__debug( "Set switch PAGEDCODE ON")
-			self.__pageConflict.append("PAGEDCODE")
+			self.resolveKeyword("codepaging", "PAGEDCODE")
 
 		elif varname == 'UNPAGED':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGED", "0"))
-			self.__debug( "Set switch PAGED OFF")
 			# UNPAGED is equivalent to UNPAGEDCODE *and* UNPAGEDDATA
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "unpaged"))
-			self.__debug( "Set switch PAGEDCODE OFF")
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "unpaged"))
-			self.__debug( "Set data PAGEDDATA OFF")
-			self.__pageConflict.append("UNPAGEDCODE")
-			self.__pageConflict.append("UNPAGEDDATA")
+			self.resolveKeyword("codepaging", "UNPAGEDCODE")
+			self.resolveKeyword("datapaging", "UNPAGEDDATA")
 
-		elif varname == 'PAGEDCODE':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "paged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
+		elif varname in ['PAGEDCODE', 'UNPAGEDCODE']:
+			self.resolveKeyword("codepaging", varname)
 
-		elif varname == 'PAGEDDATA':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "paged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
-
-		elif varname == 'UNPAGEDCODE':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "unpaged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
-			
-		elif varname == 'UNPAGEDDATA':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "unpaged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
+		elif varname in ['PAGEDDATA', 'UNPAGEDDATA']:
+			self.resolveKeyword("datapaging", varname)
 
 		elif varname == 'NOLINKTIMECODEGENERATION':
 			self.BuildVariant.AddOperation(raptor_data.Set("LTCG",""))
@@ -1421,7 +1396,7 @@ class MMPRaptorBackend(MMPBackend):
 			self.featureVariant = True
 		
 		elif varname in ['COMPRESSTARGET', 'NOCOMPRESSTARGET', 'INFLATECOMPRESSTARGET', 'BYTEPAIRCOMPRESSTARGET']:
-			self.resolveCompressionKeyword(varname)
+			self.resolveKeyword("compression", varname)
 		
 		else:
 			self.__debug( "Set switch "+toks[0]+" ON")
@@ -2361,41 +2336,49 @@ class MMPRaptorBackend(MMPBackend):
 			self.BuildVariant.AddOperation(raptor_data.Append("SYSTEMINCLUDE",productIncludePath))
 			self.__debug("Appending product include location {0} to SYSTEMINCLUDE".format(productIncludePath))
 
-		# Specifying both a PAGED* and its opposite UNPAGED* keyword in a .mmp file
-		# will generate a warning and the last keyword specified will take effect.
-		self.__pageConflict.reverse()
-		self.__explicitpagedcode = False
-		if "PAGEDCODE" in self.__pageConflict and "UNPAGEDCODE" in self.__pageConflict:
-			for x in self.__pageConflict:
-				if x == "PAGEDCODE" or x == "UNPAGEDCODE":
-					self.__Raptor.Warn("Both PAGEDCODE and UNPAGEDCODE are specified. The last one {0} will take effect".format(x))
-					if x == "PAGEDCODE":
-						self.__explicitpagedcode = True
-					break
-		elif "PAGEDCODE" in self.__pageConflict:
-			self.__explicitpagedcode = True
-				
-		if "PAGEDDATA" in self.__pageConflict and "UNPAGEDDATA" in self.__pageConflict:
-			for x in self.__pageConflict:
-				if x == "PAGEDDATA" or x == "UNPAGEDDATA":
-					self.__Raptor.Warn("Both PAGEDDATA and UNPAGEDDATA are specified. The last one {0} will take effect".format(x))
-					break
-
-		# Validate "compression" keywords against "paging" keywords
+		# Set the resolved code and data paging options.
+		explicitpagedcode = False
+		if "codepaging" in self.__resolved_keywords:
+			if self.__resolved_keywords["codepaging"] == "PAGEDCODE":
+				self.__debug("Set switch PAGED ON")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGED", "1"))
+				self.__debug("Set value PAGEDCODE_OPTION = paged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "paged"))
+				explicitpagedcode = True
+			else:
+				self.__debug("Set switch PAGED OFF")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGED", "0"))
+				self.__debug("Set value PAGEDCODE_OPTION = unpaged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "unpaged"))
+		
+		if "datapaging" in self.__resolved_keywords:
+			if self.__resolved_keywords["datapaging"] == "PAGEDDATA":
+				self.__debug("Set value PAGEDDATA_OPTION = paged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "paged"))
+			else:
+				self.__debug("Set value PAGEDDATA_OPTION = unpaged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "unpaged"))
+						
+		# Validate "compression" keywords against "codepaging" keywords
 		# PAGEDCODE only supports BYTEPAIRCOMPRESSTARGET and NOCOMPRESSTARGET
-		if self.__explicitpagedcode:
-			if self.__compressionKeyword:
-				if self.__compressionKeyword in ["COMPRESSTARGET", "INFLATECOMPRESSTARGET"]:
-					self.__Raptor.Warn("Cannot use {0} with PAGEDCODE, forcing BYTEPAIRCOMPRESSTARGET instead".format(self.__compressionKeyword))
-					self.__compressionKeyword = "BYTEPAIRCOMPRESSTARGET"
+		if "compression" in self.__resolved_keywords:
+			compressionkeyword = self.__resolved_keywords["compression"]
+		else:
+			compressionkeyword = ""
+			
+		if explicitpagedcode:
+			if compressionkeyword:
+				if compressionkeyword in ["COMPRESSTARGET", "INFLATECOMPRESSTARGET"]:
+					self.__warn("Cannot use {0} with PAGEDCODE, forcing BYTEPAIRCOMPRESSTARGET instead".format(compressionkeyword))
+					compressionkeyword = "BYTEPAIRCOMPRESSTARGET"
 			else:
 				# no keyword present implies default compression, so make sure
 				# that it is BytePair. 
-				self.__compressionKeyword = "BYTEPAIRCOMPRESSTARGET"
+				compressionkeyword = "BYTEPAIRCOMPRESSTARGET"
 				
-		if self.__compressionKeyword:
-			self.__debug("Set switch " + self.__compressionKeyword + " ON")
-			self.BuildVariant.AddOperation(raptor_data.Set(self.__compressionKeyword, "1"))
+		if compressionkeyword:
+			self.__debug("Set switch " + compressionkeyword + " ON")
+			self.BuildVariant.AddOperation(raptor_data.Set(compressionkeyword, "1"))
 		
 		# Set Debuggable
 		self.BuildVariant.AddOperation(raptor_data.Set("DEBUGGABLE", self.__debuggable))
@@ -2440,15 +2423,17 @@ class MMPRaptorBackend(MMPBackend):
 		"""Target type in lower case - the standard format"""
 		return self.__targettype.lower()
 
-	def resolveCompressionKeyword(self, aCompressionKeyword):
-		"""If a compression keyword is set more than once then a warning is 
-		given and the last one takes effect.
+	def resolveKeyword(self, key, value):
+		"""If a keyword which conflicts with a previous keyword is seen then
+		a warning is given and the last setting takes effect.
 		"""
-		if self.__compressionKeyword and self.__compressionKeyword != aCompressionKeyword:
-			self.__Raptor.Warn("{0} keyword in {1} overrides earlier use of {2}".format
-						(aCompressionKeyword, self.__currentMmpFile, self.__compressionKeyword))
-		self.__compressionKeyword = aCompressionKeyword
-
+		if key in self.__resolved_keywords:
+			previous = self.__resolved_keywords[key]
+			if value != previous:
+				self.__warn("{0} keyword in {1} overrides earlier use of {2}".format
+			                (value, self.__currentMmpFile, previous))
+		self.__resolved_keywords[key] = value
+		
 	def checkImplibDefFile(self, defFile):
 		"""Project with target type implib must have DEFFILE defined 
 		explicitly or implicitly, otherwise it is an error
