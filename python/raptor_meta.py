@@ -2382,11 +2382,18 @@ class MMPRaptorBackend(MMPBackend):
 					break
 
 		# Validate "compression" keywords against "paging" keywords
-		if self.__compressionKeyword:
-			if self.__explicitpagedcode:
+		# PAGEDCODE only supports BYTEPAIRCOMPRESSTARGET and UNCOMPRESSTARGET
+		if self.__explicitpagedcode:
+			if self.__compressionKeyword:
 				if self.__compressionKeyword in ["COMPRESSTARGET", "INFLATECOMPRESSTARGET"]:
 					self.__Raptor.Warn("Cannot use {0} with PAGEDCODE, forcing BYTEPAIRCOMPRESSTARGET instead".format(self.__compressionKeyword))
 					self.__compressionKeyword = "BYTEPAIRCOMPRESSTARGET"
+			else:
+				# no keyword present implies default compression, so make sure
+				# that it is BytePair. 
+				self.__compressionKeyword = "BYTEPAIRCOMPRESSTARGET"
+				
+		if self.__compressionKeyword:
 			self.__debug("Set switch " + self.__compressionKeyword + " ON")
 			self.BuildVariant.AddOperation(raptor_data.Set(self.__compressionKeyword, "1"))
 		

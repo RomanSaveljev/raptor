@@ -128,7 +128,7 @@ def run():
 			"--compressionmethod=inflate",
 			"--uncompressed"
 			]
-	t.warnings = 0
+	t.warnings = 2
 	t.run()
 	
 	t.name = "paging_unpagedcode_compress"
@@ -212,7 +212,7 @@ def run():
 			"--compressionmethod=inflate",
 			"--uncompressed"
 			]
-	t.warnings = 1
+	t.warnings = 2
 	t.run()
 	
 	t.name = "paging_unpagedcode_inflate"
