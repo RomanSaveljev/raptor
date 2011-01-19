@@ -2423,16 +2423,20 @@ class MMPRaptorBackend(MMPBackend):
 		"""Target type in lower case - the standard format"""
 		return self.__targettype.lower()
 
-	def resolveKeyword(self, key, value):
-		"""If a keyword which conflicts with a previous keyword is seen then
-		a warning is given and the last setting takes effect.
+	def resolveKeyword(self, category, keyword):
+		"""Ensure that only one of a set of mutually exclusive MMP keywords is applied.
+		
+		There are sets of MMP keywords which are mutually exclusive. For example
+		PAGED and UNPAGED. When more than one keyword from a given category
+		appears in a single MMP file then a warning is given and the last setting
+		takes effect.
 		"""
-		if key in self.__resolved_keywords:
-			previous = self.__resolved_keywords[key]
-			if value != previous:
+		if category in self.__resolved_keywords:
+			previous = self.__resolved_keywords[category]
+			if keyword != previous:
 				self.__warn("{0} keyword in {1} overrides earlier use of {2}".format
-			                (value, self.__currentMmpFile, previous))
-		self.__resolved_keywords[key] = value
+			                (keyword, self.__currentMmpFile, previous))
+		self.__resolved_keywords[category] = keyword
 		
 	def checkImplibDefFile(self, defFile):
 		"""Project with target type implib must have DEFFILE defined 
