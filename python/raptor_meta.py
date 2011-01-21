@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -302,7 +302,7 @@ class PreProcessor(raptor_utilities.ExternalTool):
 		tool = self._ExternalTool__Tool
 		commandline = tool + " " + aArgs + " " + str(sourcefilename)
 		
-		self.raptor.Debug("Preprocessing command line %s", str(commandline))
+		self.raptor.Debug("Preprocessing command line {0}".format(str(commandline)))
 			
 		try:
 			# the actual call differs between Windows and Unix
@@ -324,10 +324,10 @@ class PreProcessor(raptor_utilities.ExternalTool):
 			# run the command and wait for all the output
 			(self._ExternalTool__Output, errors) = p.communicate()
 
-			self.raptor.Debug("Preprocessing Start %s", str(sourcefilename))
-			self.raptor.Debug("Output:\n%s", self._ExternalTool__Output)
-			self.raptor.Debug("Errors:\n%s", errors)
-			self.raptor.Debug("Preprocessing End %s", str(sourcefilename))
+			self.raptor.Debug("Preprocessing Start {0}".format(str(sourcefilename)))
+			self.raptor.Debug("Output:\n{0}".format(self._ExternalTool__Output))
+			self.raptor.Debug("Errors:\n{0}".format(errors))
+			self.raptor.Debug("Preprocessing End {0}".format(str(sourcefilename)))
 
 			incRE = re.compile("In file included from")
 			fromRE = re.compile(r"\s+from")
@@ -341,9 +341,9 @@ class PreProcessor(raptor_utilities.ExternalTool):
 						continue
 					if not remarkRE.search(error):
 						if warningRE.search(error):
-							self.raptor.Warn("%s: %s", tool, error)
+							self.raptor.Warn("{0}: {1}".format(tool, error))
 						else:
-							self.raptor.Error("%s: %s", tool, error)
+							self.raptor.Error("{0}: {1}".format(tool, error))
 							actualErr = True
 			if actualErr:
 				raise MetaDataError("Errors in %s" % str(sourcefilename))
@@ -369,7 +369,7 @@ class PreProcessor(raptor_utilities.ExternalTool):
 	def addIncludePath(self, aIncludePath):
 		p = str(aIncludePath)
 		if p == "":
-			self.raptor.Warn("attempt to set an empty preprocessor include path for %s" % str(self.filename))
+			self.raptor.Warn("attempt to set an empty preprocessor include path for {0}".format(str(self.filename)))
 		else:
 			self.__IncludePaths.append(p)
 
@@ -902,7 +902,7 @@ class Extension(object):
 			try:
 				metaFile = open(metaFilename, "r")
 			except IOError, e:
-				self.__warn("Extension: %s - cannot open Meta file: %s" % (self.__RawMakefile, metaFilename))
+				self.__warn("Extension: {0} - cannot open Meta file: {1}".format(self.__RawMakefile, metaFilename))
 
 			if metaFile:
 				for line in metaFile.readlines():
@@ -974,7 +974,7 @@ class BldInfFile(MetaDataFile):
 			if n:
 
 				if (n.groupdict()['invalid']):
-					self.log.Error("%s (%d) : invalid .mmp file qualifier \"%s\"", mmpFileEntry.filename, mmpFileEntry.getLineNumber(), n.groupdict()['invalid'])
+					self.log.Error("{0} ({1}) : invalid .mmp file qualifier \"{2}\"".format(mmpFileEntry.filename, mmpFileEntry.getLineNumber(), n.groupdict()['invalid']))
 				if raptor_utilities.getOSFileSystem() == "unix":
 					self.log.Warn("NMAKEFILE/GNUMAKEFILE/MAKEFILE keywords not supported on Linux")
 				else:
@@ -999,7 +999,7 @@ class BldInfFile(MetaDataFile):
 
 			if m:
 				if (m.groupdict()['invalid']):
-					self.log.Error("%s (%d) : invalid .mmp file qualifier \"%s\"", mmpFileEntry.filename, mmpFileEntry.getLineNumber(), m.groupdict()['invalid'])
+					self.log.Error("{0} ({1}) : invalid .mmp file qualifier \"{2}\"".format(mmpFileEntry.filename, mmpFileEntry.getLineNumber(), m.groupdict()['invalid']))
 
 				mmpFileName = m.groupdict()['name']
 				testmmpoption = "auto" # Setup tests to be automatic by default
@@ -1025,7 +1025,7 @@ class BldInfFile(MetaDataFile):
 					mmpfe = MMPFileEntry(mmpFileName, testmmpoption, buildasarm)
 					mmpFileList.append(mmpfe)
 				except ValueError, e:
-					self.log.Error("invalid .mmp file name: %s" % str(e))
+					self.log.Error("invalid .mmp file name: {0}".format(str(e)))
 
 				m = None
 
@@ -1054,7 +1054,7 @@ class BldInfFile(MetaDataFile):
 					m = re.match('\s*MAKEFILE\s+(?P<extmakefile>[^ ]+)\s*(?P<invalid>\S+.*)?\s*$',extmakeFileEntry,re.I)
 			if m:
 				if (m.groupdict()['invalid']):
-					self.log.Error("%s (%d) : invalid extension makefile qualifier \"%s\"", extmakeFileEntry.filename, extmakeFileEntry.getLineNumber(), m.groupdict()['invalid'])
+					self.log.Error("{0} ({1}) : invalid extension makefile qualifier \"{2}\"".format(extmakeFileEntry.filename, extmakeFileEntry.getLineNumber(), m.groupdict()['invalid']))
 
 				extmakefilearg = m.groupdict()['extmakefile']
 				bldInfDir = actualBldInfRoot.Dir()
@@ -1117,7 +1117,7 @@ class BldInfFile(MetaDataFile):
 				start = extensionLine
 			elif re.search(r'^\s*END\s*$',extensionLine, re.I):
 				if start == "":
-					self.log.Error("unmatched END statement in %s section", aType, bldinf=str(self.filename))
+					self.log.Error("unmatched END statement in {0} section".format(aType), bldinf=str(self.filename))
 				else:
 					extensionObjects.append(Extension(self.filename, start, options, aBuildPlatform, self.__Raptor))
 					start = ""
@@ -1268,7 +1268,7 @@ class MMPRaptorBackend(MMPBackend):
 		super(MMPRaptorBackend,self).__init__()
 		self.platformblock = None
 		self.__Raptor = aRaptor
-		self.__debug("-----+++++ %s " % aMmpfilename)
+		self.__debug("-----+++++ {0} ".format(aMmpfilename))
 		self.BuildVariant = raptor_data.Variant(name = "mmp")
 		self.ApplyVariants = []
 		self.ResourceVariants = []
@@ -1285,9 +1285,8 @@ class MMPRaptorBackend(MMPBackend):
 		self.__bitmapSourcepath = self.__sourcepath
 		self.__current_resource = ""
 		self.__resourceFiles = []
-		self.__pageConflict = []
+		self.__resolved_keywords = {}
 		self.__debuggable = ""
-		self.__compressionKeyword = ""
 		self.sources = []
 		self.capabilities = []
 		self.documents = []
@@ -1323,7 +1322,7 @@ class MMPRaptorBackend(MMPBackend):
 		commentDetail = getPreProcessorCommentDetail(toks[0])
 		self.__currentMmpFile = commentDetail[0].GetLocalString()
 		self.__currentLineNumber = commentDetail[1]
-		self.__debug("Current file %s, line number %s\n"  % (self.__currentMmpFile,str(self.__currentLineNumber)))
+		self.__debug("Current file {0}, line number {1}\n".format(self.__currentMmpFile,str(self.__currentLineNumber)))
 		return "OK"
 
 	def doBlankLine(self,s,loc,toks):
@@ -1359,43 +1358,19 @@ class MMPRaptorBackend(MMPBackend):
 			self.BuildVariant.AddOperation(raptor_data.Set(prefix+varname, "1"))
 
 		elif varname == 'PAGED':
-			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
-			self.__debug( "Set switch PAGE ON")
 			# PAGED is equivalent to PAGEDCODE
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "paged"))
-			self.__debug( "Set switch PAGEDCODE ON")
-			self.__pageConflict.append("PAGEDCODE")
+			self.resolveKeyword("codepaging", "PAGEDCODE")
 
 		elif varname == 'UNPAGED':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGED", "0"))
-			self.__debug( "Set switch PAGED OFF")
 			# UNPAGED is equivalent to UNPAGEDCODE *and* UNPAGEDDATA
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "unpaged"))
-			self.__debug( "Set switch PAGEDCODE OFF")
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "unpaged"))
-			self.__debug( "Set data PAGEDDATA OFF")
-			self.__pageConflict.append("UNPAGEDCODE")
-			self.__pageConflict.append("UNPAGEDDATA")
+			self.resolveKeyword("codepaging", "UNPAGEDCODE")
+			self.resolveKeyword("datapaging", "UNPAGEDDATA")
 
-		elif varname == 'PAGEDCODE':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "paged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
+		elif varname in ['PAGEDCODE', 'UNPAGEDCODE']:
+			self.resolveKeyword("codepaging", varname)
 
-		elif varname == 'PAGEDDATA':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "paged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
-
-		elif varname == 'UNPAGEDCODE':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "unpaged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
-			
-		elif varname == 'UNPAGEDDATA':
-			self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "unpaged"))
-			self.__debug( "Set switch " + varname + " ON")
-			self.__pageConflict.append(varname)
+		elif varname in ['PAGEDDATA', 'UNPAGEDDATA']:
+			self.resolveKeyword("datapaging", varname)
 
 		elif varname == 'NOLINKTIMECODEGENERATION':
 			self.BuildVariant.AddOperation(raptor_data.Set("LTCG",""))
@@ -1421,7 +1396,7 @@ class MMPRaptorBackend(MMPBackend):
 			self.featureVariant = True
 		
 		elif varname in ['COMPRESSTARGET', 'NOCOMPRESSTARGET', 'INFLATECOMPRESSTARGET', 'BYTEPAIRCOMPRESSTARGET']:
-			self.resolveCompressionKeyword(varname)
+			self.resolveKeyword("compression", varname)
 		
 		else:
 			self.__debug( "Set switch "+toks[0]+" ON")
@@ -1450,7 +1425,7 @@ class MMPRaptorBackend(MMPBackend):
 				self.BuildVariant.AddOperation(raptor_data.Set("TARGET_var", self.__TARGET))
 
 			if  lowercase_TARGET !=  self.__TARGET:
-				self.__debug("TARGET is not lowercase: '%s' - might cause BC problems." % self.__TARGET)
+				self.__debug("TARGET is not lowercase: '{0}' - might cause BC problems.".format(self.__TARGET))
 		elif varname=='TARGETTYPE':
 			self.__debug("Set "+toks[0]+" to " + str(toks[1]))
 			self.__targettype=toks[1]
@@ -1483,7 +1458,7 @@ class MMPRaptorBackend(MMPBackend):
 				searchReplacePairs = self.resolveOptionReplace(args)
 
 				for searchReplacePair in searchReplacePairs:
-					self.__debug("Append %s to OPTION_REPLACE_%s", searchReplacePair, toks[1].upper())
+					self.__debug("Append {0} to OPTION_REPLACE_{1}".format(searchReplacePair, toks[1].upper()))
 					self.BuildVariant.AddOperation(raptor_data.Append(varname+"_"+toks[1].upper(),searchReplacePair))
 
 		elif varname=='SYSTEMINCLUDE' or varname=='USERINCLUDE':
@@ -1496,12 +1471,12 @@ class MMPRaptorBackend(MMPBackend):
 
 				if varname=='SYSTEMINCLUDE':
 					self.__systeminclude += ' ' + resolved
-					self.__debug("  %s = %s",varname, self.__systeminclude)
+					self.__debug("  {0} = {1}".format(varname, self.__systeminclude))
 				else:
 					self.__userinclude += ' ' + resolved
-					self.__debug("  %s = %s",varname, self.__userinclude)
+					self.__debug("  {0} = {1}".format(varname, self.__userinclude))
 
-				self.__debug("Appending %s to %s",resolved, varname)
+				self.__debug("Appending {0} to {1}".format(resolved, varname))
 
 			self.__systeminclude = self.__systeminclude.strip()
 			self.__systeminclude = self.__systeminclude.rstrip('\/')
@@ -1549,7 +1524,7 @@ class MMPRaptorBackend(MMPBackend):
 				if version[1] is not None:
 					minor = int(version[2],10)
 				else:
-					self.__Raptor.Warn("VERSION (%s) missing '.minor' in %s, using '.0'" % (toks[1],self.__currentMmpFile))
+					self.__Raptor.Warn("VERSION ({0}) missing '.minor' in {1}, using '.0'".format(toks[1],self.__currentMmpFile))
 
 				self.__versionhex = "%04x%04x" % (major, minor)
 				self.BuildVariant.AddOperation(raptor_data.Set(varname, "%d.%d" %(major, minor)))
@@ -1558,7 +1533,7 @@ class MMPRaptorBackend(MMPBackend):
 				self.__debug("Set VERSIONHEX OPTION to " + self.__versionhex)
 
 			else:
-				self.__Raptor.Warn("Invalid version supplied to VERSION (%s), using default value" % toks[1])
+				self.__Raptor.Warn("Invalid version supplied to VERSION ({0}), using default value".format(toks[1]))
 
 		elif varname=='EPOCHEAPSIZE':
 			# Standardise on sending hex numbers to the FLMS.
@@ -1601,7 +1576,7 @@ class MMPRaptorBackend(MMPBackend):
 
 			# NOTE: Original validation here didn't actually work.  This has been corrected to provide an error, but probably needs re-examination.
 			if not MMPRaptorBackend.epoc32priorities.has_key(prio):
-				self.__Raptor.Error("Priority setting '%s' is not a valid priority - should be one of %s.", prio, MMPRaptorBackend.epoc32priorities.values())
+				self.__Raptor.Error("Priority setting '{0}' is not a valid priority - should be one of {1}.".format(prio, MMPRaptorBackend.epoc32priorities.values()))
 			else:
 				self.__debug("Set "+toks[0]+" to " +  MMPRaptorBackend.epoc32priorities[prio])
 				self.BuildVariant.AddOperation(raptor_data.Set(varname,MMPRaptorBackend.epoc32priorities[prio]))
@@ -1628,7 +1603,7 @@ class MMPRaptorBackend(MMPBackend):
 			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
 			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
 			self.__userinclude += ' ' + resolved
-			self.__debug("  %s = %s", "USERINCLUDE", self.__userinclude)
+			self.__debug("  {0} = {1}".format("USERINCLUDE",(self.__userinclude)))
 		
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
@@ -1674,7 +1649,7 @@ class MMPRaptorBackend(MMPBackend):
 			if name=='LIBRARY' or name=='DEBUGLIBRARY':
 				im = MMPRaptorBackend.library_re.match(item)
 				if not im:
-					self.__error("LIBRARY: %s Seems to have an invalid name.\nExpected xxxx.lib or xxxx.dso\n where xxxx might be\n\tname or \n\tname(n,m) where n is a major version number and m is a minor version number\n" %item)
+					self.__error("LIBRARY: {0} Seems to have an invalid name.\nExpected xxxx.lib or xxxx.dso\n where xxxx might be\n\tname or \n\tname(n,m) where n is a major version number and m is a minor version number\n".format(item))
 				d = im.groupdict()
 
 				item = d['name']
@@ -1718,12 +1693,12 @@ class MMPRaptorBackend(MMPBackend):
 		self.__currentLineNumber += 1
 
 		hexoutput = MMPRaptorBackend.canonicalUID(toks[1][0])
-		self.__debug( "Set UID2 to %s" % hexoutput )
+		self.__debug( "Set UID2 to {0}" .format(hexoutput))
 		self.BuildVariant.AddOperation(raptor_data.Set("UID2", hexoutput))
 
 		if len(toks[1]) > 1:
 			hexoutput = MMPRaptorBackend.canonicalUID(toks[1][1])
-			self.__debug( "Set UID3 to %s" % hexoutput)
+			self.__debug( "Set UID3 to {0}".format(hexoutput))
 			self.BuildVariant.AddOperation(raptor_data.Set("UID3", hexoutput))
 
 		self.__debug( "done set UID")
@@ -1760,7 +1735,7 @@ class MMPRaptorBackend(MMPBackend):
 				foundsource = source.FindCaseless()
 				if foundsource == None:
 					# Hope that the file will be generated later
-					self.__debug("%s file not found: %s" % (toks[0], source))
+					self.__debug("{0} file not found: {1}".format(toks[0], source))
 					foundsource = source
 
 				filelist.append(str(foundsource))					
@@ -2177,7 +2152,7 @@ class MMPRaptorBackend(MMPBackend):
 			ipath = "$(OUTPUTPATH)"
 			self.BuildVariant.AddOperation(raptor_data.Append("USERINCLUDE",ipath))
 			self.__userinclude += ' ' + ipath
-			self.__debug("  USERINCLUDE = %s", self.__userinclude)
+			self.__debug("  USERINCLUDE = {0}".format(self.__userinclude))
 			self.__userinclude.strip()
 
 		self.StringTableVariants.append(self.__currentStringTableVariant)
@@ -2193,19 +2168,19 @@ class MMPRaptorBackend(MMPBackend):
 
 
 	def doUnknownStatement(self,s,loc,toks):
-		self.__warn("%s (%d) : Unrecognised Keyword %s", self.__currentMmpFile, self.__currentLineNumber, str(toks))
+		self.__warn("{0} ({1}) : Unrecognised Keyword {2}".format(self.__currentMmpFile, self.__currentLineNumber, str(toks)))
 		self.__currentLineNumber += 1
 		return "OK"
 
 
 	def doUnknownBlock(self,s,loc,toks):
-		self.__warn("%s (%d) : Unrecognised Block %s", self.__currentMmpFile, self.__currentLineNumber, str(toks))
+		self.__warn("{0} ({1}) : Unrecognised Block {2}".format(self.__currentMmpFile, self.__currentLineNumber, str(toks)))
 		self.__currentLineNumber += 1
 		return "OK"
 
 	def doDeprecated(self,s,loc,toks):
 		self.__debug( "Deprecated command " + str(toks))
-		self.__warn("%s (%d) : %s is deprecated .mmp file syntax", self.__currentMmpFile, self.__currentLineNumber, str(toks))
+		self.__warn("{0} ({1}) : {2} is deprecated .mmp file syntax".format(self.__currentMmpFile, self.__currentLineNumber, str(toks)))
 		self.__currentLineNumber += 1
 		return "OK"
 
@@ -2230,14 +2205,14 @@ class MMPRaptorBackend(MMPBackend):
 
 			(resolvedDefFile, isSecondaryDefFile) = self.resolveDefFile(defaultRootName, aBuildPlatform)
 			# We need to store the resolved .def file and location for the FREEZE target
-			self.__debug("Resolved def file:  %s" % resolvedDefFile )
+			self.__debug("Resolved def file:  {0}".format(resolvedDefFile ))
 			self.BuildVariant.AddOperation(raptor_data.Set("RESOLVED_DEFFILE", resolvedDefFile))
 			# We need to store the primary/secondary status of the resolved .def file as some configurations
 			# require additional processing based on the result
 			secondaryDefFile = ""
 			if isSecondaryDefFile:
 				secondaryDefFile = "1"
-			self.__debug("Set RESOLVED_DEFFILE_SECONDARY to '%s'" % secondaryDefFile)
+			self.__debug("Set RESOLVED_DEFFILE_SECONDARY to '{0}'".format(secondaryDefFile))
 			self.BuildVariant.AddOperation(raptor_data.Set("RESOLVED_DEFFILE_SECONDARY", secondaryDefFile))
 
 		# If a deffile is specified, an FLM will put in a dependency.
@@ -2277,7 +2252,7 @@ class MMPRaptorBackend(MMPBackend):
 				else:
 					resolvedDefFile=""
 			except Exception,e:
-				self.__debug("While Searching for an IMPLIED  DEFFILE: %s: %s" % (str(e),str(findpath)) )
+				self.__debug("While Searching for an IMPLIED  DEFFILE: {0}: {1}".format(str(e),str(findpath)))
 				resolvedDefFile=""
 		else:
 			if not resolvedDefFile == "":
@@ -2287,16 +2262,16 @@ class MMPRaptorBackend(MMPBackend):
 					if resolvedDefFile=="None":
 						raise IOError("file not found")
 				except Exception,e:
-					self.__warn("While Searching for a SPECIFIED DEFFILE: %s: %s" % (str(e),str(findpath)) )
+					self.__warn("While Searching for a SPECIFIED DEFFILE: {0}: {1}".format(str(e),str(findpath)))
 					resolvedDefFile=""
 			else:
-				self.__warn("DEFFILE KEYWORD used (%s) but def file not resolved" % (self.deffile) )
+				self.__warn("DEFFILE KEYWORD used ({0}) but def file not resolved".format(self.deffile) )
 
 
 		self.BuildVariant.AddOperation(raptor_data.Set("DEFFILE", resolvedDefFile))
 		self.__debug("Set DEFFILE to " + resolvedDefFile)
 		self.BuildVariant.AddOperation(raptor_data.Set("DEFFILEKEYWORD", deffile_keyword))
-		self.__debug("Set DEFFILEKEYWORD to '%s'",deffile_keyword)
+		self.__debug("Set DEFFILEKEYWORD to '{0}'".format(deffile_keyword))
 
 		# If target type is "implib" it must have a def file
 		self.checkImplibDefFile(resolvedDefFile)
@@ -2359,31 +2334,52 @@ class MMPRaptorBackend(MMPBackend):
 		if not aBuildPlatform['ISFEATUREVARIANT']:
 			productIncludePath = str(aBuildPlatform['VARIANT_HRH'].Dir())
 			self.BuildVariant.AddOperation(raptor_data.Append("SYSTEMINCLUDE",productIncludePath))
-			self.__debug("Appending product include location %s to SYSTEMINCLUDE",productIncludePath)
+			self.__debug("Appending product include location {0} to SYSTEMINCLUDE".format(productIncludePath))
 
-		# Specifying both a PAGED* and its opposite UNPAGED* keyword in a .mmp file
-		# will generate a warning and the last keyword specified will take effect.
-		self.__pageConflict.reverse()
-		if "PAGEDCODE" in self.__pageConflict and "UNPAGEDCODE" in self.__pageConflict:
-			for x in self.__pageConflict:
-				if x == "PAGEDCODE" or x == "UNPAGEDCODE":
-					self.__Raptor.Warn("Both PAGEDCODE and UNPAGEDCODE are specified. The last one %s will take effect" % x)
-					if x == "PAGEDCODE":
-						self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
-					break
-		elif "PAGEDCODE" in self.__pageConflict:
-			self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
+		# Set the resolved code and data paging options.
+		explicitpagedcode = False
+		if "codepaging" in self.__resolved_keywords:
+			if self.__resolved_keywords["codepaging"] == "PAGEDCODE":
+				self.__debug("Set switch PAGED ON")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGED", "1"))
+				self.__debug("Set value PAGEDCODE_OPTION = paged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "paged"))
+				explicitpagedcode = True
+			else:
+				self.__debug("Set switch PAGED OFF")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGED", "0"))
+				self.__debug("Set value PAGEDCODE_OPTION = unpaged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDCODE_OPTION", "unpaged"))
+		
+		if "datapaging" in self.__resolved_keywords:
+			if self.__resolved_keywords["datapaging"] == "PAGEDDATA":
+				self.__debug("Set value PAGEDDATA_OPTION = paged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "paged"))
+			else:
+				self.__debug("Set value PAGEDDATA_OPTION = unpaged")
+				self.BuildVariant.AddOperation(raptor_data.Set("PAGEDDATA_OPTION", "unpaged"))
+						
+		# Validate "compression" keywords against "codepaging" keywords
+		# PAGEDCODE only supports BYTEPAIRCOMPRESSTARGET and NOCOMPRESSTARGET
+		if "compression" in self.__resolved_keywords:
+			compressionkeyword = self.__resolved_keywords["compression"]
+		else:
+			compressionkeyword = ""
+			
+		if explicitpagedcode:
+			if compressionkeyword:
+				if compressionkeyword in ["COMPRESSTARGET", "INFLATECOMPRESSTARGET"]:
+					self.__warn("Cannot use {0} with PAGEDCODE, forcing BYTEPAIRCOMPRESSTARGET instead".format(compressionkeyword))
+					compressionkeyword = "BYTEPAIRCOMPRESSTARGET"
+			else:
+				# no keyword present implies default compression, so make sure
+				# that it is BytePair. 
+				compressionkeyword = "BYTEPAIRCOMPRESSTARGET"
 				
-		if "PAGEDDATA" in self.__pageConflict and "UNPAGEDDATA" in self.__pageConflict:
-			for x in self.__pageConflict:
-				if x == "PAGEDDATA" or x == "UNPAGEDDATA":
-					self.__Raptor.Warn("Both PAGEDDATA and UNPAGEDDATA are specified. The last one %s will take effect" % x)
-					if x == "PAGEDDATA":
-						self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
-					break
-		elif "PAGEDDATA" in self.__pageConflict:
-			self.resolveCompressionKeyword("BYTEPAIRCOMPRESSTARGET")
-
+		if compressionkeyword:
+			self.__debug("Set switch " + compressionkeyword + " ON")
+			self.BuildVariant.AddOperation(raptor_data.Set(compressionkeyword, "1"))
+		
 		# Set Debuggable
 		self.BuildVariant.AddOperation(raptor_data.Set("DEBUGGABLE", self.__debuggable))
 
@@ -2427,19 +2423,21 @@ class MMPRaptorBackend(MMPBackend):
 		"""Target type in lower case - the standard format"""
 		return self.__targettype.lower()
 
-	def resolveCompressionKeyword(self, aCompressionKeyword):
-		"""If a compression keyword is set more than once either explicitly
-		or implicitly a warning is given and the last one takes effect 
+	def resolveKeyword(self, category, keyword):
+		"""Ensure that only one of a set of mutually exclusive MMP keywords is applied.
+		
+		There are sets of MMP keywords which are mutually exclusive. For example
+		PAGED and UNPAGED. When more than one keyword from a given category
+		appears in a single MMP file then a warning is given and the last setting
+		takes effect.
 		"""
-		if self.__compressionKeyword and self.__compressionKeyword != aCompressionKeyword:
-			self.__Raptor.Warn("%s keyword in %s overrides earlier use of %s" % \
-						(aCompressionKeyword, self.__currentMmpFile, self.__compressionKeyword))
-			self.BuildVariant.AddOperation(raptor_data.Set(self.__compressionKeyword, ""))
-			self.__debug( "Set switch " + self.__compressionKeyword + " OFF")
-		self.BuildVariant.AddOperation(raptor_data.Set(aCompressionKeyword,"1"))
-		self.__debug( "Set switch " + aCompressionKeyword + " ON")
-		self.__compressionKeyword = aCompressionKeyword
-
+		if category in self.__resolved_keywords:
+			previous = self.__resolved_keywords[category]
+			if keyword != previous:
+				self.__warn("{0} keyword in {1} overrides earlier use of {2}".format
+			                (keyword, self.__currentMmpFile, previous))
+		self.__resolved_keywords[category] = keyword
+		
 	def checkImplibDefFile(self, defFile):
 		"""Project with target type implib must have DEFFILE defined 
 		explicitly or implicitly, otherwise it is an error
@@ -2599,7 +2597,7 @@ class MetaReader(object):
 		# used first for determining exports.
 		sortedConfigsToBuild = sorted(configsToBuild,key=lambda config: config.name)
 
-		self.__Raptor.Debug("MetaReader: sortedConfigsToBuild:  %s", [b.name for b in sortedConfigsToBuild])
+		self.__Raptor.Debug("MetaReader: sortedConfigsToBuild:  {0}".format([b.name for b in sortedConfigsToBuild]))
 		for buildConfig in sortedConfigsToBuild:
 			# get everything we need to know about the configuration
 			evaluator = self.__Raptor.GetEvaluator(None, buildConfig)
@@ -2645,12 +2643,12 @@ class MetaReader(object):
 					variantCfgs[variantCfg] = varCfg['VARIANT_HRH']
 					# we expect to always build ABIv2
 					if not 'ENABLE_ABIV2_MODE' in varCfg:
-						self.__Raptor.Warn("missing flag ENABLE_ABIV2_MODE in %s file. ABIV1 builds are not supported.",
-										   str(variantCfg))
+						self.__Raptor.Warn("missing flag ENABLE_ABIV2_MODE in {0} file. ABIV1 builds are not supported.".format
+										   (str(variantCfg)))
 				variantHRH = variantCfgs[variantCfg]
 
 			detail['VARIANT_HRH'] = variantHRH
-			self.__Raptor.Info("'%s' uses variant hrh file '%s'", buildConfig.name, variantHRH)
+			self.__Raptor.Info("'{0}' uses variant hrh file '{1}'".format(buildConfig.name, variantHRH))
 			detail['SYSTEMINCLUDE'] = evaluator.CheckedGet("SYSTEMINCLUDE")
 
 			detail['TARGET_TYPES'] = evaluator.CheckedGet("TARGET_TYPES")
@@ -2771,7 +2769,7 @@ class MetaReader(object):
 		# to the nodes of the export and build platforms that it supports.
 		for c in aComponentList:
 			if c.bldinf_filename.isFile():
-				self.__Raptor.Info("Processing %s", str(c.bldinf_filename))
+				self.__Raptor.Info("Processing {0}".format(str(c.bldinf_filename)))
 				try:
 					self.AddComponentNodes(c, exportNodes, platformNodes)
 
@@ -2820,7 +2818,7 @@ class MetaReader(object):
 						self.ProcessExports(s, exportPlatform)
 
 					except MetaDataError, e:
-						self.__Raptor.Error("%s",e.Text)
+						self.__Raptor.Error("{0}".format(e.Text))
 						if not self.__Raptor.keepGoing:
 							return []
 		else:
@@ -2861,7 +2859,7 @@ class MetaReader(object):
 						return []
 
 		for badProj in self.projectList:
-			self.__Raptor.Warn("Can't find project '%s' in any build info file", badProj)
+			self.__Raptor.Warn("Can't find project '{0}' in any build info file".format(badProj))
 
 		# everything is specified
 		return exportNodes + platformNodes
@@ -2979,8 +2977,8 @@ class MetaReader(object):
 		else:
 			exports = componentNode.component.bldinf.getExports(exportPlatform)
 
-		self.__Raptor.Debug("%i exports for %s",
-							len(exports), str(componentNode.component.bldinf.filename))
+		self.__Raptor.Debug("{0} exports for {1}".format
+							(len(exports), str(componentNode.component.bldinf.filename)))
 		if exports:
 
 			# each export is either a 'copy' or 'unzip'
@@ -3019,7 +3017,7 @@ class MetaReader(object):
 							exportwhatlog += "</archive>\n"
 					except MetaDataError, e:
 						if self.__Raptor.keepGoing:
-							self.__Raptor.Error("%s",e.Text, bldinf=bldinf_filename)
+							self.__Raptor.Error("{0}".format(e.Text), bldinf=bldinf_filename)
 						else:
 							raise e
 			exportwhatlog+="</whatlog>\n"
@@ -3068,9 +3066,9 @@ class MetaReader(object):
 
 				# Ensure that the destination file remains executable if the source was also:
 				os.chmod(dest_str,sourceStat[stat.ST_MODE] | stat.S_IREAD | stat.S_IWRITE | stat.S_IWGRP ) 
-				self.__Raptor.Info("Copied %s to %s", source_str, dest_str)
+				self.__Raptor.Info("Copied {0} to {1}".format(source_str, dest_str))
 			else:
-				self.__Raptor.Info("Up-to-date: %s", dest_str)
+				self.__Raptor.Info("Up-to-date: {0}".format(dest_str))
 
 
 		except Exception,e:
@@ -3193,9 +3191,9 @@ class MetaReader(object):
 			self.__Raptor.PrintXML("</clean>\n")
 
 		except IOError, e:
-			self.__Raptor.Warn("Problem while unzipping export %s to %s: %s",source,destination,str(e))
+			self.__Raptor.Warn("Problem while unzipping export {0} to {1}: {2}".format(source,destination,str(e)))
 
-		self.__Raptor.Info("Unzipped %d files from %s to %s", filecount, source, destination)
+		self.__Raptor.Info("Unzipped {0} files from {1} to {2}".format(filecount, source, destination))
 		return exportwhatlog
 
 	def ProcessTEMs(self, componentNode, buildPlatform):
@@ -3212,13 +3210,13 @@ class MetaReader(object):
 		else:
 			extensions = componentNode.component.bldinf.getExtensions(buildPlatform)
 
-		self.__Raptor.Debug("%i template extension makefiles for %s",
-							len(extensions), str(componentNode.component.bldinf.filename))
+		self.__Raptor.Debug("{0} template extension makefiles for {1}".format
+							(len(extensions), str(componentNode.component.bldinf.filename)))
 
 		for i,extension in enumerate(extensions):
 			if self.__Raptor.projects:
 				if not extension.nametag in self.__Raptor.projects:
-					self.__Raptor.Debug("Skipping %s", extension.getMakefile())
+					self.__Raptor.Debug("Skipping {0}".format(extension.getMakefile()))
 					continue
 				elif extension.nametag in self.projectList:
 					self.projectList.remove(extension.nametag)
@@ -3257,7 +3255,7 @@ class MetaReader(object):
 			# as bash is the standard shell
 			standardVariables = extension.getStandardVariables()
 			for standardVariable in standardVariables.keys():
-				self.__Raptor.Debug("Set %s=%s", standardVariable, standardVariables[standardVariable])
+				self.__Raptor.Debug("Set {0}={1}".format(standardVariable, standardVariables[standardVariable]))
 				value = standardVariables[standardVariable].replace('$(', '$$$$(')
 				value = value.replace('$/', '/').replace('$;', ':')
 				var.AddOperation(raptor_data.Set(standardVariable, value))
@@ -3268,7 +3266,7 @@ class MetaReader(object):
 			var.AddOperation(raptor_data.Set("O._MEMBERS", ""))
 			options = extension.getOptions()
 			for option in options:
-				self.__Raptor.Debug("Set %s=%s", option, options[option])
+				self.__Raptor.Debug("Set {0}={1}".format(option, options[option]))
 				value = options[option].replace('$(EPOCROOT)', '$(EPOCROOT)/')
 				value = value.replace('$(', '$$$$(')
 				value = value.replace('$/', '/').replace('$;', ':')
@@ -3309,7 +3307,7 @@ class MetaReader(object):
 
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
-					self.__Raptor.Debug("Skipping %s", str(mmpFileEntry.filename))
+					self.__Raptor.Debug("Skipping {0}".format(str(mmpFileEntry.filename)))
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
@@ -3317,7 +3315,7 @@ class MetaReader(object):
 			foundmmpfile = (mmpFileEntry.filename).FindCaseless()
 
 			if foundmmpfile == None:
-				self.__Raptor.Error("Can't find mmp file '%s'", str(mmpFileEntry.filename), bldinf=str(bldInfFile))
+				self.__Raptor.Error("Can't find mmp file '{0}'".format(str(mmpFileEntry.filename)), bldinf=str(bldInfFile))
 				continue
 
 			mmpFile = MMPFile(foundmmpfile,
@@ -3328,9 +3326,9 @@ class MetaReader(object):
 
 			mmpFilename = mmpFile.filename
 
-			self.__Raptor.Info("Processing %s for platform %s",
+			self.__Raptor.Info("Processing {0} for platform {1}".format(
 							   str(mmpFilename),
-							   " + ".join([x.name for x in buildPlatform["configs"]]))
+							   " + ".join([x.name for x in buildPlatform["configs"]])))
 
 			# Run the Parser
 			# The backend supplies the actions
@@ -3344,11 +3342,11 @@ class MetaReader(object):
 				self.__Raptor.Debug(e) # basically ignore parse exceptions
 
 			if (not parseresult) or (parseresult[0] != 'MMP'):
-				self.__Raptor.Error("The MMP Parser didn't recognise the mmp file '%s'",
-					                str(mmpFileEntry.filename), 
+				self.__Raptor.Error("The MMP Parser didn't recognise the mmp file '{0}'".format(
+					                str(mmpFileEntry.filename)), 
 					                bldinf=str(bldInfFile))
 				self.__Raptor.Debug(content)
-				self.__Raptor.Debug("The parse result was %s", parseresult)
+				self.__Raptor.Debug("The parse result was {0}".format(parseresult))
 			else:
 				backend.finalise(buildPlatform)
 
@@ -3391,24 +3389,24 @@ class MetaReader(object):
 				validtargettypes = buildPlatform['TARGET_TYPES'].split()
 			except KeyError:
 				# Shouldn't get this since it should have been CheckedGetted already
-				self.__Raptor.Error("TARGET_TYPES not defined in platform %s",
-									buildPlatform['PLATFORM'])
+				self.__Raptor.Error("TARGET_TYPES not defined in platform {0}".format
+									(buildPlatform['PLATFORM']))
 
 			try:
 				if not targettype in validtargettypes:
-					self.__Raptor.Error("Unsupported target type '%s' in %s - should be one of %s",
+					self.__Raptor.Error("Unsupported target type '{0}' in {1} - should be one of {2}".format(
 										targettype,
 										str(mmpFileEntry.filename),
-										", ".join(validtargettypes),
+										", ".join(validtargettypes)),
 										bldinf=str(bldInfFile))
 				else:
 					interfaceName = buildPlatform[targettype]
 					mmpSpec.SetInterface(interfaceName)
 			except KeyError:
 				# Shouldn't get this far unless INTERFACE_TYPES doesn't contain TARGET_TYPES
-				self.__Raptor.Error("%s interface not defined for %s (invalid configuration?)",
+				self.__Raptor.Error("{0} interface not defined for {1} (invalid configuration?)".format(
 								    targettype,
-									buildPlatform['PLATFORM'],
+									buildPlatform['PLATFORM']),
 								    bldinf=str(bldInfFile))
 				continue
 
@@ -3433,9 +3431,9 @@ class MetaReader(object):
 				try:
 					mmpSpec.AddVariant(self.__Raptor.cache.FindNamedVariant(applyVar))
 				except KeyError:
-					self.__Raptor.Error("APPLY unknown variant '%s' in %s",
-								        applyVar,
-								        str(mmpFileEntry.filename),
+					self.__Raptor.Error("APPLY unknown variant '{0}' in {1}".format
+								        (applyVar,
+								        str(mmpFileEntry.filename)),
 								        bldinf=str(bldInfFile))
 
 			# resources, stringtables and bitmaps are sub-nodes of this project
@@ -3474,13 +3472,13 @@ class MetaReader(object):
 
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
-					self.__Raptor.Debug("Skipping %s", str(g.getMakefileName()))
+					self.__Raptor.Debug("Skipping {0}".format(str(g.getMakefileName())))
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
 
-			self.__Raptor.Debug("%i gnumakefile extension makefiles for %s",
-						len(gnuList), str(componentNode.component.bldinf.filename))
+			self.__Raptor.Debug("{0} gnumakefile extension makefiles for {1}".format
+						(len(gnuList), str(componentNode.component.bldinf.filename)))
 			var = raptor_data.Variant()
 			gnuSpec = raptor_data.Specification("gnumakefile " + str(g.getMakefileName()))
 			interface = buildPlatform["ext_makefile"]
@@ -3493,7 +3491,7 @@ class MetaReader(object):
 			var.AddOperation(raptor_data.Set("CFG","$(VARIANTTYPE)"))
 			standardVariables = g.getStandardVariables()
 			for standardVariable in standardVariables.keys():
-				self.__Raptor.Debug("Set %s=%s", standardVariable, standardVariables[standardVariable])
+				self.__Raptor.Debug("Set {0}={1}".format(standardVariable, standardVariables[standardVariable]))
 				value = standardVariables[standardVariable].replace('$(', '$$$$(')
 				value = value.replace('$/', '/').replace('$;', ':')
 				var.AddOperation(raptor_data.Set(standardVariable, value))
@@ -3506,13 +3504,13 @@ class MetaReader(object):
 
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
-					self.__Raptor.Debug("Skipping %s", str(m.getMakefileName()))
+					self.__Raptor.Debug("Skipping {0}".format(str(m.getMakefileName())))
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
 
-			self.__Raptor.Debug("%i makefile extension makefiles for %s",
-						len(makefileList), str(componentNode.component.bldinf.filename))
+			self.__Raptor.Debug("{0} makefile extension makefiles for {1}".format
+						(len(makefileList), str(componentNode.component.bldinf.filename)))
 			var = raptor_data.Variant()
 			gnuSpec = raptor_data.Specification("makefile " + str(m.getMakefileName()))
 			interface = buildPlatform["ext_makefile"]
@@ -3526,7 +3524,7 @@ class MetaReader(object):
 			var.AddOperation(raptor_data.Set("USENMAKE","1"))
 			standardVariables = m.getStandardVariables()
 			for standardVariable in standardVariables.keys():
-				self.__Raptor.Debug("Set %s=%s", standardVariable, standardVariables[standardVariable])
+				self.__Raptor.Debug("Set {0}={1}".format(standardVariable, standardVariables[standardVariable]))
 				value = standardVariables[standardVariable].replace('$(', '$$$$(')
 				value = value.replace('$/', '/').replace('$;', ':')
 				var.AddOperation(raptor_data.Set(standardVariable, value))
@@ -3546,21 +3544,21 @@ class MetaReader(object):
 		if kifXmlPath.isFile(): # kif.xml exists so try to read it
 			osVersion = getOsVerFromKifXml(str(kifXmlPath))
 			if osVersion != None:
-				self.__Raptor.Info("OS version \"%s\" determined from file \"%s\"" % (osVersion, kifXmlPath))
+				self.__Raptor.Info("OS version \"{0}\" determined from file \"{1}\"".format(osVersion, kifXmlPath))
 
 		# OS version was not determined from the kif.xml, e.g. because it doesn't exist
 		# or there was a problem parsing it. So, we fall over to using the buildinfo.txt
 		if osVersion == None and buildInfoTxtPath.isFile():
 			osVersion = getOsVerFromBuildInfoTxt(str(buildInfoTxtPath))
 			if osVersion != None:
-				self.__Raptor.Info("OS version \"%s\" determined from file \"%s\"" % (osVersion, buildInfoTxtPath))
+				self.__Raptor.Info("OS version \"{0}\" determined from file \"{1}\"".format(osVersion, buildInfoTxtPath))
 
 		# If we determined a non-empty string for the OS Version, attempt to apply it
 		if osVersion and osVersion in self.__Raptor.cache.variants:
-			self.__Raptor.Info("applying the OS variant to the configuration \"%s\"." % aBuildUnit.name)
+			self.__Raptor.Info("applying the OS variant to the configuration \"{0}\".".format(aBuildUnit.name))
 			aBuildUnit.variants.append(self.__Raptor.cache.variants[osVersion])
 		else:
-			self.__Raptor.Info("no OS variant for the configuration \"%s\"." % aBuildUnit.name)
+			self.__Raptor.Info("no OS variant for the configuration \"{0}\".".format(aBuildUnit.name))
 			
 	@classmethod		
 	def unzippedPathFragment(self, sanitisedPath):

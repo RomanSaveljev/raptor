@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -63,7 +63,7 @@ class Cache:
 		# skipped if not in debug mode
 		if self.raptor.debugOutput:
 			for path in pathlist:
-				self.raptor.Debug("Loading XML cache from %s", path)
+				self.raptor.Debug("Loading XML cache from {0}".format(path))
 
 		# Internal function to get the list of XML
 		# files recursively
@@ -91,7 +91,7 @@ class Cache:
 			elif os.path.isdir(path):
 				getXmlFiles(path, filenames)
 			else: # it isn't a file or directory
-				self.raptor.Warn("No file or directory found for '%s'", path)
+				self.raptor.Warn("No file or directory found for '{0}'".format(path))
 
 		if not filenames:
 			# No XML files found in any of the paths
@@ -104,10 +104,10 @@ class Cache:
 				objects = raptor_xml.Read(self.raptor, fullpath)
 
 			except raptor_xml.XMLError:
-				self.raptor.Warn("Failed to read XML file %s", fullpath)
+				self.raptor.Warn("Failed to read XML file {0}".format(fullpath))
 				continue
 
-			self.raptor.Debug("%d objects found in XML file %s", len(objects), fullpath)
+			self.raptor.Debug("{0} objects found in XML file {1}".format(len(objects), fullpath))
 
 			for obj in objects:
 				# top-level objects need to know which XML file they came from.
@@ -115,7 +115,7 @@ class Cache:
 				try:
 					self.AddObject(obj, cacheID)
 				except UnexpectedObjectError:
-					self.raptor.Warn("Unexpected object %s", str(obj))
+					self.raptor.Warn("Unexpected object {0}".format(str(obj)))
 
 	def AddObject(self, obj, cacheID):
 		"""add a Group, Alias, Interface or Variant.
@@ -209,8 +209,8 @@ class Cache:
 
 		# actually this is just for information not a warning
 		
-		self.raptor.Info("Duplicate %s '%s' (the one from '%s' will override the one in '%s')",
-						 type, objOld.name, oldSource, newSource)
+		self.raptor.Info("Duplicate {0} '{1}' (the one from '{2}' will override the one in '{3}')".format
+						 (type, objOld.name, oldSource, newSource))
 
 
 class UnexpectedObjectError(Exception):

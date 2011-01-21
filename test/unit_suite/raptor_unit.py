@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -176,7 +176,7 @@ class TestRaptor(unittest.TestCase):
 	# Test Info, Warn & Error functions can handle attributes
 	def testInfoAttributes(self):
 		self.r.out = OutputMock()
-		self.r.Info("hello %s", "world", planet="earth")
+		self.r.Info("hello {0}".format("world"), planet="earth")
 		expected = "<info planet='earth'>hello world</info>\n"
 		self.assertEquals(self.r.out.actual, expected)
 		
@@ -188,7 +188,7 @@ class TestRaptor(unittest.TestCase):
 		
 	def testErrorAttributes(self):
 		self.r.out = OutputMock()
-		self.r.Error("messed up %s and %s", "all", "sundry", bldinf="bld.inf")
+		self.r.Error("messed up {0} and {1}".format("all", "sundry"), bldinf="bld.inf")
 		expected = "<error bldinf='bld.inf'>messed up all and sundry</error>\n"
 		self.assertEquals(self.r.out.actual, expected)	
 		

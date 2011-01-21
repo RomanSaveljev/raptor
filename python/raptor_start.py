@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -38,6 +38,6 @@ if __name__ == "__main__":
 		sys.stderr.write("ERROR: sbs: Terminated by control-c or break\n")
 		sys.exit(255)
 	except ValueError, exc:
-		sys.stderr.write("ERROR: sbs: %s" % str(exc))
+		sys.stderr.write("ERROR: sbs: {0}".format(str(exc)))
 		sys.exit(255)
 

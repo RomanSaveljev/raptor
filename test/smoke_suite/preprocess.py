@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -31,11 +31,11 @@ def run():
 	if t.onWindows:
 		addConfigs = "-c x86_udeb"
 		addTargets = [
-			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.x86.udeb.pre",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.x86.udeb.pre",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.x86.udeb.pre",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.x86.udeb.pre",
-			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.x86.udeb.pre"
+			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.x86.udeb.helloworld.exe.pre",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.x86.udeb.helloworld.exe.pre",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.x86.udeb.helloworld.exe.pre",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.x86.udeb.helloworld.exe.pre",
+			"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.x86.udeb.helloworld.exe.pre"
 			]
 
 	t.command = """
@@ -44,31 +44,31 @@ def run():
 		""".format(addConfigs)
 	
 	t.targets = [
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv5.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv5.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv5.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv5.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv5.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv5.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv5.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv5.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv5.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv5.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.winscw.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.winscw.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.winscw.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.winscw.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.winscw.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv7.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv7.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv7.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv7.udeb.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv7.udeb.pre",		
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv7.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv7.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv7.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv7.urel.pre",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv7.urel.pre"
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv5.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv5.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv5.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv5.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv5.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv5.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv5.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv5.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv5.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv5.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.winscw.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.winscw.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.winscw.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.winscw.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.winscw.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv7.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv7.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv7.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv7.udeb.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv7.udeb.helloworld.exe.pre",		
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Application.cpp.armv7.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppUi.cpp.armv7.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_AppView.cpp.armv7.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Document.cpp.armv7.urel.helloworld.exe.pre",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/HelloWorld_Main.cpp.armv7.urel.helloworld.exe.pre"
 		] + addTargets
 
 	t.run()

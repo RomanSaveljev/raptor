@@ -1,0 +1,15 @@
+
+.anno files can contain differently formatted tags. In particular, when 
+reading data from them, Raptor must handle the following cases for a 
+certain XML element containing a duration. That is, Raptor must handle the 
+cases
+
+<metric name="duration">93</metric>
+
+and
+
+<metric name="duration">93.000000</metric>
+
+Since this may vary between the .anno files, a float conversion must be used 
+first in all cases, before an int conversion. This fix implements the extra 
+float conversion without which an exception occurs.

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -163,7 +163,7 @@ class ExternalTool(object):
 		self.__Output = []
 
 	def call(self, aArgs):		
-		print "RUNNNING: %s %s" %(self.__Tool, aArgs)
+		print "RUNNNING: {0} {1}".format(self.__Tool, aArgs)
 		(input, output) = os.popen2(self.__Tool + " " + aArgs)
 		self.__Output = output.read()
 		return output.close() 
@@ -260,7 +260,7 @@ miniCommandOption = "--co"  # update this if another "co" option is added
 def read_command_file(filename, used):
 	"""Read commandline options in from a file"""
 	if filename in used:
-		raise IOError("command file '%s' refers to itself" % filename)
+		raise IOError("command file '{0}' refers to itself".format(filename))
 
 	args = []
 	try:
@@ -269,7 +269,7 @@ def read_command_file(filename, used):
 			args.extend(line.split())
 		file.close()
 	except:
-		raise IOError("couldn't read command file '%s'" % filename)
+		raise IOError("couldn't read command file '{0}'".format(filename))
 
 	# expand any command files in the options we just read.
 	# making sure we don't get stuck in a loop.
