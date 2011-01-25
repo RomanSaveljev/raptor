@@ -67,7 +67,7 @@ def generate_csv(dir_or_file, prefix):
 		input_file = dir_or_file
 		
 		# run the CSV filter on this one log file and sort the result
-		csvfilter = "sbs_filter --filters=csv[ok] -f- < {0} | sort > {1}".format(input_file, sorted_file)
+		csvfilter = "sbs_filter --filters=csv[ok] -f- < {0} | sort | uniq > {1}".format(input_file, sorted_file)
 		if options.debug:
 			print( csvfilter )
 		returncode = subprocess.call(csvfilter, shell=True)
@@ -111,18 +111,19 @@ def summarise_totals(filename):
 	
 	reader = csv.reader(open(filename, "rb"))
 	for row in reader:
+		count = int(row[3])
 		
 		event = row[0]
 		if event in events:
-			events[event] += 1
+			events[event] += count
 		else:
-			events[event] = 1
+			events[event] = count
 			
 		bldinf = row[1]
 		if bldinf in components:
-			components[bldinf] += 1
+			components[bldinf] += count
 		else:
-			components[bldinf] = 1
+			components[bldinf] = count
 			
 	return (events, components)
 		
@@ -147,11 +148,11 @@ for bldinf in bldinfs:
 		different_components[bldinf] = (left_number, right_number)
 
 if different_components:
-	print("\nComponent differences\n=====================")
+	print("\nComponent totals (where different)\n==================================")
 	widest = max(different_components, key=len)
 
 	for bldinf in sorted(different_components.keys()):
-		print("{0:<{w}}:{v[0]:>6}{v[1]:>6}".format(bldinf, v=different_components[bldinf], w=len(widest)+1))
+		print("{0:<{w}}:{v[0]:>8}{v[1]:>8}".format(bldinf, v=different_components[bldinf], w=len(widest)+1))
 
 print("\nOverall totals\n==============")
 for event in ["error", "critical", "warning", "remark", "missing"]:
@@ -165,6 +166,58 @@ for event in ["error", "critical", "warning", "remark", "missing"]:
 	else:
 		right_number = 0
 			
-	print("{0:<9}:{1:>6}{2:>6}".format(event, left_number, right_number))
+	print("{0:<9}:{1:>8}{2:>8}".format(event, left_number, right_number))
+
+# now create left_diff.txt and right_diff.txt which are all the errors, warnings
+# etc. from left_all.csv which are not the same in right_all.csv and vice-versa.
+#
+# these are .txt because the lines are reformatted for easier reading in a 
+# graphical tool (e.g. NEWLINE strings are replaced by \n)
+#
+# note that these files are not necessarily empty if the totals are all the
+# same - because there may be the same number of errors in both builds by
+# fluke and they could be totally different sets of errors.
+
+left_file = open("left_all.csv", "r")
+right_file = open("right_all.csv", "r")
+
+left_diff = open("left_diff.txt", "w")
+right_diff = open("right_diff.txt", "w")
+
+# we know that the files are sorted, so we can step through both line by line
+left_line = left_file.readline()
+right_line = right_file.readline()
+common = False
+while left_line or right_line:
+	if left_line == right_line:
+		common = True
+		left_diff.write("=")
+		right_diff.write("=")
+		left_line = left_file.readline()
+		right_line = right_file.readline()
+	elif left_line < right_line or not right_line:
+		# close off the line of =
+		if common:
+			left_diff.write("\n") 
+			right_diff.write("\n")
+		common = False
+		# left is missing from right
+		left_diff.write(left_line.replace("NEWLINE","\n"))
+		left_line = left_file.readline()
+	else:
+		# close off the line of =
+		if common:
+			left_diff.write("\n") 
+			right_diff.write("\n")
+		common = False
+		# right is missing from left
+		right_diff.write(right_line.replace("NEWLINE","\n"))
+		right_line = right_file.readline()
+		
+left_diff.close()
+right_diff.close()
 	
+left_file.close()
+right_file.close()
+
 sys.exit(0)

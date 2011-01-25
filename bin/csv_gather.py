@@ -92,7 +92,7 @@ for i,f in enumerate(logs):
 	csvs.append(tmpfile)
 	
 # cat all the temporary CSV files together and output the sorted result
-catsort = "cat {0} | sort > {1}".format(" ".join(csvs), options.output)
+catsort = "cat {0} | sort | uniq > {1}".format(" ".join(csvs), options.output)
 print catsort
 				
 returncode = subprocess.call(catsort, shell=True)
