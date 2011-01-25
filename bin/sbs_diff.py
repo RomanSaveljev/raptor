@@ -107,30 +107,64 @@ if not options.use_intermediate:
 
 def summarise_totals(filename):
 	events = {}
+	components = {}
+	
 	reader = csv.reader(open(filename, "rb"))
 	for row in reader:
+		
 		event = row[0]
 		if event in events:
 			events[event] += 1
 		else:
 			events[event] = 1
-	return events
+			
+		bldinf = row[1]
+		if bldinf in components:
+			components[bldinf] += 1
+		else:
+			components[bldinf] = 1
+			
+	return (events, components)
 		
 left_summary = summarise_totals("left_totals.csv")
 right_summary = summarise_totals("right_totals.csv")
 
-print("\nOverall totals\n=============")
-for event in ["error", "critical", "warning", "remark", "missing"]:
-	if event in left_summary:
-		left_number = left_summary[event]
+# Component differences (if any)
+bldinfs = set(left_summary[1].keys()) | set(right_summary[1].keys())
+different_components = {}
+for bldinf in bldinfs:
+	if bldinf in left_summary[1]:
+		left_number = left_summary[1][bldinf]
 	else:
 		left_number = 0
 		
-	if event in right_summary:
-		right_number = right_summary[event]
+	if bldinf in right_summary[1]:
+		right_number = right_summary[1][bldinf]
+	else:
+		right_number = 0
+
+	if left_number != right_number:	
+		different_components[bldinf] = (left_number, right_number)
+
+if different_components:
+	print("\nComponent differences\n=====================")
+	widest = max(different_components, key=len)
+
+	for bldinf in sorted(different_components.keys()):
+		print("{0:<{w}}:{v[0]:>6}{v[1]:>6}".format(bldinf, v=different_components[bldinf], w=len(widest)+1))
+
+print("\nOverall totals\n==============")
+for event in ["error", "critical", "warning", "remark", "missing"]:
+	if event in left_summary[0]:
+		left_number = left_summary[0][event]
+	else:
+		left_number = 0
+		
+	if event in right_summary[0]:
+		right_number = right_summary[0][event]
 	else:
 		right_number = 0
 			
-	print("\t{0:<10}:{1:>10}{2:>10}".format(event, left_number, right_number))
-
+	print("{0:<9}:{1:>6}{2:>6}".format(event, left_number, right_number))
+	
 sys.exit(0)
