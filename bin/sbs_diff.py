@@ -218,4 +218,7 @@ right_diff.close()
 left_file.close()
 right_file.close()
 
-sys.exit(0)
+if different_components:
+	sys.exit(1) # the builds are different
+
+sys.exit(0) # the builds are probably equivalent
