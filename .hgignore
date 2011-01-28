@@ -2,12 +2,19 @@
 \.orig$
 \.pyc$
 \.swp$
+\.project$
+\.pydevproject$
 
-.project
-.pydevproject
 linux-.*-.*/bin
+linux-.*-.*/bv
+linux-.*-.*/cw_build470msl19
+linux-.*-.*/python27
+linux-.*-.*/share
+linux-.*-.*/info
+linux-.*-.*/man
 
 test/epoc32/
+test/smoke_suite/test_resources/gnumakefile/.*\.txt
 test/smoke_suite/test_resources/longerpathnames
 test/smoke_suite/test_resources/qt/helloworld/Makefile
 test/smoke_suite/test_resources/qt/helloworld/.make.cache
