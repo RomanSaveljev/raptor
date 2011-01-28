@@ -107,17 +107,20 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 	emulatedDrive = dosDriveRegEx.match(reference)	
 	if emulatedDrive and aMainType in ("PRJ_EXPORTS", "PRJ_TESTEXPORTS"):
 		# Interpret drive letters as emulator drives but only when dealing with exports
-		# Emulated drive C:/ Z:/ and the like
-		# C: drive 
-		if reference.lower().startswith("c"):
-			resolvedPath = []
-			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT+'/epoc32/data/'+emulatedDrive.group(1), reference))
-			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT+'/epoc32/winscw/'+emulatedDrive.group(1), reference))
+		# Emulated drive C:/ Z:/ and the like		
+		resolvedPath = []
+		driveLetter = emulatedDrive.group(1)
+		if driveLetter.isupper():
+			driveLetter = driveLetter.lower()
+		
+		# C: drive
+		if driveLetter is "c":
+			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/data/' + driveLetter, reference))
+			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/winscw/' + driveLetter, reference))
 		else: # Other letters: A, B and D to Z
-			resolvedPath = []
-			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT+'/epoc32/data/'+emulatedDrive.group(1), reference))
-			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT+'/epoc32/release/winscw/udeb/'+emulatedDrive.group(1), reference))
-			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT+'/epoc32/release/winscw/urel/'+emulatedDrive.group(1), reference))
+			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/data/' + driveLetter, reference))
+			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/release/winscw/udeb/' + driveLetter, reference))
+			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/release/winscw/urel/' + driveLetter, reference))
 	elif os.path.isabs(reference):
 		# Absolute
 		if re.search("(DEFFILE|PRJ_(TEST)?EXPORTS)", aMainType, re.I) and not re.search("^\/epoc32\/", reference, re.I):

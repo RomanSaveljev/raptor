@@ -1,0 +1,29 @@
+It can happen that a bld.inf has PRJ_EXPORTS which have drive letters in both 
+upper and lower case. For example, a bld.inf might have contents as follows:
+
+----------------------------
+PRJ_PLATFORMS
+ARMV5 WINSCW
+
+PRJ_EXPORTS
+foo.txt z:/foo.txt
+bar.txt Z:/bar.txt
+----------------------------
+
+In previous versions of Raptor, the following exports result:
+
+$EPOCROOT/epoc32/data/z/foo.txt
+$EPOCROOT/epoc32/release/winscw/udeb/z/foo.txt
+$EPOCROOT/epoc32/release/winscw/urel/z/foo.txt
+$EPOCROOT/epoc32/data/Z/bar.txt
+$EPOCROOT/epoc32/release/winscw/udeb/Z/bar.txt
+$EPOCROOT/epoc32/release/winscw/urel/Z/bar.txt
+
+Notice the z and Z directories under the directories
+
+$EPOCROOT/epoc32/release/winscw/udeb/
+$EPOCROOT/epoc32/release/winscw/urel/
+$EPOCROOT/epoc32/data/
+
+This is a problem on Linux, since the directories "z" and "Z" are different.
+The fix is to make the drive letter lower case in the target drive exports.

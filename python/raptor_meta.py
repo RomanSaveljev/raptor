@@ -3041,8 +3041,6 @@ class MetaReader(object):
 			destDir = destination.Dir()
 			if not destDir.isDir():
 				os.makedirs(str(destDir))
-				shutil.copyfile(source_str, dest_str)
-				return exportwhatlog
 
 			sourceMTime = 0
 			destMTime = 0
