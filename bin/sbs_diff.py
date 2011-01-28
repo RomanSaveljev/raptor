@@ -36,7 +36,7 @@ parser.add_option("--debug", action="store_true", default=False, help =
     "Print out info on how the processing is done. The default is '%default'."
 				)
 
-parser.add_option("--use_intermediate", action="store_true", default=False, help =
+parser.add_option("--use-intermediate", action="store_true", dest="use_intermediate", default=False, help =
     "Do not re-read the original logs, use the intermediate files generated "
     "by a previous run of this script. Useful for debugging and for turning "
     "up the verbosity without rescanning all the logs. The default is '%default'."
@@ -54,9 +54,7 @@ if len(leftover_args) == 2:
 	left_param = leftover_args[0]
 	right_param = leftover_args[1]
 elif not options.use_intermediate:
-	sys.stderr.write("error: expected 2 names, got\n")
-	for leftover in leftover_args:
-		sys.stderr.write("       {0}\n".format(leftover))
+	sys.stderr.write("error: expected 2 names, got '{0}'\n".format(",".join(leftover_args)))
 	sys.exit(1)
 
 def generate_csv(dir_or_file, prefix):
