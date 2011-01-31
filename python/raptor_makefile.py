@@ -229,7 +229,7 @@ class BaseMakefileSet(object):
 
 	def __init__(self, metadepsfilename):
 		self.makefiles = [] # list of Makefile()
-		self.metadepsfilename = metadepsfilename
+		self.metadepsfilename = str(metadepsfilename)
 
 	def json(self):
 		"""Enables json serialisation of this object. Returns a structure in a format that the json module can render to text easily"""
@@ -369,7 +369,7 @@ class MakefileSet(BaseMakefileSet):
 		]
 
 	def __init__(self, directory, selectors=defaultselectors, makefiles=None, parent=None, filenamebase="Makefile", prologue=None, epilogue=None, defaulttargets=None, readonly=False):
-		super(MakefileSet,self).__init__(metadepsfilename = filenamebase + ".metadeps")
+		super(MakefileSet,self).__init__(metadepsfilename = generic_path.Join(directory, filenamebase + ".metadeps"))
 
 		self.directory = generic_path.Path(directory)
 		self.filenamebase = filenamebase
