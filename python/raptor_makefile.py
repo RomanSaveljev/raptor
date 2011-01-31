@@ -13,7 +13,7 @@
 #
 # Description: 
 # makefile module
-# This module is for writing calls to Function-Like Makefiles
+# This module is for writing makefiles containing calls to Function-Like Makefiles
 #
 
 import re
