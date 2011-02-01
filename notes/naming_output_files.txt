@@ -1,0 +1,124 @@
+Naming Output Files
+--------------------
+
+This document describes how to cause output files from a build
+to be named so that they are  related (so one can group them)
+but distinguished (so that they don't overwrite each other).
+
+Examples would be logfiles, annotation files, history files etc.
+
+
+Multiple Builds
+----------------
+In a situation where several builds are done, one after the other by
+some automation system, the makefiles and log files are named so that
+they don't clash - this way it is possible for the logs and makefiles
+to be analysed, inspected for errors etc long after the entire sequence
+is finished.
+
+Some make engines generate extra output files - not just logs.
+e.g annotation files that indicate what happened during a build - from
+clashes to timings for each build command.
+
+In these use cases one also needs to be able to produce uniquely named
+files so that successive builds can avoid writing over the information
+from the previous build.
+
+e.g.
+
+  sbs -m ncp_01012010.mk -f ncp_01012010.log -c all_variants
+  sbs -m dfs_01012010.mk -f dfs_01012010.log -c generic
+  sbs -m winscw_01012010.mk -f winscw_01012010.log -c winscw
+
+Note that the date is being included in the name so that not only is the
+"stage" of each build unique but the overall sequence of builds is also
+unique (at least to the resolution of a day).
+
+#MAKEFILE#
+-----------
+
+Since Raptor builds in stages (a measure designed to take the pressure
+off the build engine by reducing the number of many-to-many dependencies
+it has to handle) there are actually 5 makefiles and 5 invocations of
+make for every invocation of raptor:
+
+  ncp_01012010.mk.export
+  ncp_01012010.mk.bitmap
+  ncp_01012010.mk.resource_deps
+  ncp_01012010.mk.resource
+  ncp_01012010.mk.default
+  
+  dfs_01012010.mk.export
+  dfs_01012010.mk.bitmap
+  dfs_01012010.mk.resource_deps
+  dfs_01012010.mk.resource
+  dfs_01012010.mk.default
+  
+  winscw_01012010.mk.export
+  winscw_01012010.mk.bitmap
+  winscw_01012010.mk.resource_deps
+  winscw_01012010.mk.resource
+  winscw_01012010.mk.default
+
+Ask can be seen, Raptor takes the argument to "-m" as a "base" for the 
+filename of the makefiles it generates.
+
+If we had a hypothetical build engine, called "wmake" for example,
+and it offered an annotation feature then we could tell it to create
+the annotation files with a unique name by copying the makefile 
+name we supplied to "-m" e.g.
+
+  sbs -e wmake -m ncp_01012010.mk -c all_variants --mo=--annofile=ncp_01012010.anno
+
+This would work badly, however, because Raptor actually runs make 5 times
+- once for each stage and each of these stages has a different makefile
+with different recipes.  Raptor knows how to create unique makefiles 
+automatically but it doesn't understand the "--annofile" option which is 
+being passed through to wmake so it has no way of also making that unique.
+The annotation file would get overwritten 4 times and we would be left
+with only the data from the "default" stage - no annotation data for
+"resource" or "bitmap".
+
+So Raptor provides a feature which replaces the string "#MAKEFILE#"
+with the full makefile name, including the stage:
+
+  sbs -e wmake -m ncp_01012010.mk -c all_variants --mo=--annofile=#MAKEFILE#.anno
+
+This ensures that there are 5 unique annotation files - one for each
+stage of the build:
+
+  ncp_01012010.mk.export.anno
+  ncp_01012010.mk.bitmap.anno
+  ... etc
+
+Date Independent Files - #STAGE#
+---------------------------------
+#MAKEFILE# is designed so that the user can make a sequence of builds
+include the date and time in all filenames.  That makes it possible to
+keep logs from successive build attempts in the same directory structure.
+In essence a sequence of builds may fail and be restarted and this allows
+*all* the logging information to be kept for post-mortem analysis.
+
+#STAGE# is different.  It only substitutes the stage name and this is for
+files that need to be the same from one attempt to another but where there
+must still be one per stage.  History files are like this - they are a way for
+a build system to remember sequencing problems from the last build and
+thereby generate more efficient sequencing in the new one.
+
+e.g.
+
+   sbs -e wmake -m ncp_makefile_01012010 -c all_variants --mo=--historyfile=ncp_#STAGE#.history
+
+. . . would generate . . .
+
+  ncp_export.history
+  ncp_default.history
+  ncp_resource.history
+  ncp_resource_deps.history
+  ncp_bitmap.history
+
+Note that the date is included in the makefile name so we get new
+makefiles every time but the history files get reused.  This is what we
+want because history files are a store of knowledge that helps the build
+system to learn from one "ncp_resource" (for example) to the next.
+

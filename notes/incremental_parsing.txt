@@ -27,9 +27,54 @@ This feature is new and somewhat experimental - if you suspect that something
 should have been rebuilt but hasn't while you are using the feature then 
 simply remove the option from your invocation of sbs and rebuild.
 
+Are Two Builds the Same?
+------------------------
 
-Example:
+The judgement about whether a set of makefiles can be reused is made on two criteria:
 
+  1) The environment: currently only the "EPOCROOT" and "PATH"
+  environment variables are compared between two builds - if these differ
+  then the builds are not equivalent. This attempts to ensure that 
+  two builds are building against the same SDK with the same tools but 
+  since not all tools have to be on the path there is room for some
+  degree of error e.g. if you upgraded tools or the SDK itself between
+  two builds.
+
+  2) The commandline: if the commandline for two builds is different then
+  the makefiles are considered different.  This *very* conservative but
+  that seems right with a build system.  There are 3 exceptions.
+      i) The "--ip=on" command itself is not considered to count as a 
+         difference
+     ii) The "clean" target is ignored.  This means that building code and 
+         then cleaning it should not require the regeneration of makefiles.
+    iii) The -f (logfilename) option and its argument are ignored.
+
+  e.g. the makefiles generated for:
+
+       sbs -b bld.inf -c armv5
+
+  ...will be reused if this command follows:
+
+       sbs -b bld.inf --ip=on -c armv5 clean
+
+
+Build Records
+--------------
+A new file is created in every build with the name #MAKEFILE#.buildrecord.
+This file records of the names of the makefiles involved in a build and
+the corresponding commandline that was given to raptor when it created
+them.
+
+Raptor uses these records to determine if the current build can reuse
+existing makefiles.  If the current build attempt's commandline and
+"environment" match those of an existing record then the makefiles
+referenced by the record can be reused.
+
+Build record files are written in JSON format.
+
+
+Example Demonstrating incremental Parsing Use Cases
+----------------------------------------------------
 Step 1)
 With a clean epocroot the user types:
 	sbs -b bld.inf --ip=on

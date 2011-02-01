@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -18,13 +18,13 @@ from raptor_tests import SmokeTest, getsymbianversion
 
 def run():
 	t = SmokeTest()
-	t.id = "39"
 	t.name = "openenvironment"
 	t.description = """Test STDEXE, STDLIB and STDDLL creation; Test open environment project linking against a symbian environment
 		library; Test symbian environment project linking against an open environment library"""
 	t.usebash = True
 	t.command = "sbs -k -b smoke_suite/test_resources/oe/group/bld.inf -c armv5 -c winscw " + \
 		"-m ${SBSMAKEFILE} -f ${SBSLOGFILE}; grep -E \"(armlink|checklib|mwldsym2)\" ${SBSLOGFILE}"
+	t.errors = 1 # The test has errors so make will return a fail code and raptor will report this
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/t_oedll.dll.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/symbian_test.lib",
