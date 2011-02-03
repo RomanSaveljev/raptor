@@ -96,17 +96,20 @@ endef
 
 # Macro for creating the test BATCH files.
 # Arguments: $(1) -> Target Name $(2) -> Output Batch file path
+# remember to catch the $(SHELL) output so that make doesn't
+# try to interpret it as make output.
+
 define MakeTestBatchFiles
     $(if $(BATCHFILE_CREATED_$(2))
         ,
             $(if $(TARGET_CREATED_$(2)_$(TARGET))
                 ,
                 ,
-                    $$(shell echo -e "$(1)\r" >> $(2))
+                    MTBF_OUTPUT:=$$(shell echo -e "$(1)\r" >> $(2))
             )
        	,
-       	    $$(shell $(GNUMKDIR) -p $(dir $(2)))
-       	    $$(shell echo -e "$(1)\r" > $(2))
+       	    MTBF_OUTPUT:=$$(shell $(GNUMKDIR) -p $(dir $(2)))
+       	    MTBF_OUTPUT:=$$(shell echo -e "$(1)\r" > $(2))
     )
 endef
 
