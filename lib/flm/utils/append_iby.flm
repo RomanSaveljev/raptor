@@ -33,7 +33,7 @@ ifneq ($(TESTCODE),)
 IBYFILE:=$(IBYFILE)test
 endif
 
-ifeq ($(IBY_TYPE),NOKIA)
+ifeq ($(call lowercase,$(IBY_TYPE)),nokia)
 IBYFILE:=$(IBYFILE)n
 endif
 

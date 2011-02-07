@@ -39,6 +39,11 @@ IBY_TYPE is optional and defaults to NOKIA if unspecified.
 APPEND_FILE is assumed to be a text file, and is located relative to the
 bld.inf file.
 
+As with other utility FLMs it is assumed that only one use of append_iby.flm
+exists per-target in normal usage i.e. to avoid clashes in parallel running
+.iby files should only be subject to one START EXTENSION utility.append_iby
+entry and hence updated by a single APPEND_FILE in a ROMFILE run. 
+
 For example, to append the content of a component local nokia_test.txt file
 to the <platform>testn.iby files created by Raptor:
 
