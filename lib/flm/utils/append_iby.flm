@@ -1,0 +1,50 @@
+# Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+# All rights reserved.
+# This component and the accompanying materials are made available
+# under the terms of the License "Eclipse Public License v1.0"
+# which accompanies this distribution, and is available
+# at the URL "http://www.eclipse.org/legal/epl-v10.html".
+#
+# Initial Contributors:
+# Nokia Corporation - initial contribution.
+#
+# Contributors:
+#
+# Description:
+#
+
+# FLM to append additional entries to Raptor generated .iby files
+
+# parameters
+#
+# APPEND_FILE	text file containing additions to be made to vanilla .iby files
+# IBY_TYPE		type of .iby file to modify - NOKIA, SYMBIAN (default of NOKIA in interface)
+
+APPEND_FILE_ABS:=$(EXTENSION_ROOT)/$(APPEND_FILE)
+
+# calculate the .iby output location for this run
+TOBLDINF:=$(dir $(subst :,,$(subst $(EPOCROOT)/,,$(COMPONENT_META))))
+ROMDIR:=$(EPOCROOT)/epoc32/rom/$(TOBLDINF)
+
+# calculate the target .iby file
+IBYFILE:=$(VARIANTPLATFORM)
+
+ifneq ($(TESTCODE),)
+IBYFILE:=$(IBYFILE)test
+endif
+
+ifeq ($(IBY_TYPE),NOKIA)
+IBYFILE:=$(IBYFILE)n
+endif
+
+IBYFILE:=$(ROMDIR)$(IBYFILE).iby
+
+define append_iby
+# we append every time, as .iby files are always regenerated
+ROMFILE:: $(IBYFILE)
+	$(call startrule,append_iby) \
+	$(GNUCAT) $(APPEND_FILE_ABS) >> $(IBYFILE) \
+	$(call endrule,append_iby)
+endef
+
+$(eval $(append_iby))
