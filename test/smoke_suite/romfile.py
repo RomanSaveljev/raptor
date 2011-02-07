@@ -68,8 +68,14 @@ def run():
 		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_sysbin\.exe\s+sys/bin/t_sysbin\.exe\n.*",
 		r".*\ndata=/epoc32/release/##MAIN##/##BUILD##/t_sysbin\.exe\s+/sys/bin/t_sysbin_ram\.exe attrib=r\n.*",
 		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_sysbin\.exe\s+/sys/bin/t_sysbina\.exe\n.*",
-		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_sysbin\.exe\s+/system/programs/t_sysbinb\.exe\n.*"
+		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_sysbin\.exe\s+/system/programs/t_sysbinb\.exe\n.*",
 		]
+	if t.onWindows:
+		t.mustmatch.extend([
+		# romstuff.mke additions - extension makefile added, so only apply on Windows
+		r".*\ndata=..\\..\\f32test\\server\\t_file.cpp\s+Test\\T_file.cpp\n.*",
+		r".*\ndata=..\\..\\f32test\\server\\t_findcaptestfile.txt\s+\\sys\\bin\\t_findcaptestfile.txt\n.*"
+		])
 	t.mustnotmatch = [
 		# Try to detect file paths that contain two or more slashes in a row,
 		# without flagging C++ style comments.
@@ -108,7 +114,11 @@ def run():
 		r".*\nfile=ABI_DIR/BUILD_DIR/t_sysbin\.exe\s+sys/bin/t_sysbin\.exe\n.*",
 		r".*\ndata=ABI_DIR/BUILD_DIR/t_sysbin\.exe\s+/sys/bin/t_sysbin_ram\.exe attrib=r\n.*",
 		r".*\nfile=ABI_DIR/BUILD_DIR/t_sysbin\.exe\s+/sys/bin/t_sysbina\.exe\n.*",
-		r".*\nfile=ABI_DIR/BUILD_DIR/t_sysbin\.exe\s+/system/programs/t_sysbinb\.exe\n.*"
+		r".*\nfile=ABI_DIR/BUILD_DIR/t_sysbin\.exe\s+/system/programs/t_sysbinb\.exe\n.*",
+		
+		# append_iby.flm additions from multiple START EXTENSION blocks
+		r".*\ndata=../../f32test/server/t_file.cpp\s+Test/T_file.cpp\n.*",
+		r".*\ndata=../../f32test/server/t_findcaptestfile.txt\s+/sys/bin/t_findcaptestfile.txt\n.*"	
 		]
 	t.mustnotmatch = [
 		# Try to detect file paths that contain two or more slashes in a row,
