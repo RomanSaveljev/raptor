@@ -143,7 +143,7 @@ ROMFILE::$(ROMFILENAME) $(ROMFILENAME_NOKIA)
 $(ROMFILENAME)::
 	$(call startrule,rombuild) \
 	$(GNUMKDIR) -p $(ROMDIR) \
-	$(if $(ROMFILE_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME))\n//\n$(DATATEXT)" > $(ROMFILENAME)) \
+	$(if $(ROMFILES_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME))\n//\n$(DATATEXT)" > $(ROMFILENAME)) \
 	$(if $(BUILDROMTARGET),&& echo "$(ROMFILETYPE)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(1)$(ROMDECORATIONS)" >> $(ROMFILENAME)) \
 	$(if $(RAMTARGET),&& echo "$(ROMFILETYPE_RAM)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(ROMPATH_RAM)$(ROMFILE_RAM)$(ROMDECORATIONS_RAM)" >> $(ROMFILENAME))
 	$(call endrule,rombuild)
@@ -151,7 +151,7 @@ $(ROMFILENAME)::
 $(ROMFILENAME_NOKIA)::
 	$(call startrule,rombuild_nokia) \
 	$(GNUMKDIR) -p $(ROMDIR) \
-	$(if $(ROMFILE_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME_NOKIA))\n//\n$(DATATEXT)" > $(ROMFILENAME_NOKIA)) \
+	$(if $(ROMFILES_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME_NOKIA))\n//\n$(DATATEXT)" > $(ROMFILENAME_NOKIA)) \
 	$(if $(BUILDROMTARGET),&& echo "$(ROMFILETYPE_NOKIA)=ABI_DIR/BUILD_DIR/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(1)$(ROMDECORATIONS)" >> $(ROMFILENAME_NOKIA)) \
 	$(if $(RAMTARGET),&& echo "$(ROMFILETYPE_RAM)=ABI_DIR/BUILD_DIR/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(ROMPATH_RAM)$(ROMFILE_RAM)$(ROMDECORATIONS_RAM)" >> $(ROMFILENAME_NOKIA)) \
 	$(call endrule,rombuild_nokia)
@@ -161,7 +161,7 @@ endef
 # apart from if this is a new component......
 ifneq ($(PREVIOUSVARIANTTYPE),)
     ifneq ($(VARIANTTYPE),$(PREVIOUSVARIANTTYPE))
-        ifneq ($(ROMFILE_CREATED_$(TOBLDINF)),)
+        ifneq ($(ROMFILES_CREATED_$(TOBLDINF)),)
             ROMFILEFINISHED:=1
         else
             ROMFILEFINISHED:=
@@ -175,8 +175,8 @@ ifeq ($(ROMFILEFINISHED),)
 endif
 
 # Don't allow romfile to be recreated for every MMP
-ifeq ($(ROMFILE_CREATED_$(TOBLDINF)),)
-    ROMFILE_CREATED_$(TOBLDINF):=1
+ifeq ($(ROMFILES_CREATED_$(TOBLDINF)),)
+    ROMFILES_CREATED_$(TOBLDINF):=1
 endif
 
 # Build other ROMTARGETs if there is more than one
