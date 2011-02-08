@@ -105,9 +105,9 @@ def AnnoFileParseOutput(annofile):
 
 			o = string_following('<metric name="duration">', line)
 			if o:
-				secs = int(o[:o.find('<')])
-				if secs != 0:
-					duration = "%d:%d" % (secs/60, secs % 60)
+				total_secs = int(float(o[:o.find('<')]))
+				if total_secs != 0:
+					duration = "{mins:.0f}:{secs}".format(mins = total_secs/60, secs = total_secs % 60)
 				else:
 					duration = "0:0"
 				continue 
@@ -128,7 +128,7 @@ def AnnoFileParseOutput(annofile):
 			if line != "":	
 				yield unescape(line)+'\n'
 
-	yield "Finished build: {0}   Duration: {1} (m:s)   Cluster availability: {2}%\n".format(buildid,duration,availability)
+	yield "Finished build: {0}   Duration: {1} (m:s)   Cluster availability: {2}%\n".format(buildid, duration, availability)
 	af.close()
 
 
@@ -286,7 +286,7 @@ class MakeEngine(object):
 						ignoretargets = evaluator.Get(name.strip() + ".selector.ignoretargets")
 						self.selectors.append(MakefileSelector(name,pattern,target,ignoretargets))
 			except KeyError:
-				Raptor.Error("{0}.selector.iface, {1}.selector.target not found in make engine configuration".format(name,name))
+				Raptor.Error("{0}.selector.iface, {0}.selector.target not found in make engine configuration".format(name))
 				self.selectors = []
 
 		except KeyError:
@@ -468,7 +468,7 @@ include {0}
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
-			self.raptor.Error("Failed to write makefile '%s': %s : %s", str(toplevel),str(e),tb)
+			self.raptor.Error("Failed to write makefile '{0}': {1} : {2}".format(str(toplevel),str(e),tb))
 			raise CannotWriteMakefileException(str(e))
 
 		return makefileset
@@ -638,7 +638,7 @@ include {0}
 		if self.initCommand:
 			self.raptor.Info("Running {0}".format(self.initCommand))
 			if os.system(self.initCommand) != 0:
-				self.raptor.Error("Failed in %s", self.initCommand)
+				self.raptor.Error("Failed in {0}".format(self.initCommand))
 				self.Tidy()
 				return False
 

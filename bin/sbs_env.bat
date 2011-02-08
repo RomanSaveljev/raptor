@@ -1,5 +1,5 @@
 @REM
-@REM Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+@REM Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 @REM All rights reserved.
 @REM This component and the accompanying materials are made available
 @REM under the terms of the License "Eclipse Public License v1.0"
@@ -30,7 +30,7 @@
 @REM The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
 @REM 1. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
 @REM 2. the python shipped locally with Raptor (if present)
-@REM 3. the python on the system PATH and the PYTHONPATH set in the system environment
+@REM 3. the python on the system PATH and PYTHONPATH/PYTHONHOME set in the system environment
 
 @SET __LOCAL_PYTHON__=%SBS_HOME%\win32\python27\python.exe
 @IF NOT "%SBS_PYTHON%"=="" GOTO sbspython
@@ -46,6 +46,7 @@
 @SET __PYTHON__=%__LOCAL_PYTHON__%
 @SET SBS_PYTHON=%__PYTHON__%
 @SET PYTHONPATH=
+@SET PYTHONHOME=
 
 :sbspythonpath
 @IF NOT "%SBS_PYTHONPATH%"=="" SET PYTHONPATH=%SBS_PYTHONPATH%

@@ -489,7 +489,7 @@ class Layer(ModelNode):
 			component_blocks.pop()
 			number_blocks -= 1
 
-		build.Info("Parallel Parsing: bld.infs split into %d blocks\n", number_blocks)
+		build.Info("Parallel Parsing: bld.infs split into {0} blocks\n".format(number_blocks))
 
 		return component_blocks
 
@@ -609,8 +609,7 @@ class Layer(ModelNode):
 				key = str(build.topMakefile))
 		build.InfoStartTime(object_type = "layer", task = "build",
 				key = str(build.topMakefile))
-
-		build.Debug("Binding Makefile base name is %s ", binding_makefiles.filenamebase)
+		build.Debug("Binding Makefile base name is {0} ".format(binding_makefiles.filenamebase))
 		binding_makefiles.close()
 		b = build.Make(binding_makefiles)
 		build.InfoEndTime(object_type = "layer", task = "build",
@@ -719,7 +718,7 @@ class Raptor(object):
 		self.home = generic_path.Path(home).Absolute()
 
 		if not self.home.isDir():
-			self.Error("%s '%s' is not a directory", env, self.home)
+			self.Error("{0} '{1}' is not a directory".format(env, self.home))
 			raise BuildCannotProgressException("{0} '{1}' is not a directory".format(env, str(self.home)))
 
 		# the set-up file location.
@@ -879,7 +878,7 @@ class Raptor(object):
 
 	def AddTarget(self, target):
 		if self.doCheck or self.doWhat:
-			self.Warn("ignoring target %s because --what or --check is specified.\n", target)
+			self.Warn("ignoring target {0} because --what or --check is specified.\n".format(target))
 		else:
 			self.targets.append(target)
 
@@ -981,7 +980,7 @@ class Raptor(object):
 			self.jobs = 0
 
 		if self.jobs < 1:
-			self.Warn("The number of jobs (%s) must be a positive integer\n", numberOfJobs)
+			self.Warn("The number of jobs ({0}) must be a positive integer\n".format(numberOfJobs))
 			self.jobs = 1
 			return False
 		return True
@@ -993,7 +992,7 @@ class Raptor(object):
 			self.tries = 0
 
 		if self.tries < 1:
-			self.Warn("The number of tries (%s) must be a positive integer\n", numberOfTries)
+			self.Warn("The number of tries ({0}) must be a positive integer\n".format(numberOfTries))
 			self.tries = 1
 			return False
 		return True
@@ -1004,7 +1003,7 @@ class Raptor(object):
 		if type in toolcheck_types:
 			self.toolcheck=type
 		else:
-			self.Warn("toolcheck option must be one of: %s" % toolcheck_types)
+			self.Warn("toolcheck option must be one of: {0}".format(toolcheck_types))
 			return False
 
 		return True
@@ -1022,7 +1021,7 @@ class Raptor(object):
 		elif type == "off":
 			self.doParallelParsing = False
 		else:
-			self.Warn(" parallel parsing option must be either 'on' or 'off' (was %s)"  % type)
+			self.Warn(" parallel parsing option must be either 'on' or 'off' (was {0})".format(type))
 			return False
 
 		return True
@@ -1036,7 +1035,7 @@ class Raptor(object):
 		elif type == "off":
 			self.incremental_parsing = False
 		else:
-			self.Warn(" incremental parsing option must be either 'on' or 'off' (was %s)"  % type)
+			self.Warn(" incremental parsing option must be either 'on' or 'off' (was {0})".format(type))
 			return False
 		return  True
 
@@ -1068,28 +1067,28 @@ class Raptor(object):
 	def Introduction(self):
 		"""Print a header of useful information about Raptor"""
 
-		self.Info("%s: version %s", name, raptor_version.fullversion())
+		self.Info("{0}: version {1}".format(name, raptor_version.fullversion()))
 
-		self.Info("%s %s", env, str(self.home))
-		self.Info("Set-up %s", str(self.raptorXML))
-		self.Info("Command-line-arguments %s", " ".join(self.args))
-		self.Info("Current working directory %s", os.getcwd())
+		self.Info("{0} {1}".format(env, str(self.home)))
+		self.Info("Set-up {0}".format(str(self.raptorXML)))
+		self.Info("Command-line-arguments {0}".format(" ".join(self.args)))
+		self.Info("Current working directory {0}".format(os.getcwd()))
 
 		# the inherited environment
 		for e, value in sorted( os.environ.items() ):
-			self.Info("Environment %s=%s", e, value.replace("]]>", "]]&gt;"))
+			self.Info("Environment {0}={1}".format(e, value.replace("]]>", "]]&gt;")))
 
 		# and some general debug stuff
-		self.Debug("Platform %s", "-".join(hostplatform))
-		self.Debug("Filesystem %s", self.filesystem)
-		self.Debug("Python %d.%d.%d", *sys.version_info[:3])
-		self.Debug("Command-line-parser %s", self.CLI)
+		self.Debug("Platform {0}".format("-".join(hostplatform)))
+		self.Debug("Filesystem {0}".format(self.filesystem))
+		self.Debug("Python {0}.{1}.{2}".format(*sys.version_info[:3]))
+		self.Debug("Command-line-parser {0}".format(self.CLI))
 
 		for e,value in self.override.items():
-			self.Debug("Override %s = %s", e, value)
+			self.Debug("Override {0} = {1}".format(e, value))
 
 		for t in self.targets:
-			self.Debug("Target %s", t)
+			self.Debug("Target {0}".format(t))
 
 
 
@@ -1153,7 +1152,7 @@ class Raptor(object):
 		buildUnitsToBuild = raptor_data.GetBuildUnits(configNames, self.cache, self)
 
 		for b in buildUnitsToBuild:
-			self.Info("Buildable configuration '%s'", b.name)
+			self.Info("Buildable configuration '{0}'".format(b.name))
 
 		if len(buildUnitsToBuild) == 0:
 			self.Error("No build configurations given")
@@ -1181,7 +1180,7 @@ class Raptor(object):
 		tools_ok = True
 		tool_problems = []
 		for b in configs:
-			self.Debug("Tool check for %s", b.name)
+			self.Debug("Tool check for {0}".format(b.name))
 			config_ok = False  #default
 			try:
 				evaluator = self.GetEvaluator(None, b, gathertools=True)
@@ -1310,7 +1309,7 @@ class Raptor(object):
 		self.endtime = time.time()
 		self.runtime = int(0.5 + self.endtime - self.starttime)
 		self.raptor_params.runtime = self.runtime
-		self.Info("Run time %s seconds" % self.runtime)
+		self.Info("Run time {0} seconds".format(self.runtime))
 
 	def AssertBuildOK(self):
 		"""Raise a BuildCannotProgressException if no further processing is required
@@ -1352,13 +1351,14 @@ class Raptor(object):
 			progress_namespace = "http://symbian.com/xml/build/log/progress"
 			schema = "http://symbian.com/xml/build/log/1_0.xsd"
 
-			self.out.write("<buildlog sbs_version=\"%s\" xmlns=\"%s\" xmlns:progress=\"%s\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"%s %s\">\n"
-						   % (raptor_version.fullversion(), namespace, progress_namespace, namespace, schema))
+			self.out.write("<buildlog sbs_version=\"{0}\" xmlns=\"{1}\" xmlns:progress=\"{2}\""
+                                       " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"{3} {4}\">\n".format(
+				       raptor_version.fullversion(), namespace, progress_namespace, namespace, schema))
 			self.logOpen = True
 		except Exception,e:
 			self.out = sys.stdout # make sure that we can actually get errors out.
 			self.logOpen = False
-			self.FatalError("Unable to open the output logs: %s" % str(e))
+			self.FatalError("Unable to open the output logs: {0}".format(str(e)))
 
 	def CloseLog(self):
 		if self.logOpen:
@@ -1384,11 +1384,11 @@ class Raptor(object):
 			atts += " " + a + "='" + v + "'"
 		return atts
 
-	def Info(self, format, *extras, **attributes):
+	def Info(self, msg, **attributes):
 		"""Send an information message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<info{0}>{1}</info>\n".format(self.attributeString(attributes), escape(format % extras)))
+		self.out.write("<info{0}>{1}</info>\n".format(self.attributeString(attributes), escape(msg)))
 
 	def InfoDiscovery(self, object_type, count):
 		if self.timing:
@@ -1414,21 +1414,21 @@ class Raptor(object):
 			except Exception, exception:
 				self.Error(exception.Text, function = "InfoEndTime")
 
-	def Debug(self, format, *extras, **attributes):
+	def Debug(self, msg, **attributes):
 		"Send a debugging message to the configured channel"
 
 		# the debug text is out of our control so wrap it in a CDATA
 		# in case it contains characters special to XML... like <>
 		if self.debugOutput:
-			self.out.write("<debug{0}><![CDATA[\n{1}\n]]></debug>\n".format(self.attributeString(attributes),(format % extras)))
+			self.out.write("<debug{0}><![CDATA[\n{1}\n]]></debug>\n".format(self.attributeString(attributes),escape(msg)))
 
-	def Warn(self, format, *extras, **attributes):
+	def Warn(self, msg, **attributes):
 		"""Send a warning message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<warning{0}>{1}</warning>\n".format(self.attributeString(attributes), escape(format % extras)))
+		self.out.write("<warning{0}>{1}</warning>\n".format(self.attributeString(attributes), escape(msg)))
 
-	def FatalError(self, format, *extras, **attributes):
+	def FatalError(self, msg, **attributes):
 		"""Send an error message to the configured channel. This implies such a serious
 		   error that the entire build must be shut down asap whilst still finishing off
 		   correctly whatever housekeeping is possible e.g. producing error reports.
@@ -1436,15 +1436,15 @@ class Raptor(object):
 		   further errors are probably triggered by the first.
 		"""
 		if not self.fatalErrorState:
-			self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes),(format % extras)))
+			self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes), escape(msg)))
 			self.errorCode = 1
 			self.fatalErrorState = True
 
-	def Error(self, format, *extras, **attributes):
+	def Error(self, msg, **attributes):
 		"""Send an error message to the configured channel
 				(XML control characters will be escaped)
 		"""
-		self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes), escape(format % extras)))
+		self.out.write("<error{0}>{1}</error>\n".format(self.attributeString(attributes), escape(msg)))
 		self.errorCode = 1
 
 
@@ -1475,7 +1475,7 @@ class Raptor(object):
 					layers.append(Layer('default',[aComponent]))
 
 			if len(layers) <= 0 and  self.systemDefinitionFile == None:
-				self.Warn("No default bld.inf or system definition file found in current directory (%s)", cwd)
+				self.Warn("No default bld.inf or system definition file found in current directory ({0})".format(cwd))
 
 		# If we now have a System Definition to parse then get the layers of components
 		if self.systemDefinitionFile != None:
@@ -1513,14 +1513,14 @@ class Raptor(object):
 		import raptor_api
 		api = raptor_api.Context(self)
 		
-		print "<sbs version='%s'>" % raptor_version.numericversion()
+		print "<sbs version='{0}'>".format(raptor_version.numericversion())
 		
 		for q in self.queries:
 			try:
 				print api.stringquery(q)
 				
 			except Exception, e:
-				self.Error("exception '%s' with query '%s'", str(e), q)
+				self.Error("exception '{0}' with query '{1}'".format(str(e), q))
 		
 		print "</sbs>"	
 		return self.errorCode
@@ -1611,7 +1611,7 @@ class Raptor(object):
 				try:
 					self.maker = raptor_make.MakeEngine(self, self.makeEngine)
 				except raptor_make.BadMakeEngineException,e:
-					self.Error("Unable to use make engine: %s " % str(e))
+					self.Error("Unable to use make engine: {0} ".format(str(e)))
 					
 
 			self.AssertBuildOK()

@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -88,7 +88,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	# The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
 	#  1. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
 	#  2. the python shipped locally with Raptor (if present)
-	#  3. the python on the system PATH and the PYTHONPATH set in the system environment
+	#  3. the python on the system PATH and PYTHONPATH/PYTHONHOME set in the system environment
 
 	# Python variables need to run in Cygwin but be understandable to a
 	# windows-centric interpreter, so we must use "mixed form" filenames.
@@ -105,6 +105,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 		__PYTHON__=$__LOCAL_PYTHON__
 		export SBS_PYTHON=$__PYTHON__
 		export PYTHONPATH=
+		export PYTHONHOME=
 	else
 		__PYTHON__=python.exe
 	fi

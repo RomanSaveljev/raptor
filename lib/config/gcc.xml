@@ -33,10 +33,6 @@
 		
 		<set name='VARIANTPLATFORM' value='tools2'/>
 
-		<!-- COMPILER_PATH can be set to tell gcc where to find as.exe (sometimes it doesn't and a build step fails). -->
-		<set name='COMPILER_PATH.WIN32' value='$(SBS_HOME)/win32/mingw/bin'/>
-		<set name='COMPILER_PATH.LINUX' value=''/>
-
 		<set name='CFLAGS.WIN32' value=''/>
 
 		<!-- macro definitions set by mmps etc -->

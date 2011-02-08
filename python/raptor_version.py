@@ -19,12 +19,12 @@
 #
 # both of these are done automatically by the installer builder.
 
-version=(2,17,0,"ISODATE","symbian build system","CHANGESET")
+version=(2,16,1,"ISODATE","symbian build system","CHANGESET")
 
 def numericversion():
 	"""Raptor version string"""
-	return "%d.%d.%d" % version[:3]
+	return "{0}.{1}.{2}".format(*version[:3])
 
 def fullversion():
 	"""Raptor version string"""
-	return "%d.%d.%d [%s %s %s]" % version
+	return "{0}.{1}.{2} [{3} {4} {5}]".format(*version)

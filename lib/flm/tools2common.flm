@@ -1,4 +1,4 @@
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -21,20 +21,21 @@
 ifeq ($(filter win,$(HOSTPLATFORM)),win)
 CDEFS.TOOLS2:=$(CDEFS.WIN32) $(CDEFS)
 CFLAGS:=$(CFLAGS.WIN32) $(CFLAGS) $(OPTION_GCC)
-COMPILER_PATH:=$(COMPILER_PATH.WIN32)
 OUTPUTPATH:=$(OUTPUTPATH)/$(TARGET)_$(TARGETTYPE)/tools2/$(VARIANTTYPE)$(TOOLPLATFORMDIR)
+
+# Due to potential issues with the environment in Windows builds we explicitly set
+# the root location from where GCC should sub-launch tools when doing its work
+COMPILER_PATH:=$(dir $(firstword $(COMPILER)))
 else
 ifneq ($(TOOLS2WIN32),)
 # Build win32 tools in Linux
 CDEFS.TOOLS2:=$(CDEFS.WIN32) $(CDEFS)
 CFLAGS:=$(CFLAGS.WIN32) $(CFLAGS) $(OPTION_GCC)
-COMPILER_PATH:=$(COMPILER_PATH.WIN32)
 OUTPUTPATH:=$(OUTPUTPATH)/$(TARGET)_$(TARGETTYPE)/tools2/$(VARIANTTYPE)
 else
 # Build linux tools in Linux
 CDEFS.TOOLS2:=$(CDEFS.LINUX) $(CDEFS)
 CFLAGS:=$(CFLAGS) $(OPTION_GCC)
-COMPILER_PATH=$(COMPILER_PATH.LINUX)
 OUTPUTPATH:=$(OUTPUTPATH)/$(TARGET)_$(TARGETTYPE)/tools2/$(VARIANTTYPE)$(TOOLPLATFORMDIR)
 endif
 endif
