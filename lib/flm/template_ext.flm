@@ -52,7 +52,7 @@
 # (in which case O._MEMBERS:=PATH FILENAME)
 
 # create the working directory for the TEM
-$(shell $(GNUMKDIR) -p $(EPOCBLD))
+$(call makepath,$(EPOCBLD))
 
 ################################ Standard Variables ##
 # We may set the following 
