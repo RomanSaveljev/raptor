@@ -32,7 +32,7 @@ def run():
 
 	# Set up variables for talon
 	bindir = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin")
-	bash = bindir + "/bash"
+	bash = "/bin/bash"
 	talon = bindir + "/talon"
 
 	# Adjust if on Windows - three "tries" for Bash on Windows.

@@ -392,7 +392,7 @@ class SmokeTest(object):
 					else:
 						BASH = ReplaceEnvs("$(SBS_HOME)/win32/cygwin/bin/bash.exe")
 				else:
-					BASH = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/bash")
+					BASH = "/bin/bash"
 				
 			shellenv['SBSMAKEFILE']=ReplaceEnvs(self.makefile())
 			shellenv['SBSLOGFILE']=ReplaceEnvs(self.logfile())
