@@ -2874,7 +2874,7 @@ class MetaReader(object):
 		module_dir = '_'.join([i for i in relevant_path.split('/') if i][-3:])
 		
 		# If we can't calculate a directory name using our logic, return a generic name
-		if module_dir == "" or module_dir.endswith(":"):
+		if module_dir == "":
 			module_dir = "module"
 		return module_dir
 	
