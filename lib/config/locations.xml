@@ -23,7 +23,7 @@
 
 		<env name='SBS_GNUCPP' default='$(SBS_USRBIN)/cpp' type='tool'/>
 		<env name='SBS_GNUDATE' default='$(SBS_SLASHBIN)/date' type='tool'/>
-		<env name='SBS_GNUMAKE38' default='$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/make' type='tool'/>
+		<env name='SBS_GNUMAKE38' default='$(SBS_USRBIN)/make' type='tool'/>
 		<env name='SBS_GNUSED' default='$(SBS_SLASHBIN)/sed' type='tool'/>
 		<env name='SBS_GNUMKDIR' default='$(SBS_SLASHBIN)/mkdir' type='tool'/>
 		<env name='SBS_GNUMV' default='$(SBS_SLASHBIN)/mv' type='tool'/>
@@ -38,9 +38,9 @@
 		<env name='SBS_GNUFIND' default='$(SBS_USRBIN)/find' type='tool'/>
 		<env name='SBS_GNUGREP' default='$(SBS_SLASHBIN)/grep' type='tool'/>
 		<env name='SBS_GNUSORT' default='sort' type='tool'/>
-		<env name='SBS_SHELL' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/sh" type='tool'/>
-		<env name='SBS_ZIP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/zip" type='tool'/>
-		<env name='SBS_UNZIP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/unzip" type='tool'/>
+		<env name='SBS_SHELL' default="$(SBS_SLASHBIN)/bash" type='tool'/>
+		<env name='SBS_ZIP' default="$(SBS_USRBIN)/zip" type='tool'/>
+		<env name='SBS_UNZIP' default="$(SBS_USRBIN)/unzip" type='tool'/>
 		<env name='SBS_BVCPP' default="$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bv/bin/cpp" type='tool'/>
 		<env name='SBS_PERL' default='perl' type='tool'/>
 		<env name='SBS_PYTHON' default='python' type='tool'/>
