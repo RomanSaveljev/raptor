@@ -198,7 +198,7 @@
 		<set name="ARMCC" value="$(RVCTBIN)/armcc$(DOTEXE)" type="tool" versionCommand="$(ARMCC) --version_number" versionResult="400[4-9]\d\d\b"/>
 		<set name="PLATMACROS.VAR" value="ARMCC_4 ARMCC_4_0"/>
 		<set name="ARMMACROS.VAR" value="__ARMCC_4__ __ARMCC_4_0__"/>
-		<set name="SYMBIAN_LINK_FLAGS.VAR" value="--override_visibility"/>
+		<set name="SYMBIAN_LINK_FLAGS.VAR" value="--override_visibility $(LINKER_INLINE_OPTION)"/>
 		<set name="RUNTIME_LIBS_LIST" value="drtaeabi.dso dfpaeabi.dso"/>
 		<set name="USER_STATIC_RUNTIME_LIB" value="usrt4_0.lib"/>
 		<set name="USER_STATIC_RUNTIME_LIB_NESTED_EXCEPTIONS" value="usrt_nx_4_0.lib"/>
@@ -215,7 +215,7 @@
 		<set name="ARMCC" value="$(RVCTBIN)/armcc$(DOTEXE)" type="tool" versionCommand="$(ARMCC) --vsn" versionResult="Compiler, 4\.1\b"/>
 		<set name="PLATMACROS.VAR" value="ARMCC_4 ARMCC_4_1"/>
 		<set name="ARMMACROS.VAR" value="__ARMCC_4__ __ARMCC_4_1__"/>
-		<set name="SYMBIAN_LINK_FLAGS.VAR" value="--override_visibility"/>
+		<set name="SYMBIAN_LINK_FLAGS.VAR" value="--override_visibility $(LINKER_INLINE_OPTION)"/>
 		<set name="RUNTIME_LIBS_LIST" value="drtaeabi.dso dfpaeabi.dso"/>
 
 		<!-- These are good enough for now. -->

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -922,7 +922,8 @@ class TestRaptorMeta(unittest.TestCase):
 				    {"bldinf":"w:/contacts/ONgoing/group/bld.inf", 'epocroot':'w:', "result":"contacts_ongoing"},
 				    {"bldinf":"M:/src/os/boardsupport/naviengine/navienginebspflexible/test/bld.inf", 'epocroot':'M:/builds/', "result":"naviengine_navienginebspflexible_test"},
 				    {"bldinf":"p:/group/bld.inf", 'epocroot':'p:', "result":"module"},
-				    {"bldinf":"/home/group/bld.inf", 'epocroot':'/home', "result":"module"}
+				    {"bldinf":"/home/group/bld.inf", 'epocroot':'/home', "result":"module"},
+				    {"bldinf":"g:/dir1/dir2/group/bld.inf", 'epocroot':'g:/some/epocroot', "result":'g_dir1_dir2'}
 				]
 
 		for result in resultsDictList:

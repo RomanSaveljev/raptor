@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -66,6 +66,10 @@ fi
 	grep -v 'flm/test'  |
 	grep -v 'util/build'  | 
 	grep -v 'test/epocroot/epoc32/build'  | 
+	grep -v 'pvm'  | 
+	grep -v 'bash'  | 
+	grep -v '.*linux-.*-libc/bin/sh$'  | 
+	grep -v 'install-windows'  | 
 	grep -v '~$'  |  cpio -o --quiet  2>/dev/null 
 ) | ( cd "$TMPSBS" && cpio -i --make-directories  --quiet >/dev/null 2>&1)
 
@@ -74,9 +78,8 @@ echo "FULLVERSION=\"$FULLVERSION\"" > $TMPSBS/.version
 echo "VERSION=\"$VERSION\"" >> $TMPSBS/.version
 
 if [[ "$packtype" == "binary" ]]; then
-chmod a+x $TMPSBS/bin/* $TMPSBS/util/$HOSTPLATFORM_DIR/bin/* $TMPSBS/util/$HOSTPLATFORM_DIR/python265/bin/* 
-chmod a+x $TMPSBS/util/pvm3/bin/LINUX/*
-chmod a+x $TMPSBS/util/$HOSTPLATFORM_DIR/cw_build470msl19/release/Symbian_Tools/Command_Line_Tools/*
+chmod a+x $TMPSBS/bin/* $TMPSBS/$HOSTPLATFORM_DIR/bin/* $TMPSBS/$HOSTPLATFORM_DIR/python27/bin/* 
+chmod a+x $TMPSBS/$HOSTPLATFORM_DIR/cw_build470msl19/release/Symbian_Tools/Command_Line_Tools/*
 fi
 
 cd $TMPSBS/.. && bash "$PACKAGER_HOME"/makeself.sh $DIRNAME $DIRNAME.run "$FULLVERSION\n" ./bin/install_raptor.sh
