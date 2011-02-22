@@ -93,7 +93,7 @@ def __writeDirTreeToArchive(zip, dirlist, sbshome, win32supportdirs=False):
 	so set this to true when writing files into $SBS_HOME/win32"""
 	for name in dirlist:
 		if name == None:
-			next
+			continue
 		files = os.walk(os.path.join(sbshome, name))
 		for dirtuple in files:
 			filenames = dirtuple[2]
