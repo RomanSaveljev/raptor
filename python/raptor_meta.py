@@ -2869,12 +2869,12 @@ class MetaReader(object):
 		and .bat files can be generated."""
 
 		epocroot = str(self.ExportPlatforms[0]['EPOCROOT'])
-		relevant_path = os.path.dirname(bldinf_file).replace(epocroot, '', 1).lower().replace('group', '')
+		relevant_path = os.path.dirname(bldinf_file).replace(epocroot, '', 1).lower().replace('group', '').replace(':', '')
 		# Only join the last 3 folder names in case the path is very long
 		module_dir = '_'.join([i for i in relevant_path.split('/') if i][-3:])
 		
 		# If we can't calculate a directory name using our logic, return a generic name
-		if module_dir == "" or module_dir.endswith(":"):
+		if module_dir == "":
 			module_dir = "module"
 		return module_dir
 	

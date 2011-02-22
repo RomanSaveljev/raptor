@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -32,7 +32,7 @@ def run():
 
 	# Set up variables for talon
 	bindir = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin")
-	bash = bindir + "/bash"
+	bash = "/bin/bash"
 	talon = bindir + "/talon"
 
 	# Adjust if on Windows - three "tries" for Bash on Windows.
