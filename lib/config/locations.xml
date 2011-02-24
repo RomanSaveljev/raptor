@@ -107,7 +107,7 @@
 		<set name='GNUMV' value='$(SBS_GNUMV)' type='tool' versionCommand='$(GNUMV) --version' versionResult='mv(.exe)?\s*\((GNU\s*)?coreutils\)\s*[5-9]\..*'/>
 		<set name='GNUCAT' value='$(SBS_GNUCAT)' type='tool' versionCommand='$(GNUCAT) --version' versionResult='cat(.exe)?\s*\((GNU\s*)?coreutils\)\s*[5-9]\..*'/>
 		<set name='GNUMAKE38' value='$(SBS_GNUMAKE38)' type='tool' versionCommand='$(GNUMAKE38) -v' versionResult='GNU Make 3.8[1-9]'/>
-		<set name='GNUSED' value='$(SBS_GNUSED)' type='tool' versionCommand='$(GNUSED) --version' versionResult='GNU sed version? [3-9].*'/>
+		<set name='GNUSED' value='$(SBS_GNUSED)' type='tool' versionCommand='$(GNUSED) --version' versionResult='GNU sed version?[3-9].*'/>
 		<set name='GNUMKDIR' value='$(SBS_GNUMKDIR)' type='tool' versionCommand='$(GNUMKDIR) --version' versionResult='.*'/>
 		<set name='GNURM' value='$(SBS_GNURM)' type='tool' versionCommand='$(GNURM) --version' versionResult='rm.*coreutils.*'/>
 		<set name='GNULN' value='$(SBS_GNULN)' type='tool' versionCommand='$(GNULN) --version' versionResult='ln.*coreutils.*'/>
