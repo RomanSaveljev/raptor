@@ -25,4 +25,12 @@
 		<param name="PRE_PLATFORM"/> 
 		<param name="PRE_TYPE"/>
 	</interface>
+
+	<interface name="utility.append_iby" extends="utility.base" flm="append_iby.flm">
+		<param name="APPEND_FILE"/>
+		<param name="GNUCAT"/>
+		<param name="IBY_TYPE" default="NOKIA"/>
+		<param name="TESTCODE" default=""/>
+		<param name="VARIANTPLATFORM"/>
+	</interface>
 </build>

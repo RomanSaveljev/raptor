@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies). 
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -92,7 +92,7 @@ for i,f in enumerate(logs):
 	csvs.append(tmpfile)
 	
 # cat all the temporary CSV files together and output the sorted result
-catsort = "cat {0} | sort > {1}".format(" ".join(csvs), options.output)
+catsort = "cat {0} | sort | uniq > {1}".format(" ".join(csvs), options.output)
 print catsort
 				
 returncode = subprocess.call(catsort, shell=True)
