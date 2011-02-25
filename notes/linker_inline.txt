@@ -1,0 +1,10 @@
+Linker inlining is enabled by default for both UREL and UDEB builds
+when building with RVCT4.0 onwards
+
+Linker inlining means that the linker is able to replace branch instructions
+to smaller functions, by inlining the code of the small function where the
+call is made. Branching is an expensive operation, and this feature allows
+the linker to avoid branching. The constraint to that is that target 
+function should fit within the 4bytes of the branch instruction, which is
+why linker inlining shouldn’t cause any code size increase, since it’s 
+simply replacing a 4byte branch instruction with the 4byte inlined function.

@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -83,7 +83,7 @@ ShowInstDetails show
 ##################### Pages in the installer #####################
 !define MUI_WELCOMEPAGE_TITLE_3LINES
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE ${RAPTOR_LOCATION}\license.txt
+!insertmacro MUI_PAGE_LICENSE ${LICENSE_FILE}
 !define MUI_PAGE_HEADER_TEXT "Installation type"
 Page custom UserOrSysInstall UserOrSysInstallLeave
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE DirLeave # Directory page exit function - disallow spaces in $INSTDIR
@@ -120,8 +120,10 @@ Section "Install Raptor" INSTALLRAPTOR
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\style\*.*
     SetOutPath "$INSTDIR\win32\bin"
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\win32\bin\*.*
+!ifdef BV_LOCATION
     SetOutPath "$INSTDIR\win32\bv"
     File /r /x distribution.policy.s60 /x .hg ${BV_LOCATION}\*.*
+!endif
     SetOutPath "$INSTDIR\win32\cygwin"
     File /r /x distribution.policy.s60 /x .hg ${CYGWIN_LOCATION}\*.*
     SetOutPath "$INSTDIR\win32\mingw"

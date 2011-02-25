@@ -92,6 +92,8 @@ def __writeDirTreeToArchive(zip, dirlist, sbshome, win32supportdirs=False):
 	open archive "zip" assuming valid sbshome; destination path is tweaked for win32supportdirs, 
 	so set this to true when writing files into $SBS_HOME/win32"""
 	for name in dirlist:
+		if name == None:
+			continue
 		files = os.walk(os.path.join(sbshome, name))
 		for dirtuple in files:
 			filenames = dirtuple[2]
@@ -114,12 +116,12 @@ def __writeDirTreeToArchive(zip, dirlist, sbshome, win32supportdirs=False):
 					print("Compressing {0}\tto\t{1}".format(origin, destination))
 					zip.write(origin, destination)
 
-def writeZip(filename, sbshome, sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondir):
+def writeZip(filename, sbshome, sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondir, license):
 	"""Write a zip archive with file name "filename" assuming SBS_HOME is sbshome, and  
 	that sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondir are the win32 support directories."""
 	
 	# *Files* in the top level SBS_HOME directory
-	sbshome_files = ["RELEASE-NOTES.html", "license.txt"]
+	sbshome_files = ["RELEASE-NOTES.html"]
 	
 	# Directories in SBS_HOME
 	sbshome_dirs = ["bin", "examples", "lib", "notes", "python", 
@@ -134,6 +136,8 @@ def writeZip(filename, sbshome, sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondi
 		# writing commences
 		zip = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
 		
+		# Write the license file into the archive
+		zip.write(license, os.path.join("sbs","license.txt"))
 		# Write the files in the top-level of SBS_HOME into the archive
 		for name in sbshome_files:
 			origin = os.path.join(sbshome, name)
@@ -155,7 +159,7 @@ def writeZip(filename, sbshome, sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondi
 		print("Zipoutput: \"{0}\"".format(os.path.join(os.getcwd(), filename)))
 		print("Zip file creation successful.")
 		return 0
-	except Exception(e):
+	except Exception, e:
 		print("Error: failed to create zip file: {0}".format(str(e)))
 		return 2
 
@@ -168,6 +172,7 @@ if __name__ == "__main__":
 	parser.add_option("-s", "--sbs-home", dest="sbshome", help="Path to use as SBS_HOME environment variable. If not present the script exits.")
 	parser.add_option("-w", "--win32-support", dest="win32support", help="Path to Win32 support directory. If not present the script exits.")
 	parser.add_option("-b", "--bv", dest="bv", help="Path to Binary variation CPP \"root\" directory. " + win32_msg)
+	parser.add_option("--nobv", dest="nobv", help="Do not include the binary variation CPP (ignores any --bv option).", action="store_true" , default=False)
 	parser.add_option("-c", "--cygwin", dest="cygwin", help="Path to Cygwin \"root\" directory. " + win32_msg)
 	parser.add_option("-m", "--mingw", dest="mingw", help="Path to MinGW \"root\" directory. " + win32_msg)
 	parser.add_option("-p", "--python", dest="python", help="Path to Python \"root\" directory. " + win32_msg)
@@ -183,7 +188,10 @@ if __name__ == "__main__":
 	(options, args) = parser.parse_args()
 
 	# Required directories inside the win32-support directory (i.e. the win32-support repository).
-	win32supportdirs = {"bv":"bv", "cygwin":"cygwin", "mingw":"mingw", "python":"python27"}
+	win32supportdirs = {"cygwin":"cygwin", "mingw":"mingw", "python":"python27"}
+
+	if not options.nobv:
+		win32supportdirs["bv"] = "bv"
 
 	if options.sbshome == None:
 		print("ERROR: no SBS_HOME passed in. Exiting...")
@@ -192,10 +200,21 @@ if __name__ == "__main__":
 		print("ERROR: the specified SBS_HOME directory \"{0}\" does not exist. Cannot build installer. Exiting...".format(options.sbshome))
 		sys.exit(2)
 
+	licensetxt = tempfile.NamedTemporaryFile(mode="w")
+
 	if options.win32support == None:
 		print("ERROR: no win32support directory specified. Unable to proceed. Exiting...")
 		sys.exit(2)
 	else:
+		raptorlicense = os.path.join(options.sbshome,"license.txt")
+		if os.path.exists(raptorlicense):
+			shutil.copyfileobj(open(raptorlicense,"r"),licensetxt.file)
+
+		nsisnotices = os.path.join(options.sbshome,"util","install-windows","notices.txt")
+		if os.path.exists(nsisnotices):
+			licensetxt.write("\n---\n\n")
+			shutil.copyfileobj(open(nsisnotices,"r"),licensetxt.file)
+
 		# Check for command line overrides to defaults
 		for directory in win32supportdirs:
 			print("Checking for location \"{0}\"...".format(directory))
@@ -218,11 +237,19 @@ if __name__ == "__main__":
 			dir = win32supportdirs[directory]
 			if os.path.isdir(dir):
 				print("Found directory {0}".format(dir))
+
+				# Check for a notices.txt file
+				noticesfile = os.path.join(dir,"notices.txt")
+				if os.path.exists(noticesfile):
+					print("Using notices.txt from {0}".format(dir))
+					licensetxt.write("\n---\n\n")
+					shutil.copyfileobj(open(noticesfile,"r"),licensetxt)
 			else:
 				print("ERROR: directory {0} does not exist. Cannot build installer. Exiting...".format(dir))
 				sys.exit(2)
 
-
+	licensetxt.file.flush()
+	
 	raptorversion = options.versionprefix + generateinstallerversion(options.sbshome) + options.versionpostfix
 
 	print("Using Raptor version {0} ...".format(raptorversion))
@@ -230,16 +257,22 @@ if __name__ == "__main__":
 	if not options.noexe:
 		makensispath = unzipnsis("." + os.sep + "NSIS.zip")
 		command_string = "{makensis} -DRAPTOR_LOCATION={sbs_home} " \
-					"-DBV_LOCATION={bv} -DCYGWIN_LOCATION={cygwin} " \
-					"-DMINGW_LOCATION={mingw} -DPYTHON_LOCATION={python} "  \
+					"{bvopt} -DCYGWIN_LOCATION={cygwin} " \
+					"-DMINGW_LOCATION={mingw} -DPYTHON_LOCATION={python} " \
+					"-DLICENSE_FILE={license} " \
 					"-DRAPTOR_VERSION={sbs_version} {nsis_script}"
-		
+		if options.nobv:
+			bvopt = ""
+		else:
+			bvopt = "-DBV_LOCATION={bv}".format(bv = win32supportdirs["bv"])
+
 		nsiscommand = command_string.format(makensis = makensispath,
 					sbs_home = options.sbshome, 
-					bv = win32supportdirs["bv"], 
+					bvopt = bvopt, 
 					cygwin = win32supportdirs["cygwin"],
 					mingw = win32supportdirs["mingw"],
 					python = win32supportdirs["python"],
+					license = licensetxt.name,
 					sbs_version = raptorversion,
 					nsis_script = os.path.join(options.sbshome, "util", "install-windows", "raptorinstallerscript.nsi")
 				)
@@ -264,7 +297,11 @@ if __name__ == "__main__":
 	# Only create zip archive if required
 	if not options.nozip:
 		filename = "sbs-" + raptorversion + ".zip"
-		zipfile_success = writeZip(filename, options.sbshome, win32supportdirs["bv"], win32supportdirs["cygwin"], win32supportdirs["mingw"], win32supportdirs["python"])
+		if options.nobv:
+			bvopt = None
+		else:
+			bvopt = win32supportdirs["bv"]	
+		zipfile_success = writeZip(filename, options.sbshome, bvopt, win32supportdirs["cygwin"], win32supportdirs["mingw"], win32supportdirs["python"], licensetxt.name)
 	else:
 		print("Not creating zip archive as requested.")
 	
@@ -275,3 +312,4 @@ if __name__ == "__main__":
 		print("Zip file creation completed and exited with code {0}".format(zipfile_success))
 	print("Finished.")
 
+	licensetxt.close() # Not strictly necessary, as the object going out of scope should close (and delete) it

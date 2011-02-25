@@ -1293,7 +1293,7 @@ class ToolSet(object):
 	                                os.environ['HOSTPLATFORM_DIR'])
 	                            
 		if HostPlatform.IsHost('lin*'):
-			shell=os.path.join(hostbinaries, 'bin/bash')
+			shell='/bin/bash'
 		else:
 			if 'SBS_CYGWIN' in os.environ:
 				shell=os.path.join(os.environ['SBS_CYGWIN'], 'bin\\bash.exe')

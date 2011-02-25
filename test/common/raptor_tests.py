@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -392,7 +392,7 @@ class SmokeTest(object):
 					else:
 						BASH = ReplaceEnvs("$(SBS_HOME)/win32/cygwin/bin/bash.exe")
 				else:
-					BASH = ReplaceEnvs("$(SBS_HOME)/$(HOSTPLATFORM_DIR)/bin/bash")
+					BASH = "/bin/bash"
 				
 			shellenv['SBSMAKEFILE']=ReplaceEnvs(self.makefile())
 			shellenv['SBSLOGFILE']=ReplaceEnvs(self.logfile())
