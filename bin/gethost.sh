@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -27,6 +27,8 @@ getopts de  OPT
 
 if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 	ARCH=$(uname -i)
+	# Find the libce binary and use a regular expression to slice off the major and minor version numbers
+	# e.g /lib/libc-2.12.1.so  => libc2_12
 	LIBC=$(echo /lib/libc-* | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
 	HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 
