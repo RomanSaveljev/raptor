@@ -1,0 +1,22 @@
+This file lists the environment variables that Raptor detects and their 
+purpose. In some cases, when an environment variable is not set in the 
+environment, Raptor will give it a default value which is also listed.
+
+Name:           SBS_HOME
+Default:        The directory containing the bin\sbs.bat batch file on 
+                Windows; the directory containing the bin/sbs Bash shell 
+                script on Linux. 
+Description:    Location for Raptor's script, FLMs, configuration files, 
+                certain supporting utilities. 
+Versions:       Optional from Raptor v2.9.0; essential for earlier versions.
+Platforms:      All
+
+Name:           SBS_CYGWIN_TMP
+Default:        %EPOCROOT%\sbs_cygwin_tmp
+Description:    Location for Cygwin's /tmp directory; Cygwin's default 
+                value for this it %TEMP% which can cause problems in 
+                cluster builds.
+Versions:       New in Raptor v2.16.3; not detected in earlier versions.
+Platforms:      Windows only
+
+
