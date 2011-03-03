@@ -1,0 +1,68 @@
+# Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+# All rights reserved.
+# This component and the accompanying materials are made available
+# under the terms of the License "Eclipse Public License v1.0"
+# which accompanies this distribution, and is available
+# at the URL "http://www.eclipse.org/legal/epl-v10.html".
+#
+# Initial Contributors:
+# Nokia Corporation - initial contribution.
+#
+# Contributors:
+#
+# Description:
+#
+
+# FLM to append additional entries to Raptor generated .iby files
+
+# parameters
+#
+# APPEND_FILE	text file containing additions to be made to vanilla .iby files
+# IBY_TYPE		type of .iby file to modify - NOKIA, SYMBIAN (default of NOKIA in interface)
+
+APPEND_FILE_ABS:=$(EXTENSION_ROOT)/$(APPEND_FILE)
+
+# calculate the .iby output location for this run
+TOBLDINF:=$(dir $(subst :,,$(subst $(EPOCROOT)/,,$(COMPONENT_META))))
+ROMDIR:=$(EPOCROOT)/epoc32/rom/$(TOBLDINF)
+
+# calculate the target .iby file
+IBYFILE:=$(VARIANTPLATFORM)
+
+ifneq ($(TESTCODE),)
+IBYFILE:=$(IBYFILE)test
+endif
+
+ifeq ($(call lowercase,$(IBY_TYPE)),nokia)
+IBYFILE:=$(IBYFILE)n
+endif
+
+IBYFILE:=$(ROMDIR)$(IBYFILE).iby
+$(if $(FLMDEBUG),$(info <debug>append_iby.flm: target iby file: $(IBYFILE)</debug>))
+
+# $(IBY_APPEND_FILES_VAR) holds the name of a global variable unique to the .iby file being updated.
+# We add all APPEND_FILEs that apply to the .iby file as values of this variable
+IBY_APPEND_FILES_VAR:=$(call sanitise,$(IBYFILE))_APPEND_FILES
+$(IBY_APPEND_FILES_VAR):=$($(IBY_APPEND_FILES_VAR)) $(APPEND_FILE_ABS)
+$(if $(FLMDEBUG),$(info <debug>append_iby.flm: append files var: $(IBY_APPEND_FILES_VAR)</debug>))
+$(if $(FLMDEBUG),$(info <debug>append_iby.flm: list of append files: $($(IBY_APPEND_FILES_VAR))</debug>))
+
+define append_iby
+# we append every time, as .iby files are always regenerated
+ROMFILE:: $(IBYFILE)
+	$(call startrule,append_iby) \
+	$(GNUCAT) $$($(IBY_APPEND_FILES_VAR)) >> $(IBYFILE) \
+	$(call endrule,append_iby)
+endef
+
+# we ensure that the append_iby function is only $(eval)-ed once in a build for each .iby file to be
+# updated.  $(IBY_APPEND_FILES_VAR) is expanded when the (single) instance of the rule is executed,
+# hence there is only one run to update each .iby file, using all files held by $(IBY_APPEND_FILES_VAR),
+# and the FLM is parallel safe.
+
+IBY_APPEND_GUARD:=$(call sanitise,$(IBYFILE))_APPEND_GUARD
+$(if $(FLMDEBUG),$(info <debug>append_iby.flm: append guard: $(IBY_APPEND_GUARD)</debug>))
+ifeq ($($(IBY_APPEND_GUARD)),)
+$(eval $(append_iby))
+$(IBY_APPEND_GUARD):=1
+endif

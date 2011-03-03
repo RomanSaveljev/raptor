@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -21,6 +21,8 @@ ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
 
     # Default values
     ROMFILETYPE:=file
+    ROMFILETYPE_NOKIA:=file
+    
     ROMFILE:=$(TARGET).$(REQUESTEDTARGETEXT)
     ROMPATH:=$(if $(TARGETPATH),$(TARGETPATH)/,sys/bin/)
     ROMDECORATIONS:=
@@ -37,18 +39,22 @@ ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
 
     ifeq ($(call uppercase,$(TARGETTYPE)),KEXT)
     ROMFILETYPE:=extension[MAGIC]
+    ROMFILETYPE_NOKIA:=extension[VARID]
     ABIDIR:=KMAIN
     endif
     ifeq ($(call uppercase,$(TARGETTYPE)),LDD)
     ROMFILETYPE:=device[MAGIC]
+    ROMFILETYPE_NOKIA:=device[VARID]
     ABIDIR:=KMAIN
     endif
     ifeq ($(call uppercase,$(TARGETTYPE)),PDD)
     ROMFILETYPE:=device[MAGIC]
+    ROMFILETYPE_NOKIA:=device[VARID]
     ABIDIR:=KMAIN
     endif
     ifeq ($(call uppercase,$(TARGETTYPE)),VAR)
     ROMFILETYPE:=variant[MAGIC]
+    ROMFILETYPE_NOKIA:=variant[VARID]
     ABIDIR:=KMAIN
     endif
     ifeq ($(call uppercase,$(TARGETTYPE)),KDLL)
@@ -57,6 +63,7 @@ ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
 
     ifneq ($(CALLDLLENTRYPOINTS),)
     ROMFILETYPE:=dll
+    ROMFILETYPE_NOKIA:=dll
     endif
     ifeq ($(ROMFILETYPE),primary)
     ABIDIR:=KMAIN
@@ -111,7 +118,10 @@ ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
     endif
 endif
 
+# Generate both old and new format .iby files by default
+# These differ by ROMFILETYPE and the way that macros are used for the release tree location
 ROMFILENAME:=$(ROMDIR)$(PLATFORM)$(ROMTEST).iby
+ROMFILENAME_NOKIA:=$(ROMDIR)$(PLATFORM)$(ROMTEST)n.iby
 
 # RAMTARGET
 ifneq ($(RAMTARGET),)
@@ -128,20 +138,30 @@ endif
 
 define BuildRomfileTarget
 $(ALLTARGET)::ROMFILE
-ROMFILE::
+ROMFILE::$(ROMFILENAME) $(ROMFILENAME_NOKIA)
+
+$(ROMFILENAME)::
 	$(call startrule,rombuild) \
 	$(GNUMKDIR) -p $(ROMDIR) \
-	$(if $(ROMFILE_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME))\n//\n$(DATATEXT)" > $(ROMFILENAME)) \
+	$(if $(ROMFILES_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME))\n//\n$(DATATEXT)" > $(ROMFILENAME)) \
 	$(if $(BUILDROMTARGET),&& echo "$(ROMFILETYPE)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(1)$(ROMDECORATIONS)" >> $(ROMFILENAME)) \
-	$(if $(RAMTARGET),&& echo "$(ROMFILETYPE_RAM)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(ROMPATH_RAM)$(ROMFILE_RAM)$(ROMDECORATIONS_RAM)" >> $(ROMFILENAME)) \
-	$(call endrule,buildromfiletarget)
+	$(if $(RAMTARGET),&& echo "$(ROMFILETYPE_RAM)=/epoc32/release/##$(ABIDIR)##/##BUILD##/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(ROMPATH_RAM)$(ROMFILE_RAM)$(ROMDECORATIONS_RAM)" >> $(ROMFILENAME))
+	$(call endrule,rombuild)
+
+$(ROMFILENAME_NOKIA)::
+	$(call startrule,rombuild_nokia) \
+	$(GNUMKDIR) -p $(ROMDIR) \
+	$(if $(ROMFILES_CREATED_$(TOBLDINF)),,&& echo -e "// $(subst $(EPOCROOT)/,,$(ROMFILENAME_NOKIA))\n//\n$(DATATEXT)" > $(ROMFILENAME_NOKIA)) \
+	$(if $(BUILDROMTARGET),&& echo "$(ROMFILETYPE_NOKIA)=ABI_DIR/BUILD_DIR/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(1)$(ROMDECORATIONS)" >> $(ROMFILENAME_NOKIA)) \
+	$(if $(RAMTARGET),&& echo "$(ROMFILETYPE_RAM)=ABI_DIR/BUILD_DIR/$(TARGET)$(if $(EXPLICITVERSION),{$(VERSIONHEX)},).$(REQUESTEDTARGETEXT)   $(ROMPATH_RAM)$(ROMFILE_RAM)$(ROMDECORATIONS_RAM)" >> $(ROMFILENAME_NOKIA)) \
+	$(call endrule,rombuild_nokia)
 endef
 
 # When VARIANTTYPE changes, romfile is finished,
 # apart from if this is a new component......
 ifneq ($(PREVIOUSVARIANTTYPE),)
     ifneq ($(VARIANTTYPE),$(PREVIOUSVARIANTTYPE))
-        ifneq ($(ROMFILE_CREATED_$(TOBLDINF)),)
+        ifneq ($(ROMFILES_CREATED_$(TOBLDINF)),)
             ROMFILEFINISHED:=1
         else
             ROMFILEFINISHED:=
@@ -155,8 +175,8 @@ ifeq ($(ROMFILEFINISHED),)
 endif
 
 # Don't allow romfile to be recreated for every MMP
-ifeq ($(ROMFILE_CREATED_$(TOBLDINF)),)
-    ROMFILE_CREATED_$(TOBLDINF):=1
+ifeq ($(ROMFILES_CREATED_$(TOBLDINF)),)
+    ROMFILES_CREATED_$(TOBLDINF):=1
 endif
 
 # Build other ROMTARGETs if there is more than one
@@ -169,6 +189,5 @@ endif
 # Keep track of variant type while romfile is being created
 PREVIOUSVARIANTTYPE:=$(VARIANTTYPE)
 
-WHATRELEASE:=$(WHATRELEASE) $(ROMFILENAME)
-
+WHATRELEASE:=$(WHATRELEASE) $(ROMFILENAME) $(ROMFILENAME_NOKIA)
 
