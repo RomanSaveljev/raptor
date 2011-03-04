@@ -139,7 +139,7 @@ class RaptorAnnofile(object):
 		self.filename = filename
 		self.buildid = buildid
 
-		self.annofile = annofile.Annofile(self.filename, maxagents)
+		self.annofile = allo.annofile.Annofile(self.filename, maxagents)
 
 	def __str__(self):
 		return "<annofile name='%s' phase='%s'>\n%s</annofile>\n" \
