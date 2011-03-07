@@ -7,15 +7,17 @@ Default:        The directory containing the bin\sbs.bat batch file on
                 Windows; the directory containing the bin/sbs Bash shell 
                 script on Linux. 
 Description:    Location for Raptor's script, FLMs, configuration files, 
-                certain supporting utilities. 
+                and certain supporting utilities. 
 Versions:       Optional from Raptor v2.9.0; essential for earlier versions.
 Platforms:      All
 
 Name:           SBS_CYGWIN_TMP
-Default:        %EPOCROOT%\sbs_cygwin_tmp
+Default:        %TEMP%
 Description:    Location for Cygwin's /tmp directory; Cygwin's default 
-                value for this it %TEMP% which can cause problems in 
-                cluster builds.
+                value for this is %TEMP% which can cause problems in 
+                cluster builds. Set SBS_CYGWIN_TMP to point to an existing 
+                directory that can be made available to all nodes in a 
+                cluster build.
 Versions:       New in Raptor v2.16.3; not detected in earlier versions.
 Platforms:      Windows only
 

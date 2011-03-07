@@ -82,7 +82,7 @@
 
 @REM Make sure that /tmp is not set incorrectly for sbs in cygwin 1.5
 @IF NOT "%SBS_CYGWIN17%"=="" GOTO nomount
-@IF "%SBS_CYGWIN_TMP%"=="" SET SBS_CYGWIN_TMP=%EPOCROOT%\sbs_cygwin_tmp
+@IF "%SBS_CYGWIN_TMP%"=="" SET SBS_CYGWIN_TMP=%TEMP%
 @umount %__UMOUNTOPTIONS__% /tmp >NUL 2>NUL
 @mount %__MOUNTOPTIONS__% %SBS_CYGWIN_TMP% /tmp >NUL 2>NUL
 @umount %__UMOUNTOPTIONS__% / >NUL 2>NUL
