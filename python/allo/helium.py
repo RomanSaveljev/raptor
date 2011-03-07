@@ -8,7 +8,8 @@
 
 """
 Gathers performance metrics from the logs of a complex multi-step build.
-Supports Helium 9 at the moment with Helium 13 coming soon [?].
+Supports Helium 9-12 at the moment with support for the new logging format of 
+Helium 13 coming soon [?].
 
 Can also extract useful data from emake annotation files.
 """
@@ -51,7 +52,7 @@ class HeliumLog(object):
 
 
 	def __str__(self):
-		return "<metric name='buildid'  value='%s'>\n" % self.buildid
+		return "<metric name='buildid'  value='{0}'>\n".format(self.buildid)
 
 class MainAntLog(HeliumLog):
 	""" This is the primary log of the helium build.  Useful for obtaining the total build time. Not good for this if the build failed. """
@@ -74,16 +75,13 @@ class MainAntLog(HeliumLog):
 				if start_time is None:
 					m = start_re.match(l)
 					if m:
-						#sys.stderr.write("start TIME: %s\n" %m.groups()[0])
 						start_time = datetime.datetime.strptime(m.groups()[0], self.timeformat)
 						
 				else: # if there are many stop lines then make sure the last one overrides the others
 					m = stop_re.match(l)
 					if m:
 						stop_time = datetime.datetime.strptime(m.groups()[0], self.timeformat)
-						#sys.stderr.write("stop TIME: %s\n" %m.groups()[0])
 
-		#sys.stderr.write("build start/stop: %s / %s  from %s\n" % (start_time, stop_time, self.logfilename))
 		if start_time and stop_time:
 			build_duration = stop_time - start_time  # returns a timedelta object
 			self.build_duration = build_duration.seconds +  86400 * build_duration.days  # seconds
@@ -92,7 +90,7 @@ class MainAntLog(HeliumLog):
 			self.build_duration = 0
 			
 	def __str__(self):
-		return "<metric name='build_duration'  value='%d'>\n" % self.build_duration
+		return "<metric name='build_duration' value='{0}'>\n".format(self.build_duration)
 		
 class AntEnvLog(HeliumLog):
 	# output/logs/92_7952_201020_003_ant_env.log
@@ -102,7 +100,7 @@ class AntEnvLog(HeliumLog):
 		super(AntEnvLog,self).__init__(logpath, buildid)
 
 class TargetTimesLog(HeliumLog):
-	"""Very useful timing data from Ant but does not get created in all builds by default (must be configured"""
+	"""Very useful timing data from Ant but does not get created in all builds by default (must be configured)"""
 	# output/logs/92_7952_custom_dilbert_201022_dilbert_targetTimesLog.csv
 	filenamesuffix = "_targetTimesLog.csv"
 
@@ -114,18 +112,15 @@ class TargetTimesLog(HeliumLog):
 		with open(self.logfilename) as f:
 			for ll in f:
 				l = ll.rstrip("\n")
-				#print self.logfilename
-				#print "L:",l
 				(rname, rsecs) = l.split(",")
 				rsecs = int(rsecs)
-				#print "rname, rsecs: %s %d"%(rname,rsecs)
 				self.totalsecs += rsecs
 				if rname == "compile-sbs":
 					self.raptorsecs += rsecs
 
 	def __str__(self):
-		s = "<metric name='build_duration'  value='%s'>" % self.totalsecs  \
-			+ "\n<metric name='raptor_duration'  value='%s'>\n" % self.raptorsecs
+		s = "<metric name='build_duration' value='{0}'>\n" \
+			"<metric name='raptor_duration' value='{1}'>\n".format(self.totalsecs, self.raptorsecs)
 		return s
 
 class RaptorAnnofile(object):
@@ -142,8 +137,8 @@ class RaptorAnnofile(object):
 		self.annofile = allo.annofile.Annofile(self.filename, maxagents)
 
 	def __str__(self):
-		return "<annofile name='%s' phase='%s'>\n%s</annofile>\n" \
-	         % (os.path.basename(self.filename), self.phase, str(self.annofile))
+		return "<annofile name='{0}' phase='{1}'>\n{2}</annofile>\n" \
+	           .format(os.path.basename(self.filename), self.phase, str(self.annofile))
 
 
 class RaptorBuild(HeliumLog):
@@ -152,12 +147,12 @@ class RaptorBuild(HeliumLog):
 	the version of raptor and the total time taken by this particular
 	invocation of Raptor"""
 	def __init__(self, logpath, buildid, build, options=None):
-		self.filenamesuffix = '_%s' % build
+		self.filenamesuffix = '_' + build
 		super(RaptorBuild,self).__init__(os.path.join(logpath, "compile"), buildid, options)
 		self.build = build
 
 		if not os.path.isfile(self.logfilename):
-			raise LogfileNotFound("missing log file: %s\n" % self.logfilename)
+			raise LogfileNotFound("missing log file: {0}\n".format(self.logfilename))
 		
 		self.annofile_refs = []	
 		self.build_duration = None
@@ -172,7 +167,7 @@ class RaptorBuild(HeliumLog):
 		self.recipes = { 'TOTAL':0, 'ok':0, 'failed':0, 'retry':0, 'COMPILE':0 }
 		
 		with open(self.logfilename) as f:
-			sys.stderr.write("      parsing build log %s\n" % os.path.split(self.logfilename)[1])
+			sys.stderr.write("      parsing build log {0}\n".format(os.path.split(self.logfilename)[1]))
 			for l in f:
 				# match in order of likelihood (most probable first)
 				
@@ -183,7 +178,7 @@ class RaptorBuild(HeliumLog):
 					try:
 						self.recipes[status] += 1
 					except KeyError:
-						sys.stderr.write("unknown recipe status '%s'" % status)
+						sys.stderr.write("unknown recipe status '{0}'".format(status))
 					continue
 				
 				m = compilation_re.match(l)
@@ -195,7 +190,7 @@ class RaptorBuild(HeliumLog):
 				if m:
 					(adir, aname) = os.path.split(m.group(1))
 					if aname.find("pp")==-1: # no parallel parsing ones preferably
-						sys.stderr.write("        found annotation file %s\n" % aname)
+						sys.stderr.write("        found annotation file {0}\n".format(aname))
 						
 						# if --emake-maxagents is present then use that, otherwise use
 						# the value passed in through the options.
@@ -204,7 +199,7 @@ class RaptorBuild(HeliumLog):
 							maxagents = int(m.group(1))
 						else:
 							maxagents = options.maxagents
-							sys.stderr.write("          using maxagents %d as there is no record in the logs\n" % maxagents)
+							sys.stderr.write("          using maxagents {0} as there is no record in the logs\n".format(maxagents))
 							
 						self.annofile_refs.append( (os.path.join(logpath, "makefile", aname), maxagents) )
 					continue
@@ -223,16 +218,18 @@ class RaptorBuild(HeliumLog):
 			self.annofiles.append(RaptorAnnofile(p[0], buildid, p[1]))
 
 	def __str__(self):
-		recipes = [" <metric name='raptor_%s_recipes' value='%d'/>\n" % x for x in self.recipes.items()]
+		recipes = [" <metric name='raptor_{0}_recipes' value='{1}'/>\n".format(*x) for x in self.recipes.items()]
 		
-		return 	"<raptorbuild logfile='%s'>\n" % os.path.split(self.logfilename)[-1] + \
-			" <metric name='raptor_version'  value='%s' />\n" % (self.version) + \
-			" <metric name='raptor_duration_%s'  value='%d' />\n" % (self.build, self.build_duration) + \
-			"".join(recipes) + \
-			"".join([str(a) for a in self.annofiles]) + \
-			"</raptorbuild>\n"
+		return 	"<raptorbuild logfile='{0}'>\n" \
+			    " <metric name='raptor_version' value='{1}' />\n" \
+			    " <metric name='raptor_duration_{2}' value='{3}' />\n" \
+			    .format(os.path.split(self.logfilename)[-1], 
+					    self.version,
+					    self.build, self.build_duration) + \
+			    "".join(recipes) + \
+			    "".join([str(a) for a in self.annofiles]) + \
+			    "</raptorbuild>\n"
 		
-
 
 class HeliumBuild(object):
 	"""A build with any version of Helium"""
@@ -271,11 +268,12 @@ class Helium9Build(HeliumBuild):
 	def __str__(self):
 
 		raptor_duration = reduce(lambda x, y: x + y,[y.build_duration for y in self.raptorbuilds],0)
-		return "<heliumbuild ver='9' id='%s'>\n" % (self.buildid) + \
-			"<metric name='total_duration'  value='%d' />\n" % (self.mainantlog.build_duration) + \
-			"<metric name='raptor_duration'  value='%d' />\n" % (raptor_duration) + \
-	 		"".join([str(a) for a in self.raptorbuilds ]) + \
-	 		"</heliumbuild>\n"
+		return "<heliumbuild ver='9' id='{0}'>\n" \
+			   "<metric name='total_duration' value='{1}' />\n" \
+			   "<metric name='raptor_duration' value='{2}' />\n" \
+			   .format(self.buildid,  self.mainantlog.build_duration, raptor_duration) + \
+	 		   "".join([str(a) for a in self.raptorbuilds ]) + \
+	 		   "</heliumbuild>\n"
 		
 
 class HeliumLogDir(object):
@@ -290,11 +288,11 @@ class HeliumLogDir(object):
 		
 		for b in logs.keys():
 			try:
-				sys.stderr.write("  Found build with id %s\n" % b)
+				sys.stderr.write("  Found build with id {0}\n".format(b))
 				build = Helium9Build(self.logpath, b, options)
 				self.builds.append(build)
 			except IOError,e:
-				sys.stderr.write("  Buildid %s found but does not refer to a complete build\n" % b)
+				sys.stderr.write("  Buildid {0} found but does not refer to a complete build\n".format(b))
 				sys.stderr.write(str(e)+"\n")
 
 	def write(self, stream):
