@@ -183,6 +183,35 @@ def run_make(make_process):
 	return make_process.returncode
 
 
+def log_output(make_process):
+	""" A function to send the output from a previously run make command to the
+	    log filters. This is needed for safely injecting the stderr output by
+	    escaping it and making sure it isn't interleaved with stdout. Also, for
+	    emake builds this is where we copy the stdout from the annotation file.
+	"""
+	if not make_process.hasrun:
+		return
+
+	if make_process.copyLogFromAnnoFile:
+		annofilename = make_process.annoFileName
+		make_process.logstream.write("<info>copylogfromannofile: Copying log from annotation file {0} to work around a potential problem with the console output</info>\n".format(annofilename))
+		try:
+			for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
+				make_process.logstream.write(l)
+		except Exception,e:
+			sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, make_process.command, str(e)))
+				
+	# Take all the stderr output that went into the .stderr file
+	# and put it back into the log, but safely so it can't mess up
+	# xml parsers.
+	try:
+		errfile = open(make_process.stderrfilename, "r")
+		for line in errfile:
+			make_process.logstream.write(escape(line))
+		errfile.close()
+	except Exception,e:
+		sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(make_process.command, str(e)))
+
 
 class MakeProcess(object):
 	""" A process of make program """
@@ -785,6 +814,7 @@ include {0}
 					task = "build", key = str(makefilename))
 
 				run_make(mproc)
+				log_output(mproc)
 
 				if mproc.returncode != 0:
 					return_state = False
@@ -798,33 +828,6 @@ include {0}
 				# Still report end-time of the build
 				self.raptor.InfoEndTime(object_type = "makefile", task = "build",
 									    key = str(makefilename))
-
-
-		# Getting all the log output copied into files
-		for mproc in make_processes:
-			# Don't try to get log results if we never actually ran make.
-			if not mproc.hasrun:
-				continue 
-
-			if self.copyLogFromAnnoFile:
-				annofilename = mproc.annoFileName.replace("#MAKEFILE#", makefilename)
-				self.raptor.Info("copylogfromannofile: Copying log from annotation file {0} to work around a potential problem with the console output".format(annofilename))
-				try:
-					for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
-						mproc.logstream.write(l)
-				except Exception,e:
-					sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, command, str(e)))
-				
-			# Take all the stderr output that went into the .stderr file
-			# and put it back into the log, but safely so it can't mess up
-			# xml parsers.
-			try:
-				e = open(mproc.stderrfilename,"r")
-				for line in e:
-					self.raptor.out.write(escape(line))
-				e.close()
-			except Exception,e:
-				sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(mproc.command, str(e)))
 
 		# run any shutdown script
 		if self.shutdownCommand != None and self.shutdownCommand != "":

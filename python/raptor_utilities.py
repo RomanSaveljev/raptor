@@ -23,8 +23,6 @@ import sys
 import stat
 import shutil
 
-dosSlashRegEx = re.compile(r'\\')
-unixSlashRegEx = re.compile(r'/')
 dosDriveRegEx = re.compile("^([A-Za-z]{1}):")
 
 def getOSPlatform():
@@ -36,15 +34,9 @@ def getOSFileSystem():
 	else:
 		return "unix"
 
-def convertToUnixSlash(aReference):
-	return dosSlashRegEx.sub(r'/', aReference)
-
-def convertToDOSSlash(aReference):
-	return unixSlashRegEx.sub(r'\\', aReference)
-
 def absPathFromPath(aPathRoot, aReference):
-	pathRoot = convertToUnixSlash(aPathRoot)
-	reference = convertToUnixSlash(aReference)
+	pathRoot = aPathRoot.replace('\\', '/')
+	reference = aReference.replace('\\', '/')
 	
 	if os.path.isabs(reference):
 		reference = reference.lstrip(r'/')
@@ -97,8 +89,8 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 	+-prefix 		: relative to $(EPOCROOT)/epoc32"""
 	
 	# Both reference and fileroot can have backslashes - so convert them.
-	reference = convertToUnixSlash(aReference)
-	fileroot = convertToUnixSlash(aFileRoot)
+	reference = aReference.replace('\\', '/')
+	fileroot = aFileRoot.replace('\\', '/')
 	
 	# Remove Trailing backslashes so that the expansions doesnt mess up the shell
 	if reference.endswith('/') and len(reference) > 1:

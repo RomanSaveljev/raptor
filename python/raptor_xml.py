@@ -17,7 +17,6 @@
 
 import os
 import raptor_data
-import raptor_utilities
 import xml.dom.minidom
 import re
 import generic_path
@@ -448,7 +447,7 @@ class SystemModel(object):
 
 				if self.__Version['MAJOR'] == 1:
 					# version 1.x schema paths can use DOS slashes
-					bldFileValue = raptor_utilities.convertToUnixSlash(bldFileValue)
+					bldFileValue = bldFileValue.replace('\\', '/')
 				elif self.__Version['MAJOR'] >= 2:
 					# version 2.x.x schema paths are subject to a "root" attribute off-set, if it exists
 					rootValue = aElement.getAttribute("root")
