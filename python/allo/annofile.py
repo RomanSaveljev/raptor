@@ -1,19 +1,12 @@
-#
+
 # Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
-#
-# Initial Contributors:
-# Nokia Corporation - initial contribution.
-#
-# Contributors:
-#
-# Description:  
-# Annofile class
-#
+
+"""Classes to read Electric Accelerator (emake) annotation files."""
 
 import xml.sax
 import os
@@ -164,53 +157,3 @@ class Annofile(xml.sax.handler.ContentHandler):
 			" <metric name='efficiency_nomake' value='%s' />\n" % self.getEfficiency()[1] 
 
 		return s
-	
-
-
-if __name__ == '__main__':
-	
-	# Work around annoying DOCTYPE error by 
-	# creating a dummy DTD file	
-	if not os.path.exists('build.dtd'):
-		dummy = open('build.dtd', 'w')
-		dummy.close()
-
-	################## Edit this basepath ################
-	basepath = '92_7952_201022_logs\\output\\logs'
-	######################################################
-
-	# Find out all the annofiles
-	annofiles = []
-	for dirpath, dirs, files in os.walk(basepath):
-		for f in files:
-			if f.endswith('.anno') or f.endswith('.anno.xml'):
-				annofiles.append(dirpath + '\\' + f)
-
-	#print annofiles # debug
-	
-	# Parse all the annofiles and generate report
-	# Write XML header
-	report = open('anno_report.xml', 'w')
-	report.write('<?xml version="1.0" encoding="ISO-8859-1"?>\n')
-	report.write("<report>\n")
-	report.close()
-	# Parse each annofile
-	#num = 0 # debug
-	parser = xml.sax.make_parser()
-	for afilename in annofiles:
-		parser.setContentHandler(Annofile(afilename))
-		try:
-			parser.parse(open(afilename))
-		except xml.sax._exceptions.SAXParseException, e:
-			print "Error:\n" + str(e)
-			print "Ignore that file, parsing continues..."
-			
-		#num += 1 # <debug> only process num annofiles
-		#if num == 3:
-		#	break
-
-	# Write XML footer
-	report = open('anno_report.xml', 'a')
-	report.write("</report>")
-	report.close()
-
