@@ -1,0 +1,36 @@
+Filter to generate Bash shell scripts from a Raptor build log.
+
+The ShellScriptsFilter takes the following named parameters: "name" and "file"
+"name" specifies the name attribute of a recipe tag to parse for
+"file" specifies a "command file", which has one "name" per line
+
+Recipe names specified in command files come after all recipes specified
+with the filter's "name" parameter, but the order of the recipes in the
+command file is maintained.
+
+E.g.
+
+sbs_filter --filters=ShellScriptsFilter[name=compile,name=linkandpostlink] < a_raptor_log.log
+
+generates the files 
+
+rebuild.sh - calls the shell scripts below in the order given in the filter's parameter list
+compile.sh - contains command from all "compile" recipes
+linkandpostlink.sh - contains commands from "linkandpostlink" recipes
+
+sbs_filter --filters=ShellScriptsFilter[file=recipes.txt] < a_raptor_log.log
+
+recipes.txt has the format
+----------------------
+name=compile
+name=linkandpostlink
+----------------------
+
+generates the files 
+
+rebuild.sh - calls the shell scripts below in the order given in the filter's parameter list
+compile.sh - contains command from all "compile" recipes
+linkandpostlink.sh - contains commands from "linkandpostlink" recipes
+ 
+The ShellScriptsFilter can also be used during a build by specifying it alongside other filters 
+in the sbs command line.
