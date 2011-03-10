@@ -1,0 +1,6 @@
+TARGET simple4
+TARGETTYPE exe
+
+SOURCE simple4.cpp
+
+LIBRARY euser.lib
