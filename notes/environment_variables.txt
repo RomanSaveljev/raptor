@@ -18,7 +18,7 @@ Description:    Location for Cygwin's /tmp directory; Cygwin's default
                 cluster builds. Set SBS_CYGWIN_TMP to point to an existing 
                 directory that can be made available to all nodes in a 
                 cluster build. Must be a full path including drive letter.
-Versions:       New in Raptor v2.16.3; not detected in earlier versions.
+Versions:       New in Raptor v2.16.4; not detected in earlier versions.
 Platforms:      Windows only
 
 
