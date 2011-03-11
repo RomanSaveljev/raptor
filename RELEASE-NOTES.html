@@ -17,6 +17,13 @@
 <h3>Engineering Changes</h3>
 <ul>
 <li><a href="notes/shell_scripts_filter.txt">Shell scripts filter</a></li>
+<li>Add terminal filter output for "qmake_extra_pre_targetdep" recipes</li>
+</ul>
+
+<h3>Defect Fixes</h3>
+<ul>
+<li>Bug 188 - uname -p versus uname -m (on Ubuntu make it possible for 32-bit tools and 64-bit ones to co-exist) i.e. one Raptor can run on both architectures</li>
+<li>Bug 192 - Some $(shell) statement output can leak into a $(eval) in the MakeTestBatchFiles macro and in template_ext.flm</li>
 </ul>
 
 <h2>version 2.16.2</h2>

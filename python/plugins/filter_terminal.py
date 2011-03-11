@@ -127,7 +127,8 @@ class FilterTerminal(filter_interface.Filter):
 		"msvctoolsinstall" : "target",
 		"msvctoolscompile" : "compile",
 		"freeze" : "freeze",
-		"win32archive" : "target"
+		"win32archive" : "target",
+		"qmake_extra_pre_targetdep": "qt-tools"
 	}
 
 	# Determine the width of the largest mapped recipe name

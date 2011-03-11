@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -27,22 +27,24 @@ getopts de  OPT
 
 if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 	ARCH=$(uname -i)
-        LIBC=$(echo /lib/libc-* | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
-        HOSTPLATFORM="linux ${ARCH} ${LIBC}"
+	# Find the libce binary and use a regular expression to slice off the major and minor version numbers
+	# e.g /lib/libc-2.12.1.so  => libc2_12
+	LIBC=$(echo /lib/libc-* | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
+	HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 
 	# The 32-bit platform is often compatible in the sense that
 	# a) 32-bit programs can run on the 64-bit OS.
 	# b) a 64-bit OS can tell the compiler to create 32-bit executables.
 
-       	ARCH32="i386"
+	ARCH32="i386"
 
 	# deal with ubuntu/debian:
 	if [ "$ARCH" == "unknown" ]; then
-		ARCH32="${ARCH}"
+		ARCH=$(uname -m)
 	fi
 
-       	HOSTPLATFORM_DIR="linux-${ARCH}-${LIBC}"
-       	HOSTPLATFORM32_DIR="linux-${ARCH32}-${LIBC}"
+	HOSTPLATFORM_DIR="linux-${ARCH}-${LIBC}"
+	HOSTPLATFORM32_DIR="linux-${ARCH32}-${LIBC}"
 	
 elif [[ "$OS" == "Windows_NT" ]]; then
 	HOSTPLATFORM="win 32"
