@@ -71,9 +71,23 @@ def run():
 		]
 	t.run()
 
+	# Clean the previous run
+	t.name = "sysdef_layers_clean"
+	t.description = "Clean the previous run"
+	t.command = unorderedcommand + " REALLYCLEAN"
+	t.targets = []
+	t.countmatch = []
+	t.run()
+
+	# System definition layer test with PP on
 	t.name = "sysdef_layers_pp"
 	t.description = "Test system definition layer building and logging with parallel processing on"
 	t.command = unorderedcommand + " --pp on"
+	t.targets = unorderedtargets
+	t.countmatch = [
+		["<recipe .*layer='layer1' .*>", 24],
+		["<recipe .*layer='layer2' .*>", 24]
+		]
 	t.run()
 
 	# Ordered layer building and logging tests
@@ -153,6 +167,13 @@ def run():
 	# package definition building and logging tests
 	packagecommand = 'sbs -f- -s smoke_suite/test_resources/sysdef/package_definition.xml'
 
+	t.name = "sysdef_layers_pkgdef_clean_1"
+	t.description = "Clean for testing package definition building and layer logging"
+	t.command = packagecommand + " reallyclean"
+	t.targets = []
+	t.countmatch = []
+	t.run()
+
 	t.name = "sysdef_layers_pkgdef"
 	t.description = "Test package definition building and layer logging"
 	t.command = packagecommand
@@ -161,6 +182,13 @@ def run():
 		["<recipe .*layer='package1' .*>", 24],
 		["<recipe .*layer='package2' .*>", 24]
 		]
+	t.run()
+
+	t.name = "sysdef_layers_pkgdef_clean_2"
+	t.description = "Clean for testing package definition building and layer logging"
+	t.command = packagecommand + " reallyclean"
+	t.targets = []
+	t.countmatch = []
 	t.run()
 
 	t.name = "sysdef_layers_pkgdef_pp"

@@ -212,7 +212,9 @@ class SystemModel(object):
 		"""Add a layer with components to this system definition"""
 
 		for c in layer.children:
-			self.AddComponent(c, layer.name)
+			# c.layername takes precedence over layer.name; but if 
+			# either is blank, use the non-blank one.
+			self.AddComponent(c, c.layername or layer.name)
 
 	def AddComponent(self, aComponent, layername):
 		'''Add a dummy component, sufficient for the purposes of
@@ -413,6 +415,7 @@ class SystemModel(object):
 
 			if name:
 				aContainers[parent.tagName] = name
+				aContainers["effectivelayer"] = name # calculate the effective later
 
 			self.__GetElementContainers(parent, aContainers)
 
