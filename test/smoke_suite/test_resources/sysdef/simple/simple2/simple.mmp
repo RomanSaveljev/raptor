@@ -1,6 +1,7 @@
 TARGET simple2
 TARGETTYPE exe
 
-SOURCE simple2.cpp
+SOURCEPATH ../src
+SOURCE simple.cpp
 
 LIBRARY euser.lib

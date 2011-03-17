@@ -166,6 +166,36 @@ def run():
 
 	# package definition building and logging tests
 	packagecommand = 'sbs -f- -s smoke_suite/test_resources/sysdef/package_definition.xml'
+	packagetargets = [
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe.map"
+		]
 
 	t.name = "sysdef_layers_pkgdef_clean_1"
 	t.description = "Clean for testing package definition building and layer logging"
@@ -177,7 +207,7 @@ def run():
 	t.name = "sysdef_layers_pkgdef"
 	t.description = "Test package definition building and layer logging"
 	t.command = packagecommand
-	t.targets = unorderedtargets
+	t.targets = packagetargets
 	t.countmatch = [
 		["<recipe .*layer='package1' .*>", 24],
 		["<recipe .*layer='package2' .*>", 24]
@@ -194,6 +224,7 @@ def run():
 	t.name = "sysdef_layers_pkgdef_pp"
 	t.description = "Test package definition building and layer logging with parallel processing on"
 	t.command = packagecommand + " --pp on"
+	t.targets = packagetargets
 	t.run()
 
 	t.id = "48"
