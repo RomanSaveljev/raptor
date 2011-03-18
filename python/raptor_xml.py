@@ -415,7 +415,10 @@ class SystemModel(object):
 
 			if name:
 				aContainers[parent.tagName] = name
-				aContainers["effectivelayer"] = name # calculate the effective later
+				# The "effective layer" is the id attribute of closest ancestor node of the given 
+				# <unit> element whose parent has no id attribute. I.e. there is a run of 
+				# id attributes in the ancestors above <unit> and this is the top of the sequence.
+				aContainers["effectivelayer"] = name
 
 			self.__GetElementContainers(parent, aContainers)
 
