@@ -398,13 +398,23 @@ class SystemModel(object):
 		return component
 
 	def __GetEffectiveLayer(self, aElement):
-		# return the ID of the topmost item which has an ID. For 1.x and 2.x, this will always be layer,
-		# for 3.x, it will be the topmost ID'd element in the file never call this on the root element
+		# return layer ID in effect for this unit.  This is either the ID of a parent
+		# element called 'layer' or the ID of the first parent whose own parent does
+		# not have an ID.  For a well formed v1.x or 2.x system definition these two
+		# criteria must point to the same element's ID.  A well formed v3.x system
+		# definition does not need a 'layer' component necessarily.
+		# Never call this on the root element
+
 		if aElement.tagName == "layer" and aElement.hasAttribute(self.__IdAttribute):
+			# Note if we encounter an element named 'layer' before we reach the end
+			# of the id stack, we'll use that.
 			return aElement.getAttribute(self.__IdAttribute)
 		elif aElement.parentNode.hasAttribute(self.__IdAttribute):
 			return self.__GetEffectiveLayer(aElement.parentNode)
 		elif aElement.hasAttribute(self.__IdAttribute):
+			# Note that if we encounter the end of the id stack before we encounter
+			# an element called 'layer', we'll use that regardless of whether there's
+			# a 'layer' element further up.
 			return aElement.getAttribute(self.__IdAttribute)
 		return ""
 

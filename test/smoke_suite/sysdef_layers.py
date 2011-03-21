@@ -228,7 +228,6 @@ def run():
 	t.name = "sysdef_layers_pkgdef_pp"
 	t.description = "Test package definition building and layer logging with parallel processing on"
 	t.command = packagecommand + " --pp on"
-	t.targets = packagetargets
 	t.run()
 
 	t.id = "48"
