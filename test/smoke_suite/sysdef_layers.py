@@ -61,29 +61,39 @@ def run():
 		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe.map"
 		]
 
+	unorderedbuildtargets = [
+		"{COMPONENT}_/armv5/udeb/simple.o",
+		"{COMPONENT}_/armv5/urel/simple.o",
+		"{COMPONENT}_/winscw/udeb/simple.o",
+		"{COMPONENT}_/winscw/udeb/{COMPONENT}_UID_.o",
+		"{COMPONENT}_/winscw/udeb/{COMPONENT}.UID.CPP",
+		"{COMPONENT}_/winscw/urel/simple.o",
+		"{COMPONENT}_/winscw/urel/{COMPONENT}_UID_.o",
+		"{COMPONENT}_/winscw/urel/{COMPONENT}.UID.CPP"
+		]
+
 	t.name = "sysdef_layers"
 	t.description = "Test system definition building and layer logging"
 	t.command = unorderedcommand
 	t.targets = unorderedtargets
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple1/bld.inf',
+	  [x.format(COMPONENT="simple1") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple2/bld.inf',
+	  [x.format(COMPONENT="simple2") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple3/bld.inf',
+	  [x.format(COMPONENT="simple3") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple4/bld.inf',
+	  [x.format(COMPONENT="simple4") for x in unorderedbuildtargets])
 	t.countmatch = [
 		["<recipe .*layer='layer1' .*>", 24],
 		["<recipe .*layer='layer2' .*>", 24]
 		]
 	t.run()
 
-	# Clean the previous run
-	t.name = "sysdef_layers_clean"
-	t.description = "Clean the previous run"
-	t.command = unorderedcommand + " REALLYCLEAN"
-	t.targets = []
-	t.countmatch = []
-	t.run()
-
 	# System definition layer test with PP on
 	t.name = "sysdef_layers_pp"
 	t.description = "Test system definition layer building and logging with parallel processing on"
 	t.command = unorderedcommand + " --pp on"
-	t.targets = unorderedtargets
 	t.countmatch = [
 		["<recipe .*layer='layer1' .*>", 24],
 		["<recipe .*layer='layer2' .*>", 24]
@@ -197,28 +207,22 @@ def run():
 		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe.map"
 		]
 
-	t.name = "sysdef_layers_pkgdef_clean_1"
-	t.description = "Clean for testing package definition building and layer logging"
-	t.command = packagecommand + " reallyclean"
-	t.targets = []
-	t.countmatch = []
-	t.run()
-
 	t.name = "sysdef_layers_pkgdef"
 	t.description = "Test package definition building and layer logging"
 	t.command = packagecommand
 	t.targets = packagetargets
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple1/bld.inf',
+	  [x.format(COMPONENT="simple1") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple2/bld.inf',
+	  [x.format(COMPONENT="simple2") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple3/bld.inf',
+	  [x.format(COMPONENT="simple3") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple4/bld.inf',
+	  [x.format(COMPONENT="simple4") for x in unorderedbuildtargets])
 	t.countmatch = [
 		["<recipe .*layer='package1' .*>", 24],
 		["<recipe .*layer='package2' .*>", 24]
 		]
-	t.run()
-
-	t.name = "sysdef_layers_pkgdef_clean_2"
-	t.description = "Clean for testing package definition building and layer logging"
-	t.command = packagecommand + " reallyclean"
-	t.targets = []
-	t.countmatch = []
 	t.run()
 
 	t.name = "sysdef_layers_pkgdef_pp"

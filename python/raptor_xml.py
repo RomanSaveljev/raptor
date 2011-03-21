@@ -400,7 +400,9 @@ class SystemModel(object):
 	def __GetEffectiveLayer(self, aElement):
 		# return the ID of the topmost item which has an ID. For 1.x and 2.x, this will always be layer,
 		# for 3.x, it will be the topmost ID'd element in the file never call this on the root element
-		if aElement.parentNode.hasAttribute(self.__IdAttribute):
+		if aElement.tagName == "layer" and aElement.hasAttribute(self.__IdAttribute):
+			return aElement.getAttribute(self.__IdAttribute)
+		elif aElement.parentNode.hasAttribute(self.__IdAttribute):
 			return self.__GetEffectiveLayer(aElement.parentNode)
 		elif aElement.hasAttribute(self.__IdAttribute):
 			return aElement.getAttribute(self.__IdAttribute)
@@ -415,10 +417,6 @@ class SystemModel(object):
 
 			if name:
 				aContainers[parent.tagName] = name
-				# The "effective layer" is the id attribute of closest ancestor node of the given 
-				# <unit> element whose parent has no id attribute. I.e. there is a run of 
-				# id attributes in the ancestors above <unit> and this is the top of the sequence.
-				aContainers["effectivelayer"] = name
 
 			self.__GetElementContainers(parent, aContainers)
 
