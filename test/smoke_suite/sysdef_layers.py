@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -17,15 +17,96 @@
 from raptor_tests import AntiTargetSmokeTest
 
 def run():
-	command = 'sbs -f- -s smoke_suite/test_resources/sysdef/system_definition_order_layer_test.xml ' + \
+	t = AntiTargetSmokeTest()
+	t.usebash = True
+
+	# Unordered layer logging tests
+	unorderedcommand = 'sbs -f- -s smoke_suite/test_resources/sysdef/system_definition_simple.xml'
+	unorderedtargets = [
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe.map"
+		]
+
+	unorderedbuildtargets = [
+		"{COMPONENT}_/armv5/udeb/simple.o",
+		"{COMPONENT}_/armv5/urel/simple.o",
+		"{COMPONENT}_/winscw/udeb/simple.o",
+		"{COMPONENT}_/winscw/udeb/{COMPONENT}_UID_.o",
+		"{COMPONENT}_/winscw/udeb/{COMPONENT}.UID.CPP",
+		"{COMPONENT}_/winscw/urel/simple.o",
+		"{COMPONENT}_/winscw/urel/{COMPONENT}_UID_.o",
+		"{COMPONENT}_/winscw/urel/{COMPONENT}.UID.CPP"
+		]
+
+	t.name = "sysdef_layers"
+	t.description = "Test system definition building and layer logging"
+	t.command = unorderedcommand
+	t.targets = unorderedtargets
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple1/bld.inf',
+	  [x.format(COMPONENT="simple1") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple2/bld.inf',
+	  [x.format(COMPONENT="simple2") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple3/bld.inf',
+	  [x.format(COMPONENT="simple3") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple4/bld.inf',
+	  [x.format(COMPONENT="simple4") for x in unorderedbuildtargets])
+	t.countmatch = [
+		["<recipe .*layer='layer1' .*>", 24],
+		["<recipe .*layer='layer2' .*>", 24]
+		]
+	t.run()
+
+	# System definition layer test with PP on
+	t.name = "sysdef_layers_pp"
+	t.description = "Test system definition layer building and logging with parallel processing on"
+	t.command = unorderedcommand + " --pp on"
+	t.countmatch = [
+		["<recipe .*layer='layer1' .*>", 24],
+		["<recipe .*layer='layer2' .*>", 24]
+		]
+	t.run()
+
+	# Ordered layer building and logging tests
+	orderedcommand = 'sbs -f- -s smoke_suite/test_resources/sysdef/system_definition_order_layer_test.xml ' + \
 			'-l "Metadata Export" -l "Build Generated Source" -l "Component with Layer Dependencies" -o'
 
-	t = AntiTargetSmokeTest()
-	t.id = "48a"
-	t.name = "sysdef_layers"
-	t.usebash = True
-	t.description = "Test system_definition.xml layer processing and log reporting"
-	t.command = command
+	t.name = "sysdef_layers_ordered"
+	t.description = "Test system definition ordered layer building and logging"
+	t.command = orderedcommand
 	t.targets = [
 		"$(SBS_HOME)/test/smoke_suite/test_resources/sysdef/build_gen_source/exported.inf",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/sysdef/build_gen_source/exported.mmh",
@@ -88,10 +169,65 @@ def run():
 		]
 	t.run()
 
-	t.id = "48b"
-	t.name = "sysdef_layers_pp"
-	t.description = "Test system definition layer building and logging with parallel processing on"
-	t.command = command + " --pp on"
+	t.name = "sysdef_layers_ordered_pp"
+	t.description = "Test system definition ordered layer building and logging with parallel processing on"
+	t.command = orderedcommand + " --pp on"
+	t.run()
+
+	# package definition building and logging tests
+	packagecommand = 'sbs -f- -s smoke_suite/test_resources/sysdef/package_definition.xml'
+	packagetargets = [
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/simple4.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/simple4.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple1.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple1.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple2.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple2.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple3.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple3.exe.map",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe",
+		"$(EPOCROOT)/epoc32/release/winscw/urel/simple4.exe.map"
+		]
+
+	t.name = "sysdef_layers_pkgdef"
+	t.description = "Test package definition building and layer logging"
+	t.command = packagecommand
+	t.targets = packagetargets
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple1/bld.inf',
+	  [x.format(COMPONENT="simple1") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple2/bld.inf',
+	  [x.format(COMPONENT="simple2") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple3/bld.inf',
+	  [x.format(COMPONENT="simple3") for x in unorderedbuildtargets])
+	t.addbuildtargets('smoke_suite/test_resources/sysdef/simple/simple4/bld.inf',
+	  [x.format(COMPONENT="simple4") for x in unorderedbuildtargets])
+	t.countmatch = [
+		["<recipe .*layer='package1' .*>", 24],
+		["<recipe .*layer='package2' .*>", 24]
+		]
+	t.run()
+
+	t.name = "sysdef_layers_pkgdef_pp"
+	t.description = "Test package definition building and layer logging with parallel processing on"
+	t.command = packagecommand + " --pp on"
 	t.run()
 
 	t.id = "48"

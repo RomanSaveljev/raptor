@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition schema="3.0.1" id-namespace="http://www.nokia.com/schema/drd/system-definition">
+<systemModel>
+  <layer id="layer1" name="Layer 1">
+    <component id="component1" name="Component 1">
+      <unit bldFile="simple/simple1"/>
+    </component>
+    <component id="component2" name="Component 2">
+      <unit bldFile="simple/simple2"/>
+    </component>
+  </layer>
+  <layer id="layer2" name="Layer 2">
+    <component id="component3" name="Component 3">
+      <unit bldFile="simple/simple3"/>
+    </component>
+    <component id="component4" name="Component 4">
+      <unit bldFile="simple/simple4"/>
+    </component>
+  </layer>
+</systemModel>
+</SystemDefinition>

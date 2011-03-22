@@ -423,7 +423,7 @@ class Layer(ModelNode):
 		    this eases the process of working with a "system_definition.xml" file. """
 		l = cls(name) # Call our class' constructor
 		for c in sysmodel_componentlist:
-			l.children.add(BldinfComponent(c, c.GetContainerName("layer"), c.GetContainerName("component")))
+			l.children.add(BldinfComponent(c, c.GetLayerName(), c.GetContainerName("component")))
 
 		return l
 
