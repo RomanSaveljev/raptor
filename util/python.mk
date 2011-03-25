@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -17,18 +17,18 @@
 
 # Build Python for Raptor
 
-RAPTOR_PYTHON_VER:=2.7
-
-PYTHON_SOURCEDIR:=$(OUTPUTPATH)/Python-$(RAPTOR_PYTHON_VER)
-PYTHON_TAR:=$(SBS_HOME)/util/ext/Python-$(RAPTOR_PYTHON_VER).tar.bz2
-PYINSTALLROOT:=$(INSTALLROOT)/python$(subst .,,$(RAPTOR_PYTHON_VER))
 
 define b_python
-.PHONY:: python
+.PHONY:: python$(RAPTOR_PYTHON_DIRVERSION) python
 
-all:: python
+python$(RAPTOR_PYTHON_DIRVERSION):: $(PYINSTALLROOT)/bin/python
 
-python: $(PYINSTALLROOT)/bin/python
+all:: python$(RAPTOR_PYTHON_DIRVERSION)
+
+python:: $(RAPTOR_PYTHON_DIRVERSION)
+	
+$(PYTHON_TAR):
+	wget $(PYTHON_TAR_URL) -O $(PYTHON_TAR)
 	
 $(PYINSTALLROOT)/bin/python: $(PYTHON_TAR) 
 	rm -rf $(PYTHON_SOURCEDIR) && \
@@ -44,6 +44,3 @@ CLEANFILES:=$(PYINSTALLROOT)/bin/python
 $(cleanlog)
 
 endef
-
-$(eval $(b_python))
-
