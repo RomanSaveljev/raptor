@@ -1270,6 +1270,7 @@ class MMPRaptorBackend(MMPBackend):
 		self.__Raptor = aRaptor
 		self.__debug("-----+++++ {0} ".format(aMmpfilename))
 		self.BuildVariant = raptor_data.Variant(name = "mmp")
+		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
 		self.ApplyVariants = []
 		self.ResourceVariants = []
 		self.BitmapVariants = []
@@ -1280,8 +1281,9 @@ class MMPRaptorBackend(MMPBackend):
 		self.__defFileRoot = self.__currentMmpFile
 		self.__currentLineNumber = 0
 		self.__sourcepath = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, "")
-		self.__userinclude = ""
-		self.__systeminclude = ""
+		self.__userinclude_list = []
+		self.__systeminclude_list = []
+		self.__traces_sentinel = "__RAPTOR_TRACES_RESOLVE__"
 		self.__bitmapSourcepath = self.__sourcepath
 		self.__current_resource = ""
 		self.__resourceFiles = []
@@ -1466,22 +1468,13 @@ class MMPRaptorBackend(MMPBackend):
 				# includes are "symbian paths" (i.e. we translate them into absolute paths according
 				# to the common conventions in symbian) 
 
-				resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
-				self.BuildVariant.AddOperation(raptor_data.Append(varname,resolved))
+				resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path).strip().rstrip('\/')
 
 				if varname=='SYSTEMINCLUDE':
-					self.__systeminclude += ' ' + resolved
-					self.__debug("  {0} = {1}".format(varname, self.__systeminclude))
+					self.__systeminclude_list.append(resolved)
 				else:
-					self.__userinclude += ' ' + resolved
-					self.__debug("  {0} = {1}".format(varname, self.__userinclude))
-
-				self.__debug("Appending {0} to {1}".format(resolved, varname))
-
-			self.__systeminclude = self.__systeminclude.strip()
-			self.__systeminclude = self.__systeminclude.rstrip('\/')
-			self.__userinclude = self.__userinclude.strip()
-			self.__userinclude = self.__userinclude.rstrip('\/')
+					self.__userinclude_list.append(resolved)
+				self.__debug("Appended {0} to {1} list".format(resolved, varname))
 
 		elif varname=='EXPORTLIBRARY':
 			# Remove extension from the EXPORTLIBRARY name
@@ -1527,7 +1520,7 @@ class MMPRaptorBackend(MMPBackend):
 					self.__Raptor.Warn("VERSION ({0}) missing '.minor' in {1}, using '.0'".format(toks[1],self.__currentMmpFile))
 
 				self.__versionhex = "%04x%04x" % (major, minor)
-				self.BuildVariant.AddOperation(raptor_data.Set(varname, "%d.%d" %(major, minor)))
+				self.BuildVariant.AddOperation(raptor_data.Set(varname, "{0}.{1}".format(major, minor)))
 				self.BuildVariant.AddOperation(raptor_data.Set("VERSIONHEX", self.__versionhex))
 				self.__debug("Set "+toks[0]+"  OPTION to " + toks[1])
 				self.__debug("Set VERSIONHEX OPTION to " + self.__versionhex)
@@ -1596,15 +1589,17 @@ class MMPRaptorBackend(MMPBackend):
 			self.BuildVariant.AddOperation(raptor_data.Set(varname, "1"))
 			
 			if len(toks) == 1:
-				toks1 = "../traces"
+				self.__traces_dir = "../traces"
 			else:
-				toks1 = os.path.join(toks[1], "traces").replace("\\","/")
-			path = toks1 + "/" + self.__TARGET + "_" + self.__TARGETEXT
-			resolved = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path)
-			self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', resolved))
-			self.__userinclude += ' ' + resolved
-			self.__debug("  {0} = {1}".format("USERINCLUDE",(self.__userinclude)))
-		
+				self.__traces_dir = os.path.join(toks[1], "traces").replace("\\","/")
+			# Insert the sentinel, indicating that we have to calculate the traces
+			# directory based upon the target and target extension. This is done in the
+			# finalise method in case the TARGET and TARGETTYPE are not known at the 
+			# point the TRACES keyword is encountered.
+			self.__userinclude_list.append(self.__traces_sentinel)
+			self.__debug("Appended traces sentinel {0} to {1} list; traces " \
+						 " dir value of {2}".format(self.__traces_sentinel, "USERINCLUDE", self.__traces_dir))
+			
 		elif varname=='APPLY':
 			self.ApplyVariants.append(toks[1])
 		elif varname=='ARMFPU':
@@ -2150,10 +2145,8 @@ class MMPRaptorBackend(MMPBackend):
 			# must add the path of the generated location to the userinclude path
 
 			ipath = "$(OUTPUTPATH)"
-			self.BuildVariant.AddOperation(raptor_data.Append("USERINCLUDE",ipath))
-			self.__userinclude += ' ' + ipath
-			self.__debug("  USERINCLUDE = {0}".format(self.__userinclude))
-			self.__userinclude.strip()
+			self.__userinclude_list.append(ipath)
+			self.__debug("Appending {0} to USERINCLUDE".format(ipath))
 
 		self.StringTableVariants.append(self.__currentStringTableVariant)
 		self.__currentStringTableVariant = None
@@ -2187,7 +2180,31 @@ class MMPRaptorBackend(MMPBackend):
 	def doNothing(self):
 		self.__currentLineNumber += 1
 		return "OK"
-
+	
+	def finaliseIncludes(self):
+		""" Gather system and user includes and do one Append operation for each type, 
+		rather than repeated Append ops for each system include and for each user include. 
+		Also, resolve the TRACES include directory by adding the target name and target 
+		extension to it if the traces sentinel is present in the user include list.  """
+		
+		# If the traces sentinel is in the user include list, we need to construct a directory 
+		# name from the target name and target extension. Best to do this once the entire MMP 
+		# has been parsed in case the target name and target extension are after the TRACES keyword.
+		if self.__traces_sentinel in self.__userinclude_list:
+			# Get index of sentinel to preserve order w.r.t. other user includes
+			index = self.__userinclude_list.index(self.__traces_sentinel)
+			path = self.__traces_dir + "/" + self.__TARGET + "_" + self.__TARGETEXT
+			self.__userinclude_list[index] = raptor_utilities.resolveSymbianPath(self.__currentMmpFile, path).strip().rstrip('\/')
+			self.__debug("Traces sentinel present. Substituted it with traces directory: {0}".format(self.__userinclude_list[index]))
+		
+		userincludes = " ".join(self.__userinclude_list)
+		self.__debug("User includes are: {0}".format(userincludes))
+		self.BuildVariant.AddOperation(raptor_data.Append('USERINCLUDE', userincludes))
+		
+		systemincludes = " ".join(self.__systeminclude_list)
+		self.__debug("System includes are: {0}".format(systemincludes))
+		self.BuildVariant.AddOperation(raptor_data.Append('SYSTEMINCLUDE', systemincludes))
+	
 	def finalise(self, aBuildPlatform):
 		"""Post-processing of data that is only applicable in the context of a fully
 		processed .mmp file."""
@@ -2333,7 +2350,7 @@ class MMPRaptorBackend(MMPBackend):
 		# appended to the SYSTEMINCLUDE list
 		if not aBuildPlatform['ISFEATUREVARIANT']:
 			productIncludePath = str(aBuildPlatform['VARIANT_HRH'].Dir())
-			self.BuildVariant.AddOperation(raptor_data.Append("SYSTEMINCLUDE",productIncludePath))
+			self.__systeminclude_list.append(productIncludePath)
 			self.__debug("Appending product include location {0} to SYSTEMINCLUDE".format(productIncludePath))
 
 		# Set the resolved code and data paging options.
@@ -2397,7 +2414,10 @@ class MMPRaptorBackend(MMPBackend):
 		# and performance over using multiple Append operations.
 		self.BuildVariant.AddOperation(raptor_data.Set("DOCUMENT",
 						   " ".join(self.documents)))
-
+		
+		# Finalise the include statements using one Append operation for SYSTEMINCLUDEs
+		# and one for USERINCLUDES - saves memory and performance over using multiple Append operations.
+		self.finaliseIncludes()
 
 	def validate(self):
 		"""Test that the parsed MMP file is correct.
@@ -3360,8 +3380,6 @@ class MetaReader(object):
 			# now build the specification tree
 			mmpSpec = raptor_data.Specification(generic_path.Path(getSpecName(mmpFilename)))
 			var = backend.BuildVariant
-
-			var.AddOperation(raptor_data.Set("PROJECT_META", str(mmpFilename)))
 
 			# If it is a TESTMMPFILE section, the FLM needs to know about it
 			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in
