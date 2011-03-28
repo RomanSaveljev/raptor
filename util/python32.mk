@@ -27,5 +27,4 @@ PYTHON_SOURCEDIR:=$(OUTPUTPATH)/Python-$(RAPTOR_PYTHON_VER)
 PYTHON_TAR:=$(SBS_HOME)/util/ext/Python-$(RAPTOR_PYTHON_VER).tar.bz2
 PYINSTALLROOT:=$(INSTALLROOT)/python$(RAPTOR_PYTHON_DIRVERSION)
 PYTHON_TAR_URL:=http://www.python.org/ftp/python/3.2/Python-3.2.tar.bz2
-$(info $(INSTALLROOT)/python$(RAPTOR_PYTHON_DIRVERSION))
 $(eval $(b_python))
