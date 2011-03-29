@@ -15,6 +15,7 @@
 		<param name='COMPONENT_LAYER' default=''/> <!-- Multimedia -->
 		<param name='PROJECT_META' default=''/>     <!-- my.mmp  -->
 		<param name='DATE' default=''/>
+		<param name='EPOCROOT'/>
 		<param name='FLMDEBUG'  default=''/>
 		<param name='PYTHON' default=''/> <!-- allow python scripts to be used in general flms -->
 		<param name='GNUMAKE38'/>
@@ -43,7 +44,6 @@
 	<interface name="base.extension" extends="base.flm" flm="template_ext.flm">
 		<param name='TEMCOUNT'/>
 		<param name='TEMMAKE' default='$(GNUMAKE38)'/>
-		<param name='EPOCROOT'/>
 		<param name='TEMPLATE_EXTENSION_MAKEFILE'/>
 		<param name='PRODUCT_INCLUDE'/>
 		<param name='EPOCBLD'/>
@@ -63,7 +63,6 @@
 		<paramgroup pattern='^O\.[^ \t]+$' default=""/>
 	</interface>
 	<interface name="base.stringtable" extends="base.flm" flm="stringtable.flm">
-		<param name='EPOCROOT'/>
 		<param name='SOURCE'/>
 		<param name='EXPORTPATH'/>
 		<param name='HEADERONLY' default=''/>
@@ -74,7 +73,6 @@
 	<interface name="base.bitmap" extends="base.flm" flm="bitmap.flm">
 		<param name='BINCOPYDIRS' default=''/>
 		<param name='BMCONV'/>
-		<param name='EPOCROOT'/>
 		<param name='HEADER' default=''/>
 		<param name='OUTPUTPATH'/>
 		<param name='SOURCE'/>
@@ -87,7 +85,6 @@
 		<param name='MMPDEFS' default=''/>
 		<param name='GNUCPP'/>
 		<param name='GNUSED'/>
-		<param name='EPOCROOT'/>
 		<param name='HEADER' default=''/>
 		<param name='HEADERONLY' default=''/>
 		<param name='LANGUAGES' default='sc'/>
@@ -110,7 +107,6 @@
 	</interface>
 	<interface name="base.ext_makefile" extends="base.flm" flm="gnumakefile.flm">
 		<param name='CFG' default='$(VARIANTTYPE)'/>
-		<param name='EPOCROOT'/>
 		<param name='EXTENSION_ROOT'/>
 		<param name='DIRECTORY'/>
 		<param name='EXTMAKEFILENAME'/>

@@ -3,7 +3,6 @@
 	<!-- Extension interfaces : replacements for Template Extension Makefiles -->
 
 	<interface name="Symbian.UserFLM" extends="base.flm" abstract="true">
-		<param name='EPOCROOT'/>
 		<param name='PRODUCT_INCLUDE'/>
 		<param name='EPOCBLD'/>
 		<param name='TO_BLDINF'/>
