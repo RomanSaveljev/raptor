@@ -6,7 +6,14 @@
 
 <h1>Release Notes for Symbian Build System v2</h1>
 
-<h2>next version</h2>
+<h2>version 2.16.4</h2>
+
+<h3>Engineering Changes</h3>
+<ul>
+<li><a href="notes/shell_scripts_filter.txt">Shell scripts filter</a></li>
+<li>Add terminal filter output for "qmake_extra_pre_targetdep" recipes</li>
+<li>Enable SBS_HOME/util Makefiles to bootstrap Python 3.2 or 2.7 and to fetch the source from the internet if it's not in util/ext</li>
+</ul>
 
 <h3>Defect Fixes</h3>
 
@@ -16,13 +23,6 @@
 <li>Bug 192 - Some $(shell) statement output can leak into a $(eval) in the MakeTestBatchFiles macro and in template_ext.flm</li>
 <li>Bug 202 - Raptor doesn't log layer names correctly with parallel parsing on</li>
 <li>Bug 206 - TRACES statement works only after the target and targettype statements</li>
-</ul>
-
-<h3>Engineering Changes</h3>
-<ul>
-<li><a href="notes/shell_scripts_filter.txt">Shell scripts filter</a></li>
-<li>Add terminal filter output for "qmake_extra_pre_targetdep" recipes</li>
-<li>Enable SBS_HOME/util Makefiles to bootstrap Python 3.2 or 2.7 and to fetch the source from the internet if it's not in util/ext</li>
 </ul>
 
 <h2>version 2.16.2</h2>
