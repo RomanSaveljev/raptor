@@ -1245,10 +1245,14 @@ class Tool(object):
 	def check(self, shell, evaluator, log = raptor_utilities.nulllog):
 
 		self.vre = re.compile(self.versionresult)
+		
+		# to avoid L10n issues with toolcheck and cygwin use the minimal C locale
+		c_locale_env = os.environ.copy()
+		c_locale_env['LANG']='C'
 
 		try:
 			self.log.Debug("Pre toolcheck: '{0}' for version '{1}'".format(self.name, self.versionresult))
-			p = subprocess.Popen(args=[shell, "-c", self.versioncommand], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+			p = subprocess.Popen(args=[shell, "-c", self.versioncommand], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=c_locale_env)
 			log.Debug("Checking tool '{0}' for version '{1}'".format(self.name, self.versionresult))
 			versionoutput,err = p.communicate()
 		except Exception,e:
