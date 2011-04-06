@@ -49,7 +49,6 @@ def run():
 	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -n --configpath=" + toolcheckDir + \
 			" -c default.toolcheck --toolcheck=off"
 
-	t.name = "toolcheck_off"
 	t.mustmatch = []
 	t.mustnotmatch = [
 		".*TOOLCHECK1.*",
@@ -68,7 +67,6 @@ def run():
 	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -n --configpath=" + toolcheckDir + \
 			" -c default.toolcheck --toolcheck=forced"
 
-	t.name = "toolcheck_forced"
 	t.mustmatch = [
 		".*tool 'TOOLCHECK1' from config 'none' did not return version.*",
 		".*tool 'TOOLCHECK3' from config 'none' did not return version.*",
