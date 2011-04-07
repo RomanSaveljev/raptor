@@ -26,9 +26,9 @@
 		<set name="ASSEMBLER_LISTING_OPTION" value="-S"/>
 		<set name="BPABI_OPTION" value=""/>
 		<set name="C_LANG_OPTION" value="-x c"/>
-		<set name="CC.ARMV5" value="-march=armv5t"/>
-		<set name="CC.ARMV6" value="-march=armv6t2"/>
-		<set name="CC.ARMV7" value="-march=armv7"/>
+		<set name="CC.ARMV5" value="-march=armv5te"/>
+		<set name="CC.ARMV6" value="-march=armv6"/>
+		<set name="CC.ARMV7" value="-march=armv7-a"/>
 		<!-- From the GCC manual: "With this option, GCC uses features of DWARF version 3 when they are useful; ..." -->
 		<!-- There is no -gdwarf-3 option; hence CC.DWARF2 and CC.DWARF3 have the same value. -->
 		<set name="CC.DWARF2" value="-gdwarf-2"/>
@@ -42,10 +42,10 @@
 		<set name="CODE_SEGMENT_START" value="-Ttext"/>
 		<set name="COMMANDFILE_OPTION" value="@"/>
 		<set name="COMPILE_ONLY_OPTION" value="-c"/>
-		<set name="COMPILER_CIA_FLAGS" value="-marm"/>		
+		<set name="COMPILER_CIA_FLAGS" value="-marm"/>
 		<set name="COMPILER_FPU_OPTION" value="-mfloat-abi="/>
 		<set name="COMPILER_INTERWORK_DEFINES" value="__MARM_INTERWORK__"/>
-        	<set name="COMPILER_NO_HIDE_ALL_OPTION" value="-fvisibility=default"/>
+		<set name="COMPILER_NO_HIDE_ALL_OPTION" value="-fvisibility=default"/>
 		<set name="COMPILER_SYSTEM_INCLUDE_OPTION" value="-I"/>
 		<set name="COMPILER_THUMB_DEFINES" value="__MARM_THUMB__"/>
 		<set name="CPP_LANG_OPTION" value="-x c++ -Wno-ctor-dtor-privacy"/>
