@@ -2581,6 +2581,7 @@ class MetaReader(object):
 		self.__Raptor = aRaptor
 		self.BuildPlatforms = []
 		self.ExportPlatforms = []
+		self.PartialBuild = False
 
 		# Get the version of CPP that we are using
 		metadata = self.__Raptor.cache.FindNamedVariant("meta")
@@ -3235,6 +3236,7 @@ class MetaReader(object):
 			if self.__Raptor.projects:
 				if not extension.nametag in self.__Raptor.projects:
 					self.__Raptor.Debug("Skipping {0}".format(extension.getMakefile()))
+					self.PartialBuild=True
 					continue
 				elif extension.nametag in self.projectList:
 					self.projectList.remove(extension.nametag)
@@ -3326,6 +3328,7 @@ class MetaReader(object):
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
 					self.__Raptor.Debug("Skipping {0}".format(str(mmpFileEntry.filename)))
+					self.PartialBuild=True
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
@@ -3382,8 +3385,7 @@ class MetaReader(object):
 			var = backend.BuildVariant
 
 			# If it is a TESTMMPFILE section, the FLM needs to know about it
-			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in
-					["manual", "auto"]):
+			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in ["manual", "auto"]) and not self.PartialBuild:
 
 				var.AddOperation(raptor_data.Set("TESTPATH",
 						mmpFileEntry.testoption.lower() + ".bat"))
@@ -3489,6 +3491,7 @@ class MetaReader(object):
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
 					self.__Raptor.Debug("Skipping {0}".format(str(g.getMakefileName())))
+					self.PartialBuild=True
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
@@ -3521,6 +3524,7 @@ class MetaReader(object):
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
 					self.__Raptor.Debug("Skipping {0}".format(str(m.getMakefileName())))
+					self.PartialBuild=True
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
