@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -48,13 +48,20 @@ executable_file executable_file
 "file with a space.doc" "exportedfilewithspacesremoved.doc"
 "file with a space.doc" "exported file with a space.doc"
 
-simple_exp1.h /tmp/{0}/  //
-simple_exp2.h \\tmp\\{0}/  //
-simple_exp3.h /tmp/{0}/simple_exp3.h 
+simple_exp1.h /tmp/{username}/  //
+simple_exp2.h \\tmp\\{username}/  //
+simple_exp3.h /tmp/{username}/simple_exp3.h 
 simple_exp4.h //
 read_only.h was_read_only.h //
 
-""".format(user))
+// Extended format exports: support for filename wildcards and whole directory copying
+:xexport xexport/dir1                                xexport1
+:xexport[invalid_arg] xexport/dir1/dir2              +/xexport2
+:xexport[recursive] xexport/dir1/dir2                xexport3
+:xexport["*1dir?.txt"] xexport/dir1/dir2             +/xexport4
+:xexport["*1dir?.txt", recursive] xexport/dir1/dir2  xexport5/subdir
+
+""".format(username=user))
 	bld_inf.close()
 	
 	exported_files = [
@@ -69,7 +76,20 @@ read_only.h was_read_only.h //
 		"$(EPOCROOT)/epoc32/include/executable_file",
 		"$(EPOCROOT)/epoc32/include/simple_exp4.h",
 		"$(EPOCROOT)/epoc32/include/was_read_only.h",
+		"$(EPOCROOT)/epoc32/include/xexport1/file1dir1.txt",
+		"$(EPOCROOT)/epoc32/include/xexport1/file2dir1.txt",
+		"$(EPOCROOT)/epoc32/xexport2/file1dir2.txt",
+		"$(EPOCROOT)/epoc32/xexport2/file2dir2.txt",
+		"$(EPOCROOT)/epoc32/include/xexport3/file1dir2.txt",
+		"$(EPOCROOT)/epoc32/include/xexport3/file2dir2.txt",
+		"$(EPOCROOT)/epoc32/include/xexport3/dir3/file1dir3.txt",
+		"$(EPOCROOT)/epoc32/include/xexport3/dir3/file2dir3.txt",
+		"$(EPOCROOT)/epoc32/xexport4/file1dir2.txt",
+		"$(EPOCROOT)/epoc32/include/xexport5/subdir/file1dir2.txt",
+		"$(EPOCROOT)/epoc32/include/xexport5/subdir/dir3/file1dir3.txt"
 		]
+	
+	warning_match = ".*warning: Unrecognised :xexport argument 'invalid_arg' ignored when processing.*"
 
 	t = AntiTargetSmokeTest()
 	
@@ -78,6 +98,8 @@ read_only.h was_read_only.h //
 	t.command = "sbs -b smoke_suite/test_resources/simple_export/expbld.inf export"
 	t.targets = exported_files
 	t.antitargets = []
+	t.mustmatch_singleline = [warning_match]
+	t.warnings = 1
 	t.run()
 	
 	# Confirm executable permissions are retained on Linux
@@ -87,6 +109,8 @@ read_only.h was_read_only.h //
 	t.mustmatch = [ "^.rwxrwxr.x[\.\+]? .*executable_file.*$" ]
 	t.targets = [] # prevent auto clean-up up of target files from previous test
 	t.antitargets = []
+	t.mustmatch_singleline = []
+	t.warnings = 0
 	t.run("linux")
 
 	# Check clean does not delete exports
@@ -95,6 +119,8 @@ read_only.h was_read_only.h //
 	t.mustmatch = []
 	t.targets = exported_files
 	t.antitargets = []
+	t.mustmatch_singleline = [warning_match]
+	t.warnings = 1
 	t.run()
 
 	# Confirm reallyclean deletes all exports, including those that were read-only
@@ -103,6 +129,8 @@ read_only.h was_read_only.h //
 	t.command = "sbs -b smoke_suite/test_resources/simple_export/expbld.inf reallyclean"
 	t.targets = []
 	t.antitargets = exported_files
+	t.mustmatch_singleline = [warning_match]
+	t.warnings = 1
 	t.run()
 
 	# Check --noexport suppresses exports
@@ -110,6 +138,8 @@ read_only.h was_read_only.h //
 	t.command = "sbs -b smoke_suite/test_resources/simple_export/expbld.inf --noexport -n"
 	t.targets = []
 	t.antitargets = exported_files
+	t.mustmatch_singleline = []
+	t.warnings = 0
 	t.run()
 	
 	t.name = "export"
