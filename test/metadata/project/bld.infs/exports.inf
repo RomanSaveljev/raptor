@@ -16,55 +16,54 @@
 */
 
 PRJ_EXPORTS
-export1.h										// %EPOCROOT%epoc32\include\export1.h
-export2.h					export_test/export2.h			// %EPOCROOT%epoc32\include\export_test\export2.h 
-export3.h					../export_test/export3.h		// %EPOCROOT%epoc32\export_test\export3.h
-export4.h					/export_test_abs/export4.h		// \export_test_abs\export4.h
-export5.h					/epoc32/export_test_abs/export5.h	// %EPOCROOT%epoc32\export_test_abs\export5.h
-export6.h					|../export_test_rel/\export6.h		// ..\export_test_rel\export6.h
-export7.h					|/export_test_rel/export7.h		// .\export_test_rel\export7.h
-export8.h					|export_test_rel/export8.h		// .\export_test_rel\export8.h
-:zip export9.zip									// %EPOCROOT% 
-:zip export10.zip				export_test				// %EPOCROOT%export_test
-:zip export11.zip				/export_test				// \export_test
-:zip export12.zip				/epoc32/export_test			// %EPOCROOT%epoc32\export_test
-export13.rsc					z:/resource/app/export13.rsc		// %EPOCROOT%epoc32\data\z\resource\app\export13.rsc
-:xexport["match"] export14								// %EPOCROOT%epoc32\include
-:xexport["match"] export15			export_test				// %EPOCROOT%epoc32\include\export_test 
-:xexport["match"] export16			../export_test				// %EPOCROOT%epoc32\export_test
-:xexport["match"] export17			/export_test_abs			// \export_test_abs
-:xexport[recursive] export18			/epoc32/export_test_abs			// %EPOCROOT%epoc32\export_test_abs
-:xexport[recursive] export19			|../export_test_rel			// ..\export_test_rel
-:xexport["match",recursive] export20		|/export_test_rel			// .\export_test_rel
-:xexport[recursive,"match"] export21		|export_test_rel			// .\export_test_rel
-:xexport[] export22									// %EPOCROOT%epoc32\include
-:xexport export23									// %EPOCROOT%epoc32\include
-:xexport ./										// %EPOCROOT%epoc32\include
-:xexport										// n/a - an error
+export1.h                                                                           // %EPOCROOT%epoc32\include\export1.h
+export2.h                                   export_test/export2.h                   // %EPOCROOT%epoc32\include\export_test\export2.h 
+export3.h                                   ../export_test/export3.h                // %EPOCROOT%epoc32\export_test\export3.h
+export4.h                                   /export_test_abs/export4.h              // \export_test_abs\export4.h
+export5.h                                   /epoc32/export_test_abs/export5.h       // %EPOCROOT%epoc32\export_test_abs\export5.h
+export6.h                                   |../export_test_rel/\export6.h          // ..\export_test_rel\export6.h
+export7.h                                   |/export_test_rel/export7.h             // .\export_test_rel\export7.h
+export8.h                                   |export_test_rel/export8.h              // .\export_test_rel\export8.h
+:zip export9.zip                                                                    // %EPOCROOT% 
+:zip export10.zip                           export_test                             // %EPOCROOT%export_test
+:zip export11.zip                           /export_test                            // \export_test
+:zip export12.zip                           /epoc32/export_test                     // %EPOCROOT%epoc32\export_test
+export13.rsc                                z:/resource/app/export13.rsc            // %EPOCROOT%epoc32\data\z\resource\app\export13.rsc
+:xexport["match"] export14                                                          // %EPOCROOT%epoc32\include
+:xexport["match"] export15                  export_test                             // %EPOCROOT%epoc32\include\export_test 
+:xexport["match"] export16                  ../export_test                          // %EPOCROOT%epoc32\export_test
+:xexport["match"] export17                  /export_test_abs                        // \export_test_abs
+:xexport[recursive] export18                /epoc32/export_test_abs                 // %EPOCROOT%epoc32\export_test_abs
+:xexport[recursive] export19                |../export_test_rel                     // ..\export_test_rel
+:xexport["match",recursive] export20        |/export_test_rel                       // .\export_test_rel
+:xexport[recursive,"match"] export21        |export_test_rel                        // .\export_test_rel
+:xexport[] export22                                                                 // %EPOCROOT%epoc32\include
+:xexport export23                                                                   // %EPOCROOT%epoc32\include
+:xexport ./                                                                         // %EPOCROOT%epoc32\include
+:xexport                                                                            // n/a - an error
  
 PRJ_TESTEXPORTS
-testexport1.h										// .\testexport1.h (as exports over itself!)
-testexport2.h					export_test_rel/testexport2.h		// .\export_test_rel\testexport2.h 
-testexport3.h					../export_test_rel/testexport3.h	// ..\export_test_rel\testexport3.h
-testexport4.h					/export_test_abs/testexport4.h		// \export_test_abs\testexport4.h
-testexport5.h					/epoc32/export_test_abs/testexport5.h	// %EPOCROOT%epoc32\export_test_abs\testexport5.h
-testexport6.h					|../export_test_rel/testexport6.h	// ..\export_test_rel\testexport6.h
-testexport7.h					|/export_test_rel/testexport7.h		// .\export_test_rel\testexport7.h
-testexport8.h					|export_test_rel/testexport8.h		// .\export_test_rel\testexport8.h
-:zip testexport9.zip									// %EPOCROOT%
-:zip testexport10.zip				export_test				// %EPOCROOT%export_test
-:zip testexport11.zip				/export_test				// \export_test
-:zip testexport12.zip				/epoc32/export_test			// %EPOCROOT%epoc32\export_test
-testexport13.rsc				z:/resource/app/testexport13.rsc	// %EPOCROOT%epoc32\data\z\resource\app\testexport13.rsc
-:xexport["match"] testexport14								// . (as exports over itself!)
-:xexport["match"] testexport15			export_test_rel				// .\export_test_rel 
-:xexport["match"] testexport16			../export_test_rel			// ..\export_test_rel
-:xexport["match"] testexport17			/export_test_abs			// \export_test_abs
-:xexport[recursive] testexport18		/epoc32/export_test_abs			// %EPOCROOT%epoc32\export_test_abs
-:xexport[recursive] testexport19		|../export_test_rel			// ..\export_test_rel
-:xexport["match",recursive] testexport20	|/export_test_rel			// .\export_test_rel
-:xexport[recursive,"match"] testexport21	|export_test_rel			// .\export_test_rel
-:xexport[] testexport22									// . (as exports over itself!)
-:xexport testexport23									// . (as exports over itself!)
-:xexport ./										// . (as exports over itself!)
-
+testexport1.h                                                                       // .\testexport1.h (as exports over itself!)
+testexport2.h                               export_test_rel/testexport2.h           // .\export_test_rel\testexport2.h 
+testexport3.h                               ../export_test_rel/testexport3.h        // ..\export_test_rel\testexport3.h
+testexport4.h                               /export_test_abs/testexport4.h          // \export_test_abs\testexport4.h
+testexport5.h                               /epoc32/export_test_abs/testexport5.h   // %EPOCROOT%epoc32\export_test_abs\testexport5.h
+testexport6.h                               |../export_test_rel/testexport6.h       // ..\export_test_rel\testexport6.h
+testexport7.h                               |/export_test_rel/testexport7.h         // .\export_test_rel\testexport7.h
+testexport8.h                               |export_test_rel/testexport8.h          // .\export_test_rel\testexport8.h
+:zip testexport9.zip                                                                // %EPOCROOT%
+:zip testexport10.zip                       export_test                             // %EPOCROOT%export_test
+:zip testexport11.zip                       /export_test                            // \export_test
+:zip testexport12.zip                       /epoc32/export_test                     // %EPOCROOT%epoc32\export_test
+testexport13.rsc                            z:/resource/app/testexport13.rsc        // %EPOCROOT%epoc32\data\z\resource\app\testexport13.rsc
+:xexport["match"] testexport14                                                      // . (as exports over itself!)
+:xexport["match"] testexport15              export_test_rel                         // .\export_test_rel 
+:xexport["match"] testexport16              ../export_test_rel                      // ..\export_test_rel
+:xexport["match"] testexport17              /export_test_abs                        // \export_test_abs
+:xexport[recursive] testexport18            /epoc32/export_test_abs                 // %EPOCROOT%epoc32\export_test_abs
+:xexport[recursive] testexport19            |../export_test_rel                     // ..\export_test_rel
+:xexport["match",recursive] testexport20    |/export_test_rel                       // .\export_test_rel
+:xexport[recursive,"match"] testexport21    |export_test_rel                        // .\export_test_rel
+:xexport[] testexport22                                                             // . (as exports over itself!)
+:xexport testexport23                                                               // . (as exports over itself!)
+:xexport ./                                                                         // . (as exports over itself!)

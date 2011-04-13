@@ -2,7 +2,7 @@ Overview
 --------
 
 Raptor bld.inf processing now recognises the :xexport prefix within export
-exetions to denote an "Extended export".  Extended exports support whole
+sections to denote an "Extended export".  Extended exports support whole
 directory copies (optionally recursive) with wildcard filename matching of
 source files.
 
