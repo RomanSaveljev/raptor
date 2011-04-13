@@ -24,7 +24,10 @@ Non-recursive operation is the default.
 
 This gives the following general syntax:
 
-    PRJ_[TEST]EXPORTS
+    PRJ_EXPORTS
+    :xexport["filename_match", recursive] source_dir  destination_dir
+    
+    PRJ_TESTEXPORTS
     :xexport["filename_match", recursive] source_dir  destination_dir
 
 Examples
