@@ -409,61 +409,61 @@ class TestRaptorMeta(unittest.TestCase):
 						  'copy')
 		
 		# Extended exports - directory based source and destination
-		# :xexport["match"] export14
+		# :xexport[match="match"] export14
 		self.__testExport(exports[13], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export14', 
 						  '$(EPOCROOT)/epoc32/include', 
 						  'xexport',
-						  ['"match"'])
+						   {'match':'match'})
 
-		# :xexport["match"] export15 export_test
+		# :xexport[match="match"] export15 export_test
 		self.__testExport(exports[14], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export15', 
 						  '$(EPOCROOT)/epoc32/include/export_test', 
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 		
-		# :xexport["match"] export16 ..\export_test
+		# :xexport[match="match"] export16 ..\export_test
 		self.__testExport(exports[15], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export16', 
 						  '$(EPOCROOT)/epoc32/export_test', 
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 		
-		# :xexport["match"] export17 \export_test_abs
+		# :xexport[match="match"] export17 \export_test_abs
 		self.__testExport(exports[16], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export17', 
 						  self.__OSRoot+'/export_test_abs', 
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 
-		# :xexport[recursive] export18 \epoc32\export_test_abs
+		# :xexport[recursive=true] export18 \epoc32\export_test_abs
 		self.__testExport(exports[17], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export18', 
 						  '$(EPOCROOT)/epoc32/export_test_abs', 
 						  'xexport',
-						  ['recursive'])
+						  {'recursive':'true'})
 		
-		# :xexport[recursive] export19 |..\export_test_rel
+		# :xexport[recursive=true] export19 |..\export_test_rel
 		self.__testExport(exports[18], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export19', 
 						  bldInfMakefilePathTestRoot+'export_test_rel', 
 						  'xexport',
-						  ['recursive'])
+						  {'recursive':'true'})
 		
-		# :xexport["match",recursive] export20 |\export_test_rel
+		# :xexport[match="match" recursive=true] export20 |\export_test_rel
 		self.__testExport(exports[19], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export20', 
 						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel',
 						  'xexport',
-						  ['"match"', 'recursive'])
+						  {'match':'match', 'recursive':'true'})
 		
-		# :xexport[recursive,"match"] export21 |export_test_rel
+		# :xexport[recursive=true match="match"] export21 |export_test_rel
 		self.__testExport(exports[20], 
 						  bldInfMakefilePathTestRoot+'bld.infs/export21', 
 						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
 						  'xexport',
-						  ['"match"', 'recursive'])
+						  {'match':'match', 'recursive':'true'})
 
 		# :xexport[] export22
 		self.__testExport(exports[21], 
@@ -583,61 +583,61 @@ class TestRaptorMeta(unittest.TestCase):
 						  'copy')
 
 		# Extended exports - directory based source and destination
-		# :xexport["match"] testexport14
+		# :xexport[match="match"] testexport14
 		self.__testExport(testExports[13], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport14', 
 						  bldInfMakefilePathTestRoot+'bld.infs', 
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 
-		# :xexport["match"] testexport15	export_test_rel
+		# :xexport[match="match"] testexport15	export_test_rel
 		self.__testExport(testExports[14], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport15', 
 						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 		
-		# :xexport["match"] testexport16	../export_test_rel
+		# :xexport[match="match"] testexport16	../export_test_rel
 		self.__testExport(testExports[15], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport16', 
 						  bldInfMakefilePathTestRoot+'export_test_rel', 
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 		
-		# :xexport["match"] testexport17	/export_test_abs
+		# :xexport[match="match"] testexport17	/export_test_abs
 		self.__testExport(testExports[16], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport17', 
 						  self.__OSRoot+'/export_test_abs',
 						  'xexport',
-						  ['"match"'])
+						  {'match':'match'})
 
-		# :xexport[recursive] testexport18	/epoc32/export_test_abs
+		# :xexport[recursive=true] testexport18	/epoc32/export_test_abs
 		self.__testExport(testExports[17], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport18', 
 						  '$(EPOCROOT)/epoc32/export_test_abs', 
 						  'xexport',
-						  ['recursive'])
+						  {'recursive':'true'})
 		
-		# :xexport[recursive] testexport19	|../export_test_rel
+		# :xexport[recursive=true] testexport19	|../export_test_rel
 		self.__testExport(testExports[18], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport19', 
 						  bldInfMakefilePathTestRoot+'export_test_rel', 
 						  'xexport',
-						  ['recursive'])
+						  {'recursive':'true'})
 		
-		# :xexport["match",recursive] testexport20	|/export_test_rel
+		# :xexport[match="match" recursive=true] testexport20	|/export_test_rel
 		self.__testExport(testExports[19], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport20', 
 						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel',
 						  'xexport',
-						  ['"match"', 'recursive'])
+						  {'match':'match', 'recursive':'true'})
 		
-		# :xexport[recursive,"match"] testexport21	|export_test_rel
+		# :xexport[recursive=true match="match"] testexport21	|export_test_rel
 		self.__testExport(testExports[20], 
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport21', 
 						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
 						  'xexport',
-						  ['"match"', 'recursive'])
+						  {'match':'match', 'recursive':'true'})
 
 		# :xexport[] testexport22
 		self.__testExport(testExports[21], 

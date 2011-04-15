@@ -11,24 +11,27 @@ Syntax
 
 :xexport requires both a source directory and a destination directory with
 which to operate, and optionally takes arguments in square brackets of the
-form ':xexport[opt1, opt2, optn]'.
+form ':xexport[option1=value option2=value optionN=value]'.
 
 Initially supported arguments are:
 
-a quoted "filename pattern match": limits copies to source files matching
+match="filename pattern match": limits copies to source files matching
 a pattern - supports "*" (multiple character) and "?" (single character)
-wildcards.  Not listing a pattern is the equivalent to using ["*"].
+wildcards.  Not using 'match' is the equivalent to specifying [match="*"].
 
-recursive: applies operations to sub-directories found at the source directory.
-Non-recursive operation is the default.
+recursive=true|false: if 'true', applies operations to sub-directories
+found at the source directory onwards.  Not using 'recursive' is the
+equivalent to specifying [recursive=false]
+
+Argument order is not significant.
 
 This gives the following general syntax:
 
     PRJ_EXPORTS
-    :xexport["filename_match", recursive] source_dir  destination_dir
+    :xexport[match="filename_match" recursive=true|false] source_dir dest_dir
     
     PRJ_TESTEXPORTS
-    :xexport["filename_match", recursive] source_dir  destination_dir
+    :xexport[match="filename_match" recursive=true|false] source_dir dest_dir
 
 Examples
 --------
@@ -49,9 +52,9 @@ File System - Source
     
     dir1/file1dir1.txt                           destdir1
     :xexport dir1/dir2                           destdir2
-    :xexport[recursive] dir1/dir2                destdir3
-    :xexport["*1dir?.txt"] dir1/dir2             destdir4
-    :xexport["*1dir?.txt", recursive] dir1/dir2  destdir5/subdir
+    :xexport[recursive=true] dir1/dir2           destdir3
+    :xexport[match="*1dir?.txt"] dir1/dir2       destdir4
+    :xexport[match="*1dir?.txt" recursive=true]  dir1/dir2  destdir5/subdir
 
 File System - Destination
 
@@ -78,6 +81,6 @@ Notes
 * Destination locations are resolved as directories using the same rules that
   apply to normal exports e.g. implicit $EPOCROOT/epoc32/include off-sets if no
   destination is given, etc.
-* Pattern matches apply to files only, not directories
+* Pattern matches listed using 'match' apply to files only, not directories
 * As with normal exports, source files must exist if they are to be exported
   to their destination in the same build

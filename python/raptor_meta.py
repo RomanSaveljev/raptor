@@ -24,6 +24,7 @@ import stat
 import hashlib
 import base64
 import fnmatch
+import shlex
 
 import raptor
 import raptor_data
@@ -639,7 +640,7 @@ class Export(object):
 
 	def __init__(self, aBldInfFile, aExportsLine, aType):
 		"""
-		Rules from the OS library for convenience:
+		Updated rules from the OS library for convenience:
 
 		For PRJ_TESTEXPORTS
 		source_file_1 [destination_file]
@@ -655,6 +656,7 @@ class Export(object):
 		source_file_1 [destination_file]
 		source_file_n [destination_file]
 		:zip zip_file [destination_path]
+		:xexport[arguments] source_dir [destination_dir]
 
 		Note that:
 		If a source file is listed with a relative path, the path will be
@@ -698,19 +700,26 @@ class Export(object):
 		# The default action is a normal copy with no arguments, unless we
 		# explicitly find otherwise
 		self.__Action = "copy"
-		self.__Arguments = []		
+		self.__Arguments = {}		
 
 		prefix = export_match.group('prefix')
 		if prefix:
+			# validate based on prefixes we understand
 			if prefix not in ['zip', 'xexport']:
 				raise ValueError('export prefix \':{0}\' not recognised in {1}'.format(prefix, aBldInfFile))
 
 			self.__Action = 'unzip' if prefix == 'zip' else prefix
 				
 			args = export_match.group('arguments')
-			if args and self.__Action == 'xexport':				
-				self.__Arguments = map(lambda arg: arg.strip(), args.split(","))
-
+			if args:
+				# split arguments as "'option'='value'", where values surrounded
+				# in quotes are grouped as literals, protecting the content.
+				# form a dictionary of the results keyed on option; right-most
+				# values found always take precedence where multiples of the
+				# same option are present
+				args_list = [arg.partition("=") for arg in shlex.split(args)]
+				self.__Arguments.update([(option, value) for (option, separator, value) in args_list])
+				
 		# Split the spec into source and destination but take care
 		# to allow filenames with quoted strings.
 		spec = export_match.group('spec')
@@ -753,7 +762,7 @@ class Export(object):
 		if dest_spec:
 			# check for troublesome characters
 			if ':' in dest_spec and not re.search('^[a-z]:', dest_spec, re.I):
-				raise ValueError("invalid filename " + dest_spec)
+				raise ValueError("invalid filename {0} in {1}".format(dest_spec, aBldInfFile))
 
 			dest_spec = dest_spec.replace(' ','%20')
 			aSubType=""
@@ -798,7 +807,7 @@ class Export(object):
 				elif self.__Action == "unzip":
 					destination = "$(EPOCROOT)"
 			else:
-				raise ValueError("Export type should be 'PRJ_EXPORTS' or 'PRJ_TESTEXPORTS'. It was: "+str(aType))
+				raise ValueError("Export type should be 'PRJ_EXPORTS' or 'PRJ_TESTEXPORTS'. It was \'{0}\' in \'{1}\'".format(str(aType), aBldInfFile))
 
 
 		self.__Source = source
@@ -3067,6 +3076,11 @@ class MetaReader(object):
 							exportwhatlog += "</archive>\n"
 						elif export.getAction() == "xexport":
 							exportwhatlog += self.ExtendedExport(fromFile, toFile, bldinf_filename, export.getArguments())
+						else:
+							# we should never get here with an action, as export actions are
+							# validated earlier
+							assert export.getAction() == ""
+							
 					except MetaDataError, e:
 						if self.__Raptor.keepGoing:
 							self.__Raptor.Error("{0}".format(e.Text), bldinf=bldinf_filename)
@@ -3246,27 +3260,28 @@ class MetaReader(object):
 		self.__Raptor.Info("Unzipped {0} files from {1} to {2}".format(filecount, source, destination))
 		return exportwhatlog
 	
-	def ExtendedExport(self, from_dir, to_dir, bld_inf, args=[]):
+	def ExtendedExport(self, from_dir, to_dir, bld_inf, args={}):
 		"""Work out the individual files that exist to be be copied as the
 		result of any PRJ_[TEST]EXPORTS :xexport entries.  Resolve whole
 		directory content (optionally recursive) applying wildcard filename
 		matches (if required) and then call the basic copy command on the
 		concrete source files found and the destination files calculated."""
 		
-		self.__Raptor.Info("Extended export: {0}, {1}, {2}".format(args, from_dir, to_dir)) 
+		self.__Raptor.Info("Extended export: {0}, {1}, {2}".format(args, from_dir, to_dir), bldinf=bld_inf) 
 		
-		# extract arguments (right-most has precedence) and override defaults
-		# (where applicable)
+		# examine arguments, overriding defaults (where applicable)
 		pattern_match = "*"
 		recursive = False
-
-		for arg in args:
-			if arg.lower() == "recursive":
-				recursive = True
-			elif arg.startswith(("\"", "\'")) and arg.endswith(("\"", "\'")):
-				pattern_match = arg.strip("\"\'")
-			else:
-				self.__Raptor.Warn("Unrecognised :xexport argument \'{0}\' ignored when processing {1}".format(arg, bld_inf))
+		
+		for option in args.keys():
+			if option not in ['match', 'recursive']:
+				self.__Raptor.Warn("Unrecognised \':xexport\' argument \'{0}={1}\' ignored".format(option, args[option]), bldinf=bld_inf)
+		
+		if 'recursive' in args:
+			recursive = True if args['recursive'].lower() == 'true' else False
+		
+		if 'match' in args:
+			pattern_match = args['match']
 		
 		found_files = []
 		from_dir_str = str(from_dir)

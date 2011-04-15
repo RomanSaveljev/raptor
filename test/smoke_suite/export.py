@@ -55,11 +55,11 @@ simple_exp4.h //
 read_only.h was_read_only.h //
 
 // Extended format exports: support for filename wildcards and whole directory copying
-:xexport xexport/dir1                                xexport1
-:xexport[invalid_arg] xexport/dir1/dir2              +/xexport2
-:xexport[recursive] xexport/dir1/dir2                xexport3
-:xexport["*1dir?.txt"] xexport/dir1/dir2             +/xexport4
-:xexport["*1dir?.txt", recursive] xexport/dir1/dir2  xexport5/subdir
+:xexport xexport/dir1                                           xexport1
+:xexport[invalid_arg=cobblers] xexport/dir1/dir2                +/xexport2
+:xexport[recursive=true] xexport/dir1/dir2                      xexport3
+:xexport[match="*1dir?.txt"] xexport/dir1/dir2                  +/xexport4
+:xexport[match="*1dir?.txt" recursive=true] xexport/dir1/dir2   xexport5/subdir
 
 """.format(username=user))
 	bld_inf.close()
@@ -89,7 +89,7 @@ read_only.h was_read_only.h //
 		"$(EPOCROOT)/epoc32/include/xexport5/subdir/dir3/file1dir3.txt"
 		]
 	
-	warning_match = ".*warning: Unrecognised :xexport argument 'invalid_arg' ignored when processing.*"
+	warning_match = ".*warning: Unrecognised ':xexport' argument 'invalid_arg=cobblers' ignored.*"
 
 	t = AntiTargetSmokeTest()
 	
