@@ -1,5 +1,5 @@
 @rem
-@rem Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
+@rem Copyright (c) 2005-2011 Nokia Corporation and/or its subsidiary(-ies).
 @rem All rights reserved.
 @rem This component and the accompanying materials are made available
 @rem under the terms of the License "Eclipse Public License v1.0"
@@ -15,6 +15,7 @@
 @rem
 
 @SETLOCAL
+@SET SBS="%~dp0sbs.bat"
 @CALL "%~dp0sbs_env.bat"
 
 @REM Run Raptor with all the arguments.

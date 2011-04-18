@@ -1,0 +1,25 @@
+Running Raptor from Raptor
+============================
+
+If a Function-like Makefile (FLM) needs to run raptor for some reason then it should use the $(SBS) variable to do so and MUST NOT try to run sbs directly.  The problem would be that on windows, direct usage of the "sbs" command causes the bash sbs shellscript to be executed rather than sbs.bat and this does not work in the main builds done on a cluster although it might appear to work on someone's individual desktop PC.
+
+An example: in some test code the FLM generates test mmps using the EXPORT target and these can then only be built in the same build by invoking a sub-instance of raptor.
+
+mybld.inf: 
+	$(call startrule,geninf)
+	echo -e "PRJ_MMPFILES\nmymmp.mmp\n" >$@
+	$(call endrule,geninf)
+
+# CORRECT:
+mygoodbuild: mybld.inf
+	$(call startrule,dobuild)
+	$(SBS) -b mybld.inf
+	$(call endrule,dobuild)
+
+# INCORRECT: 
+mybadbuild: mybld.inf
+	$(call startrule,dobuild)
+	sbs -b mybld.inf
+	$(call endrule,dobuild)
+
+
