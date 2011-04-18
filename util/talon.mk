@@ -46,12 +46,18 @@ SOURCEDIR:=$(subst \,/,$(SBS_HOME))/util/talon
 MANIFEST:=$(SOURCEDIR)/manifest
 
 TARGET:=talon
-SOURCES:=$(addprefix $(SOURCEDIR)/,talon.c buffer.c sema.c log.c $(PROCESS_C) $(CHOMP_C)) 
+SOURCES:=$(addprefix $(SOURCEDIR)/,talon.c buffer.c sema.c log.c env.c $(PROCESS_C) $(CHOMP_C)) 
 $(eval $(cprogram))
 
 TARGET:=talonctl
 SOURCES:=$(addprefix $(SOURCEDIR)/,talonctl.c sema.c log.c)
 $(eval $(cprogram))
+
+ifeq ($(filter win,$(HOSTPLATFORM)),win)
+TARGET:=sbs
+SOURCES:=$(addprefix $(SOURCEDIR)/,sbs.c buffer.c sema.c log.c env.c file.c $(PROCESS_C) $(CHOMP_C)) 
+$(eval $(cprogram))
+endif
 
 TARGET:=testbuffer
 SOURCES:=$(addprefix $(SOURCEDIR)/,testbuffer.c buffer.c log.c)
