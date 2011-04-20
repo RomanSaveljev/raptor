@@ -100,16 +100,17 @@ endef
 # try to interpret it as make output.
 
 define MakeTestBatchFiles
-    $(if $(BATCHFILE_CREATED_$(2))
+    $(if $(NOTESTBATCHFILES),
         ,
-            $(if $(TARGET_CREATED_$(2)_$(TARGET))
-                ,
-                ,
-                    MTBF_OUTPUT:=$$(shell echo -e "$(1)\r" >> $(2))
-            )
-       	,
-       	    MTBF_OUTPUT:=$$(shell $(GNUMKDIR) -p $(dir $(2)))
-       	    MTBF_OUTPUT:=$$(shell echo -e "$(1)\r" > $(2))
+        $(if $(BATCHFILE_CREATED_$(2)),
+              $(if $(TARGET_CREATED_$(2)_$(TARGET)),
+                   ,
+                   MTBF_OUTPUT:=$$(shell echo -e "$(1)\r" >> $(2))
+              )
+              ,
+              MTBF_OUTPUT:=$$(shell $(GNUMKDIR) -p $(dir $(2)))
+              MTBF_OUTPUT:=$$(shell echo -e "$(1)\r" > $(2))
+         )
     )
 endef
 
