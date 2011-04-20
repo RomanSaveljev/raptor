@@ -18,12 +18,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include "env.h"
 #include "log.h"
 #include "buffer.h"
 #include "talon_process.h"
 #include "file.h"
+
+#ifdef HAS_MSVCRT
+  /* Make all output handling binary */
+  unsigned int _CRT_fmode = _O_BINARY;
+#endif
+
 
 #define OUTPUT_UNWANTED 0
 #define OUTPUT_WANTED 1

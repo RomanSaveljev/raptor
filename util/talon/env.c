@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description: functions for manipulating environment variables.
 *
 */
 
@@ -35,14 +35,6 @@
 
 #include "env.h"
 #include "log.h"
-
-#ifdef HAS_MSVCRT
-  #ifndef __CRT_FMODE
-  #define __CRT_FMODE
-  /* Make all output handling binary */
-  unsigned int _CRT_fmode = _O_BINARY;
-  #endif /* __CRT_FMODE */
-#endif
 
 void talon_setenv(char name[], char val[])
 {

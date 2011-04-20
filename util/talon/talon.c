@@ -59,6 +59,11 @@ sbs_semaphore talon_sem;
 
 #include "log.h"
 
+#ifdef HAS_MSVCRT
+  /* Make all output handling binary */
+  unsigned int _CRT_fmode = _O_BINARY;
+#endif
+
 double getseconds(void)
 {
 	struct timeval tp;
