@@ -922,8 +922,9 @@ class Variant(Model, Config):
 
 		pname = self.extends
 		while pname is not None and pname is not '':
-			parent = cache.FindNamedVariant(pname)
-			if parent is None:
+			try:
+				parent = cache.FindNamedVariant(pname)
+			except KeyError,e:
 				break
 			if parent.name == progenitor:
 				return True

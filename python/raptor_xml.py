@@ -308,7 +308,9 @@ class SystemModel(object):
 		# Record that we haven't stripped the file names off our bld.infs
 		self.__SystemDefinitionElement.setAttribute('fullbldinfs','True')
 
-		self.__DOM.writexml(open(aFilename,"w"),newl="\n",indent="",addindent="\t")
+		# Write the sysdef file.  "with" ensures we don't forget to close it.
+		with open(aFilename,"w") as f:
+			self.__DOM.writexml(f,newl="\n",indent="",addindent="\t")
 
 		self.__DOM.unlink()		
 
@@ -323,8 +325,8 @@ class SystemModel(object):
 		try:
 			self.__DOM = xml.dom.minidom.parse(self.__SystemDefinitionFile)
 
-		except: # a whole bag of exceptions can be raised here
-			self.__Logger.Error("Failed to parse XML file {0}".format(self.__SystemDefinitionFile))
+		except Exception,e: # a whole bag of exceptions can be raised here
+			self.__Logger.Error("Failed to parse XML file {0}: {1}".format(self.__SystemDefinitionFile,str(e)))
 			return False
 
 		# <SystemDefinition> is always the root element
