@@ -40,6 +40,9 @@ int is_file(char name[])
 {
 	int ret_val = 1;
 #ifdef HAS_MSVCRT
+	/*
+	 * This can be changed to use fstat as this is available on Windows.
+	 */
 	WIN32_FIND_DATA find_file_data;
 	HANDLE handle;
 	LPVOID msg_buff;
