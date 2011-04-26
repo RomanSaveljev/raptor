@@ -203,6 +203,7 @@ def run():
 		"$(EPOCROOT)/epoc32/data/z/test/src_ongoing_romfile/armv5.auto.bat"
 		]
 	t.mustmatch = []
+	t.mustnotmatch = []
 	t.warnings = 0 if t.onWindows else 2
 	t.run()	
 

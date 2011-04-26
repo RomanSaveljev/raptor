@@ -3479,7 +3479,7 @@ class MetaReader(object):
 		# END iterating over mmps
 		if partialBuild:
 			var = raptor_data.Variant()
-			var.AddOperation(raptor_data.Set("NOTESTBATCHFILES","1")) # TODO Does 1= True?
+			var.AddOperation(raptor_data.Set("NOTESTBATCHFILES","1"))
 			componentNode.AddVariant(var)
  
 		# feature variation does not run extensions at all

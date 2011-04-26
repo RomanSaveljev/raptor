@@ -14,6 +14,7 @@
 		<param name='SBSV1MAKE'/>
 		<param name='NMAKE'/>
 		<param name='NMAKEFLAGS'/>
+		<param name='NOTESTBATCHFILES' default=''/>
 		<param name='FULLVARIANTPATH'/>
 		<param name='PLATMACROS.WINDOWS'/>
 		<param name='PLATMACROS.LINUX'/>
@@ -121,7 +122,6 @@
 	<interface name="Emulator.exe" extends="Emulator.win32" flm="win32exe.flm">
 		<param name='CHECKLIB' default=''/>
 		<param name='LD'/>
-		<param name='NOTESTBATCHFILES' default=''/>
 		<param name='OPT.CHECKLIB.STDCPP'/>
 		<param name='OPT.CHECKLIB.SYMCPP'/>
 		<param name='OPT.CHECKLIB.WIN32'/>
