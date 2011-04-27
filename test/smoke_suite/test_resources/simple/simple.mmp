@@ -26,10 +26,6 @@ SECUREID		0x10003a5c
 SYSTEMINCLUDE	/epoc32/include
 SOURCE			test.cpp test.cia test1.c++ test2.cxx test3.Cpp test4.cc test5.CC test6.C++
 MACRO			TEST_MACRO_THAT_DOES_NOTHING
-OPTION GCCE -O3
-OPTION GCCE -fvisibility-inlines-hidden
-LINKEROPTION GCCE --verbose
-LINKEROPTION GCCE -pie
 PAGED
 DEBUGGABLE
 EPOCCALLDLLENTRYPOINTS

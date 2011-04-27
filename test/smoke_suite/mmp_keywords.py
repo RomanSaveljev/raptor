@@ -70,7 +70,7 @@ def run():
 	t.run()
 	
 	t.name = "mmp_option_gcce_linkeroption_gcce"
-	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c arm.v5.urel.gcce4_4_1.release_gcce -f-"
+	t.command = "sbs -b smoke_suite/test_resources/mmp/options/bld.inf -c arm.v5.urel.gcce4_4_1.release_gcce -f-"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/gcce/urel/test.exe",
 	]
@@ -85,7 +85,24 @@ def run():
 	t.warnings = 0 
 	t.run()
 	
+	# LINKEROPTION CW can impact DLL (and variants), EXE and LIB TARGETTYPEs in different ways
+	# We ensure we have enough build coverage to cover all linker calls constructed in the win32 FLM
+	t.name = "mmp_option_cw_linkeroption_cw"
+	t.command = "sbs -b smoke_suite/test_resources/mmp/options/bld.inf -c winscw_urel -f-"
+	t.targets = [
+		"$(EPOCROOT)/epoc32/release/winscw/urel/test.exe",
+	]
+	t.mustmatch = []
 	t.mustmatch_singleline = []
+	t.countmatch = [
+		[".*mwccsym2.*-relax_pointers.*-O2", 5],
+		[".*mwldsym2.*-zerobss.*-export none", 2],
+		[".*mwldsym2.*-zerobss.*-fold all", 2]
+	]	
+	t.warnings = 0
+	t.run()
+	
+	t.countmatch = []
 	
 	t.name = "mmp_debuglibrary"
 	t.command = "sbs -b smoke_suite/test_resources/mmp/mmp3/bld.inf -c armv5 -c winscw -f-"

@@ -40,6 +40,7 @@
 		<param name='LIBRARY' default=''/>
 		<param name='LIBRARY_DEBUG' default=''/>
 		<param name='LINKAS' default=''/>
+		<param name='LINKEROPTION_CW' default=''/>
 		<param name='LISTING_OPTION' default='-S'/>
 		<param name='MMPDEFS' default=''/>
 		<param name='NEWLIB' default=''/>
