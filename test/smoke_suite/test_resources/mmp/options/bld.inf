@@ -20,6 +20,8 @@ PRJ_PLATFORMS
 WINSCW ARMV5
 
 PRJ_MMPFILES
+// Emulator builds require more TARGETTYPEs to be tested for
+// full coverage of OPTION and LINKEROPTION
 #ifdef WINSCW
 exe.mmp
 dll.mmp
