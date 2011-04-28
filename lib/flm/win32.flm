@@ -528,7 +528,7 @@ ifneq ($(BASE_TYPE),importlib)
 	    $(call startrule,win32archive) \
 	    $(LD) $(OPT.STATICLIBRARY) $(LFLAGS) $(OPT.NOIMPLIB) $(WIN32_LIBRARIES) \
 	    $(OPT.OUT)"$$@" $(STDCPPTAGFILE) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
-	    $(if $(LINKEROPTION_CW),$(LINKEROPTION_CW)) \
+	    $(LINKEROPTION_CW) \
 	    $(if $(SAVESPACE),; $(GNURM) -rf $(BLDDIR); true,) \
 	    $(call endrule,win32archive)
     endef
@@ -554,7 +554,7 @@ ifneq ($(BASE_TYPE),importlib)
 	    MWSym2LibraryFiles="$(MWSym2LibraryFiles)" \
 	    $(LD) $(LFLAGS) $(OPT.MENTRYPOINT)$(ENTRYSYMBOL) $(MAP) $(LINKER_FIRSTSTATLIBFILE) $(NEWLIBFILE) $(WIN32_LIBRARIES) $(STATICLIBFILES) $(LINKLIBFILES) \
 	    $(OPT.OUT)"$$@" $(OPT.NOIMPLIB) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
-	    $(if $(LINKEROPTION_CW),$(LINKEROPTION_CW)) \
+	    $(LINKEROPTION_CW) \
 	    $(if $(SAVESPACE),; $(GNURM) -rf $(BLDDIR); true,) \
 	    $(call endrule,win32simplelink)
     endef
@@ -613,7 +613,7 @@ ifneq ($(BASE_TYPE),importlib)
 	    $(LD) $(LFLAGS) $(OPT.MENTRYPOINT)$(ENTRYSYMBOL) $(OPT.EXPORT)$(EXPORT_TYPE) $(OPT.NOCOMPACTIMPORTLIB) \
 	    $(OPT.ADDCOMMAND) "out:$(TARGET).$(TARGETEXT)" $(OPT.WARNINGS) off $(OPT.IMPLIB)"$(TMP_IMPLIB)" $(OPT.OUT)"$(TMP_TARGET)" \
 	    $(LINKER_FIRSTSTATLIBFILE) $(NEWLIBFILE) $(WIN32_LIBRARIES) $(STATICLIBFILES) $(LINKLIBFILES) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
-	    $(if $(LINKEROPTION_CW),$(LINKEROPTION_CW)) \
+	    $(LINKEROPTION_CW) \
 	    $(call endrule,win32stageonelink)
     endef
     $(eval $(win32stageonelink))
@@ -665,7 +665,7 @@ ifneq ($(BASE_TYPE),importlib)
 	    $(OPT.OUT)"$$@" \
 	    $(if $(EXPORTUNFROZEN),$(OPT.IMPLIB)$(IMPORTLIBTARGET),$(OPT.NOIMPLIB)) \
 	    $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
-	    $(if $(LINKEROPTION_CW),$(LINKEROPTION_CW)) \
+	    $(LINKEROPTION_CW) \
 	    $(if $(SAVESPACE),; $(GNURM) -rf $(BLDDIR); true,) \
 	    $(call endrule,win32stagetwolink)
     endef
