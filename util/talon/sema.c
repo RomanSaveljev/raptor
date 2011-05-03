@@ -121,6 +121,8 @@ int sema_wait(sbs_semaphore *s)
 
 void  sema_release(sbs_semaphore *s)
 {
+	if (s->handle)
+	{
 	/* release the semaphore */
 	#ifdef WIN32
 		ReleaseSemaphore(s->handle, 1, NULL);
@@ -134,4 +136,7 @@ void  sema_release(sbs_semaphore *s)
 	#else
 	   	sem_close(s->handle);
 	#endif
+	} else {
+          error("sema: attempt to release an semaphore that wasn't 'held'");
+	}
 }
