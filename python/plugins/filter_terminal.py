@@ -128,6 +128,10 @@ class FilterTerminal(filter_interface.Filter):
 		"msvctoolscompile" : "compile",
 		"freeze" : "freeze",
 		"win32archive" : "target",
+		"mifconvwrapper" : "mifconv",
+		"ar" : "staticlib",	
+		"win32archive" : "staticlib",	
+		"tools2lib" : "staticlib",	
 		"qmake_extra_pre_targetdep": "qt-tools"
 	}
 
