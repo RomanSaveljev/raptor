@@ -112,6 +112,7 @@ class FilterTerminal(filter_interface.Filter):
 	docare = {
 		"asmcompile" : "asmcompile" ,
 		"compile" : "compile" ,
+		"ar" : "target",
 		"postlink" : "target",
 		"linkandpostlink" : "target",
 		"resourcecompile" : "resource",
@@ -129,9 +130,9 @@ class FilterTerminal(filter_interface.Filter):
 		"freeze" : "freeze",
 		"win32archive" : "target",
 		"mifconvwrapper" : "mifconv",
-		"ar" : "staticlib",	
-		"win32archive" : "staticlib",	
-		"tools2lib" : "staticlib",	
+		"ar" : "target",	
+		"win32archive" : "target",	
+		"tools2lib" : "target",	
 		"qmake_extra_pre_targetdep": "qt-tools"
 	}
 

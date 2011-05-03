@@ -41,6 +41,9 @@ ifeq ($(TARGETS),)
     TARGETS:=$(TARGETS) make python27 bvcpp dialog 
     # TARGETS:=$(TARGETS) python32
   endif
+  ifneq ($(filter $(HOSTPLATFORM),win),)
+	TARGETS:=$(TARGETS) sbs
+  endif
 endif
 
 $(foreach T,$(TARGETS),$(eval -include $(T).mk))

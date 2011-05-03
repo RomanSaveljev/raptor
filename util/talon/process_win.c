@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -219,8 +219,8 @@ proc *process_run(char executable[], char *args[], int timeout)
 	
 	DEBUG(("pre commandline \n"));
 	/* create the commandline string */
-	int len = 0;
-	int i = 0;
+	int len = strlen(executable) + 1;
+	int i = 1;
 	while (args[i] != NULL)
 	{
 		len += strlen(args[i++]) + 1;
@@ -232,7 +232,9 @@ proc *process_run(char executable[], char *args[], int timeout)
 		RETURN(p);
 	commandline[0] = '\0';
 
-	i = 0;
+	strcat(commandline, executable);
+	strcat(commandline, " ");
+	i = 1;
 	while (args[i] != NULL)
 	{
 		strcat(commandline, args[i]);
@@ -255,11 +257,12 @@ proc *process_run(char executable[], char *args[], int timeout)
 	HANDLE h_readpipe_thread = CreateThread(NULL, 8192, (LPTHREAD_START_ROUTINE) readpipe_thread, (void*)ropq, 0, &readpipe_threadid);
 
 	/* ready to run the process */
- 
+
+	DEBUG(("process executable:\n%s \n", executable));
 	DEBUG(("process commandline:\n%s \n", commandline));
 	DEBUG(("\n"));
-	createproc_success = CreateProcess(executable, 
-	   commandline,     // command line 
+	createproc_success = CreateProcess(NULL,
+	   commandline,   // command line, starts with executable, possibly fully-pathed
 	   NULL,          // process security attributes 
 	   NULL,          // primary thread security attributes 
 	   TRUE,          // handles are inherited 
@@ -271,7 +274,20 @@ proc *process_run(char executable[], char *args[], int timeout)
 
 	if (! createproc_success)
 	{
-		DEBUG(("Createprocess failed. \n"));
+		DWORD last_error = GetLastError();
+		LPVOID msg_buff;
+		FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			last_error,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR) &msg_buff,
+			0, NULL );
+		DEBUG(("CreateProcess failed (error code %d):\n%s\n",
+				last_error, msg_buff));
+		LocalFree(msg_buff);
 		p->causeofdeath = PROC_SOMEODDDEATH;
 		RETURN(p);
 	}
