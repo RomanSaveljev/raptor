@@ -3477,9 +3477,9 @@ class MetaReader(object):
 					bitmapSpec.AddVariant(bvar)
 					mmpSpec.AddChild(bitmapSpec)
 		# END iterating over mmps
-		if partialBuild:
+		if not partialBuild:
 			var = raptor_data.Variant()
-			var.AddOperation(raptor_data.Set("NOTESTBATCHFILES","1"))
+			var.AddOperation(raptor_data.Set("TESTBATCHFILES","1"))
 			componentNode.AddVariant(var)
  
 		# feature variation does not run extensions at all

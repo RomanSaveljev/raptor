@@ -14,7 +14,7 @@
 		<param name='SBSV1MAKE'/>
 		<param name='NMAKE'/>
 		<param name='NMAKEFLAGS'/>
-		<param name='NOTESTBATCHFILES' default=''/>
+		<param name='TESTBATCHFILES' default=''/>
 		<param name='FULLVARIANTPATH'/>
 		<param name='PLATMACROS.WINDOWS'/>
 		<param name='PLATMACROS.LINUX'/>

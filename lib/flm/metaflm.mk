@@ -100,8 +100,7 @@ endef
 # try to interpret it as make output.
 
 define MakeTestBatchFiles
-    $(if $(NOTESTBATCHFILES),
-        ,
+    $(if $(TESTBATCHFILES),
         $(if $(BATCHFILE_CREATED_$(2)),
               $(if $(TARGET_CREATED_$(2)_$(TARGET)),
                    ,

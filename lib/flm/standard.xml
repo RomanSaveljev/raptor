@@ -70,7 +70,7 @@
 		<param name='PLATMACROS.LINUX' default=''/>
 		<param name='STDCPP' default=''/>
 		<param name='NOSTDCPP' default=''/>
-		<param name='NOTESTBATCHFILES' default=''/>
+		<param name='TESTBATCHFILES' default=''/>
 		<param name='NEWLIB' default=''/>
 		<param name='SMPSAFE' default=''/>
 		<param name='STDCPP_INCLUDE' default=''/>
