@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -51,7 +51,7 @@ class Reply(object):
 		children = []
 		longend = False
 		
-		for attribute,value in self.__dict__.items():
+		for attribute,value in sorted(self.__dict__.items()):
 			if attribute != "text" and not attribute.startswith('_'):
 				if isinstance(value, Reply):
 					children.append(value)

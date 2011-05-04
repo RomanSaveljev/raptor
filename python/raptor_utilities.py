@@ -106,7 +106,7 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 			driveLetter = driveLetter.lower()
 		
 		# C: drive
-		if driveLetter is "c":
+		if driveLetter == "c":
 			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/data/' + driveLetter, reference))
 			resolvedPath.append(dosDriveRegEx.sub(aEPOCROOT + '/epoc32/winscw/' + driveLetter, reference))
 		else: # Other letters: A, B and D to Z

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -36,6 +36,7 @@
 #include "talon_process.h"
 #include "sema.h"
 #include "buffer.h"
+#include "env.h"
 #include "../config.h"
 
 #ifdef HAS_GETCOMMANDLINE
@@ -59,10 +60,9 @@ sbs_semaphore talon_sem;
 #include "log.h"
 
 #ifdef HAS_MSVCRT
-/* Make all output handling binary */
-unsigned int _CRT_fmode = _O_BINARY;
+  /* Make all output handling binary */
+  unsigned int _CRT_fmode = _O_BINARY;
 #endif
-
 
 double getseconds(void)
 {
@@ -70,45 +70,6 @@ double getseconds(void)
 	gettimeofday(&tp, NULL);
 
 	return (double)tp.tv_sec + ((double)tp.tv_usec)/1000000.0L;
-}
-
-void talon_setenv(char name[], char val[])
-{
-#if defined(HAS_GETENVIRONMENTVARIABLE)
-	SetEnvironmentVariableA(name,val); 
-#elif defined(HAS_GETENV)
-	setenv(name,val, 1);
-#else
-#	error "Need a function for setting environment variables"
-#endif
-}
-
-
-#define TALON_MAXENV 4096
-char * talon_getenv(char name[])
-{
-#if defined(HAS_SETENV)
-	char *val = getenv(name);
-	char *dest = NULL;
-	
-	if (val)
-	{
-		dest = malloc(strlen(val) + 1);
-		if (dest)
-		{
-			strcpy(dest,val);
-		}
-	}
-	return dest;
-#elif defined(HAS_SETENVIRONMENTVARIABLE)
-	char *val = malloc(TALON_MAXENV);
-	if (0 != GetEnvironmentVariableA(name,val,TALON_MAXENV-1))
-		return val;
-	else
-		return NULL;
-#else
-#	error "Need a function for setting environment variables"
-#endif
 }
 
 void prependattributes(buffer *b, char *attributes)
