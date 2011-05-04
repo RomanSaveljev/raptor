@@ -112,6 +112,7 @@ class FilterTerminal(filter_interface.Filter):
 	docare = {
 		"asmcompile" : "asmcompile" ,
 		"compile" : "compile" ,
+		"ar" : "target",
 		"postlink" : "target",
 		"linkandpostlink" : "target",
 		"resourcecompile" : "resource",
