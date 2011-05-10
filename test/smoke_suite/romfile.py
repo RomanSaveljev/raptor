@@ -59,8 +59,8 @@ def run():
 		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_localtime\.exe\s+sys/bin/t_localtime\.exe\n.*",
 
 		# Some files where the MMP file has the PAGED or UNPAGED keywords.
-		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe paged\n.*",
-		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_fsys\.exe\s+sys/bin/t_fsys\.exe unpaged\n.*",
+		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe\n.*",
+		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_fsys\.exe\s+sys/bin/t_fsys\.exe\n.*",
 
 		# Some files where the MMP file has the ROMTARGET or RAMTARGET keywords.
 		r".*\ndata=/epoc32/release/##MAIN##/##BUILD##/t_prel\.dll\s+/sys/bin/t_prel\.dll attrib=r\n.*",
@@ -105,8 +105,8 @@ def run():
 		r".*\nfile=ABI_DIR/BUILD_DIR/t_localtime\.exe\s+sys/bin/t_localtime\.exe\n.*",
 
 		# Some files where the MMP file has the PAGED or UNPAGED keywords.
-		r".*\nfile=ABI_DIR/BUILD_DIR/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe paged\n.*",
-		r".*\nfile=ABI_DIR/BUILD_DIR/t_fsys\.exe\s+sys/bin/t_fsys\.exe unpaged\n.*",
+		r".*\nfile=ABI_DIR/BUILD_DIR/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe\n.*",
+		r".*\nfile=ABI_DIR/BUILD_DIR/t_fsys\.exe\s+sys/bin/t_fsys\.exe\n.*",
 
 		# Some files where the MMP file has the ROMTARGET or RAMTARGET keywords.
 		r".*\ndata=ABI_DIR/BUILD_DIR/t_prel\.dll\s+/sys/bin/t_prel\.dll attrib=r\n.*",
