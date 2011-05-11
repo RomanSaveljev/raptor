@@ -266,7 +266,7 @@ ifeq ($(SUPPORTS_IMPORT_LIBRARY),1)
       ifneq ($(EXPORTUNFROZEN),)
         # EXPORTUNFROZEN amounts to doing the stage-two link with the makedef generated temporary .def file but creating a .lib
         # file as a side-effect of linking.  The import library is therefore dependent on the final binary in this instance.
-        $(info <warning project='$(PROJECT_META)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META) - unfrozen exports will be represented in import library.</warning> )
+        $(info <warning project='$(PROJECT_META_FILENAME)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META_FILENAME) - unfrozen exports will be represented in import library.</warning> )
         $(IMPORTLIBTARGET): $(BINTARGET)
         $(eval TARGET_$(call sanitise,$(IMPORTLIBTARGET)):=1)
       else

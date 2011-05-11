@@ -30,7 +30,7 @@ _METAFLM_MK_:=1
 .PHONY:: CLEAN
 
 define GenerateStandardCleanTarget
-$(info <clean bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META)' config='$(SBS_CONFIGURATION)'>)
+$(info <clean bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META_FILENAME)' config='$(SBS_CONFIGURATION)'>)
 $(foreach ITEM,$(1),$(info <file>$(ITEM)</file>))
 $(foreach ITEM,$(2),$(info <dir>$(ITEM)</dir>))
 $(info </clean>)
@@ -61,7 +61,7 @@ endef
 
 ## Begin .whatlog Macros #####
 define whatLogOpen
-<whatlog bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META)' config='$(SBS_CONFIGURATION)'>
+<whatlog bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META_FILENAME)' config='$(SBS_CONFIGURATION)'>
 endef
 
 define whatLogItem

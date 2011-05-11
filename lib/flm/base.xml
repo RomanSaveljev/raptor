@@ -13,7 +13,8 @@
 		<param name='COMPONENT_META' default=''/>  <!-- bld.inf -->
 		<param name='COMPONENT_NAME' default=''/>  <!-- MP4 Player -->
 		<param name='COMPONENT_LAYER' default=''/> <!-- Multimedia -->
-		<param name='PROJECT_META' default=''/>     <!-- my.mmp  -->
+		<param name='PROJECT_META' default=''/>     		<!-- my.mmp (as a makefile dependency) -->
+		<param name='PROJECT_META_FILENAME' default=''/> 	<!-- my.mmp (as a string for logging info) -->
 		<param name='DATE' default=''/>
 		<param name='EPOCROOT'/>
 		<param name='SBS'/>

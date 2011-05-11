@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -20,7 +20,7 @@ ifeq ($(TARGETTYPE),lib)
 include $(FLMHOME)/e32abiv2defaults.mk
 
 ifeq ($(FEATUREVARIANT),1)
-$(error TARGETTYPE lib cannot be FEATUREVARIANT (in $(PROJECT_META) from $(COMPONENT_META)))
+$(error TARGETTYPE lib cannot be FEATUREVARIANT (in $(PROJECT_META_FILENAME) from $(COMPONENT_META)))
 endif
 
 POSTLINKFILETYPE:=lib

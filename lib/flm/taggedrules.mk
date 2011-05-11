@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -55,7 +55,7 @@ define startrule
     echo -e "<recipe name='$(1)' \
     target='$$@' host='$$$$HOSTNAME' \
     layer='$(COMPONENT_LAYER)' component='$(COMPONENT_NAME)' \
-    bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META)' \
+    bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META_FILENAME)' \
     config='$(SBS_CONFIGURATION)' platform='$(PLATFORM)' \
     phase='$(MAKEFILE_GROUP)' \
     source='$(3)'>\n<![CDATA["; \
@@ -105,7 +105,7 @@ TALON_RECIPEATTRIBUTES:=\
  host='$$HOSTNAME'\
  layer='$$COMPONENT_LAYER'\
  component='$$COMPONENT_NAME'\
- bldinf='$$COMPONENT_META' mmp='$$PROJECT_META'\
+ bldinf='$$COMPONENT_META' mmp='$$PROJECT_META_FILENAME'\
  config='$$SBS_CONFIGURATION' platform='$$PLATFORM'\
  phase='$$MAKEFILE_GROUP' source='$$SOURCE' $(if i$(FLMDEBUG),prereqs='$$RECIPE_PREREQS',)
 
@@ -114,7 +114,7 @@ export TALON_RETRIES
 export TALON_DESCRAMBLE
 
 define startrule
-	@|RECIPE=$1;TARGET=$$@;COMPONENT_LAYER=$(COMPONENT_LAYER);COMPONENT_NAME=$(COMPONENT_NAME);COMPONENT_META=$(COMPONENT_META);PROJECT_META=$(PROJECT_META);SBS_CONFIGURATION=$(SBS_CONFIGURATION);PLATFORM=$(PLATFORM);MAKEFILE_GROUP=$(MAKEFILE_GROUP);SOURCE=$3;TALON_FLAGS=$2;$(if $(FLMDEBUG),RECIPE_PREREQS=$$^;,)|
+	@|RECIPE=$1;TARGET=$$@;COMPONENT_LAYER=$(COMPONENT_LAYER);COMPONENT_NAME=$(COMPONENT_NAME);COMPONENT_META=$(COMPONENT_META);PROJECT_META=$(PROJECT_META_FILENAME);SBS_CONFIGURATION=$(SBS_CONFIGURATION);PLATFORM=$(PLATFORM);MAKEFILE_GROUP=$(MAKEFILE_GROUP);SOURCE=$3;TALON_FLAGS=$2;$(if $(FLMDEBUG),RECIPE_PREREQS=$$^;,)|
 endef
 
 define endrule

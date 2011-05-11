@@ -92,7 +92,7 @@ CHECKLIB_TYPE:=symc++
 STDCPPTAGFILE:=
 ifeq ($(NOSTDCPP),1)
   ifeq ($(STDCPP),1)
-    $(info <warning>STDCPP and NOSTDCPP both specified in $(PROJECT_META)</warning>)
+    $(info <warning>STDCPP and NOSTDCPP both specified in $(PROJECT_META_FILENAME)</warning>)
   else
     ifeq ($(HAS_DEDICATED_OP_NEWDEL_LIB),1)
       DEFAULT_NEWLIB:=$(DEFAULT_SYMBIAN_NEWLIB)
@@ -308,7 +308,7 @@ ifneq ($(IMPORTLIBTARGET_DSO),) # check that we haven't tried to specify this ta
   endif
 
   ifneq ($(EXPORTUNFROZEN),) # Unfrozen  - warn and create .dso as side-effect of the final postlink
-    $(info <warning project='$(PROJECT_META)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META) - unfrozen exports will be represented in import library.</warning> )
+    $(info <warning project='$(PROJECT_META_FILENAME)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META_FILENAME) - unfrozen exports will be represented in import library.</warning> )
     define importlibtarget_unfrozen
       $(IMPORTLIBTARGET_DSO): $(IMPORTLIBTARGETVERSIONED_DSO)
 		$(call startrule,importlibtarget_unfrozen,FORCESUCCESS) \

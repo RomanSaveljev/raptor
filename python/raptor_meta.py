@@ -1270,7 +1270,15 @@ class MMPRaptorBackend(MMPBackend):
 		self.__Raptor = aRaptor
 		self.__debug("-----+++++ {0} ".format(aMmpfilename))
 		self.BuildVariant = raptor_data.Variant(name = "mmp")
-		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
+		
+		if self.__Raptor.no_metadata_depend:
+			self.__debug("No metadata depend requested. Setting PROJECT_META to blank.")
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", ""))
+		else:
+			self.__debug("Setting PROJECT_META to \"{0}\".".format(str(aMmpfilename)))
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
+		
+		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_FILENAME", str(aMmpfilename)))
 		self.ApplyVariants = []
 		self.ResourceVariants = []
 		self.BitmapVariants = []
@@ -2977,7 +2985,7 @@ class MetaReader(object):
 
 				var.AddOperation(raptor_data.Set("TEST_OPTION", component.bldinf.getRomTestType(bp)))
 				specNode.AddVariant(var)
-
+				
 				# add this bld.inf Specification to the build platform
 				platformNodes[i].AddChild(specNode)
 				# also attach it into the component
