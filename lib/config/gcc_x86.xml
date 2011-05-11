@@ -103,7 +103,8 @@
 		<set name="STATIC_LIBS_PATH" value="" />
 		<set name="STDCPP_INCLUDE" value="$(EPOCINCLUDE)/stdapis"/>
 		<set name="STDLIB_OPTION" value=""/>
-		<set name="SUPPORTS_ABIV1_IMPLIBS" value=""/>	
+		<set name="SUPPORTS_ABIV1_IMPLIBS" value=""/>
+		<set name="SUPPORTS_LINKER_FEEDBACK" value=""/>	
 		<set name="SYMBIAN_LD_MESSAGE_OPTION" value="$(LD_WARNINGS_CONTROL_OPTION) $(LD_ERRORS_CONTROL_OPTION)"/>
 		<set name="SYMVER_OPTION" value=""/>
 		<set name="TARGET_RELOCATION_OPTION" value="--target1-rel" />
