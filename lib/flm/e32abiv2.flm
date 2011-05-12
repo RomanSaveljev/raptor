@@ -92,7 +92,7 @@ CHECKLIB_TYPE:=symc++
 STDCPPTAGFILE:=
 ifeq ($(NOSTDCPP),1)
   ifeq ($(STDCPP),1)
-    $(info <warning>STDCPP and NOSTDCPP both specified in $(PROJECT_META_FILENAME)</warning>)
+    $(info <warning>STDCPP and NOSTDCPP both specified in $(PROJECT_META)</warning>)
   else
     ifeq ($(HAS_DEDICATED_OP_NEWDEL_LIB),1)
       DEFAULT_NEWLIB:=$(DEFAULT_SYMBIAN_NEWLIB)
@@ -308,7 +308,7 @@ ifneq ($(IMPORTLIBTARGET_DSO),) # check that we haven't tried to specify this ta
   endif
 
   ifneq ($(EXPORTUNFROZEN),) # Unfrozen  - warn and create .dso as side-effect of the final postlink
-    $(info <warning project='$(PROJECT_META_FILENAME)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META_FILENAME) - unfrozen exports will be represented in import library.</warning> )
+    $(info <warning project='$(PROJECT_META)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META) - unfrozen exports will be represented in import library.</warning> )
     define importlibtarget_unfrozen
       $(IMPORTLIBTARGET_DSO): $(IMPORTLIBTARGETVERSIONED_DSO)
 		$(call startrule,importlibtarget_unfrozen,FORCESUCCESS) \
@@ -799,7 +799,7 @@ $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 $(eval TYPE:=$(if $(5),$(5),compile))
 
-$(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(TRACE_THISCOMPONENT_ALLRULE) 
+$(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(TRACE_THISCOMPONENT_ALLRULE) 
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
@@ -885,7 +885,7 @@ $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
 LISTING:: $(LISTINGTARGET)
 
-$(LISTINGTARGET): $(1) $(PROJECT_META)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(LISTINGTARGET): $(1) $(PROJECT_META_DEP)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,e32listing,,$(1))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(CC) $(LICENSERETRY_OPTION) $(SYMBIAN_CCFLAGS) \
@@ -985,7 +985,7 @@ $(eval e32abiv2_PREFILE:=$(call mapcia2xxx,$(1),_.pre))
 $(eval e32abiv2_CPPFILE:=$(call mapcia2xxx,$(1),_.cpp))
 $(eval CLEANTARGETS:=$(CLEANTARGETS) $(e32abiv2_OFILE) $(e32abiv2_CPPFILE) $(e32abiv2_PREFILE))
 
-$(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(PROJECT_META)
+$(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(PROJECT_META_DEP)
 	$(call startrule,cia2cpp2o,,$(e32abiv2_CPPFILE)) \
 		$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 			$(CC) $(LICENSERETRY_OPTION) \
@@ -1018,7 +1018,7 @@ $(eval e32abiv2_PREFILE_OPTIONS:= $(LICENSERETRY_OPTION) $(PREPROCESSOR_OPTION) 
        $(if $(ARMINC),$(if $(RVCTINC), $(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$(RVCTINC)),),) )
 
 
-$(e32abiv2_PREFILE): $1 $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(e32abiv2_PREFILE): $1 $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,cia2cpp,,$1) \
 	$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 	$(CC) $(e32abiv2_PREFILE_OPTIONS) $(OUTPUT_OPTION) $$@ $$(call dblquote,$1) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
@@ -1061,7 +1061,7 @@ define e32abiv2_asm
 $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
-$(1): $(2) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(1): $(2) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,asmcompile,,$(2)) \
 		$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(CC) $(e32abiv2_asm_OPTIONS) \
@@ -1125,7 +1125,7 @@ OUTPUTVMAP:=$(E32TARGET).vmap
 WHATRELEASE:=$(WHATRELEASE) $(OUPUTVMAP)
 
 TARGET:: $(OUTPUTVMAP)
-VMAPNEEDS:=$(E32TARGET) $(SOURCE) $(PROJECT_META)
+VMAPNEEDS:=$(E32TARGET) $(SOURCE) $(PROJECT_META_DEP)
 
 BV_FEATURELIST:=$(addprefix -f ,$(FEATURELISTFILES))
 BV_USER_INCLUDES:=$(addprefix -u ,$(USERINCLUDE))
@@ -1143,7 +1143,7 @@ define createvmap
 
 $(OUTPUTVMAP): $(VMAPNEEDS)
 	@echo -n "" > $(VMAPCOMMANDFILE);
-	$(call groupin10infile,$(VMAPCOMMANDFILE),$(addprefix -s,$(SOURCE) $(PROJECT_META))) ;
+	$(call groupin10infile,$(VMAPCOMMANDFILE),$(addprefix -s,$(SOURCE) $(PROJECT_META_DEP))) ;
 	$(call startrule,createvmap) \
 	$(CREATEVMAP) -o $(OUTPUTVMAP) $(BV_FEATURELIST) $(BV_DEFINES) -p $(PREINCLUDE) --command=$(VMAPCOMMANDFILE) $(BV_USER_INCLUDES) $(BV_SYSTEM_INCLUDES) -c $(CREATEVMAPCPP) \
 	$(call endrule,createvmap)

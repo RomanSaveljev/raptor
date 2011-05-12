@@ -1272,13 +1272,13 @@ class MMPRaptorBackend(MMPBackend):
 		self.BuildVariant = raptor_data.Variant(name = "mmp")
 		
 		if self.__Raptor.no_metadata_depend:
-			self.__debug("No metadata depend requested. Setting PROJECT_META to blank.")
-			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", ""))
+			self.__debug("No metadata depend requested. Setting PROJECT_META_DEP to blank.")
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_DEP", ""))
 		else:
-			self.__debug("Setting PROJECT_META to \"{0}\".".format(str(aMmpfilename)))
-			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
+			self.__debug("Setting PROJECT_META_DEP to \"{0}\".".format(str(aMmpfilename)))
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_DEP", str(aMmpfilename)))
 		
-		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_FILENAME", str(aMmpfilename)))
+		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
 		self.ApplyVariants = []
 		self.ResourceVariants = []
 		self.BitmapVariants = []

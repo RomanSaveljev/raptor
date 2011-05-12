@@ -59,7 +59,7 @@ FINDFILES:=$(GNUFIND) $(SOURCEPATH) -type f -print | $(GNUSED) 's!$(SOURCEPATH)!
 define whatcopies
 
 WHAT::
-	@(echo "<whatlog bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META_FILENAME)' config='$(SBS_CONFIGURATION)'>"; \
+	@(echo "<whatlog bldinf='$(COMPONENT_META)' mmp='$(PROJECT_META)' config='$(SBS_CONFIGURATION)'>"; \
 	$(FINDFILES) | (read LINE; \
 	while [ $$$$? -eq 0 ]; do \
 		echo "<build>$$$$LINE</build>"; \

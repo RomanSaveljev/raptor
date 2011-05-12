@@ -23,7 +23,7 @@ $(if $(FLMDEBUG),$(info <debug>CDEFS=$(CDEFS)</debug>))
 endif
 
 # Set project name as <mmp_name>
-TRACE_PRJNAME:=$(basename $(notdir $(PROJECT_META_FILENAME)))
+TRACE_PRJNAME:=$(basename $(notdir $(PROJECT_META)))
 OLDTC_TRACE_PRJNAME:=$(TRACE_PRJNAME)
 TRACE_RELEASABLE_ID:=$(TARGET)_$(TARGETEXT)
 
@@ -184,11 +184,11 @@ $(TRACE_SOURCE_LIST):
 	  $(GNUCP) $$@.new $$@ \
 	$(call endrule,sourcelist_combine)
 
-$(TRACE_MARKER) : $(PROJECT_META) $(TRACE_SOURCE_LIST)
+$(TRACE_MARKER) : $(PROJECT_META_DEP) $(TRACE_SOURCE_LIST)
 	$(call startrule,tracecompile) \
 	( $(GNUCAT) $(TRACE_SOURCE_LIST); \
 	  echo -en "*ENDOFSOURCEFILES*\n" ) | \
-	$(JAVA_COMMAND) $(TRACE_COMPILER_START) $(if $(FLMDEBUG),-d,) --uid=$(UID_TC) --project=$(TRACE_PRJNAME) --mmp=$(PROJECT_META_FILENAME) --traces=$(TRACE_PATH) &&  \
+	$(JAVA_COMMAND) $(TRACE_COMPILER_START) $(if $(FLMDEBUG),-d,) --uid=$(UID_TC) --project=$(TRACE_PRJNAME) --mmp=$(PROJECT_META) --traces=$(TRACE_PATH) &&  \
 	$(GNUMD5SUM) $(TRACE_SOURCE_LIST).new > $$@ 2>/dev/null && \
 	{ $(GNUTOUCH) $(TRACE_DICTIONARY) $(AUTOGEN_HEADER); \
 	 $(GNUCAT) $(TRACE_SOURCE_LIST) ; true ; } \
@@ -207,9 +207,9 @@ $(TRACE_SOURCE_LIST):
 	  $(GNUCP) $$@.new $$@ \
 	$(call endrule,sourcelist_combine)
 
-$(TRACE_MARKER) : $(PROJECT_META) $(TRACE_SOURCE_LIST)
+$(TRACE_MARKER) : $(PROJECT_META_DEP) $(TRACE_SOURCE_LIST)
 	$(call startrule,tracecompile) \
-	( echo -en "$(OLDTC_TRACE_PRJNAME)\n$(PROJECT_META_FILENAME)\n"; \
+	( echo -en "$(OLDTC_TRACE_PRJNAME)\n$(PROJECT_META)\n"; \
 	  $(GNUCAT) $(TRACE_SOURCE_LIST); \
 	  echo -en "*ENDOFSOURCEFILES*\n" ) | \
 	$(JAVA_COMMAND) $(TRACE_COMPILER_START) $(UID_TC) &&  \

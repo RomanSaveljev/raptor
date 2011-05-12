@@ -85,7 +85,7 @@ endef
 
 # targets
 INCLUDESFILE:=$(ROOTRELEASEPATH)/includeheaders.txt
-MMPXMLFILE:=$(ROOTBLDPATH)/$(notdir $(PROJECT_META_FILENAME)).xml
+MMPXMLFILE:=$(ROOTBLDPATH)/$(notdir $(PROJECT_META)).xml
 SRCXMLFILES:=$(call mapsource2output,$(SOURCE),.xml)
 RFIFILES:=$(call mapresource2output,$(RESOURCEFILES),.rfi)
 DEPFILES:=$(call mapsource2output,$(SOURCE),.xml.d)
@@ -158,7 +158,7 @@ ifneq ($(PROCESSED_$(call sanitise,$(MMPXMLFILE))),1)
 	  @echo -e \
 	    "<?xml version=\"1.0\"?>\n" \
 	    "<mmpInfo>\n" \
-	    "\t<mmp path=\"$(PROJECT_META_FILENAME)\"/>\n" \
+	    "\t<mmp path=\"$(PROJECT_META)\"/>\n" \
 	    "\t<target name=\"$(TARGET).$(if $(REQUESTEDTARGETEXT),$(REQUESTEDTARGETEXT),$(TARGETTYPE))\" type=\"$(TARGETTYPE)\"$(if $(TARGETPATH), path=\"$(TARGETPATH)\",)/>\n" \
 	    "\t<cwd path=\"$(dir $(COMPONENT_META))\"/>\n" \
 	    "\t<abi type=\"ARM4\"/>\n" \

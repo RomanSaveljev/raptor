@@ -60,7 +60,7 @@ DEFINES:=$(call makemacrodef,$(OPT.DEFINE),$(CDEFS) $(BASE_MACRO) $(CFLAGS.ADD))
 
 #compile
 define msvctoolscompile
-  $(BUILDPATH)/$(basename $(notdir $(1))).obj: $(1) $(PROJECT_META) $(if $(HAVE_ORDERONLY),|,)  EXPORT
+  $(BUILDPATH)/$(basename $(notdir $(1))).obj: $(1) $(PROJECT_META_DEP) $(if $(HAVE_ORDERONLY),|,)  EXPORT
 	$(call startrule,msvctoolscompile,,$(1)) \
 	$(CC) \
 	$(if $(findstring staticlib,$(BASE_TYPE)),,$(CFLAGS.LIB)) \

@@ -266,7 +266,7 @@ ifeq ($(SUPPORTS_IMPORT_LIBRARY),1)
       ifneq ($(EXPORTUNFROZEN),)
         # EXPORTUNFROZEN amounts to doing the stage-two link with the makedef generated temporary .def file but creating a .lib
         # file as a side-effect of linking.  The import library is therefore dependent on the final binary in this instance.
-        $(info <warning project='$(PROJECT_META_FILENAME)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META_FILENAME) - unfrozen exports will be represented in import library.</warning> )
+        $(info <warning project='$(PROJECT_META)' component='$(COMPONENT_META)'>EXPORTUNFROZEN present in $(PROJECT_META_FILENAME) - unfrozen exports will be represented in import library.</warning> )
         $(IMPORTLIBTARGET): $(BINTARGET)
         $(eval TARGET_$(call sanitise,$(IMPORTLIBTARGET)):=1)
       else
@@ -332,7 +332,7 @@ ifneq ($(BASE_TYPE),importlib)
     endif
 
     define win32generateUIDcpp
-      $(GENSOURCE): $(PROJECT_META)
+      $(GENSOURCE): $(PROJECT_META_DEP)
 	    $(call startrule,win32generateUIDcpp,,) \
 	    echo "// SBS-generated uid source file" > $$@ && \
 	    echo "#include <e32cmn.h>" >> $$@ && \
@@ -384,7 +384,7 @@ ifneq ($(BASE_TYPE),importlib)
     $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
     $(eval TYPE:=$(if $(3),$(3),win32compile2object))
 
-    $(if $(2),$(2),$(call mapwin32file,$(1),.o)): $(1) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
+    $(if $(2),$(2),$(call mapwin32file,$(1),.o)): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
 	  $(call startrule,$(TYPE),,$(1)) \
 	  $(CC) \
 	  $(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \
@@ -455,7 +455,7 @@ ifneq ($(BASE_TYPE),importlib)
     $(eval DEPENDFILENAME:=$(call mapwin32file,$(1),.res.d))
     $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
-    $(call mapwin32file,$(1),.res): $(1) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+    $(call mapwin32file,$(1),.res): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	  $(call startrule,win32resourcecompile,,$(1)) \
 	  MWCIncludes='$(STDMWCINCLUDEPATHS)' $(RC) $(OPT.OUT)"$$@" "$(1)" \
 	  $(if $(NO_DEPEND_GENERATE),,&& \
