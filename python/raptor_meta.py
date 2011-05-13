@@ -2985,7 +2985,7 @@ class MetaReader(object):
 
 				var.AddOperation(raptor_data.Set("TEST_OPTION", component.bldinf.getRomTestType(bp)))
 				specNode.AddVariant(var)
-				
+
 				# add this bld.inf Specification to the build platform
 				platformNodes[i].AddChild(specNode)
 				# also attach it into the component
