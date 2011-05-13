@@ -42,7 +42,9 @@ def run():
 		]
 	t.addbuildtargets('smoke_suite/test_resources/simple_dll/bld.inf', [
 		"createstaticdll_dll/armv5/udeb/createstaticdll_udeb_feedback.fdb",
-		"createstaticdll_dll/armv5/urel/createstaticdll_urel_feedback.fdb"
+		"createstaticdll_dll/armv5/urel/createstaticdll_urel_feedback.fdb",
+		"createstaticdll_dll/armv5/udeb/CreateStaticDLL.o",
+		"createstaticdll_dll/armv5/urel/CreateStaticDLL.o"		
 		])
 	t.mustmatch_singleline = gen_fdb_match
 	t.mustnotmatch_singleline = use_fdb_match
@@ -50,11 +52,12 @@ def run():
 	
 	# Note: we neutralise the targets in the following in order to ensure
 	# that they aren't cleaned from the initial build
-	# Instead we confirm that the "right thing" happens in terms of tools
-	# calls based on the linker feedback files (a) being present, and used
-	# in compilation due to cleaned object files and (b) being present,
-	# but not being used in compilation as they haven't changed and the
-	# object files were left alone
+	# Instead we confirm that the "right thing" happens in these next builds
+	# in terms of tools calls based on the linker feedback files being present
+	# and:
+	# (a) newer than the object files (triggering re-compile and re-link)
+	# (b) older than the object files (nothing to be done)
+
 	t.name = "linkerfeedback_first_rebuild"
 	t.targets = []
 	t.mustmatch_singleline = gen_fdb_match + use_fdb_match
