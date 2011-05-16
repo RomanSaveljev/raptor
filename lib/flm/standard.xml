@@ -20,7 +20,6 @@
 		<param name='NOEXPORTLIBRARY' default=''/>
 		<param name='EXPORTLIBRARY' default=''/>
 		<param name='EXPORTUNFROZEN' default=''/>
-		<param name='FEEDBACK_OPTION' default='--feedback=' />
 		<param name='FIRSTLIB' default=''/>
 		<param name='INFLATECOMPRESSTARGET' default=''/>
 		<param name='LINKEROPTION_ARMCC' default=''/>
@@ -35,8 +34,6 @@
 		<param name='PAGEDDATA_OPTION' default='default'/>
 		<param name='PRODUCT_INCLUDE'/>
 		<param name='REQUESTEDTARGETEXT' default=''/>
-		<param name='GENERATELINKERFEEDBACK' default=''/>
-		<param name='LINKERFEEDBACK_STAGE2' default='' />
 		<param name='MULTIFILE_ENABLED' default=''/>
 		<param name='SYSTEMINCLUDE'/>
 		<param name='SECUREID' default=''/>
@@ -102,6 +99,7 @@
 		<param name='CIADEFS'/>
 		<param name='COMMANDFILE_OPTION'/>
 		<param name='COMPILE_ONLY_OPTION'/>
+		<param name='COMPILER_FEEDBACK_OPTION' default=''/>
 		<param name='COMPILER_FPU_DEFAULT'/>
 		<param name='COMPILER_FPU_OPTION'/>
 		<param name='COMPILER_NO_HIDE_ALL_OPTION'/>
@@ -149,12 +147,14 @@
 		<param name='LINKER_DEFAULT_LIB_PATHS'/>
 		<param name='LINKER_ENTRY_OPTION'/>
 		<param name='LINKER_ENTRYPOINT_PREFIX'/>
+		<param name='LINKER_FEEDBACK_OPTION' default=''/>
 		<param name='LINKER_GROUP_START_OPTION'/>
 		<param name='LINKER_GROUP_END_OPTION'/>
 		<param name='LINKER_MISC_FLAGS'/>		
 		<param name='LINKER_NODEBUG_OPTION'/>
 		<param name='LINKER_SYMBOLS_FILE_OPTION'/>
 		<param name='LINKER_SYMBOLS_OPTION'/>
+		<param name='LINKERFEEDBACK' default='' />
 		<param name='NEED_ENTRYPOINT_LIBRARY'/>
 		<param name='OUTPUT_OPTION' default='-o'/>
 		<param name='OUTPUTPATH'/>
@@ -199,7 +199,8 @@
 		<param name='STATIC_LIBS_PATH'/>
 		<param name='STATIC_LIBRARY_DIR'/>
 		<param name='STATIC_RUNTIME_DIR'/>
-		<param name='SUPPORTS_ABIV1_IMPLIBS'/>		
+		<param name='SUPPORTS_ABIV1_IMPLIBS'/>
+		<param name='SUPPORTS_LINKER_FEEDBACK'/>
 		<param name='SYMBIAN_CCFLAGS'/>
 		<param name='SYMBIAN_LD_MESSAGE_OPTION'/>
 		<param name='SYMBIAN_LINK_FLAGS'/>

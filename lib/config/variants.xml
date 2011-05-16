@@ -68,14 +68,11 @@
 	<var name="savespace">
 		<set name='SAVESPACE' value='TRUE'/>
 	</var>
-
-	<var name="generate_linkerfeedback">
-		<set name='GENERATELINKERFEEDBACK' value='TRUE'/>
-	</var>
-
-	<var name="use_linkerfeedback">
-		<set name='GENERATELINKERFEEDBACK' value='TRUE'/>
-		<set name='LINKERFEEDBACK_STAGE2' value='TRUE'/>
+	
+	<!-- This variant triggers linker feedback file generation, and its subsequent
+		 use in compilation, with toolchains that support the functionality -->
+	<var name="linkerfeedback">
+		<set name='LINKERFEEDBACK' value='TRUE'/>
 	</var>
 
 	<var name="profilerfeedback">
