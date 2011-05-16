@@ -32,6 +32,7 @@
 		<set name="CODE_SEGMENT_START" value=""/>
 		<set name="COMMANDFILE_OPTION" value="--via "/>
 		<set name="COMPILER_CIA_FLAGS" value=""/>
+		<set name='COMPILER_FEEDBACK_OPTION' value='--feedback=' />
 		<set name="COMPILER_FPU_OPTION" value="--fpu "/>
 		<set name="COMPILER_INTERWORK_DEFINES" value="__MARM_INTERWORK__"/>
 		<set name="COMPILER_NO_HIDE_ALL_OPTION" value="--no_hide_all"/>
@@ -66,6 +67,7 @@
 		<set name="LINKER_DEFAULT_LIBS" value=""/>
 		<set name="LINKER_DEFAULT_LIB_PATHS" value=""/>
 		<set name="LINKER_ENTRY_OPTION" value="--entry"/>
+		<set name='LINKER_FEEDBACK_OPTION' value='--remove --feedback=' />
 		<set name="LINKER_GROUP_END_OPTION" value=""/>
 		<set name="LINKER_GROUP_START_OPTION" value=""/>
 		<set name="LINKER_INLINE_OPTION" value="--inline"/>
@@ -91,6 +93,7 @@
 		<set name="STATIC_LIBS_PATH" value="$(RVCTLIB)/armlib"/>
 		<set name="STDCPP_INCLUDE" value="$(EPOCINCLUDE)/stdapis"/>
 		<set name="STDLIB_OPTION" value="--no_scanlib"/>
+		<set name="SUPPORTS_LINKER_FEEDBACK" value="1"/>		
 		<set name="SYMBIAN_LD_MESSAGE_OPTION" value="$(LD_WARNINGS_CONTROL_OPTION) $(LD_ERRORS_CONTROL_OPTION)"/>
 		<set name="SYMVER_OPTION" value="--symver_soname"/>
 		<set name="TARGET_RELOCATION_OPTION" value=""/>

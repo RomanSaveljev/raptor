@@ -23,6 +23,7 @@
 		<param name='GNUMAKE38'/>
 		<param name='GNUCP'/>
 		<param name='GNUCAT'/>
+		<param name='GNUDIFF'/>
 		<param name='GNUMKDIR'/>
 		<param name='GNUMV'/>
 		<param name='GNURM'/>

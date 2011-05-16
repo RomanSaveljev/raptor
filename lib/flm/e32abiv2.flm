@@ -116,6 +116,18 @@ ifeq ($(NEWLIB),)
   NEWLIB:=$(DEFAULT_NEWLIB)
 endif
 
+# Linker feedback requests have implications for both compile and link, but are
+# only available for specific toolchains
+# We respond accordingly based on flags set by variants and interfaces
+ifneq ($(LINKERFEEDBACK),)
+  ifneq ($(SUPPORTS_LINKER_FEEDBACK),)
+    DOLINKERFEEDBACK:=1
+    FEEDBACKFILENAME:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_feedback.fdb
+  endif
+else
+  DOLINKERFEEDBACK:=
+endif
+
 
 ##########################################################################
 ## OUTPUTS - externally relevant targets that this FLM generates
@@ -533,9 +545,6 @@ endif
 # list of all objects to be linked
 #
 VIAFILE:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_objects.via
-ifneq ($(GENERATELINKERFEEDBACK),)
-FEEDBACKFILE:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_feedback.fdb
-endif
 
 # The groupin10 macro allows us to construct a via file, 10 objects at a time
 # to avoid limits on argument lengths and sizes on Windows.
@@ -663,8 +672,17 @@ ifeq ($(e32postlink_mk),)
 endif
 
 define linktarget_func
+
+# Supporting info in the logs for linker feedback users
+$(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
+$(if $(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),,\
+  $(if $(DOLINKERFEEDBACK),
+    $(if $(FEEDBACKFILE),, \
+      $(info <info>Linker feedback file will be generated during the link of $(LINK_TARGET) - re-build to use in compilation</info>) \
+      )))
+
 ## The actual link target, dependencies and build step
-$(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS),$(LINKOBJECTS)) $(e32abiv2_LIBS) $(ADDITIONAL_LIBS) $(LINKER_ENTRYPOINT_LIBDEP) $(if $(SUPPORTS_STDCPP_NEWLIB),$(CHECKLIB)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) $(if $(HAVE_ORDERONLY),|,) $(EPOCROOT)/epoc32/build/TEM_LIB
+$(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS),$(LINKOBJECTS)) $(e32abiv2_LIBS) $(ADDITIONAL_LIBS) $(LINKER_ENTRYPOINT_LIBDEP) $(if $(SUPPORTS_STDCPP_NEWLIB),$(CHECKLIB)) $(if $(HAVE_ORDERONLY),|,) $(EPOCROOT)/epoc32/build/TEM_LIB
 	$(if $(MULTIFILE_ENABLED),,@echo -n "" > $(VIAFILE);
 	$(call groupin10,$(LINKOBJECTS)) ;)
 	$(call startrule,linkandpostlink) \
@@ -686,11 +704,12 @@ $(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTI
 	  $(LINKER_SYMBOLS_OPTION) $(LINKER_SYMBOLS_FILE_OPTION)=$(call dblquote,$(MAPFILE)) \
   	  $(LINKEROPTION) \
 	  $(if $(MULTIFILE_ENABLED),$(call dblquote,$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS)),$(COMMANDFILE_OPTION)$(call dblquote,$(VIAFILE))) \
-      $(if $(GENERATELINKERFEEDBACK),$(FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
+      $(if $(DOLINKERFEEDBACK),$(LINKER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILENAME)_temp)) \
 	  $(if $(LINKER_ADD_STATIC_RUNTIME),$(if $(STATIC_RUNTIME_LIB),$(LINKER_GROUP_START_OPTION) $(STATIC_RUNTIME_DIR)/$(STATIC_RUNTIME_LIB) $(LINKER_GROUP_END_OPTION),)) \
 	  $(call dblquote,$(e32abiv2_LIBS)) $(LINKER_DEFAULT_LIBS) && \
 	$(call e32postlink_$(BASE_ARCH)) \
-	  $(if $(SAVESPACE),$(if $(EXPORTUNFROZEN),,&& { $(GNURM) -rf $(INTERMEDIATEPATH); true; })) \
+	$(if $(DOLINKERFEEDBACK),&& $(call e32linkerfeedback_$(BASE_ARCH))) \
+	$(if $(SAVESPACE),$(if $(EXPORTUNFROZEN),,&& { $(GNURM) -rf $(INTERMEDIATEPATH); true; })) \
 	$(call endrule,linkandpostlink)
 
 $(MAPFILE): $(E32TARGET)
@@ -700,7 +719,7 @@ ifneq ($(DOPOSTLINK),)
 $(eval $(linktarget_func))
 endif # ifneq ($(DOPOSTLINK),)
 
-CLEANTARGETS:=$(CLEANTARGETS) $(VIAFILE) $(if $(GENERATELINKERFEEDBACK),$(FEEDBACKFILE)) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT))
+CLEANTARGETS:=$(CLEANTARGETS) $(VIAFILE) $(if $(DOLINKERFEEDBACK),$(FEEDBACKFILENAME)_temp $(FEEDBACKFILENAME)) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT))
 WHATRELEASE:=$(WHATRELEASE) $(MAPFILE)
 
 endif # if TARGETTYPE lib
@@ -799,7 +818,12 @@ $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 $(eval TYPE:=$(if $(5),$(5),compile))
 
-$(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(TRACE_THISCOMPONENT_ALLRULE) 
+# linker feedback files are referenced if the variant has requested it, the
+# toolchains supports it and a feedback file already  exists (from a prior
+# build)
+$(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
+
+$(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) | $(TRACE_THISCOMPONENT_ALLRULE)
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
@@ -817,7 +841,7 @@ $(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RE
 			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
-			$(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
+			$(if $(FEEDBACKFILE),$(COMPILER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
 			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $(MULTIFILEOBJECT) \
 			--via $$(call dblquote, $(MULTIFILE_VIAFILE)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,$(TYPE))
@@ -847,7 +871,7 @@ ifneq ($(TRANSFORM_CIA),1)
   $(if $(MULTIFILE_ENABLED),,$(foreach F,$(CIAFILES),$(eval $(call e32abiv2_compile,$(call mapcia2object,$(F)),$(F),$(CPP_LANG_OPTION) $(COMPILER_CIA_FLAGS) $(call makemacrodef,-D,$(CIADEFS))))))
 endif
 
-CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(MULTIFILEOBJECT),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS)) $(if $(GENERATELINKERFEEDBACK),$(FEEDBACKFILE))
+CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(MULTIFILEOBJECT),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS))
 
 
 ## Preprocess target ###################################################
