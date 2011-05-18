@@ -41,7 +41,9 @@ export13.rsc                                          z:/resource/app/export13.r
 :xexport export23                                                                            // %EPOCROOT%epoc32\include
 :xexport ./                                                                                  // %EPOCROOT%epoc32\include
 :xexport                                                                                     // n/a - an error
- 
+:xexport[match="match"] export26/                     export_test/                           // %EPOCROOT%epoc32\include\export_test 
+
+
 PRJ_TESTEXPORTS
 testexport1.h                                                                                // .\testexport1.h (as exports over itself!)
 testexport2.h                                         export_test_rel/testexport2.h          // .\export_test_rel\testexport2.h 
@@ -67,3 +69,4 @@ testexport13.rsc                                      z:/resource/app/testexport
 :xexport[] testexport22                                                                      // . (as exports over itself!)
 :xexport testexport23                                                                        // . (as exports over itself!)
 :xexport ./                                                                                  // . (as exports over itself!)
+:xexport[match="match"] testexport25/                 export_test_rel/                       // .\export_test_rel 

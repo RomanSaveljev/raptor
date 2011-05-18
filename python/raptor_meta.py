@@ -766,9 +766,11 @@ class Export(object):
 
 			dest_spec = dest_spec.replace(' ','%20')
 			aSubType=""
-			if self.__Action == "unzip":
-				aSubType=":zip"
+			if self.__Action in ["unzip", "xexport"]:
 				dest_spec = dest_spec.rstrip("\\/")
+				
+				if self.__Action == "unzip":
+					aSubType=":zip"
 
 			# Get the export destination(s) - note this can be a list of strings or just a string.
 			dest_list = raptor_utilities.resolveSymbianPath(str(aBldInfFile), dest_spec, aType, aSubType)

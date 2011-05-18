@@ -486,6 +486,13 @@ class TestRaptorMeta(unittest.TestCase):
 		# :xexport
 		self.assertEquals(len(logger.errors), 1)
 		self.assertTrue(logger.errors[0][0].startswith("must specify at least a source file for an export in"))
+
+		# :xexport[match="match"] export26/ export_test/
+		self.__testExport(exports[24], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export26', 
+						  '$(EPOCROOT)/epoc32/include/export_test', 
+						  'xexport',
+						  {'match':'match'})
 		
 		
 		testExports = bldInfObject.getTestExports(self.defaultPlatform)
@@ -656,6 +663,13 @@ class TestRaptorMeta(unittest.TestCase):
 						  bldInfMakefilePathTestRoot+'bld.infs', 
 						  bldInfMakefilePathTestRoot+'bld.infs', 
 						  'xexport')
+
+		# :xexport[match="match"] testexport25/	export_test_rel/
+		self.__testExport(testExports[24], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport25', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
+						  'xexport',
+						  {'match':'match'})
 
 
 	def __testExtension(self, aExtensionObject, aMakefile, aTestParameters):
