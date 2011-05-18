@@ -112,6 +112,7 @@ defaults = {
 		"ignoreOsDetection": False,
 		"toolcheck": "on",
 		"incremental_parsing": False,
+		"no_metadata_depend": False, 
 		"ignore_zero_flmcall_makefiles": False,
 		"filterList": "filterterminal,filterlogfile"
 		}
@@ -1038,6 +1039,10 @@ class Raptor(object):
 			self.Warn(" incremental parsing option must be either 'on' or 'off' (was {0})".format(type))
 			return False
 		return  True
+	
+	def SetNoMetadataDepend(self, TrueOrFalse):
+		self.no_metadata_depend = TrueOrFalse
+		return True
 
 	def AddProject(self, projectName):
 		self.projects.add(projectName.lower())

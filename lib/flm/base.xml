@@ -13,7 +13,8 @@
 		<param name='COMPONENT_META' default=''/>  <!-- bld.inf -->
 		<param name='COMPONENT_NAME' default=''/>  <!-- MP4 Player -->
 		<param name='COMPONENT_LAYER' default=''/> <!-- Multimedia -->
-		<param name='PROJECT_META' default=''/>     <!-- my.mmp  -->
+		<param name='PROJECT_META' default=''/>     <!-- my.mmp -->
+		<param name='PROJECT_META_DEP' default=''/> <!-- my.mmp as a dependency in Make rules -->
 		<param name='DATE' default=''/>
 		<param name='EPOCROOT'/>
 		<param name='SBS'/>
@@ -22,6 +23,7 @@
 		<param name='GNUMAKE38'/>
 		<param name='GNUCP'/>
 		<param name='GNUCAT'/>
+		<param name='GNUDIFF'/>
 		<param name='GNUMKDIR'/>
 		<param name='GNUMV'/>
 		<param name='GNURM'/>

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -131,6 +131,10 @@ parser.add_option("--no-depend-include",action="store_true",dest="noDependInclud
 
 parser.add_option("--no-depend-generate",action="store_true",dest="noDependGenerate",
 				help="Do not generate dependency files. This is only useful for extremely large non-incremental builds.  Implies --no-depend-include.")
+
+parser.add_option("--no-metadata-depend",action="store_true",dest="no_metadata_depend",default=False,
+				help="ADVANCED USERS ONLY: Assumes that MMP files are generated and removes the dependency between " 
+				"the MMP file's target and the MMP file itself from Raptor's Makefile.")
 				
 parser.add_option("-o","--orderlayers",action="store_true",dest="sys_def_order_layers",
 				help="Build layers in the System Definition XML file in the order listed or, if given, in the order of -l options.")
@@ -276,6 +280,7 @@ def DoRaptor(Raptor, args):
 				 'parallel_parsing' : Raptor.SetParallelParsing,
 				 'resource_rsg_casefolding' : Raptor.SetRsgCaseFolding,
 				 'incremental_parsing' : Raptor.SetIncrementalParsing,
+				 'no_metadata_depend' : Raptor.SetNoMetadataDepend,
 			 	 'version' : Raptor.PrintVersion
 				}
 

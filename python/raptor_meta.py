@@ -1270,6 +1270,14 @@ class MMPRaptorBackend(MMPBackend):
 		self.__Raptor = aRaptor
 		self.__debug("-----+++++ {0} ".format(aMmpfilename))
 		self.BuildVariant = raptor_data.Variant(name = "mmp")
+		
+		if self.__Raptor.no_metadata_depend:
+			self.__debug("No metadata depend requested. Setting PROJECT_META_DEP to blank.")
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_DEP", ""))
+		else:
+			self.__debug("Setting PROJECT_META_DEP to \"{0}\".".format(str(aMmpfilename)))
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_DEP", str(aMmpfilename)))
+		
 		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
 		self.ApplyVariants = []
 		self.ResourceVariants = []
@@ -3306,7 +3314,7 @@ class MetaReader(object):
 		"""
 		gnuList = []
 		makefileList = []
-
+		partialBuild = False
 
 		component = componentNode.component
 
@@ -3326,6 +3334,7 @@ class MetaReader(object):
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
 					self.__Raptor.Debug("Skipping {0}".format(str(mmpFileEntry.filename)))
+					partialBuild = True
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
@@ -3381,9 +3390,8 @@ class MetaReader(object):
 			mmpSpec = raptor_data.Specification(generic_path.Path(getSpecName(mmpFilename)))
 			var = backend.BuildVariant
 
-			# If it is a TESTMMPFILE section, the FLM needs to know about it
-			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in
-					["manual", "auto"]):
+			# If it is a TESTMMPFILE section, the FLM needs to know about it,
+			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in ["manual", "auto"]):
 
 				var.AddOperation(raptor_data.Set("TESTPATH",
 						mmpFileEntry.testoption.lower() + ".bat"))
@@ -3476,7 +3484,12 @@ class MetaReader(object):
 					bitmapSpec.SetInterface(buildPlatform['bitmap'])
 					bitmapSpec.AddVariant(bvar)
 					mmpSpec.AddChild(bitmapSpec)
-
+		# END iterating over mmps
+		if not partialBuild:
+			var = raptor_data.Variant()
+			var.AddOperation(raptor_data.Set("TESTBATCHFILES","1"))
+			componentNode.AddVariant(var)
+ 
 		# feature variation does not run extensions at all
 		# so return without considering .*MAKEFILE sections
 		if buildPlatform["ISFEATUREVARIANT"]:
