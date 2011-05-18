@@ -672,10 +672,10 @@ class TestRaptorMeta(unittest.TestCase):
 	
 		mmpContent = mmpFile.getContent(self.ARMV5)
 		mmpBackend = raptor_meta.MMPRaptorBackend(self.raptor, str(mmpFile.filename), str(bldInfObject.filename))
-		mmpParser = mmpparser.MMPParser(mmpBackend)
+		mmpParser = mmpparser.MMPParser()
 		parseresult = None
 		try:
-			parseresult = mmpParser.mmp.parseString(mmpContent)
+			parseresult = mmpParser.parse(mmpContent, mmpBackend)
 		except Exception,e:
 			pass
 			

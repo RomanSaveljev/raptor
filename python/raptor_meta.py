@@ -2873,13 +2873,21 @@ class MetaReader(object):
 		# finally we can process all the other parts of the bld.inf nodes.
 		# Keep a list of the projects we were asked to build so that we can
 		# tell at the end if there were any we didn't know about.
+		try:
+			parser = self.__Raptor.mmpparser # reuse one from a previous mmp
+		except AttributeError:
+			parser = MMPParser()
+			self.__Raptor.mmpparser = parser # keep for other bld.infs
+			
+			
+			
 		self.projectList = list(self.__Raptor.projects)
 		for i,p in enumerate(platformNodes):
 			buildPlatform = self.BuildPlatforms[i]
 			for s in p.GetChildSpecs():
 				try:
 					self.ProcessTEMs(s, buildPlatform)
-					self.ProcessMMPs(s, buildPlatform)
+					self.ProcessMMPs(s, parser, buildPlatform)
 
 				except MetaDataError, e:
 					self.__Raptor.Error(e.Text)
@@ -3307,7 +3315,7 @@ class MetaReader(object):
 			componentNode.AddChild(extensionSpec)
 
 
-	def ProcessMMPs(self, componentNode, buildPlatform):
+	def ProcessMMPs(self, componentNode, parser, buildPlatform):
 		"""Add project nodes for a given platform to a skeleton bld.inf node.
 
 		This happens after exports have been handled.
@@ -3360,11 +3368,13 @@ class MetaReader(object):
 			# Run the Parser
 			# The backend supplies the actions
 			content = mmpFile.getContent(buildPlatform)
+
+			# make the mediator object point to a different backend
 			backend = MMPRaptorBackend(self.__Raptor, str(mmpFilename), str(bldInfFile))
-			parser  = MMPParser(backend)
+			
 			parseresult = None
 			try:
-				parseresult = parser.mmp.parseString(content)
+				parseresult = parser.parse(content, backend)
 			except ParseException,e:
 				self.__Raptor.Debug(e) # basically ignore parse exceptions
 

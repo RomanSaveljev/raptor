@@ -1,0 +1,46 @@
+Raptor's MMP Parser
+--------------------
+
+Raptor parses project files that usually represent one epoc32 target
+such as an executable program (.exe file) or a Dynamic Link Library (.dll).
+
+The MMP files are preprocessed using their header file that lists the
+features for each device variant (the "variant HRH") such that they can
+be sensitive to features of a specific device.  i.e. one MMP may result
+in many targets - e.g. a different version of a DLL for each phone model.
+
+A library called pyparsing is used to create a parser object which
+preprocesses MMPs into an internal data structure called a "spec node"
+which will later become part of a call to a "Function-like Makefile".
+
+
+
+MMP PARSING IMPROVEMENTS
+-------------------------
+
+Parser Reuse
+-------------
+The parser object contains numerous regular expressions which match
+tokens in the MMP file and are used to construct its grammar.
+
+The parser object was, for a long time, recreated for use on each
+instance of the MMP due to a limitation in the design of the parser.
+This had a speed impact partly because of the need to recompile all the
+regular expressions.
+
+Thanks to the flexibility of Python a "Mediator" pattern was eventually
+adopted that overcome the problem and enabled one parser object to be
+used for the entire build, bringing a makefile generation time reduction
+of just under 15%.
+
+Results: Generating makefiles for 2500 short MMPs for armv5_udeb
+armv5_urel winscw_udeb winscw_urel  ("time sbs -b bld.inf -n")
+MMP Parser reuse   -	10m20.249s
+Non-reusable parser -	12m7.441s
+
+The Mediator is a kind of proxy so that we can redirect the output of
+the pyparsing parse object. This object can only be told where to 
+store its output when it is created and that means that it is normally
+a "single-use" object and a new one must be created for every parse.
+We can avoid the expense telling it to output to the Mediator
+which *does* have the ability to retarget output.
