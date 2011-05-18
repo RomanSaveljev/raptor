@@ -131,7 +131,6 @@ class FilterTerminal(filter_interface.Filter):
 		"win32archive" : "target",
 		"mifconvwrapper" : "mifconv",
 		"ar" : "target",	
-		"win32archive" : "target",	
 		"tools2lib" : "target",	
 		"qmake_extra_pre_targetdep": "qt-tools"
 	}

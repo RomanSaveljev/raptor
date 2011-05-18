@@ -136,6 +136,8 @@ void  sema_release(sbs_semaphore *s)
 	#else
 	   	sem_close(s->handle);
 	#endif
+	s->handle = NULL; /* prevent double release */
+
 	} else {
           error("sema: attempt to release an semaphore that wasn't 'held'");
 	}
