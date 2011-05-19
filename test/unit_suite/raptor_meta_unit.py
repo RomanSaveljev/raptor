@@ -27,6 +27,19 @@ import os
 import sys
 import re
 
+class BldInfLogger(object):
+	"mock logger to capture Error messages from the parser."
+	
+	def __init__(self):
+		self.errors = []
+		self.debugOutput = False
+		
+	def Error(self, format, *extras, **attributes):
+		self.errors.append( ((format % extras), attributes) )
+
+	def Debug(self, format, *extras, **attributes):
+		pass
+
 class TestRaptorMeta(unittest.TestCase):
 
 	def setUp(self):
@@ -268,10 +281,13 @@ class TestRaptorMeta(unittest.TestCase):
 		self.__testBldInfTestCode(bldInfTestRoot, 'test_mmps.inf',
 				[bldInfObject.testManual, bldInfObject.testAuto], [1, 1])
 	
-	def __testExport(self, aExportObject, aSource, aDestination, aAction):			
+	def __testExport(self, aExportObject, aSource, aDestination, aAction, aArguments=None):			
 		self.assertEquals(aExportObject.getSource(), aSource)
 		self.assertEqualsOrContainsPath(aExportObject.getDestination(), aDestination)
 		self.assertEquals(aExportObject.getAction(), aAction)
+		
+		if aArguments:
+			self.assertItemsEqual(aExportObject.getArguments(), aArguments)
 	
 	def assertEqualsOrContainsPath(self, aRequirement, aCandidate):
 		# If aRequirement is a list, which it might well be, we should
@@ -293,8 +309,10 @@ class TestRaptorMeta(unittest.TestCase):
 		bldInfMakefilePathTestRoot = str(self.__makefilePathTestRoot) + '/metadata/project/'
 		
 		depfiles = []
+		logger = BldInfLogger()
+		
 		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('exports.inf'), 
-											  self.__gnucpp, depfiles=depfiles, log=self.raptor)
+											  self.__gnucpp, depfiles=depfiles, log=logger)
 					
 		exports = bldInfObject.getExports(self.defaultPlatform)
 		
@@ -390,7 +408,93 @@ class TestRaptorMeta(unittest.TestCase):
 						  '$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/app/export13.rsc', 
 						  'copy')
 		
+		# Extended exports - directory based source and destination
+		# :xexport[match="match"] export14
+		self.__testExport(exports[13], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export14', 
+						  '$(EPOCROOT)/epoc32/include', 
+						  'xexport',
+						   {'match':'match'})
 
+		# :xexport[match="match"] export15 export_test
+		self.__testExport(exports[14], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export15', 
+						  '$(EPOCROOT)/epoc32/include/export_test', 
+						  'xexport',
+						  {'match':'match'})
+		
+		# :xexport[match="match"] export16 ..\export_test
+		self.__testExport(exports[15], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export16', 
+						  '$(EPOCROOT)/epoc32/export_test', 
+						  'xexport',
+						  {'match':'match'})
+		
+		# :xexport[match="match"] export17 \export_test_abs
+		self.__testExport(exports[16], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export17', 
+						  self.__OSRoot+'/export_test_abs', 
+						  'xexport',
+						  {'match':'match'})
+
+		# :xexport[recursive=true] export18 \epoc32\export_test_abs
+		self.__testExport(exports[17], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export18', 
+						  '$(EPOCROOT)/epoc32/export_test_abs', 
+						  'xexport',
+						  {'recursive':'true'})
+		
+		# :xexport[recursive=true] export19 |..\export_test_rel
+		self.__testExport(exports[18], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export19', 
+						  bldInfMakefilePathTestRoot+'export_test_rel', 
+						  'xexport',
+						  {'recursive':'true'})
+		
+		# :xexport[match="match" recursive=true] export20 |\export_test_rel
+		self.__testExport(exports[19], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export20', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel',
+						  'xexport',
+						  {'match':'match', 'recursive':'true'})
+		
+		# :xexport[recursive=true match="match"] export21 |export_test_rel
+		self.__testExport(exports[20], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export21', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
+						  'xexport',
+						  {'match':'match', 'recursive':'true'})
+
+		# :xexport[] export22
+		self.__testExport(exports[21], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export22', 
+						  '$(EPOCROOT)/epoc32/include', 
+						  'xexport')
+
+		# :xexport export23
+		self.__testExport(exports[22], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export23', 
+						  '$(EPOCROOT)/epoc32/include', 
+						  'xexport')
+
+		# :xexport ./
+		self.__testExport(exports[23], 
+						  bldInfMakefilePathTestRoot+'bld.infs', 
+						  '$(EPOCROOT)/epoc32/include', 
+						  'xexport')
+
+		# :xexport
+		self.assertEquals(len(logger.errors), 1)
+		self.assertTrue(logger.errors[0][0].startswith("must specify at least a source file for an export in"))
+
+		# :xexport[match="match"] export26/ export_test/
+		self.__testExport(exports[24], 
+						  bldInfMakefilePathTestRoot+'bld.infs/export26', 
+						  '$(EPOCROOT)/epoc32/include/export_test', 
+						  'xexport',
+						  {'match':'match'})
+		
+		
 		testExports = bldInfObject.getTestExports(self.defaultPlatform)
 		
 		# testexport1.h
@@ -484,6 +588,88 @@ class TestRaptorMeta(unittest.TestCase):
 						  bldInfMakefilePathTestRoot+'bld.infs/testexport13.rsc', 
 						  '$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/app/testexport13.rsc', 
 						  'copy')
+
+		# Extended exports - directory based source and destination
+		# :xexport[match="match"] testexport14
+		self.__testExport(testExports[13], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport14', 
+						  bldInfMakefilePathTestRoot+'bld.infs', 
+						  'xexport',
+						  {'match':'match'})
+
+		# :xexport[match="match"] testexport15	export_test_rel
+		self.__testExport(testExports[14], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport15', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
+						  'xexport',
+						  {'match':'match'})
+		
+		# :xexport[match="match"] testexport16	../export_test_rel
+		self.__testExport(testExports[15], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport16', 
+						  bldInfMakefilePathTestRoot+'export_test_rel', 
+						  'xexport',
+						  {'match':'match'})
+		
+		# :xexport[match="match"] testexport17	/export_test_abs
+		self.__testExport(testExports[16], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport17', 
+						  self.__OSRoot+'/export_test_abs',
+						  'xexport',
+						  {'match':'match'})
+
+		# :xexport[recursive=true] testexport18	/epoc32/export_test_abs
+		self.__testExport(testExports[17], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport18', 
+						  '$(EPOCROOT)/epoc32/export_test_abs', 
+						  'xexport',
+						  {'recursive':'true'})
+		
+		# :xexport[recursive=true] testexport19	|../export_test_rel
+		self.__testExport(testExports[18], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport19', 
+						  bldInfMakefilePathTestRoot+'export_test_rel', 
+						  'xexport',
+						  {'recursive':'true'})
+		
+		# :xexport[match="match" recursive=true] testexport20	|/export_test_rel
+		self.__testExport(testExports[19], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport20', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel',
+						  'xexport',
+						  {'match':'match', 'recursive':'true'})
+		
+		# :xexport[recursive=true match="match"] testexport21	|export_test_rel
+		self.__testExport(testExports[20], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport21', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
+						  'xexport',
+						  {'match':'match', 'recursive':'true'})
+
+		# :xexport[] testexport22
+		self.__testExport(testExports[21], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport22', 
+						  bldInfMakefilePathTestRoot+'bld.infs', 
+						  'xexport')
+
+		# :xexport testexport23
+		self.__testExport(testExports[22], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport23', 
+						  bldInfMakefilePathTestRoot+'bld.infs', 
+						  'xexport')
+
+		# :xexport ./
+		self.__testExport(testExports[23], 
+						  bldInfMakefilePathTestRoot+'bld.infs', 
+						  bldInfMakefilePathTestRoot+'bld.infs', 
+						  'xexport')
+
+		# :xexport[match="match"] testexport25/	export_test_rel/
+		self.__testExport(testExports[24], 
+						  bldInfMakefilePathTestRoot+'bld.infs/testexport25', 
+						  bldInfMakefilePathTestRoot+'bld.infs/export_test_rel', 
+						  'xexport',
+						  {'match':'match'})
 
 
 	def __testExtension(self, aExtensionObject, aMakefile, aTestParameters):
@@ -593,21 +779,8 @@ class TestRaptorMeta(unittest.TestCase):
 	def testBadBldInfs(self):
 		bldInfTestRoot = self.__testRoot.Append('metadata/project/bld.infs')
 		depfiles=[]
-		
-		class BadBldInfLogger(object):
-			"mock logger to capture Error messages from the parser."
-			
-			def __init__(self):
-				self.errors = []
-				self.debugOutput = False
 				
-			def Error(self, format, *extras, **attributes):
-				self.errors.append( ((format % extras), attributes) )
-		
-			def Debug(self, format, *extras, **attributes):
-				pass
-				
-		logger = BadBldInfLogger()
+		logger = BldInfLogger()
 		
 		# this bld.inf has END lines with no matching START
 		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('bad_lone_end.inf'),
