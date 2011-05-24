@@ -16,6 +16,7 @@
 		<set name="LD" value="$(GCCELD)"/>
 		<set name="ASM" value="$(GCCECC)"/>
 		<set name="AR" value="$(GCCEAR)"/>
+		<set name="CC_VIA_FILE_OPTION" value="@"/>
 
 		<set name="AAPCS_OPTION" value="-mapcs -mthumb-interwork"/>
 		<set name="ARCHIVER_CREATE_OPTION" value="cr"/>

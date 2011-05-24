@@ -79,6 +79,7 @@
 		<param name='TOOLCHAIN' default=''/>
 		<param name='TRACES' default=''/>
 		<param name='USE_RVCT22_DELETE_WORKAROUND' default=''/>
+		<param name='CC_VIA_FILE_OPTION' default='--via='/>
 	</interface>
 	<interface name="Symbian.e32abiv2" extends="Symbian.mmp" flm="e32abiv2.flm">
 		<param name='BASE_ARCH' default=''/>

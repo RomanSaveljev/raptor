@@ -22,8 +22,9 @@ CHAR_COMMA:=,
 CHAR_SEMIC:=;
 CHAR_COLON:=:
 CHAR_BLANK:=
-#the BLANK BLANK trick saves us from clever text editrors that remove spaces at the end of a line
+#the BLANK BLANK trick saves us from clever text editors that remove spaces at the end of a line
 CHAR_SPACE:=$(BLANK) $(BLANK)
+CHAR_TAB:=$(BLANK)	$(BLANK)
 CHAR_DQUOTE:="
 CHAR_QUOTE:='
 CHAR_LBRACKET:=(
