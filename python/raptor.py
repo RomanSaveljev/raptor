@@ -112,6 +112,7 @@ defaults = {
 		"ignoreOsDetection": False,
 		"toolcheck": "on",
 		"incremental_parsing": False,
+		"no_metadata_depend": False, 
 		"ignore_zero_flmcall_makefiles": False,
 		"filterList": "filterterminal,filterlogfile"
 		}
@@ -561,8 +562,8 @@ class Layer(ModelNode):
 				sys_def_writer.Write(pp_system_definition)
 				build.Debug("Wrote intermediate parallel-parsing system definition file " + pp_system_definition)
 			except Exception as e:
-				build.Error("Failed to write intermediate parallel-parsing system definition file " + pp_system_definition)
-				raise
+				build.Error("Failed to write intermediate parallel-parsing system definition file: {0} {1}".format(pp_system_definition,str(e)))
+				raise e
 
 
 			configList = " ".join([c.name for c in self.configs if c.name != "build" ])
@@ -1038,6 +1039,10 @@ class Raptor(object):
 			self.Warn(" incremental parsing option must be either 'on' or 'off' (was {0})".format(type))
 			return False
 		return  True
+	
+	def SetNoMetadataDepend(self, TrueOrFalse):
+		self.no_metadata_depend = TrueOrFalse
+		return True
 
 	def AddProject(self, projectName):
 		self.projects.add(projectName.lower())

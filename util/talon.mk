@@ -1,4 +1,4 @@
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -46,7 +46,7 @@ SOURCEDIR:=$(subst \,/,$(SBS_HOME))/util/talon
 MANIFEST:=$(SOURCEDIR)/manifest
 
 TARGET:=talon
-SOURCES:=$(addprefix $(SOURCEDIR)/,talon.c buffer.c sema.c log.c $(PROCESS_C) $(CHOMP_C)) 
+SOURCES:=$(addprefix $(SOURCEDIR)/,talon.c buffer.c sema.c log.c env.c $(PROCESS_C) $(CHOMP_C)) 
 $(eval $(cprogram))
 
 TARGET:=talonctl

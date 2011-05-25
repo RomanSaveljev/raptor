@@ -23,6 +23,8 @@ import shutil
 import stat
 import hashlib
 import base64
+import fnmatch
+import shlex
 
 import raptor
 import raptor_data
@@ -638,7 +640,7 @@ class Export(object):
 
 	def __init__(self, aBldInfFile, aExportsLine, aType):
 		"""
-		Rules from the OS library for convenience:
+		Updated rules from the OS library for convenience:
 
 		For PRJ_TESTEXPORTS
 		source_file_1 [destination_file]
@@ -654,6 +656,7 @@ class Export(object):
 		source_file_1 [destination_file]
 		source_file_n [destination_file]
 		:zip zip_file [destination_path]
+		:xexport[arguments] source_dir [destination_dir]
 
 		Note that:
 		If a source file is listed with a relative path, the path will be
@@ -677,22 +680,52 @@ class Export(object):
 		destination path is not specified, the source file will be unzipped in
 		the root directory.
 
-
 		"""
 
-		# Work out what action is required - unzip or copy?
-		action = "copy"
-		typematch = re.match(r'^\s*(?P<type>:zip\s+)?(?P<spec>[^\s].*[^\s])\s*$',aExportsLine, re.I)
+		# Export lines have the general format of:
+		#
+		# :prefix[arguments] source destination
+		#
+		# The only mandatory element is a source value - all other
+		# elements are optional.
+		#
+		# Our regular expression needs to deal with all potential cases, and
+		# we test and use named groups based on what's present.
+		# The "spec" group covers both source and destination (if both are
+		# specified).
+		
+		export_match = re.match("^\s*(:(?P<prefix>\w+)(\[(?P<arguments>.*)\])?\s*)?(?P<spec>.*?)\s*$", aExportsLine)
+		
+		# Deduce the action and any arguments to modify the action
+		# The default action is a normal copy with no arguments, unless we
+		# explicitly find otherwise
+		self.__Action = "copy"
+		self.__Arguments = {}		
 
-		spec = typematch.group('spec')
-		if spec == None:
-			raise ValueError('must specify at least a source file for an export')
+		prefix = export_match.group('prefix')
+		if prefix:
+			# validate based on prefixes we understand
+			if prefix not in ['zip', 'xexport']:
+				raise ValueError('export prefix \':{0}\' not recognised in {1}'.format(prefix, aBldInfFile))
 
-		if typematch.group('type') is not None:
-			action = "unzip"
-
+			self.__Action = 'unzip' if prefix == 'zip' else prefix
+				
+			args = export_match.group('arguments')
+			if args:
+				# split arguments as "'option'='value'", where values surrounded
+				# in quotes are grouped as literals, protecting the content.
+				# form a dictionary of the results keyed on option; right-most
+				# values found always take precedence where multiples of the
+				# same option are present
+				args_list = [arg.partition("=") for arg in shlex.split(args)]
+				self.__Arguments.update([(option, value) for (option, separator, value) in args_list])
+				
 		# Split the spec into source and destination but take care
 		# to allow filenames with quoted strings.
+		spec = export_match.group('spec')
+		if not spec:
+			raise ValueError('must specify at least a source file for an export in {0}'.format(aBldInfFile))
+
 		exportEntries = Export.getPossiblyQuotedStrings(spec)
 
 		# Get the source path as specified by the bld.inf
@@ -729,13 +762,15 @@ class Export(object):
 		if dest_spec:
 			# check for troublesome characters
 			if ':' in dest_spec and not re.search('^[a-z]:', dest_spec, re.I):
-				raise ValueError("invalid filename " + dest_spec)
+				raise ValueError("invalid filename {0} in {1}".format(dest_spec, aBldInfFile))
 
 			dest_spec = dest_spec.replace(' ','%20')
 			aSubType=""
-			if action == "unzip":
-				aSubType=":zip"
+			if self.__Action in ["unzip", "xexport"]:
 				dest_spec = dest_spec.rstrip("\\/")
+				
+				if self.__Action == "unzip":
+					aSubType=":zip"
 
 			# Get the export destination(s) - note this can be a list of strings or just a string.
 			dest_list = raptor_utilities.resolveSymbianPath(str(aBldInfFile), dest_spec, aType, aSubType)
@@ -759,18 +794,22 @@ class Export(object):
 			dest_filename=generic_path.Path(source).File()
 
 			if aType == "PRJ_EXPORTS":
-				if action == "copy":
+				if self.__Action == "copy":
 					destination = '$(EPOCROOT)/epoc32/include/'+dest_filename
-				elif action == "unzip":
+				elif self.__Action == "xexport":
+					destination = '$(EPOCROOT)/epoc32/include'
+				elif self.__Action == "unzip":
 					destination = '$(EPOCROOT)'
 			elif aType == "PRJ_TESTEXPORTS":
 				d = aBldInfFile.Dir()
-				if action == "copy":
+				if self.__Action  == "copy":
 					destination = str(d.Append(dest_filename))
-				elif action == "unzip":
+				elif self.__Action == "xexport":
+					destination = str(d)
+				elif self.__Action == "unzip":
 					destination = "$(EPOCROOT)"
 			else:
-				raise ValueError("Export type should be 'PRJ_EXPORTS' or 'PRJ_TESTEXPORTS'. It was: "+str(aType))
+				raise ValueError("Export type should be 'PRJ_EXPORTS' or 'PRJ_TESTEXPORTS'. It was \'{0}\' in \'{1}\'".format(str(aType), aBldInfFile))
 
 
 		self.__Source = source
@@ -778,7 +817,6 @@ class Export(object):
 			self.__Destination = dest_list
 		else: # Otherwise the list has length zero, so there is only a single export destination.
 			self.__Destination = destination
-		self.__Action = action
 
 	def getSource(self):
 		return self.__Source
@@ -788,6 +826,9 @@ class Export(object):
 
 	def getAction(self):
 		return self.__Action
+
+	def getArguments(self):
+		return self.__Arguments
 
 class ExtensionmakefileEntry(object):
 	def __init__(self, aGnuLine, aBldInfFile, tmp):
@@ -1270,6 +1311,14 @@ class MMPRaptorBackend(MMPBackend):
 		self.__Raptor = aRaptor
 		self.__debug("-----+++++ {0} ".format(aMmpfilename))
 		self.BuildVariant = raptor_data.Variant(name = "mmp")
+		
+		if self.__Raptor.no_metadata_depend:
+			self.__debug("No metadata depend requested. Setting PROJECT_META_DEP to blank.")
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_DEP", ""))
+		else:
+			self.__debug("Setting PROJECT_META_DEP to \"{0}\".".format(str(aMmpfilename)))
+			self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META_DEP", str(aMmpfilename)))
+		
 		self.BuildVariant.AddOperation(raptor_data.Set("PROJECT_META", str(aMmpfilename)))
 		self.ApplyVariants = []
 		self.ResourceVariants = []
@@ -2865,13 +2914,21 @@ class MetaReader(object):
 		# finally we can process all the other parts of the bld.inf nodes.
 		# Keep a list of the projects we were asked to build so that we can
 		# tell at the end if there were any we didn't know about.
+		try:
+			parser = self.__Raptor.mmpparser # reuse one from a previous mmp
+		except AttributeError:
+			parser = MMPParser()
+			self.__Raptor.mmpparser = parser # keep for other bld.infs
+			
+			
+			
 		self.projectList = list(self.__Raptor.projects)
 		for i,p in enumerate(platformNodes):
 			buildPlatform = self.BuildPlatforms[i]
 			for s in p.GetChildSpecs():
 				try:
 					self.ProcessTEMs(s, buildPlatform)
-					self.ProcessMMPs(s, buildPlatform)
+					self.ProcessMMPs(s, parser, buildPlatform)
 
 				except MetaDataError, e:
 					self.__Raptor.Error(e.Text)
@@ -3001,7 +3058,7 @@ class MetaReader(object):
 							(len(exports), str(componentNode.component.bldinf.filename)))
 		if exports:
 
-			# each export is either a 'copy' or 'unzip'
+			# each export is either a 'copy', 'unzip' or an extended format 'xexport'
 			# maybe we should trap multiple exports to the same location here?
 			epocroot = str(exportPlatform["EPOCROOT"])
 			bldinf_filename = str(componentNode.component.bldinf.filename)
@@ -3026,7 +3083,7 @@ class MetaReader(object):
 						if export.getAction() == "copy":
 							# export the file
 							exportwhatlog += self.CopyExport(fromFile, toFile, bldinf_filename)
-						else:
+						elif export.getAction() == "unzip":
 							members = self.UnzipExport(fromFile, toFile,
 									str(exportPlatform['SBS_BUILD_DIR']),
 									bldinf_filename)
@@ -3035,6 +3092,13 @@ class MetaReader(object):
 							if members != None:
 								exportwhatlog += members
 							exportwhatlog += "</archive>\n"
+						elif export.getAction() == "xexport":
+							exportwhatlog += self.ExtendedExport(fromFile, toFile, bldinf_filename, export.getArguments())
+						else:
+							# we should never get here with an action, as export actions are
+							# validated earlier
+							assert export.getAction() == ""
+							
 					except MetaDataError, e:
 						if self.__Raptor.keepGoing:
 							self.__Raptor.Error("{0}".format(e.Text), bldinf=bldinf_filename)
@@ -3213,7 +3277,62 @@ class MetaReader(object):
 
 		self.__Raptor.Info("Unzipped {0} files from {1} to {2}".format(filecount, source, destination))
 		return exportwhatlog
-
+	
+	def ExtendedExport(self, from_dir, to_dir, bld_inf, args={}):
+		"""Work out the individual files that exist to be be copied as the
+		result of any PRJ_[TEST]EXPORTS :xexport entries.  Resolve whole
+		directory content (optionally recursive) applying wildcard filename
+		matches (if required) and then call the basic copy command on the
+		concrete source files found and the destination files calculated."""
+		
+		self.__Raptor.Info("Extended export: {0}, {1}, {2}".format(args, from_dir, to_dir), bldinf=bld_inf) 
+		
+		# examine arguments, overriding defaults (where applicable)
+		pattern_match = "*"
+		recursive = False
+		
+		for option in args.keys():
+			if option not in ['match', 'recursive']:
+				self.__Raptor.Warn("Unrecognised \':xexport\' argument \'{0}={1}\' ignored".format(option, args[option]), bldinf=bld_inf)
+		
+		if 'recursive' in args:
+			recursive = True if args['recursive'].lower() == 'true' else False
+		
+		if 'match' in args:
+			pattern_match = args['match']
+		
+		found_files = []
+		from_dir_str = str(from_dir)
+		if recursive:
+			# for recursive searches we walk the tree, applying the wildcard
+			# (default or explicitly listed) to the files returned to us.
+			# note that symlink processing is off by default, and we don't
+			# change that
+			for root, dirs, files in os.walk(from_dir_str):
+				found_files.extend(map(lambda file: generic_path.Path(root, file), fnmatch.filter(files, pattern_match)))
+		else:
+			# for non-recursive searches we just list the source directory
+			# specified and apply the match (default or explicit).
+			# due to the way that listdir works, we then discard directories
+			# that additionally appear in the list of found items
+			found_items = map(lambda item: from_dir.Append(item), fnmatch.filter(os.listdir(from_dir_str), pattern_match))
+			found_files = filter(lambda item: item.isFile(), found_items)
+		
+		# determine destination files by taking the files found, stripping their
+		# common source "root" and appending the off-set we're left with to the
+		# destination location.
+		# we then have absolutely pathed source/destination pairs, and we
+		# perform a copy for each pair using the normal exporting method
+		# (accumulating the whatlog output as we go and eventually returning it
+		# in one lump). 
+		whatlog_strings = []
+		for source_file in found_files:
+			source_file_str = str(source_file)
+			destination_file = to_dir.Append(source_file_str[len(from_dir_str)+1:])
+			whatlog_strings.append(self.CopyExport(source_file, destination_file, bld_inf))
+										
+		return ''.join(whatlog_strings)
+	
 	def ProcessTEMs(self, componentNode, buildPlatform):
 		"""Add Template Extension Makefile nodes for a given platform
 		   to a skeleton bld.inf node.
@@ -3299,14 +3418,14 @@ class MetaReader(object):
 			componentNode.AddChild(extensionSpec)
 
 
-	def ProcessMMPs(self, componentNode, buildPlatform):
+	def ProcessMMPs(self, componentNode, parser, buildPlatform):
 		"""Add project nodes for a given platform to a skeleton bld.inf node.
 
 		This happens after exports have been handled.
 		"""
 		gnuList = []
 		makefileList = []
-
+		partialBuild = False
 
 		component = componentNode.component
 
@@ -3326,6 +3445,7 @@ class MetaReader(object):
 			if self.__Raptor.projects:
 				if not projectname in self.__Raptor.projects:
 					self.__Raptor.Debug("Skipping {0}".format(str(mmpFileEntry.filename)))
+					partialBuild = True
 					continue
 				elif projectname in self.projectList:
 					self.projectList.remove(projectname)
@@ -3351,11 +3471,13 @@ class MetaReader(object):
 			# Run the Parser
 			# The backend supplies the actions
 			content = mmpFile.getContent(buildPlatform)
+
+			# make the mediator object point to a different backend
 			backend = MMPRaptorBackend(self.__Raptor, str(mmpFilename), str(bldInfFile))
-			parser  = MMPParser(backend)
+			
 			parseresult = None
 			try:
-				parseresult = parser.mmp.parseString(content)
+				parseresult = parser.parse(content, backend)
 			except ParseException,e:
 				self.__Raptor.Debug(e) # basically ignore parse exceptions
 
@@ -3381,9 +3503,8 @@ class MetaReader(object):
 			mmpSpec = raptor_data.Specification(generic_path.Path(getSpecName(mmpFilename)))
 			var = backend.BuildVariant
 
-			# If it is a TESTMMPFILE section, the FLM needs to know about it
-			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in
-					["manual", "auto"]):
+			# If it is a TESTMMPFILE section, the FLM needs to know about it,
+			if buildPlatform["TESTCODE"] and (mmpFileEntry.testoption in ["manual", "auto"]):
 
 				var.AddOperation(raptor_data.Set("TESTPATH",
 						mmpFileEntry.testoption.lower() + ".bat"))
@@ -3476,7 +3597,12 @@ class MetaReader(object):
 					bitmapSpec.SetInterface(buildPlatform['bitmap'])
 					bitmapSpec.AddVariant(bvar)
 					mmpSpec.AddChild(bitmapSpec)
-
+		# END iterating over mmps
+		if not partialBuild:
+			var = raptor_data.Variant()
+			var.AddOperation(raptor_data.Set("TESTBATCHFILES","1"))
+			componentNode.AddVariant(var)
+ 
 		# feature variation does not run extensions at all
 		# so return without considering .*MAKEFILE sections
 		if buildPlatform["ISFEATUREVARIANT"]:

@@ -75,13 +75,6 @@ ifeq ($(ROMFILE_$(call sanitise,$(TOBLDINF)$(TARGET).$(REQUESTEDTARGETEXT))),)
     ifneq ($(EPOCFIXEDPROCESS),)
         ROMDECORATIONS:=$(ROMDECORATIONS) fixed
     endif
-    ifeq ($(PAGED),1)
-        ROMDECORATIONS:=$(ROMDECORATIONS) paged
-    endif
-    ifeq ($(PAGED),0)
-        ROMDECORATIONS:=$(ROMDECORATIONS) unpaged
-    endif
-
 
     DATATEXT:=
     ifeq ($(TESTCODE),TRUE)

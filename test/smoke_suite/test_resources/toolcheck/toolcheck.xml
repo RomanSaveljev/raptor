@@ -11,5 +11,6 @@
   <env name='TOOLCHECK4' default='$(SBS_GNUCPP)' type='tool' versionCommand='$(GNUCPP) --version' versionResult='something you would never see'/>
   <env name='TOOLCHECK5' default='$(SBS_PYTHON)' type='tool' versionCommand='$(PYTHON) -V' versionResult='something you would never see'/>
   <env name='TOOLCHECK6' default='$(SBS_HOME)/test/smoke_suite/test_resources/toolcheck/toolcheck6.py' type='tool' versionCommand='$(PYTHON) $(TOOLCHECK6)' versionResult='something toolcheck6 would print out to match tool check result'/>
+  <env name='TOOLCHECK7' default='$(SBS_GNUSED)' type='tool' versionCommand='echo LANG=$LANG' versionResult='LANG=C'/>
  </var>  
 </build>

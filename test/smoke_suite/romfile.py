@@ -15,10 +15,10 @@
 #
 
 
-from raptor_tests import SmokeTest
+from raptor_tests import AntiTargetSmokeTest 
 
 def run():
-	t = SmokeTest()
+	t = AntiTargetSmokeTest()
 	t.description = """
 		Tests the creation and content of .iby romfiles generated for the armv5.test
 		configuration. Also tests for creation of relevant test batch files.
@@ -43,7 +43,6 @@ def run():
 	t.warnings = 0 if t.onWindows else 2
 	t.run()
 	
-	
 	t.name = "romfile_content_exsymbian"	
 	t.command = "cat $(EPOCROOT)/epoc32/rom/src/ongoing/group/romfile/armv5test.iby"
 	t.mustmatch = [
@@ -60,8 +59,8 @@ def run():
 		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_localtime\.exe\s+sys/bin/t_localtime\.exe\n.*",
 
 		# Some files where the MMP file has the PAGED or UNPAGED keywords.
-		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe paged\n.*",
-		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_fsys\.exe\s+sys/bin/t_fsys\.exe unpaged\n.*",
+		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe\n.*",
+		r".*\nfile=/epoc32/release/##MAIN##/##BUILD##/t_fsys\.exe\s+sys/bin/t_fsys\.exe\n.*",
 
 		# Some files where the MMP file has the ROMTARGET or RAMTARGET keywords.
 		r".*\ndata=/epoc32/release/##MAIN##/##BUILD##/t_prel\.dll\s+/sys/bin/t_prel\.dll attrib=r\n.*",
@@ -106,8 +105,8 @@ def run():
 		r".*\nfile=ABI_DIR/BUILD_DIR/t_localtime\.exe\s+sys/bin/t_localtime\.exe\n.*",
 
 		# Some files where the MMP file has the PAGED or UNPAGED keywords.
-		r".*\nfile=ABI_DIR/BUILD_DIR/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe paged\n.*",
-		r".*\nfile=ABI_DIR/BUILD_DIR/t_fsys\.exe\s+sys/bin/t_fsys\.exe unpaged\n.*",
+		r".*\nfile=ABI_DIR/BUILD_DIR/t_pagestress\.exe\s+sys/bin/t_pagestress\.exe\n.*",
+		r".*\nfile=ABI_DIR/BUILD_DIR/t_fsys\.exe\s+sys/bin/t_fsys\.exe\n.*",
 
 		# Some files where the MMP file has the ROMTARGET or RAMTARGET keywords.
 		r".*\ndata=ABI_DIR/BUILD_DIR/t_prel\.dll\s+/sys/bin/t_prel\.dll attrib=r\n.*",
@@ -180,7 +179,6 @@ def run():
 	t.warnings = 0
 	t.run()
 
-
 	t.name = "romfile_mmp_include_twice_content_nokia"	
 	t.command = "cat $(EPOCROOT)/epoc32/rom/src/e32test/group/armv5testn.iby"	
 	t.targets = []
@@ -197,6 +195,17 @@ def run():
 	t.warnings = 0
 	t.run()
 
+	# Check armv5.auto.bat doesn't get generated with -p option 
+	t.name = "romfile_partial"	
+	t.command = "sbs -b $(EPOCROOT)/src/ongoing/group/romfile/other_name.inf " \
+			+ "-c armv5.test ROMFILE -p t_rcache.mmp" 
+	t.antitargets = [
+		"$(EPOCROOT)/epoc32/data/z/test/src_ongoing_romfile/armv5.auto.bat"
+		]
+	t.mustmatch = []
+	t.mustnotmatch = []
+	t.warnings = 0 if t.onWindows else 2
+	t.run()	
 
 	t.name = "romfile"
 	t.print_result()

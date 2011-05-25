@@ -116,6 +116,18 @@ ifeq ($(NEWLIB),)
   NEWLIB:=$(DEFAULT_NEWLIB)
 endif
 
+# Linker feedback requests have implications for both compile and link, but are
+# only available for specific toolchains
+# We respond accordingly based on flags set by variants and interfaces
+ifneq ($(LINKERFEEDBACK),)
+  ifneq ($(SUPPORTS_LINKER_FEEDBACK),)
+    DOLINKERFEEDBACK:=1
+    FEEDBACKFILENAME:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_feedback.fdb
+  endif
+else
+  DOLINKERFEEDBACK:=
+endif
+
 
 ##########################################################################
 ## OUTPUTS - externally relevant targets that this FLM generates
@@ -533,9 +545,6 @@ endif
 # list of all objects to be linked
 #
 VIAFILE:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_objects.via
-ifneq ($(GENERATELINKERFEEDBACK),)
-FEEDBACKFILE:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_feedback.fdb
-endif
 
 # The groupin10 macro allows us to construct a via file, 10 objects at a time
 # to avoid limits on argument lengths and sizes on Windows.
@@ -663,8 +672,17 @@ ifeq ($(e32postlink_mk),)
 endif
 
 define linktarget_func
+
+# Supporting info in the logs for linker feedback users
+$(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
+$(if $(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),,\
+  $(if $(DOLINKERFEEDBACK),
+    $(if $(FEEDBACKFILE),, \
+      $(info <info>Linker feedback file will be generated during the link of $(LINK_TARGET) - re-build to use in compilation</info>) \
+      )))
+
 ## The actual link target, dependencies and build step
-$(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS),$(LINKOBJECTS)) $(e32abiv2_LIBS) $(ADDITIONAL_LIBS) $(LINKER_ENTRYPOINT_LIBDEP) $(if $(SUPPORTS_STDCPP_NEWLIB),$(CHECKLIB)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) $(if $(HAVE_ORDERONLY),|,) $(EPOCROOT)/epoc32/build/TEM_LIB
+$(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS),$(LINKOBJECTS)) $(e32abiv2_LIBS) $(ADDITIONAL_LIBS) $(LINKER_ENTRYPOINT_LIBDEP) $(if $(SUPPORTS_STDCPP_NEWLIB),$(CHECKLIB)) $(if $(HAVE_ORDERONLY),|,) $(EPOCROOT)/epoc32/build/TEM_LIB
 	$(if $(MULTIFILE_ENABLED),,@echo -n "" > $(VIAFILE);
 	$(call groupin10,$(LINKOBJECTS)) ;)
 	$(call startrule,linkandpostlink) \
@@ -686,11 +704,12 @@ $(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTI
 	  $(LINKER_SYMBOLS_OPTION) $(LINKER_SYMBOLS_FILE_OPTION)=$(call dblquote,$(MAPFILE)) \
   	  $(LINKEROPTION) \
 	  $(if $(MULTIFILE_ENABLED),$(call dblquote,$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS)),$(COMMANDFILE_OPTION)$(call dblquote,$(VIAFILE))) \
-      $(if $(GENERATELINKERFEEDBACK),$(FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
+      $(if $(DOLINKERFEEDBACK),$(LINKER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILENAME)_temp)) \
 	  $(if $(LINKER_ADD_STATIC_RUNTIME),$(if $(STATIC_RUNTIME_LIB),$(LINKER_GROUP_START_OPTION) $(STATIC_RUNTIME_DIR)/$(STATIC_RUNTIME_LIB) $(LINKER_GROUP_END_OPTION),)) \
 	  $(call dblquote,$(e32abiv2_LIBS)) $(LINKER_DEFAULT_LIBS) && \
 	$(call e32postlink_$(BASE_ARCH)) \
-	  $(if $(SAVESPACE),$(if $(EXPORTUNFROZEN),,&& { $(GNURM) -rf $(INTERMEDIATEPATH); true; })) \
+	$(if $(DOLINKERFEEDBACK),&& $(call e32linkerfeedback_$(BASE_ARCH))) \
+	$(if $(SAVESPACE),$(if $(EXPORTUNFROZEN),,&& { $(GNURM) -rf $(INTERMEDIATEPATH); true; })) \
 	$(call endrule,linkandpostlink)
 
 $(MAPFILE): $(E32TARGET)
@@ -700,7 +719,7 @@ ifneq ($(DOPOSTLINK),)
 $(eval $(linktarget_func))
 endif # ifneq ($(DOPOSTLINK),)
 
-CLEANTARGETS:=$(CLEANTARGETS) $(VIAFILE) $(if $(GENERATELINKERFEEDBACK),$(FEEDBACKFILE)) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT))
+CLEANTARGETS:=$(CLEANTARGETS) $(VIAFILE) $(if $(DOLINKERFEEDBACK),$(FEEDBACKFILENAME)_temp $(FEEDBACKFILENAME)) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT))
 WHATRELEASE:=$(WHATRELEASE) $(MAPFILE)
 
 endif # if TARGETTYPE lib
@@ -799,7 +818,12 @@ $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 $(eval TYPE:=$(if $(5),$(5),compile))
 
-$(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACKFILE),) | $(TRACE_THISCOMPONENT_ALLRULE) 
+# linker feedback files are referenced if the variant has requested it, the
+# toolchains supports it and a feedback file already  exists (from a prior
+# build)
+$(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
+
+$(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) | $(TRACE_THISCOMPONENT_ALLRULE)
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
@@ -817,7 +841,7 @@ $(1): $(2) $(PROJECT_META) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOUR
 			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
-			$(if $(LINKERFEEDBACK_STAGE2),$(FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
+			$(if $(FEEDBACKFILE),$(COMPILER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
 			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $(MULTIFILEOBJECT) \
 			--via $$(call dblquote, $(MULTIFILE_VIAFILE)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,$(TYPE))
@@ -847,7 +871,7 @@ ifneq ($(TRANSFORM_CIA),1)
   $(if $(MULTIFILE_ENABLED),,$(foreach F,$(CIAFILES),$(eval $(call e32abiv2_compile,$(call mapcia2object,$(F)),$(F),$(CPP_LANG_OPTION) $(COMPILER_CIA_FLAGS) $(call makemacrodef,-D,$(CIADEFS))))))
 endif
 
-CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(MULTIFILEOBJECT),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS)) $(if $(GENERATELINKERFEEDBACK),$(FEEDBACKFILE))
+CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(MULTIFILEOBJECT),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS))
 
 
 ## Preprocess target ###################################################
@@ -885,7 +909,7 @@ $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
 LISTING:: $(LISTINGTARGET)
 
-$(LISTINGTARGET): $(1) $(PROJECT_META)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(LISTINGTARGET): $(1) $(PROJECT_META_DEP)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,e32listing,,$(1))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(CC) $(LICENSERETRY_OPTION) $(SYMBIAN_CCFLAGS) \
@@ -985,7 +1009,7 @@ $(eval e32abiv2_PREFILE:=$(call mapcia2xxx,$(1),_.pre))
 $(eval e32abiv2_CPPFILE:=$(call mapcia2xxx,$(1),_.cpp))
 $(eval CLEANTARGETS:=$(CLEANTARGETS) $(e32abiv2_OFILE) $(e32abiv2_CPPFILE) $(e32abiv2_PREFILE))
 
-$(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(PROJECT_META)
+$(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(PROJECT_META_DEP)
 	$(call startrule,cia2cpp2o,,$(e32abiv2_CPPFILE)) \
 		$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 			$(CC) $(LICENSERETRY_OPTION) \
@@ -1018,7 +1042,7 @@ $(eval e32abiv2_PREFILE_OPTIONS:= $(LICENSERETRY_OPTION) $(PREPROCESSOR_OPTION) 
        $(if $(ARMINC),$(if $(RVCTINC), $(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$(RVCTINC)),),) )
 
 
-$(e32abiv2_PREFILE): $1 $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(e32abiv2_PREFILE): $1 $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,cia2cpp,,$1) \
 	$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 	$(CC) $(e32abiv2_PREFILE_OPTIONS) $(OUTPUT_OPTION) $$@ $$(call dblquote,$1) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
@@ -1061,7 +1085,7 @@ define e32abiv2_asm
 $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
-$(1): $(2) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(1): $(2) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,asmcompile,,$(2)) \
 		$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(CC) $(e32abiv2_asm_OPTIONS) \
@@ -1125,7 +1149,7 @@ OUTPUTVMAP:=$(E32TARGET).vmap
 WHATRELEASE:=$(WHATRELEASE) $(OUPUTVMAP)
 
 TARGET:: $(OUTPUTVMAP)
-VMAPNEEDS:=$(E32TARGET) $(SOURCE) $(PROJECT_META)
+VMAPNEEDS:=$(E32TARGET) $(SOURCE) $(PROJECT_META_DEP)
 
 BV_FEATURELIST:=$(addprefix -f ,$(FEATURELISTFILES))
 BV_USER_INCLUDES:=$(addprefix -u ,$(USERINCLUDE))
@@ -1143,7 +1167,7 @@ define createvmap
 
 $(OUTPUTVMAP): $(VMAPNEEDS)
 	@echo -n "" > $(VMAPCOMMANDFILE);
-	$(call groupin10infile,$(VMAPCOMMANDFILE),$(addprefix -s,$(SOURCE) $(PROJECT_META))) ;
+	$(call groupin10infile,$(VMAPCOMMANDFILE),$(addprefix -s,$(SOURCE) $(PROJECT_META_DEP))) ;
 	$(call startrule,createvmap) \
 	$(CREATEVMAP) -o $(OUTPUTVMAP) $(BV_FEATURELIST) $(BV_DEFINES) -p $(PREINCLUDE) --command=$(VMAPCOMMANDFILE) $(BV_USER_INCLUDES) $(BV_SYSTEM_INCLUDES) -c $(CREATEVMAPCPP) \
 	$(call endrule,createvmap)

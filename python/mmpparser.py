@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -30,7 +30,6 @@
 
 from pyparsing import *
 import sys
-
 # For multiline matching we must exclude \n from the list of whitespace
 # characters.  If we don't then Parse Elements like OneOrMore won't stop
 # at line boundaries.
@@ -55,14 +54,47 @@ def Line(pattern):
 	return pattern.copy() + LineEnd().suppress()
 
 
+class Mediator(object):
+	""" Instances of this class are like pointers or references 
+		to other objects. One can pass this object on in place 
+		of the "original" and it forwards all calls on to the
+		original.  The difference is that it is possible
+		to change it and thus redirect calls away from the 
+		original object at any time.
+
+		e.g. the MMPParser  writes to "mmpbackends" but to parse
+		a new mmp we are normally required to go through the
+		cost of allocating a new parser object just because we
+		had to create a new backend.  This is a limitation in
+		the parser which we cannot modify because we don't own it.
+
+		The Mediator class lets us give the parser something
+		which passes on all calls but we can change where it
+		passes them and thus can reuse the parser for all mmps.
+
+		The class member named "original" points to where
+		accesses will be redirected to and can be altered to
+		"retarget" the mediator.
+	"""
+	def __init__(self, original):
+	        self.original = original
+	
+	def __getattr__(self,name):
+		def caller(*args, **kwargs):
+			for c in self.original.__class__.__mro__:
+				if c.__dict__.has_key(name):
+					return c.__dict__[name](self.original,*args, **kwargs)
+			raise TypeError() 
+		return caller
+
 
 class MMPParser(object):
 	# Tools for whom options may be specified
 	tools = [ 'ARMCC', 'CW', 'GCC', 'MSVC', 'GCCXML', 'ARMASM', 'GCCE' ]
 
 
-	def __init__(self,statemachine):
-		self.backend = statemachine
+	def __init__(self):
+		self.backend = Mediator(None)
 		# Create Tokens for the tools we support
 		self.toolName = CaselessKeyword(MMPParser.tools[0])
 		for thisTool in MMPParser.tools[1:]:
@@ -286,6 +318,10 @@ class MMPParser(object):
 		
 		self.mmp = (ZeroOrMore(self.preProcessorComment ^ self.blankline ^ self.block ^ self.command ^ self.unknownstatement)).setParseAction(self.backend.doMMP) 
 
+	def parse(self, text, backend):
+		self.backend.original = backend
+		return self.mmp.parseString(text)
+
 
 ## MMP Parsing Backends #########################################
 class MMPBackend(object):
@@ -294,6 +330,7 @@ class MMPBackend(object):
 	source analysis tool or anything else"""
 	def __init__(self):
 		super(MMPBackend,self).__init__()
+
 	def doPreProcessorComment(self,s,loc,toks):
 		return "OK"
 	

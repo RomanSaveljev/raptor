@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -333,9 +333,9 @@ unpaged
 """, 'mustmatch': r"Set.*ARMINC"}]
 		for i in tests:
 			tester = MMPTester()
-			mp = MMPParser(tester)
+			mp = MMPParser()
 			try:
-				result = mp.mmp.parseString(i['text'])
+				result = mp.parse(i['text'],tester)
 			except ParseException,e:
 				pass
 			self.assertEquals(result[0],'MMP')

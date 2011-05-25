@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -121,6 +121,8 @@ int sema_wait(sbs_semaphore *s)
 
 void  sema_release(sbs_semaphore *s)
 {
+	if (s->handle)
+	{
 	/* release the semaphore */
 	#ifdef WIN32
 		ReleaseSemaphore(s->handle, 1, NULL);
@@ -134,4 +136,9 @@ void  sema_release(sbs_semaphore *s)
 	#else
 	   	sem_close(s->handle);
 	#endif
+	s->handle = NULL; /* prevent double release */
+
+	} else {
+          error("sema: attempt to release an semaphore that wasn't 'held'");
+	}
 }

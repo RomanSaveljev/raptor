@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -184,7 +184,7 @@ $(TRACE_SOURCE_LIST):
 	  $(GNUCP) $$@.new $$@ \
 	$(call endrule,sourcelist_combine)
 
-$(TRACE_MARKER) : $(PROJECT_META) $(TRACE_SOURCE_LIST)
+$(TRACE_MARKER) : $(PROJECT_META_DEP) $(TRACE_SOURCE_LIST)
 	$(call startrule,tracecompile) \
 	( $(GNUCAT) $(TRACE_SOURCE_LIST); \
 	  echo -en "*ENDOFSOURCEFILES*\n" ) | \
@@ -207,7 +207,7 @@ $(TRACE_SOURCE_LIST):
 	  $(GNUCP) $$@.new $$@ \
 	$(call endrule,sourcelist_combine)
 
-$(TRACE_MARKER) : $(PROJECT_META) $(TRACE_SOURCE_LIST)
+$(TRACE_MARKER) : $(PROJECT_META_DEP) $(TRACE_SOURCE_LIST)
 	$(call startrule,tracecompile) \
 	( echo -en "$(OLDTC_TRACE_PRJNAME)\n$(PROJECT_META)\n"; \
 	  $(GNUCAT) $(TRACE_SOURCE_LIST); \

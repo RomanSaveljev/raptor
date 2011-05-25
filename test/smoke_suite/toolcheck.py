@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -19,10 +19,9 @@ from raptor_tests import SmokeTest
 
 def run():
 	t = SmokeTest()
-	t.id = "0092a"
+	
 	t.description = """Test toolcheck works properly, with 3 options: on, off and forced. 
-				TOOL1 3 4 and 5 are expected to fail and 2 to pass"""
-	result = SmokeTest.PASS
+				TOOL 1, 3, 4 and 5 are expected to fail whilst 2, 6 and 7 pass"""
 	toolcheckDir = os.environ["SBS_HOME"].replace("\\","/") + "/test/smoke_suite/test_resources/toolcheck"
 
 	# toolcheck ON
@@ -38,42 +37,36 @@ def run():
 		]
 	t.mustnotmatch = [
 		".*TOOLCHECK2.*",
-		".*TOOLCHECK6.*"
+		".*TOOLCHECK6.*",
+		".*TOOLCHECK7.*"
 		]
 	t.errors = 7
 	t.returncode = 1
 	t.run()
-	if t.result == SmokeTest.FAIL:
-		result = SmokeTest.FAIL
 
-	t.name = "toolcheck_off"
 	# toolcheck OFF
+	t.name = "toolcheck_off"
 	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -n --configpath=" + toolcheckDir + \
 			" -c default.toolcheck --toolcheck=off"
 
-	t.id = "0092b"
-	t.name = "toolcheck_off"
 	t.mustmatch = []
 	t.mustnotmatch = [
 		".*TOOLCHECK1.*",
 		".*TOOLCHECK3.*",
 		".*TOOLCHECK4.*",
 		".*TOOLCHECK5.*",
-		".*TOOLCHECK6.*"
+		".*TOOLCHECK6.*",
+		".*TOOLCHECK7.*"
 		]
 	t.errors = 0
 	t.returncode = 0
 	t.run()
-	if t.result == SmokeTest.FAIL:
-		result = SmokeTest.FAIL
 
 	# force toolcheck
 	t.name = "toolcheck_force"
 	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -n --configpath=" + toolcheckDir + \
 			" -c default.toolcheck --toolcheck=forced"
 
-	t.id = "0092c"
-	t.name = "toolcheck_forced"
 	t.mustmatch = [
 		".*tool 'TOOLCHECK1' from config 'none' did not return version.*",
 		".*tool 'TOOLCHECK3' from config 'none' did not return version.*",
@@ -82,17 +75,13 @@ def run():
 		]
 	t.mustnotmatch = [
 		".*TOOLCHECK2.*",
-		".*TOOLCHECK6.*"
+		".*TOOLCHECK6.*",
+		".*TOOLCHECK7.*"
 	]
 	t.errors = 16
 	t.returncode = 1
 	t.run()
-	if t.result == SmokeTest.FAIL:
-		result = SmokeTest.FAIL
-
-
-	t.id = "0092"
-	t.result = result
+	t.name ="toolcheck"
 	t.print_result()
 	return t
 

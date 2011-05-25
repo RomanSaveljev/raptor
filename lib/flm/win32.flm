@@ -332,7 +332,7 @@ ifneq ($(BASE_TYPE),importlib)
     endif
 
     define win32generateUIDcpp
-      $(GENSOURCE): $(PROJECT_META)
+      $(GENSOURCE): $(PROJECT_META_DEP)
 	    $(call startrule,win32generateUIDcpp,,) \
 	    echo "// SBS-generated uid source file" > $$@ && \
 	    echo "#include <e32cmn.h>" >> $$@ && \
@@ -384,7 +384,7 @@ ifneq ($(BASE_TYPE),importlib)
     $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
     $(eval TYPE:=$(if $(3),$(3),win32compile2object))
 
-    $(if $(2),$(2),$(call mapwin32file,$(1),.o)): $(1) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
+    $(if $(2),$(2),$(call mapwin32file,$(1),.o)): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
 	  $(call startrule,$(TYPE),,$(1)) \
 	  $(CC) \
 	  $(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \
@@ -455,7 +455,7 @@ ifneq ($(BASE_TYPE),importlib)
     $(eval DEPENDFILENAME:=$(call mapwin32file,$(1),.res.d))
     $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
-    $(call mapwin32file,$(1),.res): $(1) $(PROJECT_META) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+    $(call mapwin32file,$(1),.res): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	  $(call startrule,win32resourcecompile,,$(1)) \
 	  MWCIncludes='$(STDMWCINCLUDEPATHS)' $(RC) $(OPT.OUT)"$$@" "$(1)" \
 	  $(if $(NO_DEPEND_GENERATE),,&& \
@@ -526,7 +526,9 @@ ifneq ($(BASE_TYPE),importlib)
 	    @echo "" > $(OBJECTFILES_LRF);
 		$(call groupin10,$(notdir $(OBJECTFILES))) ;
 	    $(call startrule,win32archive) \
-	    $(LD) $(OPT.STATICLIBRARY) $(LFLAGS) $(OPT.NOIMPLIB) $(WIN32_LIBRARIES) $(OPT.OUT)"$$@" $(STDCPPTAGFILE) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    $(LD) $(OPT.STATICLIBRARY) $(LFLAGS) $(OPT.NOIMPLIB) $(WIN32_LIBRARIES) \
+	    $(OPT.OUT)"$$@" $(STDCPPTAGFILE) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    $(LINKEROPTION_CW) \
 	    $(if $(SAVESPACE),; $(GNURM) -rf $(BLDDIR); true,) \
 	    $(call endrule,win32archive)
     endef
@@ -549,7 +551,10 @@ ifneq ($(BASE_TYPE),importlib)
 		$(call groupin10,$(notdir $(OBJECTFILES))) ;
 	    $(call startrule,win32simplelink) \
 	    $(if $(SUPPORTS_STDCPP_NEWLIB),$(if $(STATICLIBFILES),$(CHECKLIB) $(CHECKLIB_TYPE) $(OPT.CHECKLIB.WIN32) $(STATICLIBFILES) &&,),) \
-	    MWSym2LibraryFiles="$(MWSym2LibraryFiles)" $(LD) $(LFLAGS) $(OPT.MENTRYPOINT)$(ENTRYSYMBOL) $(MAP) $(LINKER_FIRSTSTATLIBFILE) $(NEWLIBFILE) $(WIN32_LIBRARIES) $(STATICLIBFILES) $(LINKLIBFILES) $(OPT.OUT)"$$@" $(OPT.NOIMPLIB) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    MWSym2LibraryFiles="$(MWSym2LibraryFiles)" \
+	    $(LD) $(LFLAGS) $(OPT.MENTRYPOINT)$(ENTRYSYMBOL) $(MAP) $(LINKER_FIRSTSTATLIBFILE) $(NEWLIBFILE) $(WIN32_LIBRARIES) $(STATICLIBFILES) $(LINKLIBFILES) \
+	    $(OPT.OUT)"$$@" $(OPT.NOIMPLIB) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    $(LINKEROPTION_CW) \
 	    $(if $(SAVESPACE),; $(GNURM) -rf $(BLDDIR); true,) \
 	    $(call endrule,win32simplelink)
     endef
@@ -604,7 +609,11 @@ ifneq ($(BASE_TYPE),importlib)
 		$(call groupin10,$(notdir $(OBJECTFILES))) ;
 	    $(call startrule,win32stageonelink) \
 	    $(if $(SUPPORTS_STDCPP_NEWLIB),$(if $(STATICLIBFILES),$(CHECKLIB) $(CHECKLIB_TYPE) $(OPT.CHECKLIB.WIN32) $(STATICLIBFILES) &&,),) \
-	    MWSym2LibraryFiles="$(MWSym2LibraryFiles)" $(LD) $(LFLAGS) $(OPT.MENTRYPOINT)$(ENTRYSYMBOL) $(OPT.EXPORT)$(EXPORT_TYPE) $(OPT.NOCOMPACTIMPORTLIB) $(OPT.ADDCOMMAND) "out:$(TARGET).$(TARGETEXT)" $(OPT.WARNINGS) off $(OPT.IMPLIB)"$(TMP_IMPLIB)" $(OPT.OUT)"$(TMP_TARGET)" $(LINKER_FIRSTSTATLIBFILE) $(NEWLIBFILE) $(WIN32_LIBRARIES) $(STATICLIBFILES) $(LINKLIBFILES) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    MWSym2LibraryFiles="$(MWSym2LibraryFiles)" \
+	    $(LD) $(LFLAGS) $(OPT.MENTRYPOINT)$(ENTRYSYMBOL) $(OPT.EXPORT)$(EXPORT_TYPE) $(OPT.NOCOMPACTIMPORTLIB) \
+	    $(OPT.ADDCOMMAND) "out:$(TARGET).$(TARGETEXT)" $(OPT.WARNINGS) off $(OPT.IMPLIB)"$(TMP_IMPLIB)" $(OPT.OUT)"$(TMP_TARGET)" \
+	    $(LINKER_FIRSTSTATLIBFILE) $(NEWLIBFILE) $(WIN32_LIBRARIES) $(STATICLIBFILES) $(LINKLIBFILES) $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    $(LINKEROPTION_CW) \
 	    $(call endrule,win32stageonelink)
     endef
     $(eval $(win32stageonelink))
@@ -656,6 +665,7 @@ ifneq ($(BASE_TYPE),importlib)
 	    $(OPT.OUT)"$$@" \
 	    $(if $(EXPORTUNFROZEN),$(OPT.IMPLIB)$(IMPORTLIBTARGET),$(OPT.NOIMPLIB)) \
 	    $(OPT.LIBPATH)$(BLDDIR) $(OPT.SEARCH) @$(OBJECTFILES_LRF) \
+	    $(LINKEROPTION_CW) \
 	    $(if $(SAVESPACE),; $(GNURM) -rf $(BLDDIR); true,) \
 	    $(call endrule,win32stagetwolink)
     endef
