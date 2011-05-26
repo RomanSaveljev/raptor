@@ -29,7 +29,12 @@ if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 	ARCH=$(uname -i)
 	# Find the libce binary and use a regular expression to slice off the major and minor version numbers
 	# e.g /lib/libc-2.12.1.so  => libc2_12
-	LIBC=$(echo /lib/libc-* | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
+	if [ -d /lib/*-linux-gnu ]; then
+		LIBCPAT='/lib/*-linux-gnu/libc-*'
+	else
+		LIBCPAT='/lib/libc-*'
+	fi
+	LIBC=$(echo $LIBCPAT | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
 	HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 
 	# The 32-bit platform is often compatible in the sense that
