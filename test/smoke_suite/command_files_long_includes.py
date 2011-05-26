@@ -42,14 +42,15 @@ def run():
 	inc_dirs = []
 	mmp_inc_dirs = []
 	source_files = []
-	for i in range(0, 65): # 65 items is enough to break the limit
+	count = 5
+	for i in range(0, 150): # 150 items is enough to break the limit
 		inc_dir = os.path.join("smoke_suite", "test_resources", "source_templates", 
-							"{0:02d}".format(i) * 10, "x" * 50, "y" * 50, "z" * 50)
+							"{0:02d}".format(i) * count, "x" * count)
 		if not os.path.isdir(inc_dir):
 			os.makedirs(inc_dir)
 		inc_dirs.append(inc_dir)
 		# The MMP inc dirs are relative to the bld.inf, not $SBS_HOME/test
-		mmp_inc_dirs.append(os.path.join("{0:02d}".format(i) * 10, "x" * 50, "y" * 50, "z" * 50))
+		mmp_inc_dirs.append(os.path.join("{0:02d}".format(i) * count, "x" * count))
 		
 		header_path = os.path.join(inc_dir, "test{0:02d}.h".format(i))
 		with open(header_path, "w") as f:
@@ -88,10 +89,10 @@ def run():
 				]
 	
 	t.run()
-		
+	
 	# Clean up all generated files and directories
 	for dir in inc_dirs:
-		top_level_dir = os.path.normpath(os.path.join(dir, "..", "..", ".."))
+		top_level_dir = os.path.normpath(os.path.join(dir, ".."))
 		shutil.rmtree(top_level_dir, ignore_errors = True)
 	
 	for src in source_files:
@@ -99,5 +100,10 @@ def run():
 			os.remove(src)
 		except:
 			pass
+	
+	try:
+		os.remove(mmp_path)
+	except:
+		pass
 	
 	return t
