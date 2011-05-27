@@ -42,15 +42,15 @@ def run():
 	inc_dirs = []
 	mmp_inc_dirs = []
 	source_files = []
-	count = 5
+	repeats = 5
 	for i in range(0, 170): # 170 items is enough to break the limit
 		inc_dir = os.path.join("smoke_suite", "test_resources", "source_templates", 
-							"{0:02d}".format(i) * count, "x" * count)
+							"{0:02d}".format(i) * repeats, "x" * repeats)
 		if not os.path.isdir(inc_dir):
 			os.makedirs(inc_dir)
 		inc_dirs.append(inc_dir)
 		# The MMP inc dirs are relative to the bld.inf, not $SBS_HOME/test
-		mmp_inc_dirs.append(os.path.join("{0:02d}".format(i) * count, "x" * count))
+		mmp_inc_dirs.append(os.path.join("{0:02d}".format(i) * repeats, "x" * repeats))
 		
 		header_path = os.path.join(inc_dir, "test{0:02d}.h".format(i))
 		with open(header_path, "w") as f:

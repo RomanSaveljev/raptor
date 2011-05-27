@@ -387,15 +387,15 @@ ifneq ($(BASE_TYPE),importlib)
     
     $(eval CC_INCLUDES:=$(wordlist 1,40,$(INCLUDES))) # get the first 40 includes: here the option and include dir are separated with a space
     $(eval COMMAND_FILE_CONTENTS:=$(wordlist 41,20000,$(INCLUDES))) # get all includes starting with the 41st
-    $(eval COMMAND_FILE_PATH:=$(WIN32_COMPILE_TARGET).viafile)
+    $(eval COMMAND_FILE:=$(WIN32_COMPILE_TARGET).cmdfile)
     
     $(if $(FLMDEBUG),$(info <debug>Explicit compiler includes: $(CC_INCLUDES)</debug>))
-    $(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE_PATH)</debug>)))
+    $(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE)</debug>)))
     $(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(COMMAND_FILE_CONTENTS)</debug>)))
 
-    $(WIN32_COMPILE_TARGET): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE) 
-$(if $(COMMAND_FILE_CONTENTS),$(CHAR_TAB)$(call startrule,command_file_includes)echo $(COMMAND_FILE_CONTENTS)>$(COMMAND_FILE_PATH)$(call endrule,command_file_includes)
-,)	  $(call startrule,$(TYPE),,$(1)) \
+    $(WIN32_COMPILE_TARGET): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE)
+	  $(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS)) 
+	  $(call startrule,$(TYPE),,$(1)) \
 	  $(CC) \
 	  $(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \
 	  $$(if $$(filter %.C,$(1)),-lang c) \
@@ -404,7 +404,7 @@ $(if $(COMMAND_FILE_CONTENTS),$(CHAR_TAB)$(call startrule,command_file_includes)
 	  $(OPTION_CW) \
 	  $(if $(STDCPP_BUILD),$$(if $$(filter %.c %.C,$(1)),,$$(call makemacrodef,$(OPT.DEFINE),$(STDCPP_WCHAR_DEF))),) \
 	  $(DEFINES) $(OPT.SPLITINCLUDE) $(CC_INCLUDES) \
-	  $(if $(COMMAND_FILE_CONTENTS),$(COMMANDFILE_OPTION)$(COMMAND_FILE_PATH),) \
+	  $(if $(COMMAND_FILE_CONTENTS),$(COMMANDFILE_OPTION)$(COMMAND_FILE),) \
 	  $(OPT.OUT)"$$@" "$(1)" \
 	  $(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,&& $(GNUSED) 's#\\\\\(.\)#/\1#g;s#/ #\\\ #g;s#\([A-Za-z]:\)\\\\#\1/#g;1,1s#.*: .* \(.\)\?$$$$#$(call mapwin32file,$(1),.o): $1 \1#' $(call mapwin32file,$(1),.dep) > $(call mapwin32file,$(1),.o.d)) \
 	  $(call endrule,$(TYPE))

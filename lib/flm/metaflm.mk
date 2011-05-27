@@ -185,6 +185,19 @@ define raptor_clean
 $(eval $(call GenerateStandardCleanTarget,$1))
 endef
 
+# Macro for creating a command file
+#
+# Usage: $(call createcommandfile,$(FILE_PATH),$(FILE_CONTENTS))
+#
+# FILE_PATH is the name of the file to create; if directories are present, they
+# are assumed to exist
+# FILE_CONTENTS is a string containing the contents to write to the command file;
+# it is also used a flag deciding whether or not to create the file: an empty string
+# means no command file is created, otherwise a file is created.
+define createcommandfile
+$(if $(2),$(call startrule,command_file_includes)echo $(2)>$(1)$(call endrule,command_file_includes))
+endef
+
 endif 
 # end of metaflm
 ## END TEST BATCH FILES MACRO

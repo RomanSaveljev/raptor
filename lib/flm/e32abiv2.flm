@@ -830,15 +830,15 @@ $(if $(FLMDEBUG),$(info <debug>System includes: $(CC_SYSTEM_INC)</debug>))
 
 $(eval CC_INCLUDES:=$(wordlist 1,20,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get the first 20 includes
 $(eval COMMAND_FILE_CONTENTS:=$(wordlist 21,20000,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get all includes starting with the 21st
-$(eval COMMAND_FILE_PATH:=$(1).viafile)
+$(eval COMMAND_FILE:=$(1).cmdfile)
 
 $(if $(FLMDEBUG),$(info <debug>All compiler includes: $(CC_INCLUDES)</debug>))
-$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE_PATH)</debug>)))
+$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE)</debug>)))
 $(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(COMMAND_FILE_CONTENTS)</debug>))) 
 
 $(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) | $(TRACE_THISCOMPONENT_ALLRULE)
-$(if $(COMMAND_FILE_CONTENTS),$(CHAR_TAB)$(call startrule,command_file_includes)echo $(COMMAND_FILE_CONTENTS)>$(COMMAND_FILE_PATH)$(call endrule,command_file_includes)
-,)	$(call startrule,$(TYPE),,$(2))		\
+	$(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS))
+	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
 		$(CC) $(LICENSERETRY_OPTION) \
@@ -852,7 +852,7 @@ $(if $(COMMAND_FILE_CONTENTS),$(CHAR_TAB)$(call startrule,command_file_includes)
 			$(if $(SET_ARMINC),$(if $(RVCTINC),$(COMPILER_SYSTEM_INCLUDE_OPTION)$(call dblquote,$(RVCTINC)),),)       \
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                      \
 			$(CC_INCLUDES)  \
-			$(if $(COMMAND_FILE_CONTENTS),$(COMMANDFILE_OPTION)$(COMMAND_FILE_PATH),) \
+			$(if $(COMMAND_FILE_CONTENTS),$(COMMANDFILE_OPTION)$(COMMAND_FILE),) \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
 			$(if $(FEEDBACKFILE),$(COMPILER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
