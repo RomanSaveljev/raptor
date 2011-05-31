@@ -200,7 +200,7 @@ if __name__ == "__main__":
 		print("ERROR: the specified SBS_HOME directory \"{0}\" does not exist. Cannot build installer. Exiting...".format(options.sbshome))
 		sys.exit(2)
 
-	licensetxt = tempfile.NamedTemporaryFile(mode="w")
+	licensetxt = tempfile.NamedTemporaryFile(mode="w",delete=not options.noclean)
 
 	if options.win32support == None:
 		print("ERROR: no win32support directory specified. Unable to proceed. Exiting...")
