@@ -23,7 +23,7 @@
 	<!-- Common folders and files -->
 	<var name="root.places">
 		<env name='EPOCROOT' default='/' type='path'/>
-		<env name='SBS' default='sbs' />
+		<env name='SBS' default='sbs' type='path' />
 		<env name='SBS_EPOCTOOLS' default='$(EPOCROOT)/epoc32/tools' type='path'/>
 		
 		<set name='EPOCINCLUDE' value='$(EPOCROOT)/epoc32/include'/>

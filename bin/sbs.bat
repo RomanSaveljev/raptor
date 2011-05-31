@@ -15,7 +15,7 @@
 @rem
 
 @SETLOCAL
-@SET SBS="%~dp0sbs.bat"
+@SET SBS=%~dp0sbs.bat
 @CALL "%~dp0sbs_env.bat"
 
 @REM Run Raptor with all the arguments.
