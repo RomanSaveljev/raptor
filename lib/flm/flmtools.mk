@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -22,8 +22,9 @@ CHAR_COMMA:=,
 CHAR_SEMIC:=;
 CHAR_COLON:=:
 CHAR_BLANK:=
-#the BLANK BLANK trick saves us from clever text editrors that remove spaces at the end of a line
+#the BLANK BLANK trick saves us from clever text editors that remove spaces at the end of a line
 CHAR_SPACE:=$(BLANK) $(BLANK)
+CHAR_TAB:=$(BLANK)	$(BLANK)
 CHAR_DQUOTE:="
 CHAR_QUOTE:='
 CHAR_LBRACKET:=(

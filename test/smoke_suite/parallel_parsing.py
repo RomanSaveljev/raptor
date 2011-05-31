@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -34,6 +34,11 @@ def run():
 
 	targets = []
 
+	# Test appropriate startup script for platform:
+	sbs_script="sbs"
+	if t.onWindows:
+		sbs_script="sbs.bat"
+
 	# Build up target list for 10 similar executables
 	for num in range(1,mmpcount):
 		for atarget in target_templ:
@@ -41,9 +46,9 @@ def run():
 
 	t.name = "parallel_parsing"
 	t.description = """This test covers parallel parsing."""
-	t.command = ("mkdir -p $(EPOCROOT)/epoc32/build && cd $(SBS_HOME)/test/smoke_suite/test_resources/pp/ && " 
-	"sbs --command=$(SBS_HOME)/test/smoke_suite/test_resources/pp/ppbldinf_commandfile -c armv5 -c winscw "
-	"--pp=on --noexport -m ${SBSMAKEFILE} -f - | grep progress ")
+	t.command=("mkdir -p $(EPOCROOT)/epoc32/build && cd $(SBS_HOME)/test/smoke_suite/test_resources/pp/ && " 
+	"{0} --command=$(SBS_HOME)/test/smoke_suite/test_resources/pp/ppbldinf_commandfile -c armv5 -c winscw " 
+	"--pp=on --noexport -m {1} -f - | grep progress ".format(sbs_script, "${SBSMAKEFILE}"))
 	t.targets = targets
 	t.mustmatch =  [
 		".*<progress:start object_type='makefile' task='makefile_generation'.*"
@@ -57,8 +62,8 @@ def run():
 
 	t.name = "parallel_parsing_missing_includes_in_bld_inf"
 	t.description = """ Ensure errors from parallel parsing are recorded by the top level Raptor. """
-	t.command = ("sbs -s smoke_suite/test_resources/pp/sys_def.xml -c armv5 -k --pp=on reallyclean > /dev/null 2>&1; "
-	"sbs -s smoke_suite/test_resources/pp/sys_def.xml -c armv5 -k --pp=on")
+	t.command=("{0} -s smoke_suite/test_resources/pp/sys_def.xml -c armv5 -k --pp=on reallyclean > /dev/null 2>&1; "
+	"{0} -s smoke_suite/test_resources/pp/sys_def.xml -c armv5 -k --pp=on".format(sbs_script))
 	t.targets = []
 	t.mustmatch = [
 		 "sbs: error: .*cpp.*test/smoke_suite/test_resources/pp/test01/bld.inf.*this_file_does_not_exist.inf: No such file or directory",

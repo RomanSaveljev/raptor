@@ -18,7 +18,7 @@
 
 # If SBS_HOME is not set in the environment then work it out
 # from the path to this script
-export SBS="$0" #Â Link to sbs script itself (needed by programs that run sub-instances of raptor)
+export SBS="$0" # Link to sbs script itself (needed by programs that run sub-instances of raptor)
 if [ -z "$SBS_HOME" ] ; then
 	SBS_HOME=$(cd ${SBS%/*}/.. && echo $PWD)
 	export SBS_HOME
@@ -26,6 +26,19 @@ fi
 
 # Call sbs_env script
 source $SBS_HOME/bin/sbs_env
+
+# The SBS variable is used as a way to create sub-invocations of raptor.
+# If we're using cygwin then SBS needs, paradoxically, to refer to the 
+# batch file rather than this shell script even though this is inconsistent.
+# The tools that need the SBS variable the most like parallel parsing and 
+# FLMs tend to fail e.g. on clustered builds where the difference in cygwin
+# mount locations between the make and "build" machines causes 
+# the #!/bin/sh at the top of this script to not resolve to the correct 
+# location of "sh".  Only the batch file can be used in these situations.
+if [ "$OSTYPE" == "cygwin" ]; then
+	SBS=$(/bin/cygpath.exe -m $SBS_HOME/bin/sbs.bat)
+fi
+
 
 # call raptor_start.py with the arguments
 

@@ -823,7 +823,21 @@ $(eval TYPE:=$(if $(5),$(5),compile))
 # build)
 $(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
 
+# Create the lists of includes and macros. Needed in case a command file is required
+$(eval CC_USER_INC:=$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE))))
+$(eval CC_SYSTEM_INC:=$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE))))
+$(if $(FLMDEBUG),$(info <debug>System includes: $(CC_SYSTEM_INC)</debug>))
+
+$(eval CC_INCLUDES:=$(wordlist 1,20,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get the first 20 includes
+$(eval COMMAND_FILE_CONTENTS:=$(wordlist 21,20000,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get all includes starting with the 21st
+$(eval COMMAND_FILE:=$(1).cmdfile)
+
+$(if $(FLMDEBUG),$(info <debug>All compiler includes: $(CC_INCLUDES)</debug>))
+$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE)</debug>)))
+$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(COMMAND_FILE_CONTENTS)</debug>))) 
+
 $(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) | $(TRACE_THISCOMPONENT_ALLRULE)
+	$(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS))
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
@@ -833,17 +847,17 @@ $(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RE
 			$(OPTION_COMPILER) $(if $(MULTIFILE_ENABLED),$(4),$(3)) \
 			$(if $(LTCG),$(LTCG_OPTION),) \
 			$(if $(USE_PROFILER_FEEDBACK),--profile=$(call dblquote,$(ARM_PROFILER_FILE)),) \
-			$(call makemacrodef,-D,$(COMPILER_INTERWORK_DEFINES) $(CDEFS))				\
+			$(call makemacrodef,-D,$(COMPILER_INTERWORK_DEFINES) $(CDEFS))    \
 			$(if $(PREINCLUDE),$(PREINCLUDE_OPTION) ,)$(call concat, $(PREINCLUDE_OPTION) ,$(call dblquote,$(PREINCLUDE)))\
 			$(if $(SET_ARMINC),$(if $(RVCTINC),$(COMPILER_SYSTEM_INCLUDE_OPTION)$(call dblquote,$(RVCTINC)),),)       \
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                      \
-			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
-			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
+			$(CC_INCLUDES)  \
+			$(if $(COMMAND_FILE_CONTENTS),$(COMMANDFILE_OPTION)$(COMMAND_FILE),) \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
 			$(if $(FEEDBACKFILE),$(COMPILER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
 			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $(MULTIFILEOBJECT) \
-			--via $$(call dblquote, $(MULTIFILE_VIAFILE)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
+			$(COMMANDFILE_OPTION)$$(call dblquote, $(MULTIFILE_VIAFILE)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,$(TYPE))
 
 ifeq ($(NO_DEPEND_GENERATE),)
