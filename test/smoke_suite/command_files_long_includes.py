@@ -43,7 +43,7 @@ def run():
 	mmp_inc_dirs = []
 	source_files = []
 	repeats = 5
-	for i in range(0, 170): # 170 items is enough to break the limit
+	for i in range(0, 160): # 160 items is enough to break the limit
 		inc_dir = os.path.join("smoke_suite", "test_resources", "source_templates", 
 							"{0:02d}".format(i) * repeats, "x" * repeats)
 		if not os.path.isdir(inc_dir):
