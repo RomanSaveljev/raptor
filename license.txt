@@ -1,8 +1,25 @@
-Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 All rights reserved.
 
-This component and the accompanying materials are made available
-under the terms of the License "Eclipse Public License v1.0"
-which accompanies this distribution, and is available
-at the URL "http://www.eclipse.org/legal/epl-v10.html".
+This product includes certain open source software. The exact
+terms of the licenses, disclaimers, acknowledgements and notices
+are reproduced in the materials provided with this product below.
+Nokia offers to provide you with the source code as defined in
+the applicable license. Please send an e-mail to
+sourcecode.request@nokia.com or a written request to:
 
+Source Code Requests
+Nokia Corporation
+P.O.Box 226
+FI-00045 Nokia Group
+Finland
+
+This offer is valid for a period of three (3) years from the date
+of the distribution of this product by Nokia. By submitting a
+request, you give your consent that Nokia (or third parties on
+behalf and under direct authority of Nokia) will process your
+personal data. The processing will be done for the purpose of the
+request and the undertakings related to it. The main reason for
+storing this data is to prove compliance with the license terms.
+The data processing will be done in compliance with Nokia
+guidelines and applicable legislation.
