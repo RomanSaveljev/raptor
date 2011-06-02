@@ -19,9 +19,100 @@ Compare the raptor XML logs from multiple builds.
 """
 
 import csv
+import generic_path
 import os
 import subprocess
 import sys
+import plugins.filter_csv
+
+
+def is_raptor_log(path):
+	try:
+		with open(path, "r") as f:
+			line1 = f.readline()
+			line2 = f.readline()
+			return line1.startswith("<?xml") and line2.startswith("<buildlog")
+	except:
+		return False
+	
+
+class NotADiffableLog(Exception):
+	pass
+
+
+class CSVFilterParams(object):
+	def __init__(self, csv_file):
+		self.logFileName = generic_path.Path(csv_file)
+		self.timestring = ""
+		self.configPath = ""
+		
+
+class DiffableLog(object):
+	"""Represents a raptor log, or set of logs, in a way that can be compared
+	to another nominally similar log (or set of logs) from a different build."""
+	
+	def __init__(self, dir_or_file, force=False, verbose=False):
+		"""If force=True the class will not reuse any cached information that
+		it finds in the specified directory: instead it will re-read the original
+		logs and generate a new cache."""
+		
+		self.location = dir_or_file
+		self.force = force
+		self.verbose = verbose
+		self.logs = []
+		
+		# find all the raptor logs that are in the running
+		if os.path.isfile(dir_or_file):
+			self.add_file(dir_or_file)
+			
+		elif os.path.isdir(dir_or_file):
+			for file in os.listdir(dir_or_file):
+				self.add_file(os.path.join(dir_or_file, file))
+		else:
+			raise NotADiffableLog("'{0}' is not a file or a directory\n".format(dir_or_file))
+	
+		if len(self.logs) > 0:
+			if self.verbose:
+				print("found {0} raptor logs".format(len(self.logs)))
+		else:
+			raise NotADiffableLog("no raptor logs found in '{0}'\n".format(dir_or_file))
+		
+		# generate all the .csv files that are missing or out of date
+		for log_file in self.logs:
+			csv_file = self.csv_for(log_file)
+			if self.force or not os.path.isfile(csv_file) \
+			or os.path.getmtime(log_file) > os.path.getmtime(csv_file):
+				self.generate_csv(log_file, csv_file)
+
+	def add_file(self, path):
+		if is_raptor_log(path):
+			self.logs.append(path)
+			if self.verbose:
+				print(path + " is a raptor log")
+	
+	def csv_for(self, path):
+		return path + "_diff.csv"
+	
+	def generate_csv(self, log_file, csv_file):
+		if self.verbose:
+			print("generating " + csv_file)
+			
+		filter = plugins.filter_csv.CSV(["ok"])    # ignore "ok" recipes
+		filter_params = CSVFilterParams(csv_file)
+		
+		try:
+			filter.open(filter_params)
+			
+			with open(log_file, "r") as file:
+				for line in file.readlines():
+					filter.write(line)
+
+			filter.summary()
+			filter.close()
+
+		except Exception,e:
+			raise NotADiffableLog("problem filtering '{0}' : {1}\n".format(log_file, str(e)))
+
 
 def generate_csv(dir_or_file, prefix):
 	sorted_file = prefix + "all.csv"
@@ -86,14 +177,13 @@ def summarise_totals(filename):
 			
 	return (events, components)
 
-class DiffableLog(object):
-	def __init__(self, dir_or_file, force=False):
-		pass
-
 class LogDiff(object):
 	def __init__(self, log_a, log_b):
 		pass
 
+	def has_differences(self):
+		return True
+	
 skip = """
 left_summary = summarise_totals("left_totals.csv")
 right_summary = summarise_totals("right_totals.csv")
