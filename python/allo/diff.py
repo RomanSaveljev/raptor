@@ -26,6 +26,11 @@ import sys
 import plugins.filter_csv
 
 
+# we don't want to create a Raptor object just for these 2 variables
+sbs_home = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+cfg_path = os.path.join("lib", "config")
+
+
 def is_raptor_log(path):
 	try:
 		with open(path, "r") as f:
@@ -44,7 +49,8 @@ class CSVFilterParams(object):
 	def __init__(self, csv_file):
 		self.logFileName = generic_path.Path(csv_file)
 		self.timestring = ""
-		self.configPath = ""
+		self.configPath = [ generic_path.Path(cfg_path) ]
+		self.home = generic_path.Path(sbs_home)
 		
 
 class DiffableLog(object):
@@ -84,6 +90,13 @@ class DiffableLog(object):
 			or os.path.getmtime(log_file) > os.path.getmtime(csv_file):
 				self.generate_csv(log_file, csv_file)
 
+		# combine multiple .csv files into one big one
+		if len(self.logs) > 1:
+			self.csv_cat = os.path.join(self.location, "all.csv")
+			self.generate_cat([self.csv_for)
+		else:
+			self.csv_cat = self.csv_for(self.logs[0])
+			
 	def add_file(self, path):
 		if is_raptor_log(path):
 			self.logs.append(path)
@@ -91,7 +104,7 @@ class DiffableLog(object):
 				print(path + " is a raptor log")
 	
 	def csv_for(self, path):
-		return path + "_diff.csv"
+		return path + "_filtered.csv"
 	
 	def generate_csv(self, log_file, csv_file):
 		if self.verbose:
