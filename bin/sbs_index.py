@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Symbian Foundation License v1.0"
@@ -16,6 +16,7 @@ of the build and links to the individual summaries.
 import os
 import sys
 import time
+import traceback
 
 # get the absolute path to this script
 script = os.path.abspath(sys.argv[0])
@@ -70,7 +71,7 @@ for t in totals:
 		break
 	
 # write the header of the index
-import filter_html
+import filter_interface
 try:
 	index = open(indexfile, "w")
 	index.write("""<html>
@@ -83,15 +84,16 @@ try:
 <table>
 <tr><th>build</th>""" % css)
 
-	for i in filter_html.Records.TITLES:
+	for i in filter_interface.Records.TITLES:
 		index.write('<th class="numbers">%s</th>' % i)
 	index.write("</tr>")
 except:
 	sys.stderr.write("error: cannot write index file %s\n" % indexfile)
+	traceback.print_exc()
 	sys.exit(1)
 	
 import csv
-grandtotal = [0 for i in filter_html.Records.TITLES]
+grandtotal = [0 for i in filter_interface.Records.TITLES]
 
 for t in totals:
 	columns = []
@@ -106,7 +108,7 @@ for t in totals:
 			else:
 				count = int(row[2])
 				
-			if count == 0 or filter_html.Records.CLASSES[type] == style:
+			if count == 0 or filter_interface.Records.CLASSES[type] == style:
 				grandtotal[type] += count
 				columns.append((style,count))
 			else:
@@ -114,7 +116,7 @@ for t in totals:
 	except:
 		sys.stderr.write("warning: %s could not be read\n" % t)
 
-	if len(columns) == len(filter_html.Records.TITLES):
+	if len(columns) == len(filter_interface.Records.TITLES):
 		try:
 			linktext = os.path.dirname(t)
 			linkname = os.path.relpath(os.path.join(linktext, "index.html"), indexdir)
@@ -128,13 +130,14 @@ for t in totals:
 			index.write("</tr>")
 		except:
 			sys.stderr.write("error: cannot write index file %s\n" % indexfile)
+			traceback.print_exc()
 			sys.exit(1)
 	
 # finish off
 try:
 	index.write('<tr><td>&nbsp;</td></tr><tr><td class="name">total</td>')
 	for i, count in enumerate(grandtotal):
-		style = filter_html.Records.CLASSES[i]
+		style = filter_interface.Records.CLASSES[i]
 		if style == 'time':
 			n = time.strftime("%H:%M:%S", time.gmtime(count + 0.5))
 		else:
@@ -150,6 +153,7 @@ try:
 
 except:
 	sys.stderr.write("error: cannot close index file %s\n" % indexfile)
+	traceback.print_exc()
 	sys.exit(1)
 			
 sys.exit(0)
