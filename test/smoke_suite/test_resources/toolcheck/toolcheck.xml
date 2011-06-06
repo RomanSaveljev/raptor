@@ -12,5 +12,11 @@
   <env name='TOOLCHECK5' default='$(SBS_PYTHON)' type='tool' versionCommand='$(PYTHON) -V' versionResult='something you would never see'/>
   <env name='TOOLCHECK6' default='$(SBS_HOME)/test/smoke_suite/test_resources/toolcheck/toolcheck6.py' type='tool' versionCommand='$(PYTHON) $(TOOLCHECK6)' versionResult='something toolcheck6 would print out to match tool check result'/>
   <env name='TOOLCHECK7' default='$(SBS_GNUSED)' type='tool' versionCommand='echo LANG=$LANG' versionResult='LANG=C'/>
+ </var> 
+ 
+ <var name="self_version_check">
+  <env name='SBS' type='tool' versionCommand='$(SBS) --version' versionResult='2\.17\.[0-9]+' 
+       versionDescMsg='This version of Raptor is not suitable for this SDK. Minimum version required is 2.17.0.' />
  </var>  
+
 </build>
