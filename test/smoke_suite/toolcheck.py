@@ -90,7 +90,7 @@ def run():
 	t.mustmatch = []
 	t.mustmatch_singleline = [
 	"sbs: error: tool 'SBS' from config 'none' did not return version \'2\\\.17\\\.\[0-9\]\+\' as required\\.",
-	"Command '/home/dan/hg/raptor/bin/sbs --version' returned:",
+	"Command '.*sbs.* --version' returned:",
 	"Check your environment and configuration: This version of Raptor is not suitable " + 
 	"for this SDK. Minimum version required is 2.17.0."	
 		]

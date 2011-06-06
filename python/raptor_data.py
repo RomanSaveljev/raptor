@@ -670,7 +670,7 @@ class Prepend(Operation):
 
 
 class Set(Operation):
-	__slots__ = ('name', 'value', 'type', 'versionCommand', 'versionResult', 'versionCommandPython')
+	__slots__ = ('name', 'value', 'type', 'versionCommand', 'versionResult', 'versionDescMsg')
 	"""implementation of <set> operation"""
 
 	def __init__(self, name = None, value = "", type = ""):
@@ -680,16 +680,15 @@ class Set(Operation):
 		self.type = type
 		self.versionCommand = ""
 		self.versionResult = ""
-		self.versionCommandPython = ""
+		self.versionDescMsg = ""
 
 
 	def __str__(self):
 		attributes = "name='{name}' value='{value}' type='{type}'".format(name = self.name, value = self.value, type = self.type)
 		
 		if type == "tool":
-			attributes += " versionCommand='{0}' versionResult='{1}' " \
-			"versionCommandPython='{2}' versionDescMsg='{3}".format(self.versionCommand,  
-			self.versionResult,	self.versionCommandPython, self.versionDescMsg)
+			attributes += " versionCommand='{0}' versionResult='{1}' versionDescMsg='{2}'".format(self.versionCommand,  
+			self.versionResult,	self.versionDescMsg)
 		return "<{0} {1}/>".format(self.__class__.__name__, attributes)
 
 
@@ -711,8 +710,6 @@ class Set(Operation):
 		elif name == "host":
 			if HostPlatform.IsKnown(value):
 				self.host = value
-		elif name == "versionCommandPython":
-			self.versionCommandPython = value
 		elif name == "versionDescMsg":
 			self.versionDescMsg = value
 		else:
@@ -1557,7 +1554,7 @@ class Evaluator(object):
 				if self.gathertools:
 					if op.type == "tool" and op.versionCommand and op.versionResult:
 						tools[op.name] = Tool(op.name, newValue, op.versionCommand, 
-										op.versionResult, configName, op.versionDescMsg if "versionDescMsg" in dir(op) else None)
+										op.versionResult, configName, op.versionDescMsg if op.versionDescMsg != "" else None)
 
 		if len(unfound_values) > 0:
 			raise UninitialisedVariableException("\n".join(unfound_values))
