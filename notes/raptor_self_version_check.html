@@ -11,7 +11,8 @@ message that is displayed to users when using an incompatible version.<br/>
 The recommendation is that the 'generic' variant in the XML file in 
 epoc32/sbs_config/ is extended to enable the version check. To do this, an 
 'env' tag should be added as a child element of the 'generic' variant. This 
-'env' tag must specify the following attributes and values:
+'env' tag must specify the following attributes and values (note that the 
+values are case sensitive):
 <br/>
 <br/>
 <table border="1" cellspacing="0" cellpadding="3" >
@@ -22,6 +23,10 @@ epoc32/sbs_config/ is extended to enable the version check. To do this, an
 <tr>
 <td>'name'</td>
 <td>'SBS'</td>
+</tr>
+<tr>
+<td>'default'</td>
+<td>'sbs'</td>
 </tr>
 <tr>
 <td>'type'</td>
@@ -48,6 +53,7 @@ clarity):</br>
 <pre>
 &lt;env 
 name='SBS' 
+default='sbs' 
 type='tool' 
 versionCommand='$(SBS) --version' 
 versionResult='2\.17\.[0-9]+' 
