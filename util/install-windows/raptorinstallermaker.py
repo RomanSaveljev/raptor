@@ -87,6 +87,44 @@ def cleanup():
 	shutil.rmtree(tempdir,True)
 	print("Done.")
 
+def writeLicense(win32supportdirs):
+	""" Create the license file from the raptor license, plus the NSIS
+	license, plus the license for the tools we're using from the
+	win32 support folders
+	
+	Returns the file object and the file name as a tuple"""
+	licensetxt = tempfile.mkstemp()
+	(licensetxtfile, licensetxtname) = licensetxt # Decode the tuple
+	licensetxtfile = os.fdopen(licensetxtfile,"w") # Reopen as a writeable file object
+
+	raptorlicense = os.path.join(options.sbshome,"license.txt")
+	if os.path.exists(raptorlicense):
+		with open(raptorlicense,"r") as f:
+			shutil.copyfileobj(f,licensetxtfile)
+
+	nsisdir = os.path.join(options.sbshome,"util","install-windows")
+	nsisnotices = os.path.join(nsisdir,"notices.txt")
+	if os.path.exists(nsisnotices):
+		print("Using notices.txt from {0}".format(nsisdir))
+		licensetxtfile.write("\n---\n\n")
+		with open(nsisnotices,"r") as f:
+			shutil.copyfileobj(f,licensetxtfile)
+	
+	for directory in win32supportdirs:
+		dir = win32supportdirs[directory]
+
+		# Check for a notices.txt file
+		noticesfile = os.path.join(dir,"notices.txt")
+		if os.path.exists(noticesfile):
+			print("Using notices.txt from {0}".format(dir))
+			licensetxtfile.write("\n---\n\n")
+			with open(noticesfile,"r") as f:
+				shutil.copyfileobj(f,licensetxtfile)
+
+	licensetxtfile.close()
+	
+	return (licensetxtfile,licensetxtname) # (File object, filename)
+
 def __writeDirTreeToArchive(zip, dirlist, sbshome, win32supportdirs=False):
 	"""Auxilliary function to write all files in each directory tree of dirlist into the
 	open archive "zip" assuming valid sbshome; destination path is tweaked for win32supportdirs, 
@@ -200,21 +238,10 @@ if __name__ == "__main__":
 		print("ERROR: the specified SBS_HOME directory \"{0}\" does not exist. Cannot build installer. Exiting...".format(options.sbshome))
 		sys.exit(2)
 
-	licensetxt = tempfile.NamedTemporaryFile(mode="w")
-
 	if options.win32support == None:
 		print("ERROR: no win32support directory specified. Unable to proceed. Exiting...")
 		sys.exit(2)
 	else:
-		raptorlicense = os.path.join(options.sbshome,"license.txt")
-		if os.path.exists(raptorlicense):
-			shutil.copyfileobj(open(raptorlicense,"r"),licensetxt.file)
-
-		nsisnotices = os.path.join(options.sbshome,"util","install-windows","notices.txt")
-		if os.path.exists(nsisnotices):
-			licensetxt.write("\n---\n\n")
-			shutil.copyfileobj(open(nsisnotices,"r"),licensetxt.file)
-
 		# Check for command line overrides to defaults
 		for directory in win32supportdirs:
 			print("Checking for location \"{0}\"...".format(directory))
@@ -238,18 +265,13 @@ if __name__ == "__main__":
 			if os.path.isdir(dir):
 				print("Found directory {0}".format(dir))
 
-				# Check for a notices.txt file
-				noticesfile = os.path.join(dir,"notices.txt")
-				if os.path.exists(noticesfile):
-					print("Using notices.txt from {0}".format(dir))
-					licensetxt.write("\n---\n\n")
-					shutil.copyfileobj(open(noticesfile,"r"),licensetxt)
 			else:
 				print("ERROR: directory {0} does not exist. Cannot build installer. Exiting...".format(dir))
 				sys.exit(2)
 
-	licensetxt.file.flush()
-	
+	# Create the license file
+	(licensetxtfile,licensetxtname) = writeLicense(win32supportdirs)
+
 	raptorversion = options.versionprefix + generateinstallerversion(options.sbshome) + options.versionpostfix
 
 	print("Using Raptor version {0} ...".format(raptorversion))
@@ -272,7 +294,7 @@ if __name__ == "__main__":
 					cygwin = win32supportdirs["cygwin"],
 					mingw = win32supportdirs["mingw"],
 					python = win32supportdirs["python"],
-					license = licensetxt.name,
+					license = licensetxtname,
 					sbs_version = raptorversion,
 					nsis_script = os.path.join(options.sbshome, "util", "install-windows", "raptorinstallerscript.nsi")
 				)
@@ -301,9 +323,12 @@ if __name__ == "__main__":
 			bvopt = None
 		else:
 			bvopt = win32supportdirs["bv"]	
-		zipfile_success = writeZip(filename, options.sbshome, bvopt, win32supportdirs["cygwin"], win32supportdirs["mingw"], win32supportdirs["python"], licensetxt.name)
+		zipfile_success = writeZip(filename, options.sbshome, bvopt, win32supportdirs["cygwin"], win32supportdirs["mingw"], win32supportdirs["python"], licensetxtname)
 	else:
 		print("Not creating zip archive as requested.")
+	
+	if not options.noclean:
+		os.unlink(licensetxtname)
 	
 	if not options.noexe and makensis_success != None:
 		print("Makensis Windows installer creation completed and exited with code {0}".format(makensis_success))
@@ -311,5 +336,3 @@ if __name__ == "__main__":
 	if not options.nozip and zipfile_success != None:
 		print("Zip file creation completed and exited with code {0}".format(zipfile_success))
 	print("Finished.")
-
-	licensetxt.close() # Not strictly necessary, as the object going out of scope should close (and delete) it
