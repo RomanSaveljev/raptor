@@ -64,7 +64,23 @@ log_b = allo.diff.DiffableLog(build_b, options.force, options.verbose)
 # now do the comparison
 log_diff = allo.diff.LogDiff(log_a, log_b)
 
-if log_diff.has_differences():
+different = False
+
+print("\nComponent differences (if any) ======================================")
+for (bldinf, counts) in log_diff.components.items():
+	if counts[0] != counts[1]:
+		print("{0:>8} {1:<8} {2}".format(counts[0], counts[1], bldinf))
+		different = True
+
+print("\nOverall totals ======================================================")
+for (event, counts) in log_diff.events.items():
+	if counts[0] != counts[1]:
+		different = True
+	print("{0:>8} {1:<8} {2}".format(counts[0], counts[1], event))
+
+print("")
+		
+if different:
 	sys.exit(1) # the builds are different
 
 sys.exit(0) # the builds are probably equivalent
