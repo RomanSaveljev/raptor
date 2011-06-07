@@ -79,6 +79,15 @@ for (event, counts) in log_diff.events.items():
 	print("{0:>8} {1:<8} {2}".format(counts[0], counts[1], event))
 
 print("")
+
+print("\ndiff ================================================================")
+for line in log_diff:
+	if line[1] == allo.diff.LogDiff.FIRST:
+		print("1: " + line[0])
+	elif line[1] == allo.diff.LogDiff.SECOND:
+		print("2: " + line[0])
+	else:
+		print("=")
 		
 if different:
 	sys.exit(1) # the builds are different

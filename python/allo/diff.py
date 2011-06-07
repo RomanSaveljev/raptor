@@ -172,8 +172,13 @@ class DiffableLog(object):
 			for (event, count) in self.events.items():
 				print("{0} : {1}".format(event, count))
 			print("{0} components".format(len(self.components)))
-				
+
+			
 class LogDiff(object):
+	FIRST  = 1
+	SECOND = 2
+	BOTH   = 3
+	
 	def __init__(self, log_a, log_b):
 		self.log_a = log_a
 		self.log_b = log_b
@@ -211,86 +216,46 @@ class LogDiff(object):
 				nb = 0
 
 			self.events[event] = (na, nb)
-			
-skip = """
-	if left_number != right_number:	
-		different_components[bldinf] = (left_number, right_number)
 
-if different_components:
-	print("\nComponent totals (where different)\n==================================")
-	widest = max(different_components, key=len)
+	def __iter__(self):
+		"""an iterator for stepping through the detailed differences."""
+		return LogDiffIterator(self)
 
-	for bldinf in sorted(different_components.keys()):
-		print("{0:<{w}}:{v[0]:>8}{v[1]:>8}".format(bldinf, v=different_components[bldinf], w=len(widest)+1))
 
-print("\nOverall totals\n==============")
-for event in ["error", "critical", "warning", "remark", "missing"]:
-	if event in left_summary[0]:
-		left_number = left_summary[0][event]
-	else:
-		left_number = 0
+class LogDiffIterator(object):
+	def __init__(self, log_diff):
+		# we know that the files are sorted, so we can step through both line by line
+		self.file_a = open(log_diff.log_a.csv, "rb")
+		self.file_b = open(log_diff.log_b.csv, "rb")
 		
-	if event in right_summary[0]:
-		right_number = right_summary[0][event]
-	else:
-		right_number = 0
-			
-	print("{0:<9}:{1:>8}{2:>8}".format(event, left_number, right_number))
-
-# now create left_diff.txt and right_diff.txt which are all the errors, warnings
-# etc. from left_all.csv which are not the same in right_all.csv and vice-versa.
-#
-# these are .txt because the lines are reformatted for easier reading in a 
-# graphical tool (e.g. NEWLINE strings are replaced by \n)
-#
-# note that these files are not necessarily empty if the totals are all the
-# same - because there may be the same number of errors in both builds by
-# fluke and they could be totally different sets of errors.
-
-left_file = open("left_all.csv", "r")
-right_file = open("right_all.csv", "r")
-
-left_diff = open("left_diff.txt", "w")
-right_diff = open("right_diff.txt", "w")
-
-# we know that the files are sorted, so we can step through both line by line
-left_line = left_file.readline()
-right_line = right_file.readline()
-common = False
-while left_line or right_line:
-	if left_line == right_line:
-		common = True
-		left_diff.write("=")
-		right_diff.write("=")
-		left_line = left_file.readline()
-		right_line = right_file.readline()
-	elif left_line < right_line or not right_line:
-		# close off the line of =
-		if common:
-			left_diff.write("\n") 
-			right_diff.write("\n")
-		common = False
-		# left is missing from right
-		left_diff.write(left_line.replace("NEWLINE","\n"))
-		left_line = left_file.readline()
-	else:
-		# close off the line of =
-		if common:
-			left_diff.write("\n") 
-			right_diff.write("\n")
-		common = False
-		# right is missing from left
-		right_diff.write(right_line.replace("NEWLINE","\n"))
-		right_line = right_file.readline()
+		self.line_a = self.file_a.readline()
+		self.line_b = self.file_b.readline()
 		
-left_diff.close()
-right_diff.close()
+	def __iter__(self):
+		return self
 	
-left_file.close()
-right_file.close()
-
-if different_components:
-	sys.exit(1) # the builds are different
-
-sys.exit(0) # the builds are probably equivalent
-"""
+	def next(self):
+		if self.line_a:
+			if self.line_b:
+				if self.line_a == self.line_b:
+					value_pair = (self.line_a, LogDiff.BOTH)
+					self.line_a = self.file_a.readline()
+					self.line_b = self.file_b.readline()
+				elif self.line_a < self.line_b:
+					value_pair = (self.line_a, LogDiff.FIRST)
+					self.line_a = self.file_a.readline()
+				else:
+					value_pair = (self.line_b, LogDiff.SECOND)
+					self.line_b = self.file_b.readline()
+			else:
+				value_pair = (self.line_a, LogDiff.FIRST)
+				self.line_a = self.file_a.readline()
+		elif self.line_b:
+			value_pair = (self.line_b, LogDiff.SECOND)
+			self.line_b = self.file_b.readline()
+		else:
+			self.file_a.close()
+			self.file_b.close()
+			raise StopIteration
+			
+		return value_pair
