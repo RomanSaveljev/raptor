@@ -42,7 +42,7 @@ values are case sensitive):
 the version of the currently running version of Raptor does not match this.</td>
 </tr>
 <tr>
-<td>'badVersionMessage'</td>
+<td>'versionDescription'</td>
 <td>A message to display to users if the version check fails</td>
 </tr>
 </table> 
@@ -57,12 +57,12 @@ default='sbs'
 type='tool' 
 versionCommand='$(SBS) --version' 
 versionResult='2\.17\.[0-9]+' 
-badVersionMessage='SBS v2.17.0 or newer is required for this SDK.' 
+versionDescription='SBS v2.17.0 or newer is required for this SDK.' 
 /&gt;
 </pre>
 
 In this example, the 'versionResult' attribute specifies that any of the 
-versions 2.17.x can be used with the SDK. The 'badVersionMessage' attribute's 
+versions 2.17.x can be used with the SDK. The 'versionDescription' attribute's 
 value could be extended to give more specific details.
 
 <h2>Command line usage</h2>

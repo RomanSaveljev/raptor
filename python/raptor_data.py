@@ -670,7 +670,7 @@ class Prepend(Operation):
 
 
 class Set(Operation):
-	__slots__ = ('name', 'value', 'type', 'versionCommand', 'versionResult', 'badVersionMessage')
+	__slots__ = ('name', 'value', 'type', 'versionCommand', 'versionResult', 'versionDescription')
 	"""implementation of <set> operation"""
 
 	def __init__(self, name = None, value = "", type = ""):
@@ -680,15 +680,15 @@ class Set(Operation):
 		self.type = type
 		self.versionCommand = ""
 		self.versionResult = ""
-		self.badVersionMessage = ""
+		self.versionDescription = ""
 
 
 	def __str__(self):
 		attributes = "name='{name}' value='{value}' type='{type}'".format(name = self.name, value = self.value, type = self.type)
 		
 		if type == "tool":
-			attributes += " versionCommand='{0}' versionResult='{1}' badVersionMessage='{2}'".format(self.versionCommand,  
-			self.versionResult,	self.badVersionMessage)
+			attributes += " versionCommand='{0}' versionResult='{1}' versionDescription='{2}'".format(self.versionCommand,  
+			self.versionResult,	self.versionDescription)
 		return "<{0} {1}/>".format(self.__class__.__name__, attributes)
 
 
@@ -710,8 +710,8 @@ class Set(Operation):
 		elif name == "host":
 			if HostPlatform.IsKnown(value):
 				self.host = value
-		elif name == "badVersionMessage":
-			self.badVersionMessage = value
+		elif name == "versionDescription":
+			self.versionDescription = value
 		else:
 			raise InvalidPropertyError()
 
@@ -1201,13 +1201,13 @@ class Tool(object):
 		nonascii += chr(c)
 		identity_chartable += " "
 
-	def __init__(self, name, command, versioncommand, versionresult, id="", badversionmessage = None):
+	def __init__(self, name, command, versioncommand, versionresult, id="", versiondescription = None):
 		self.name = name
 		self.command = command
 		self.versioncommand = versioncommand
 		self.versionresult = versionresult
 		self.id = id # what config this is from - used in debug messages
-		self.badversionmessage = badversionmessage # additional informative message on tool check failure
+		self.versiondescription = versiondescription # additional informative message on tool check failure
 		self.date = None
 
 
@@ -1281,8 +1281,8 @@ class Tool(object):
 			tool_error_exc_msg = "tool '{0}' from config '{1}' did not return version '{2}' as required.\n".format(self.name, self.id, self.versionresult)
 			tool_error_exc_msg += "Command '{0}' returned:\n{1}\n".format(self.versioncommand, versionoutput_a)
 						
-			if self.badversionmessage != None:
-				tool_error_exc_msg += "Check your environment and configuration: {0}\n".format(self.badversionmessage)
+			if self.versiondescription != None:
+				tool_error_exc_msg += "Check your environment and configuration: {0}\n".format(self.versiondescription)
 			else:
 				tool_error_exc_msg += "Check your environment and configuration.\n"
 			
@@ -1554,7 +1554,7 @@ class Evaluator(object):
 				if self.gathertools:
 					if op.type == "tool" and op.versionCommand and op.versionResult:
 						tools[op.name] = Tool(op.name, newValue, op.versionCommand, 
-										op.versionResult, configName, op.badVersionMessage if op.badVersionMessage != "" else None)
+										op.versionResult, configName, op.versionDescription if op.versionDescription != "" else None)
 
 		if len(unfound_values) > 0:
 			raise UninitialisedVariableException("\n".join(unfound_values))
