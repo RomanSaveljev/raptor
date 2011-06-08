@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 # Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies). 
 # All rights reserved.
@@ -18,7 +17,6 @@
 Compare the raptor XML logs from multiple builds.
 """
 
-
 import csv
 import os
 import sys
@@ -27,7 +25,6 @@ import allo.utils
 import generic_path
 import plugins.filter_csv
 
-
 # we don't want to create a Raptor object just for these 2 variables
 sbs_home = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 cfg_path = os.path.join("lib", "config")
@@ -35,7 +32,7 @@ cfg_path = os.path.join("lib", "config")
 
 def is_raptor_log(path):
 	try:
-		with open(path, "r") as f:
+		with open(path, "rb") as f:
 			line1 = f.readline()
 			line2 = f.readline()
 			return line1.startswith("<?xml") and line2.startswith("<buildlog")
@@ -48,6 +45,8 @@ class NotADiffableLog(Exception):
 
 
 class CSVFilterParams(object):
+	"""The minimal parameter set required for filter_csv."""
+	
 	def __init__(self, csv_file):
 		self.logFileName = generic_path.Path(csv_file)
 		self.timestring = ""
@@ -59,13 +58,24 @@ class DiffableLog(object):
 	"""Represents a raptor log, or set of logs, in a way that can be compared
 	to another nominally similar log (or set of logs) from a different build."""
 	
-	def __init__(self, dir_or_file, force=False, verbose=False):
-		"""If force=True the class will not reuse any cached information that
+	def __init__(self, dir_or_file, force=False, limit=0, verbose=False):
+		"""dir_or_file is the location of the build logs. For a directory all
+		the files it contains are examined to see if they are Raptor log files.
+		
+		If force is True the class will not reuse any cached information that
 		it finds in the specified directory: instead it will re-read the original
-		logs and generate a new cache."""
+		logs and generate a new cache.
+		
+		If limit is greater than zero then it is used to reset the maximum
+		allowed CSV record size. This is sometimes needed for builds with
+		particularly huge error or warning messages.
+		
+		If verbose is True then progress information is printed as we work
+		through the logs."""
 		
 		self.location = dir_or_file
 		self.force = force
+		self.limit = limit
 		self.verbose = verbose
 		self.logs = []
 		
@@ -126,6 +136,8 @@ class DiffableLog(object):
 				print(path + " is a raptor log")
 	
 	def generate_csv(self, log_file, csv_file):
+		"""run the CSV filter on log_file to produce csv_file."""
+		
 		if self.verbose:
 			print("generating " + csv_file)
 			
@@ -135,8 +147,8 @@ class DiffableLog(object):
 		try:
 			filter.open(filter_params)
 			
-			with open(log_file, "r") as file:
-				for line in file.readlines():
+			with open(log_file, "rb") as file:
+				for line in file:
 					filter.write(line)
 
 			filter.summary()
@@ -146,9 +158,16 @@ class DiffableLog(object):
 			raise NotADiffableLog("problem filtering '{0}' : {1}\n".format(log_file, str(e)))
 
 	def summarise(self):
+		"""scan the combined CSV file and total up the number of error, warning etc.
+		
+		also record the total number of "events" per component."""
+		
 		self.events = {}
 		self.components = {}
 	
+		if self.limit > 0:
+			csv.field_size_limit(self.limit)
+			
 		reader = csv.reader(open(self.csv, "rb"))
 		for row in reader:
 		
@@ -175,11 +194,27 @@ class DiffableLog(object):
 
 			
 class LogDiff(object):
+	"""Comparison between two DiffableLog objects.
+	
+	The result is a "components" dictionary and an "events" dictionary which
+	provide a useful summary of the differences. In components the key is the
+	bld.inf path and the data is the total number of events that appear for
+	that component. In events the key is the event type (error, warning etc.)
+	and the data is the total number of those events that appear in the whole
+	build.
+	
+	The object can also be iterated over, providing a sequence of tuples
+	(line, flag) where "line" is a single line from the combined CSV files
+	and "flag" is either FIRST, SECOND or BOTH to indicate which build(s) the
+	line appears in."""
+	
 	FIRST  = 1
 	SECOND = 2
 	BOTH   = 3
 	
 	def __init__(self, log_a, log_b):
+		"""take two DiffableLog objects."""
+		
 		self.log_a = log_a
 		self.log_b = log_b
 		
@@ -223,8 +258,15 @@ class LogDiff(object):
 
 
 class LogDiffIterator(object):
+	"""Iterate over a LogDiff object.
+	
+	The sequence values are tuples (line, flag) where "line" is a line of text
+	from one or both CSV files, and "flag" is either FIRST or SECOND or BOTH
+	to show which."""
+	
 	def __init__(self, log_diff):
-		# we know that the files are sorted, so we can step through both line by line
+		"""It should be OK to create multiple iterators for the same data."""
+		
 		self.file_a = open(log_diff.log_a.csv, "rb")
 		self.file_b = open(log_diff.log_b.csv, "rb")
 		
@@ -248,12 +290,15 @@ class LogDiffIterator(object):
 					value_pair = (self.line_b, LogDiff.SECOND)
 					self.line_b = self.file_b.readline()
 			else:
+				# file_b is finished
 				value_pair = (self.line_a, LogDiff.FIRST)
 				self.line_a = self.file_a.readline()
 		elif self.line_b:
+			# file_a is finished
 			value_pair = (self.line_b, LogDiff.SECOND)
 			self.line_b = self.file_b.readline()
 		else:
+			# both files are finished
 			self.file_a.close()
 			self.file_b.close()
 			raise StopIteration

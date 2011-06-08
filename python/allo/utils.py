@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 # Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies). 
 # All rights reserved.
