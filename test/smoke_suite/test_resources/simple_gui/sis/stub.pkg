@@ -1,0 +1,17 @@
+; stub.pkg
+;
+;Languages
+&EN
+
+;Header
+#{"Hello World"},(0xE8000091),1,0,0
+
+;Localised Vendor name
+%{"Nokia-EN"}
+
+;Unique Vendor name
+:"Nokia"
+
+""-"!:\sys\bin\helloworld.exe"
+""-"!:\resource\apps\HelloWorld.rsc"
+""-"!:\resource\apps\HelloWorld.mbm"
