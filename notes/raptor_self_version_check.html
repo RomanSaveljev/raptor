@@ -1,0 +1,81 @@
+<html>
+<body>
+<h1>Raptor self version check</h1>
+Starting with 2.16.16, Raptor has the capability to validate its own version 
+against a regular expression specified in the SDK. This regular expression 
+defines a range of versions of Raptor deemed compatible.<br/><br/>
+In addition to this, SDK creators can also specify a version description 
+message that is displayed to users when using an incompatible version.<br/> 
+
+<h2>Usage</h2>
+The recommendation is that the 'generic' variant in the XML file in 
+epoc32/sbs_config/ is extended to enable the version check. To do this, an 
+'env' tag should be added as a child element of the 'generic' variant. This 
+'env' tag must specify the following attributes and values (note that the 
+values are case sensitive):
+<br/>
+<br/>
+<table border="1" cellspacing="0" cellpadding="3" >
+<tr>
+<th>Attribute</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>'name'</td>
+<td>'SBS'</td>
+</tr>
+<tr>
+<td>'default'</td>
+<td>'sbs'</td>
+</tr>
+<tr>
+<td>'type'</td>
+<td>'tool'</td>
+</tr>
+<tr>
+<td>'versionCommand'</td>
+<td>'$(SBS) --version'</td>
+</tr>
+<tr>
+<td>'versionResult'</td>
+<td>A regular expression matching the required versions. It is an error if<br/>
+the version of the currently running version of Raptor does not match this.</td>
+</tr>
+<tr>
+<td>'versionDescription'</td>
+<td>A message to display to users if the version check fails</td>
+</tr>
+</table> 
+<br/>
+<br/>
+Below is an example of an 'env' attribute (with one attribute per line for 
+clarity):</br>
+<pre>
+&lt;env 
+name='SBS' 
+default='sbs' 
+type='tool' 
+versionCommand='$(SBS) --version' 
+versionResult='2\.17\.[0-9]+' 
+versionDescription='SBS v2.17.0 or newer is required for this SDK.' 
+/&gt;
+</pre>
+
+In this example, the 'versionResult' attribute specifies that any of the 
+versions 2.17.x can be used with the SDK. The 'versionDescription' attribute's 
+value could be extended to give more specific details.
+
+<h2>Command line usage</h2>
+In the SDK's, the 'armv5' group is redefined to have the 'generic' variant on 
+by default. The effect of this is that any build that uses the 'generic' 
+variant will have the Raptor self version check by default.
+<br/><br/>
+An error is always raised if the version check fails. If '-k' is passed to 
+Raptor, the build will continue, and without '-k', the build will stop.
+
+<h2>Note</h2>
+Starting with 2.16.4, the sbs.bat and sbs shell scripts set the SBS 
+environment variable, so it is available in the build, and in particular 
+for the version check.
+</body>
+</html> 

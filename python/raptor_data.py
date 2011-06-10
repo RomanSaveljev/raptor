@@ -29,6 +29,7 @@ from tempfile import gettempdir
 from time import time, clock
 import traceback
 import raptor_cache
+import raptor_version
 
 
 class MissingInterfaceError(Exception):
@@ -669,7 +670,7 @@ class Prepend(Operation):
 
 
 class Set(Operation):
-	__slots__ = ('name', 'value', 'type', 'versionCommand', 'versionResult')
+	__slots__ = ('name', 'value', 'type', 'versionCommand', 'versionResult', 'versionDescription')
 	"""implementation of <set> operation"""
 
 	def __init__(self, name = None, value = "", type = ""):
@@ -679,14 +680,16 @@ class Set(Operation):
 		self.type = type
 		self.versionCommand = ""
 		self.versionResult = ""
+		self.versionDescription = ""
 
 
 	def __str__(self):
-		attributes = "name='" + self.name + "' value='" + self.value + "' type='" + self.type + "'"
+		attributes = "name='{name}' value='{value}' type='{type}'".format(name = self.name, value = self.value, type = self.type)
+		
 		if type == "tool":
-			attributes += " versionCommand='" + self.versionCommand + "' versionResult='" + self.versionResult
-
-		return "<set %s/>" % attributes
+			attributes += " versionCommand='{0}' versionResult='{1}' versionDescription='{2}'".format(self.versionCommand,  
+			self.versionResult,	self.versionDescription)
+		return "<{0} {1}/>".format(self.__class__.__name__, attributes)
 
 
 	def Apply(self, oldValue):
@@ -707,6 +710,8 @@ class Set(Operation):
 		elif name == "host":
 			if HostPlatform.IsKnown(value):
 				self.host = value
+		elif name == "versionDescription":
+			self.versionDescription = value
 		else:
 			raise InvalidPropertyError()
 
@@ -1196,12 +1201,13 @@ class Tool(object):
 		nonascii += chr(c)
 		identity_chartable += " "
 
-	def __init__(self, name, command, versioncommand, versionresult, id=""):
+	def __init__(self, name, command, versioncommand, versionresult, id="", versiondescription = None):
 		self.name = name
 		self.command = command
 		self.versioncommand = versioncommand
 		self.versionresult = versionresult
 		self.id = id # what config this is from - used in debug messages
+		self.versiondescription = versiondescription # additional informative message on tool check failure
 		self.date = None
 
 
@@ -1250,14 +1256,17 @@ class Tool(object):
 		# to avoid L10n issues with toolcheck and cygwin use the minimal C locale
 		c_locale_env = os.environ.copy()
 		c_locale_env['LANG']='C'
-
-		try:
-			self.log.Debug("Pre toolcheck: '{0}' for version '{1}'".format(self.name, self.versionresult))
-			p = subprocess.Popen(args=[shell, "-c", self.versioncommand], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=c_locale_env)
-			log.Debug("Checking tool '{0}' for version '{1}'".format(self.name, self.versionresult))
-			versionoutput,err = p.communicate()
-		except Exception,e:
-			versionoutput=None
+		
+		if self.name.upper() == "SBS":
+			versionoutput = raptor_version.fullversion()
+		else:
+			try:
+				self.log.Debug("Pre toolcheck: '{0}' for version '{1}'".format(self.name, self.versionresult))
+				p = subprocess.Popen(args=[shell, "-c", self.versioncommand], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=c_locale_env)
+				log.Debug("Checking tool '{0}' for version '{1}'".format(self.name, self.versionresult))
+				versionoutput,err = p.communicate()
+			except Exception,e:
+				versionoutput=None
 
 		# Some tools return version strings with unicode characters! 
 		# There is no good response other than a lot of decoding and encoding.
@@ -1269,7 +1278,15 @@ class Tool(object):
 			self.valid = True
 		else:
 			self.valid = False
-			raise ToolErrorException("tool '%s' from config '%s' did not return version '%s' as required.\nCommand '%s' returned:\n%s\nCheck your environment and configuration.\n" % (self.name, self.id, self.versionresult, self.versioncommand, versionoutput_a))
+			tool_error_exc_msg = "tool '{0}' from config '{1}' did not return version '{2}' as required.\n".format(self.name, self.id, self.versionresult)
+			tool_error_exc_msg += "Command '{0}' returned:\n{1}\n".format(self.versioncommand, versionoutput_a)
+						
+			if self.versiondescription != None:
+				tool_error_exc_msg += "Check your environment and configuration: {0}\n".format(self.versiondescription)
+			else:
+				tool_error_exc_msg += "Check your environment and configuration.\n"
+			
+			raise ToolErrorException(tool_error_exc_msg)
 
 def envhash(irrelevant_vars):
 	"""Determine something unique about this environment to identify it.
@@ -1536,7 +1553,8 @@ class Evaluator(object):
 			
 				if self.gathertools:
 					if op.type == "tool" and op.versionCommand and op.versionResult:
-						tools[op.name] = Tool(op.name, newValue, op.versionCommand, op.versionResult, configName)
+						tools[op.name] = Tool(op.name, newValue, op.versionCommand, 
+										op.versionResult, configName, op.versionDescription if op.versionDescription != "" else None)
 
 		if len(unfound_values) > 0:
 			raise UninitialisedVariableException("\n".join(unfound_values))
