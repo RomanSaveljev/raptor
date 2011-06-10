@@ -36,7 +36,7 @@ def is_raptor_log(path):
 			line1 = f.readline()
 			line2 = f.readline()
 			return line1.startswith("<?xml") and line2.startswith("<buildlog")
-	except:
+	except IOError:
 		return False
 	
 
