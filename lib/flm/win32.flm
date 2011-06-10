@@ -385,16 +385,14 @@ ifneq ($(BASE_TYPE),importlib)
     $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
     $(eval TYPE:=$(if $(3),$(3),win32compile2object))
     
-    $(eval CC_INCLUDES:=$(wordlist 1,40,$(INCLUDES))) # get the first 40 includes: here the option and include dir are separated with a space
-    $(eval COMMAND_FILE_CONTENTS:=$(wordlist 41,20000,$(INCLUDES))) # get all includes starting with the 41st
-    $(eval COMMAND_FILE:=$(WIN32_COMPILE_TARGET).cmdfile)
-    
+    # Create and use a command file for include paths if there are more than 140
+    $(eval CC_INCLUDES:=$(wordlist 1,280,$(INCLUDES))) # get the first 140 includes: here the option and include dir are separated with a space
+    $(eval COMMAND_FILE:=$(dir $(WIN32_COMPILE_TARGET))cc_includes.cmdfile)
+    $(eval COMMAND_FILE_CONTENTS:=$(wordlist 281,40000,$(INCLUDES))) # get all includes starting with the 141st
+    $(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS))    
     $(if $(FLMDEBUG),$(info <debug>Explicit compiler includes: $(CC_INCLUDES)</debug>))
-    $(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE)</debug>)))
-    $(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(COMMAND_FILE_CONTENTS)</debug>)))
 
-    $(WIN32_COMPILE_TARGET): $(1) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) | $(TRACE_THISCOMPONENT_ALLRULE)
-	  $(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS)) 
+    $(WIN32_COMPILE_TARGET): $(1) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT) $(if $(COMMAND_FILE_CONTENTS),$(COMMAND_FILE),$(PROJECT_META_DEP)) | $(TRACE_THISCOMPONENT_ALLRULE)
 	  $(call startrule,$(TYPE),,$(1)) \
 	  $(CC) \
 	  $(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \

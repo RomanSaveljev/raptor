@@ -828,16 +828,14 @@ $(eval CC_USER_INC:=$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(cal
 $(eval CC_SYSTEM_INC:=$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE))))
 $(if $(FLMDEBUG),$(info <debug>System includes: $(CC_SYSTEM_INC)</debug>))
 
-$(eval CC_INCLUDES:=$(wordlist 1,20,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get the first 20 includes
-$(eval COMMAND_FILE_CONTENTS:=$(wordlist 21,20000,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get all includes starting with the 21st
-$(eval COMMAND_FILE:=$(1).cmdfile)
-
+# Create and use a command file for include paths if there are more than 140
+$(eval CC_INCLUDES:=$(wordlist 1,140,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get the first 140 includes
+$(eval COMMAND_FILE:=$(dir $(1))cc_includes.cmdfile)
+$(eval COMMAND_FILE_CONTENTS:=$(wordlist 141,20000,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get all includes starting with the 141st
+$(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS))
 $(if $(FLMDEBUG),$(info <debug>All compiler includes: $(CC_INCLUDES)</debug>))
-$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE)</debug>)))
-$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(COMMAND_FILE_CONTENTS)</debug>))) 
 
-$(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) | $(TRACE_THISCOMPONENT_ALLRULE)
-	$(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS))
+$(1): $(2) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) $(if $(COMMAND_FILE_CONTENTS),$(COMMAND_FILE),$(PROJECT_META_DEP)) | $(TRACE_THISCOMPONENT_ALLRULE)
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
