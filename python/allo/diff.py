@@ -256,7 +256,36 @@ class LogDiff(object):
 		"""an iterator for stepping through the detailed differences."""
 		return LogDiffIterator(self)
 
+	def dump_to_files(self, filename1, filename2):
+		"""take the detailed differences and create a pair of files which
+		should be manageable by a graphical diff tool. we trim the size by
+		replacing blocks of matching lines with "== block 1", "== block 2" etc.
 
+		returns the number of lines that differ."""
+		
+		different = 0
+		sameblock = False    # are we on a run of matching lines
+		block = 0
+
+		with open(filename1, "wb") as file_a:
+			with open(filename2, "wb") as file_b:
+
+				for line in self:
+					if line[1] == LogDiff.FIRST:
+						file_a.write(line[0])
+						sameblock = False
+						different += 1
+					elif line[1] == LogDiff.SECOND:
+						file_b.write(line[0])
+						sameblock = False
+						different += 1
+					elif not sameblock:    # LogDiff.BOTH
+						sameblock = True
+						block += 1
+						file_a.write("== block {0}\n".format(block))
+						file_b.write("== block {0}\n".format(block))
+		return different
+	
 class LogDiffIterator(object):
 	"""Iterate over a LogDiff object.
 	

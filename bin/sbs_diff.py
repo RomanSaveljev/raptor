@@ -22,6 +22,10 @@ import optparse
 import os
 import sys
 
+# raptor packages are in ../python relative to this script
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "python"))
+import allo.diff
+
 parser = optparse.OptionParser(usage = """%prog [options] dir_or_file1 dir_or_file2
 
 When a directory is specified, all the logs in that directory are combined into
@@ -54,11 +58,6 @@ else:
 	sys.stderr.write("error: expected 2 names, got '{0}'\n".format(", ".join(leftover_args)))
 	sys.exit(1)
 
-# raptor packages are in ../python relative to this script
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "python"))
-#
-import allo.diff
-
 # generate the intermediate files which make it possible to compare the builds
 log_a = allo.diff.DiffableLog(build_a, **options.__dict__)
 log_b = allo.diff.DiffableLog(build_b, **options.__dict__)
@@ -79,29 +78,8 @@ for (event, counts) in log_diff.events.items():
 # take the detailed diff and create diff_left.txt and diff_right.txt
 # which should be manageable by a graphical diff tool. we trim the size
 # by replacing blocks of matching lines with "== block 1", "== block 2" etc.
+different = log_diff.dump_to_files("diff_left.txt", "diff_right.txt")
 
-different = False    # are the logs different at all
-sameblock = False    # are we on a run of matching lines
-block = 0
-
-with open("diff_left.txt", "wb") as file_a:
-	with open("diff_right.txt", "wb") as file_b:
-
-		for line in log_diff:
-			if line[1] == allo.diff.LogDiff.FIRST:
-				file_a.write(line[0])
-				sameblock = False
-				different = True
-			elif line[1] == allo.diff.LogDiff.SECOND:
-				file_b.write(line[0])
-				sameblock = False
-				different = True
-			elif not sameblock:    # allo.diff.LogDiff.BOTH
-				sameblock = True
-				block += 1
-				file_a.write("== block {0}\n".format(block))
-				file_b.write("== block {0}\n".format(block))
-		
 if different:
 	print("\nThe build logs are different.")
 	sys.exit(1)

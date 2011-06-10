@@ -26,8 +26,7 @@ def cat(input_list, output):
 	with open(output, "wb") as fout:
 		for input in input_list:
 			with open(input, "rb") as fin:
-				for line in fin:
-					fout.write(line)
+				fout.writelines(fin)
 
 def merge(*iterables):
     for element in heapq.merge(*iterables):
