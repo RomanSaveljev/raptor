@@ -270,13 +270,13 @@ class LogDiff(object):
 		with open(filename1, "wb") as file_a:
 			with open(filename2, "wb") as file_b:
 
-				for line in self:
-					if line[1] == LogDiff.FIRST:
-						file_a.write(line[0])
+				for (line, flag) in self:
+					if flag == LogDiff.FIRST:
+						file_a.write(line)
 						sameblock = False
 						different += 1
-					elif line[1] == LogDiff.SECOND:
-						file_b.write(line[0])
+					elif flag == LogDiff.SECOND:
+						file_b.write(line)
 						sameblock = False
 						different += 1
 					elif not sameblock:    # LogDiff.BOTH
