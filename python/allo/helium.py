@@ -197,9 +197,12 @@ class RaptorBuild(HeliumLog):
 						m = emake_maxagents_re.match(l)
 						if m:
 							maxagents = int(m.group(1))
-						else:
+						elif options:
 							maxagents = options.maxagents
 							sys.stderr.write("          using maxagents {0} as there is no record in the logs\n".format(maxagents))
+						else:
+							maxagents = 30
+							sys.stderr.write("          using maxagents {0} as there is no record in the logs and no other reasonable guess\n".format(maxagents))
 							
 						self.annofile_refs.append( (os.path.join(logpath, "makefile", aname), maxagents) )
 					continue
@@ -262,7 +265,7 @@ class Helium9Build(HeliumBuild):
 		for r in ["dfs_build_ncp_variants.build_input_compile.log","dfs_build_sf_variants.build_input_compile.log","dfs_build_winscw_dfs_build_winscw_input_compile.log", "ncp_symbian_build_symtb_input_compile.log"]:
 			try:
 				self.raptorbuilds.append(RaptorBuild(logpath, buildid, r, options))
-			except LogfileNotFound, ex:
+			except LogfileNotFound as ex:
 				sys.stderr.write(str(ex))
 
 	def __str__(self):
@@ -291,7 +294,7 @@ class HeliumLogDir(object):
 				sys.stderr.write("  Found build with id {0}\n".format(b))
 				build = Helium9Build(self.logpath, b, options)
 				self.builds.append(build)
-			except IOError,e:
+			except IOError as e:
 				sys.stderr.write("  Buildid {0} found but does not refer to a complete build\n".format(b))
 				sys.stderr.write(str(e)+"\n")
 

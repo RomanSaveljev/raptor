@@ -1,5 +1,4 @@
-
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -23,14 +22,18 @@ class Annofile(xml.sax.handler.ContentHandler):
 		self.jobType = ''
 		self.nodes = set()
 		self.maxagents = maxagents
+		self.lastRecordedJobTime = 0.0
 
 		parser = xml.sax.make_parser()
+		parser.setFeature(xml.sax.handler.feature_validation, False)
+		parser.setFeature(xml.sax.handler.feature_external_ges, False)
 		parser.setContentHandler(self)
 		try:
-			parser.parse(open(name))
-		except xml.sax._exceptions.SAXParseException, e:
-			print "Error:\n" + str(e)
-			print "Ignore that file, parsing continues..."
+			with open(name,"r") as f:
+				parser.parse(f)
+		except xml.sax._exceptions.SAXParseException as e:
+			print ("Error:{0}\ncol:{1} line:{2}\n".format(str(e),e.getColumnNumber(), e.getLineNumber()))
+			print ("Ignore that file, parsing continues...")
 
 	
 	def startElement(self, name, attrs):
@@ -52,8 +55,12 @@ class Annofile(xml.sax.handler.ContentHandler):
 			# This is the sum of time spending on each node
 			# Ideally it equals the build time if there is 
 			# only one node
-			time = float(attrs.get('completed')) \
-				- float(attrs.get('invoked'))
+			job_ended = float(attrs.get('completed')) 
+			job_started = float(attrs.get('invoked'))
+
+			time = job_ended - job_started
+
+			self.lastRecordedJobTime = job_ended
 			self.overallAggregateTime += time
 
 			# Calculate parse time
@@ -81,6 +88,7 @@ class Annofile(xml.sax.handler.ContentHandler):
 			self.duration = ch
 
 
+
 	# Get class attributes
 
 	def getParseTime(self):
@@ -90,8 +98,16 @@ class Annofile(xml.sax.handler.ContentHandler):
 		return self.parseTime
 
 	def getOverallDuration(self):
-		"""Get the overall build duration"""
-		return float(self.duration)
+		"""Get the overall build duration.
+		   In some situations the logs appear to lack an appropriate metric
+		   - this may be related to builds which contain errors not appearing
+		   to always end with a </build> tag.
+		   One way to get around this is to use the last recorded 
+		   job time (job times start at 0)."""
+		if self.duration > 0:
+			return float(self.duration)
+		else:
+			return float(self.lastRecordedJobTime)
 	
 	def getClusterManager(self):
 		return self.cm
