@@ -1088,6 +1088,7 @@ class Raptor(object):
 		self.Debug("Filesystem {0}".format(self.filesystem))
 		self.Debug("Python {0}.{1}.{2}".format(*sys.version_info[:3]))
 		self.Debug("Command-line-parser {0}".format(self.CLI))
+		self.Debug("Currently selected filters: {0}".format(self.filterList))
 
 		for e,value in self.override.items():
 			self.Debug("Override {0} = {1}".format(e, value))
@@ -1099,6 +1100,9 @@ class Raptor(object):
 
 	def _check_and_set_build_targets(self):
 		# resolve inter-argument dependencies.
+		
+		targets = [x.lower() for x in self.targets]
+		
 		# --what or --check implies the WHAT target and FilterWhat Filter
 		if self.doWhat or self.doCheck:
 			self.targets = ["WHAT"]
@@ -1108,11 +1112,10 @@ class Raptor(object):
 			# 1. CLEAN/CLEANEXPORT/REALLYCLEAN needs the FilterClean filter.
 			# 2. Targets that clean should not be combined with other targets.
 
-			targets = [x.lower() for x in self.targets]
-
 			CL = "clean"
 			CE = "cleanexport"
 			RC = "reallyclean"
+			EX = "export"
 
 			is_clean = 0
 			is_suspicious_clean = 0
@@ -1131,14 +1134,17 @@ class Raptor(object):
 				if is_suspicious_clean:
 					self.Warn('CLEAN, CLEANEXPORT and a REALLYCLEAN should not be combined with other targets as the result is unpredictable.')
 			else:
-				""" Copyfile implements the <copy> tag which is primarily useful with cluster builds.
-				    It allows file copying to occur on the primary build host rather than on the cluster.
-				    This is more efficient.
-				"""
-				self.filterList += ",filtercopyfile"
-
-
-
+				# Copyfile implements the <copy> tag which is primarily useful with cluster builds.
+				# It allows file copying to occur on the primary build host rather than on the cluster.
+				# This is more efficient.
+				
+				if EX in targets: # sbs EXPORT implies sbs --export-only
+					self.SetExportOnly(True)
+				elif self.doExportOnly: # sbs --export-only implies sbs EXPORT
+					self.targets.append(EX)
+				else:
+					self.filterList += ",filtercopyfile"
+			
 	def GetBuildUnitsToBuild(self, configNames):
 		"""Return a list of the configuration objects that correspond to the
 		   list of configuration names in the configNames parameter.

@@ -14,7 +14,7 @@
 # Description: 
 #
 
-from raptor_tests import AntiTargetSmokeTest
+from raptor_tests import AntiTargetSmokeTest, ReplaceEnvs
 import os
 
 def run():
@@ -139,6 +139,42 @@ read_only.h was_read_only.h //
 	t.targets = []
 	t.antitargets = exported_files
 	t.mustmatch_singleline = []
+	t.warnings = 0
+	t.run()
+	
+	# Clean all exports in a bld.inf with resources
+	t.name = "export_reallyclean" 
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/simple.inf reallyclean"
+	t.targets = []
+	t.antitargets = []
+	t.mustmatch_singleline = []
+	t.warnings = 0
+	t.run()
+
+	# Ensure that sbs EXPORT does not generate errors
+	t.name = "export_generates_no_errors" 
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/simple.inf EXPORT"
+	t.targets = [ "$(EPOCROOT)/epoc32/include/testresource_badef.rh",
+				  "$(EPOCROOT)/epoc32/include/testresource.hrh"]
+	t.antitargets = []
+	
+	error_template = "<error>Could not update {0} from {1} : Source of copyfile does not exist:  {1}</error>"
+	
+	src_dest_pair_templates = [( "$(EPOCROOT)/epoc32/data/z/resource/testresource/testresource\.{0}", 
+								 "$(EPOCROOT)/epoc32/build/resource/.*/testresource_/testresource_simpleresource\.{0}" ),
+							   ( "$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/testresource/testresource\.{0}", 
+								 "$(EPOCROOT)/epoc32/build/resource/.*/testresource_/testresource_simpleresource\.{0}" ),
+							   ( "$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/testresource/testresource\.{0}", 
+								 "$(EPOCROOT)/epoc32/build/resource/.*/testresource_/testresource_simpleresource\.{0}" )]
+	
+	resource_langs = ("r37", "r94", "r96", "rsc")
+	
+	t.mustnotmatch_singleline = [ ReplaceEnvs(error_template.format(
+										src_dest_pair[0].format(lang), 
+										src_dest_pair[1].format(lang)
+									)) for src_dest_pair in src_dest_pair_templates for lang in resource_langs  
+								]
+	
 	t.warnings = 0
 	t.run()
 	

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -13,10 +13,10 @@
 #
 # Description: 
 #
-# The stringtable example doesn't currently build in full, hence it's built for
-# EXPORT in isolation; We also test archives here - although an export, they
-# will be exported in response to the first configuration processed (this
-# example ensures it's armv5_udeb, so we can match against that config).
+# The stringtable example builds in full, and we also test archives here - although an export, they 
+# will be exported in response to the first configuration processed (this example ensures 
+# it's armv5_udeb, so we can match against that config).
+
 from raptor_tests import CheckWhatSmokeTest, ReplaceEnvs
 from raptor_meta import MetaReader
 from raptor_utilities import sanitise
@@ -28,9 +28,8 @@ def run():
 	markerfile = MetaReader.unzippedPathFragment(premarkerfile) + ".unzipped"
 	
 	t = CheckWhatSmokeTest()
-	t.id = "0069a"
 	t.name = "stringtable_zip_whatlog"
-	t.command = "sbs -b smoke_suite/test_resources/simple_stringtable/bld.inf -b smoke_suite/test_resources/simple_zip_export/bld.inf -f - -m ${SBSMAKEFILE} -c armv5_udeb.whatlog EXPORT"
+	t.command = "sbs -b smoke_suite/test_resources/simple_stringtable/bld.inf -b smoke_suite/test_resources/simple_zip_export/bld.inf -f - -m ${SBSMAKEFILE} -c armv5_udeb.whatlog"
 	componentpath1 = re.sub(r'\\','/',os.path.abspath("smoke_suite/test_resources/simple_stringtable"))
 	componentpath2 = re.sub(r'\\','/',os.path.abspath("smoke_suite/test_resources/simple_zip_export"))
 	t.regexlinefilter = re.compile("^<(whatlog|archive|stringtable>|member>|zipmarker>)")
@@ -67,12 +66,10 @@ def run():
 	t.run()
 	
 	"Tests to check that up-to-date zip exports are reported"
-	t.id = "0069b"
 	t.name = "stringtable_zip_whatlog_rebuild"
 	t.targets = []
 	t.run()
 	
-	t.id = "69"
 	t.name = "stringtable_zip_whatlog"	
 	t.print_result()
 	return t

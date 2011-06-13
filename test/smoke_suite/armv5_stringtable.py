@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 - 2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -18,10 +18,8 @@ from raptor_tests import SmokeTest
 
 def run():
 	t = SmokeTest()
-	t.id = "26"
 	t.name = "armv5_stringtable"
-	t.command = "sbs -b smoke_suite/test_resources/simple_stringtable/bld.inf" \
-			+ " -c armv5 EXPORT"
+	t.command = "sbs -b smoke_suite/test_resources/simple_stringtable/bld.inf -c armv5"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/include/strconsts.h"
 		]
