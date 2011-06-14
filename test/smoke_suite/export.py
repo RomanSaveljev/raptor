@@ -143,7 +143,7 @@ read_only.h was_read_only.h //
 	t.run()
 	
 	# Clean all exports in a bld.inf with resources
-	t.name = "export_reallyclean" 
+	t.name = "component_with_resource_reallyclean" 
 	t.command = "sbs -b smoke_suite/test_resources/resource/group/simple.inf reallyclean"
 	t.targets = []
 	t.antitargets = []
@@ -158,21 +158,8 @@ read_only.h was_read_only.h //
 				  "$(EPOCROOT)/epoc32/include/testresource.hrh"]
 	t.antitargets = []
 	
-	error_template = "<error>Could not update {0} from {1} : Source of copyfile does not exist:  {1}</error>"
-	
-	src_dest_pair_templates = [( "$(EPOCROOT)/epoc32/data/z/resource/testresource/testresource\.{0}", 
-								 "$(EPOCROOT)/epoc32/build/resource/.*/testresource_/testresource_simpleresource\.{0}" ),
-							   ( "$(EPOCROOT)/epoc32/release/winscw/udeb/z/resource/testresource/testresource\.{0}", 
-								 "$(EPOCROOT)/epoc32/build/resource/.*/testresource_/testresource_simpleresource\.{0}" ),
-							   ( "$(EPOCROOT)/epoc32/release/winscw/urel/z/resource/testresource/testresource\.{0}", 
-								 "$(EPOCROOT)/epoc32/build/resource/.*/testresource_/testresource_simpleresource\.{0}" )]
-	
-	resource_langs = ("r37", "r94", "r96", "rsc")
-	
-	t.mustnotmatch_singleline = [ ReplaceEnvs(error_template.format(
-										src_dest_pair[0].format(lang), 
-										src_dest_pair[1].format(lang)
-									)) for src_dest_pair in src_dest_pair_templates for lang in resource_langs  
+	t.mustnotmatch_singleline = [
+									"<error>.*</error>"
 								]
 	
 	t.warnings = 0
