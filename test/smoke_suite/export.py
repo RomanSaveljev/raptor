@@ -157,11 +157,7 @@ read_only.h was_read_only.h //
 	t.targets = [ "$(EPOCROOT)/epoc32/include/testresource_badef.rh",
 				  "$(EPOCROOT)/epoc32/include/testresource.hrh"]
 	t.antitargets = []
-	
-	t.mustnotmatch_singleline = [
-									"<error>.*</error>"
-								]
-	
+	t.errors = 0
 	t.warnings = 0
 	t.run()
 	
