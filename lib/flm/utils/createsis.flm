@@ -1,0 +1,127 @@
+# Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+# All rights reserved.
+# This component and the accompanying materials are made available
+# under the terms of the License "Eclipse Public License v1.0"
+# which accompanies this distribution, and is available
+# at the URL "http://www.eclipse.org/legal/epl-v10.html".
+#
+# Initial Contributors:
+# Nokia Corporation - initial contribution.
+#
+# Contributors:
+#
+# Description:
+#
+# FLM to create, and optionally sign, .sis files
+
+# parameters
+#
+# PKG_FILE                 input .pkg filename [mandatory]
+# PKG_PATH                 path to .pkg file [default: $(EXTENSION_ROOT)]
+# SIS_FILE                 output .sis filename [mandatory]
+# SIS_PATH                 path to .sis file output [default: $(EXTENSION_ROOT) or
+#                          deduced stub .sis location]
+# TARGET_FILE              core binary to be packaged
+# SEARCH_PATH              root path to resolve .pkg references [default: $(EPOCROOT)]
+# BUILD_TYPE               urel|udeb [mandatory]
+# STUB_SIS                 false|true
+# DEPEND_FILES             additional dependent files
+# DEPEND_PATH              root path to additional dependent files [default: $(EPOCROOT)]
+# CERTIFICATE_FILE         signing_certificate_file.cer
+# PRIVATE_KEY_FILE         private_key_file.key
+# PRIVATE_KEY_PASSPHRASE   passphrase for key file/signing
+# MAKESIS_ARGS             additional arguments to makesis
+# SIGNSIS_ARGS             additional arguments to signsis
+
+
+# Ensure expansion of location values potentially making use of $(EXTENSION_ROOT) etc.
+$(eval SIS_PATH:=$(SIS_PATH))
+$(eval PKG_PATH:=$(PKG_PATH))
+$(eval SEARCH_PATH:=$(SEARCH_PATH))
+$(eval DEPEND_PATH:=$(DEPEND_PATH))
+
+# Resolve file-based inputs to absolute references
+PKG_FILE_ABS:=$(PKG_PATH)/$(PKG_FILE)
+TARGET_FILE_ABS:=$(if $(TARGET_FILE),$(RELEASEPATH)/$(VARIANTPLATFORM)/$(VARIANTTYPE)/$(TARGET_FILE),)
+DEPEND_FILES_ABS:=$(addprefix $(DEPEND_PATH)/,$(DEPEND_FILES))
+CERTIFICATE_FILE_ABS:=$(if $(CERTIFICATE_FILE),$(EXTENSION_ROOT)/$(CERTIFICATE_FILE),)
+PRIVATE_KEY_FILE_ABS:=$(if $(PRIVATE_KEY_FILE),$(EXTENSION_ROOT)/$(PRIVATE_KEY_FILE),)
+
+# Stub .sis generation status has implications on resolved file locations as well as processing
+GEN_STUB_SIS:=
+ifeq ($(call lowercase,$(STUB_SIS)),true)
+  GEN_STUB_SIS:=1
+endif
+
+ifneq ($(SIS_PATH),)
+  SIS_FILE_ABS:=$(SIS_PATH)/$(SIS_FILE)
+else
+  SIS_FILE_ABS:=$(EXTENSION_ROOT)/$(SIS_FILE)
+  ifeq ($(GEN_STUB_SIS),1)
+    SIS_FILE_ABS:=$(EPOCROOT)/epoc32/data/z/system/install/$(SIS_FILE)
+    ifeq ($(VARIANTPLATFORM),winscw)
+      SIS_FILE_ABS:=$(EPOCROOT)/epoc32/release/$(VARIANTPLATFORM)/$(VARIANTTYPE)/z/system/install/$(SIS_FILE)
+    endif
+  endif
+endif
+
+BUILD_DIR=$(OUTPUTPATH)/$(notdir $(subst .,_,$(SIS_FILE)))/$(VARIANTPLATFORM)/$(VARIANTTYPE)
+PROCESSED_PKG_FILE_TEMP_ABS:=$(if $(PKG_FILE),$(BUILD_DIR)/$(notdir $(PKG_FILE)),)
+UNSIGNED_SIS_FILE_TEMP_ABS:=$(if $(SIS_FILE),$(BUILD_DIR)/$(notdir $(SIS_FILE)),)
+
+
+ifneq ($(FLMDEBUG),)
+$(info <debug>createsis.flm: PKG_FILE_ABS=$(PKG_FILE_ABS)</debug>)
+$(info <debug>createsis.flm: SIS_FILE_ABS=$(SIS_FILE_ABS)</debug>)
+$(info <debug>createsis.flm: TARGET_FILE_ABS=$(TARGET_FILE_ABS)</debug>)
+$(info <debug>createsis.flm: SEARCH_PATH=$(SEARCH_PATH)</debug>)
+$(info <debug>createsis.flm: DEPEND_FILES_ABS=$(DEPEND_FILES_ABS)</debug>)
+$(info <debug>createsis.flm: CERTIFICATE_FILE_ABS=$(CERTIFICATE_FILE_ABS)</debug>)
+$(info <debug>createsis.flm: PRIVATE_KEY_FILE_ABS=$(PRIVATE_KEY_FILE_ABS)</debug>)
+$(info <debug>createsis.flm: BUILD_TYPE=$(BUILD_TYPE)</debug>)
+$(info <debug>createsis.flm: STUB_SIS=$(STUB_SIS)</debug>)
+$(info <debug>createsis.flm: MAKESIS_ARGS=$(MAKESIS_ARGS)</debug>)
+$(info <debug>createsis.flm: SIGNSIS_ARGS=$(SIGNSIS_ARGS)</debug>)
+$(info <debug>createsis.flm: PROCESSED_PKG_FILE_TEMP_ABS=$(PROCESSED_PKG_FILE_TEMP_ABS)</debug>)
+$(info <debug>createsis.flm: UNSIGNED_SIS_FILE_TEMP_ABS=$(UNSIGNED_SIS_FILE_TEMP_ABS)</debug>)
+endif
+
+$(call makepathfor,$(PROCESSED_PKG_FILE_TEMP_ABS))
+$(call makepathfor,$(UNSIGNED_SIS_FILE_TEMP_ABS))
+$(call makepathfor,$(SIS_FILE_ABS))
+
+
+define createsis
+# Processed packaged files have $(PLATFORM) and $(TARGET) references substituted for the
+# "current" traditional build platform and build variant; QMAKE generated template .pkg
+# files use these references by default
+$(PROCESSED_PKG_FILE_TEMP_ABS): $(PKG_FILE_ABS)
+	$(call startrule,processpkg) \
+	$(GNUSED) 's#\$$$$(PLATFORM)#$(VARIANTPLATFORM)#g;s#\$$$$(TARGET)#$(VARIANTTYPE)#g;' $$< > $$@ \
+	$(call endrule,processpkg)
+
+# Stub .sis files don't have a target binary to package, so we exclude the hard dependency
+$(UNSIGNED_SIS_FILE_TEMP_ABS): $(PROCESSED_PKG_FILE_TEMP_ABS) $(DEPEND_FILES_ABS) $(if $(TARGET_FILE),$(TARGET_FILE_ABS))
+	$(call startrule,makesis) \
+	$(MAKESIS) $(if $(GEN_STUB_SIS),-s) $(MAKESIS_ARGS) -d$(SEARCH_PATH) $$< $$@ \
+	$(call endrule,makesis)
+	
+ifneq ($(CERTIFICATE_FILE_ABS),)
+$(SIS_FILE_ABS): $(UNSIGNED_SIS_FILE_TEMP_ABS) $(CERTIFICATE_FILE_ABS) $(PRIVATE_KEY_FILE_ABS)
+	$(call startrule,signsis) \
+	$(SIGNSIS) $(SIGNSIS_ARGS) $$< $$@ $(CERTIFICATE_FILE_ABS) $(PRIVATE_KEY_FILE_ABS) $(PRIVATE_KEY_PASSPHRASE) \
+	$(call endrule,signsis)
+else
+$(SIS_FILE_ABS): $(UNSIGNED_SIS_FILE_TEMP_ABS)
+	$(call startrule,copysis) \
+	$(GNUCP) $$< $$@ \
+	$(call endrule,copysis)
+endif
+endef
+
+ifeq ($(call lowercase,$(BUILD_TYPE)),$(VARIANTTYPE))
+  ALL:: $(SIS_FILE_ABS)
+  $(eval $(createsis))
+  $(call raptor_release,$(SIS_FILE_ABS))
+  $(call raptor_clean,$(PROCESSED_PKG_FILE_TEMP_ABS) $(UNSIGNED_SIS_FILE_TEMP_ABS) $(SIS_FILE_ABS))
+endif

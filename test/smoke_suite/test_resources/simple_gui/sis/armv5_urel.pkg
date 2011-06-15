@@ -1,0 +1,17 @@
+; armv5_urel.pkg
+;
+;Languages
+&EN
+
+;Header
+#{"Hello World"},(0xE8000091),1,0,0
+
+;Localised Vendor name
+%{"Nokia-EN"}
+
+;Unique Vendor name
+:"Nokia"
+
+"\epoc32\release\armv5\urel\helloworld.exe"-"!:\sys\bin\helloworld.exe"
+"\epoc32\data\z\resource\apps\HelloWorld.rsc"-"!:\resource\apps\HelloWorld.rsc"
+"\epoc32\data\z\resource\apps\helloworld.mbm"-"!:\resource\apps\HelloWorld.mbm"

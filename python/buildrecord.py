@@ -21,6 +21,7 @@ import os
 import stat
 import json
 
+default_history_size = 10
 
 class BuildRecord(object):
 	"""Information about a build which can be used, amongst other purposes,
@@ -48,7 +49,7 @@ class BuildRecord(object):
 	
 	stored_attrs = ['commandline', 'environment', 'topmakefilename']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
-	history_size = 10
+	history_size = default_history_size
 	parsefails = []
 	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None):
 		""" 	Create a new record of a build that is about to happen (in which case the default parameters
@@ -168,12 +169,11 @@ class BuildRecord(object):
 		
 		return False
 
-	@classmethod
-	def matching_records(cls, adir, matching):
-		"""Find records of previous builds that are equivalent to this one,
-		   sort them according to time order and yield first X of them to 
-		   the caller """
 
+
+	@classmethod
+	def all_record_files(cls, adir):
+		"""Find all build records but don't instantiate them"""
 		brfiles = []
 		for b in os.listdir(adir):
 			if b.endswith(".buildrecord"):
@@ -186,22 +186,36 @@ class BuildRecord(object):
 		# sort so newest are first
 		brfiles_s = sorted(brfiles,key=lambda f:f[1], reverse=True)
 
+		return brfiles_s
+
+
+	@classmethod
+	def matching_records(cls, adir, matching=None, maxcount = default_history_size):
+		"""Find records of previous builds that are equivalent to this one,
+		   sort them according to time order and yield first X of them to 
+		   the caller """
+
 		# yield up build records if they are "equal".  Don't 
 		# look infinitely far back as it might take a long time
 		rcount = 0
-		for brt in brfiles_s:
+		for brt in cls.all_record_files(adir):
 			b = brt[0]
 			try:
 				br = cls.from_file(os.path.join(adir,b))
-				if br == matching:
+				if not matching or br == matching:
 					yield br
 					rcount += 1
-					if rcount > BuildRecord.history_size:
+					if rcount > maxcount:
 						break
 			except Exception,e:
 				print(e)
 				BuildRecord.parsefails.append(e)	# parse errors should not be fatal - just means that the build record is from an old version of raptor.  There is no way to report the fact that they happened though and that's not so nice.  This exception list just makes it feasible to debug a problem if one occurs.
 
+	@classmethod
+	def all_records(cls, adir, maxcount = default_history_size):
+		for br in cls.matching_records( adir, maxcount = maxcount):
+			yield br
+	
 	@classmethod
 	def from_old(cls,  adir, commandline, environment, topmakefile):
 		"""Create a build record for this build. Try to make it from an older one 

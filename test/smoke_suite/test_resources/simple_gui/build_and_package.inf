@@ -1,0 +1,86 @@
+/*
+* Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+PRJ_PLATFORMS
+WINSCW ARMV5
+
+PRJ_MMPFILES
+HelloWorld.mmp
+
+PRJ_EXTENSIONS
+
+// release packaging
+START EXTENSION utility.createsis
+#ifdef WINSCW
+OPTION PKG_FILE sis/winscw_urel.pkg
+OPTION SIS_FILE sis/helloworld_winscw.sis
+#else
+OPTION PKG_FILE sis/armv5_urel.pkg
+OPTION SIS_FILE sis/helloworld_armv5.sis
+#endif
+OPTION TARGET_FILE helloworld.exe
+OPTION BUILD_TYPE urel
+OPTION CERTIFICATE_FILE sis/sign.cer
+OPTION PRIVATE_KEY_FILE sis/sign.key
+OPTION PRIVATE_KEY_PASSPHRASE velociraptor123
+OPTION SIGNSIS_ARGS -cd // Sign using RSA
+OPTION DEPEND_FILES epoc32/data/z/resource/apps/HelloWorld.rsc epoc32/data/z/resource/apps/helloworld.mbm
+END
+
+// debug packaging
+START EXTENSION utility.createsis
+#ifdef WINSCW
+OPTION PKG_FILE sis/winscw_udeb.pkg
+OPTION SIS_FILE sis/helloworld_winscw_debug.sis
+#else
+OPTION PKG_FILE sis/armv5_udeb.pkg
+OPTION SIS_FILE sis/helloworld_armv5_debug.sis
+#endif
+OPTION TARGET_FILE helloworld.exe
+OPTION BUILD_TYPE udeb
+OPTION MAKESIS_ARGS -v
+OPTION DEPEND_FILES epoc32/data/z/resource/apps/HelloWorld.rsc epoc32/data/z/resource/apps/helloworld.mbm
+END
+
+// custom release packaging - uses the optional overrides for default locations
+START EXTENSION utility.createsis
+OPTION PKG_PATH $(EXTENSION_ROOT)/sis
+OPTION SIS_PATH $(EPOCROOT)/epoc32/packaging/helloworld
+#ifdef WINSCW
+OPTION PKG_FILE winscw_urel_custom.pkg
+OPTION SIS_FILE helloworld_winscw_custom.sis
+#else
+OPTION PKG_FILE armv5_urel_custom.pkg
+OPTION SIS_FILE helloworld_armv5_custom.sis
+#endif
+OPTION TARGET_FILE helloworld.exe
+option SEARCH_PATH $(EPOCROOT)/epoc32
+OPTION BUILD_TYPE urel
+OPTION DEPEND_PATH $(EPOCROOT)/epoc32/data/z/resource/apps
+OPTION DEPEND_FILES HelloWorld.rsc helloworld.mbm
+END
+
+
+// stub .sis file
+START EXTENSION utility.createsis
+OPTION PKG_FILE sis/stub.pkg
+OPTION SIS_FILE helloworld_stub.sis
+OPTION BUILD_TYPE urel
+OPTION STUB_SIS true
+END
+

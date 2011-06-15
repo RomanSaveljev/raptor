@@ -33,4 +33,31 @@
 		<param name="TESTCODE" default=""/>
 		<param name="VARIANTPLATFORM"/>
 	</interface>
+	
+	<interface name="utility.createsis" extends="utility.base" flm="createsis.flm">
+		<param name='EPOCTOOLS'/>
+		<param name="MAKESIS" default="$(EPOCTOOLS)/makesis$(DOTEXE)"/>
+		<param name="SIGNSIS" default="$(EPOCTOOLS)/signsis$(DOTEXE)"/>
+	
+		<param name="RELEASEPATH"/>
+		<param name="VARIANTPLATFORM"/>
+		<param name="VARIANTTYPE"/>
+		<param name='OUTPUTPATH'/>
+		
+		<param name="PKG_FILE"/>
+		<param name="PKG_PATH" default="$(EXTENSION_ROOT)"/>
+		<param name="SIS_FILE"/>
+		<param name="SIS_PATH" default=""/>
+		<param name="TARGET_FILE" default=""/>
+		<param name="SEARCH_PATH" default="$(EPOCROOT)"/> 			
+		<param name="BUILD_TYPE"/>
+		<param name="STUB_SIS" default="false"/>
+		<param name="DEPEND_FILES" default=""/>
+		<param name="DEPEND_PATH" default="$(EPOCROOT)"/>
+		<param name="CERTIFICATE_FILE" default=""/>
+		<param name="PRIVATE_KEY_FILE" default=""/>
+		<param name="PRIVATE_KEY_PASSPHRASE" default=""/>
+		<param name="MAKESIS_ARGS" default=""/>
+		<param name="SIGNSIS_ARGS" default=""/>		
+	</interface>
 </build>
