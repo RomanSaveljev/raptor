@@ -124,7 +124,11 @@ class TargetTimesLog(HeliumLog):
 		return s
 
 class RaptorAnnofile(object):
-	"""Thin wrapper around the annofile class to make it relevant to this utility."""
+	"""Thin wrapper around the annofile class to make it relevant to
+	this utility.  Parses anno files lazily so that one can use it
+	to represent an annotation file that one knows about without
+	committing to the potentially time consuming task of parsing it.
+	Referencing the annofile attribute triggers parsing."""
 	# Examples:
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_tools_all.resource.emake.anno
 	# 92_7952_custom_dilbert_201022_dilbert_dfs_build_sf_dfs_variants.default.emake.anno
@@ -134,7 +138,15 @@ class RaptorAnnofile(object):
 		self.filename = filename
 		self.buildid = buildid
 
-		self.annofile = allo.annofile.Annofile(self.filename, maxagents)
+		# self.annofile respond with this value "lazily" 
+		self.maxagents = maxagents
+
+	def __getattr__(self, name):
+		if name=='annofile':
+			self.annofile = allo.annofile.Annofile(self.filename,self. maxagents)
+		else:
+			raise AttributeError("'RaptorAnnofile' object has no attribute '{0}'".format(name))
+			
 
 	def __str__(self):
 		return "<annofile name='{0}' phase='{1}'>\n{2}</annofile>\n" \

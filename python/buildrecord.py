@@ -13,6 +13,7 @@
 #
 # Description:
 
+default_history_size = 10
 
 """ Module for creating/manipulating an "audit trail" of builds """
 
@@ -47,11 +48,11 @@ class BuildRecord(object):
 	depends on (e.g. the bld.infs and mmps that correspond to that makefileset).
 	"""
 	
-	stored_attrs = ['commandline', 'environment', 'topmakefilename']
+	stored_attrs = ['commandline', 'environment', 'topmakefilename','logfilename']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
 	history_size = default_history_size
 	parsefails = []
-	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None):
+	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None, logfilename='-'):
 		""" 	Create a new record of a build that is about to happen (in which case the default parameters
 			may be used) or a build that is complete.  Parameters must all be strings. 
 		"""
@@ -59,6 +60,7 @@ class BuildRecord(object):
 		self.commandline = commandline
 		self.environment = environment
 		self.topmakefilename = topmakefilename
+		self.logfilename = logfilename
 		self.uptodate = False # Do we need to regenerate the makefiles to reuse this build?
 		self.makefilesets=makefilesets #  an array of raptor_makefile.BaseMakefileset Object
 		self.filename = self.topmakefilename + ".buildrecord"
@@ -169,8 +171,6 @@ class BuildRecord(object):
 		
 		return False
 
-
-
 	@classmethod
 	def all_record_files(cls, adir):
 		"""Find all build records but don't instantiate them"""
@@ -217,11 +217,11 @@ class BuildRecord(object):
 			yield br
 	
 	@classmethod
-	def from_old(cls,  adir, commandline, environment, topmakefile):
+	def from_old(cls,  adir, commandline, environment, topmakefile, logfilename):
 		"""Create a build record for this build. Try to make it from an older one 
 		   and use its existing makefiles if they are up-to-date."""
 
-		newbr = cls(commandline, environment, topmakefile)
+		newbr = cls(commandline, environment, topmakefile,logfilename)
 		
 		# See if there is an old build record to reuse
 		for oldbr in cls.matching_records(adir, newbr):

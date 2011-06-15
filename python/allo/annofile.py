@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
+#a Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -9,6 +9,7 @@
 
 import xml.sax
 import os
+import sys
 
 class Annofile(xml.sax.handler.ContentHandler):
 	"""A class to represent an emake anno file"""
@@ -32,8 +33,7 @@ class Annofile(xml.sax.handler.ContentHandler):
 			with open(name,"r") as f:
 				parser.parse(f)
 		except xml.sax._exceptions.SAXParseException as e:
-			print ("Error:{0}\ncol:{1} line:{2}\n".format(str(e),e.getColumnNumber(), e.getLineNumber()))
-			print ("Ignore that file, parsing continues...")
+			sys.stderr.write("Error: Annofile parsing {0}\ncol:{1} line:{2}\n".format(str(e),e.getColumnNumber(), e.getLineNumber()))
 
 	
 	def startElement(self, name, attrs):
