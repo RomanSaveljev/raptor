@@ -26,7 +26,6 @@
 		<param name='CAPABILITYFLAG1' default='00000000u'/>
 		<param name='CAPABILITYFLAG2' default='00000000u'/>
 		<param name='COPY_FOR_STATIC_LINKAGE' default='0'/>
-		<param name='COMMANDFILE_OPTION' default='@'/>
 		<param name='DEBUGLIBRARY' default=''/>
 		<param name='DEFFILE' default=''/>
 		<param name='DOCUMENT' default=''/>

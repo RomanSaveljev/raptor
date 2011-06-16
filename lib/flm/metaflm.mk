@@ -185,43 +185,6 @@ define raptor_clean
 $(eval $(call GenerateStandardCleanTarget,$1))
 endef
 
-# Macro for creating a command file
-#
-# Usage: $(call createcommandfile,$(FILE_NAME),$(FILE_CONTENTS))
-#
-# FILE_NAME is the name of the file to create; if directories are present, they
-# are assumed to exist
-# FILE_CONTENTS is a string containing the contents to write to the command file;
-# it is also used a flag deciding whether or not to create the file: an empty string
-# means no command file is created, otherwise a file is created.
-#
-# Command file generation is ensured to be a singular activity through the use
-# of a guard variable based on FILE_NAME
-#
-define createcommandfile
-
-$(eval COMMAND_FILE_GUARD:=$(call sanitise,$(1)))
-
-$(if $(2),$(if $(FLMDEBUG),$(info <debug>Command file used: $(1)</debug>)))
-$(if $(2),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(2)</debug>)))
-
-ifeq ($(origin $($(COMMAND_FILE_GUARD))),undefined)
-ifneq ($(2),)
-
-$(1): $(PROJECT_META_DEP)
-	$(call startrule,command_file_includes) \
-	echo $(2) > $(1) \
-	$(call endrule,command_file_includes)
-
-CLEANTARGETS:=$$(CLEANTARGETS) $(1)
-$(eval $(COMMAND_FILE_GUARD):=1)
-
-endif
-endif
-
-endef
-
-
 endif 
 # end of metaflm
 ## END TEST BATCH FILES MACRO
