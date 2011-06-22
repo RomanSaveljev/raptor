@@ -20,6 +20,7 @@ import re
 import datetime
 
 import allo.annofile
+import allo.utils
 
 class UndeterminedBuildID(Exception):
 	pass
@@ -143,7 +144,8 @@ class RaptorAnnofile(object):
 
 	def __getattr__(self, name):
 		if name=='annofile':
-			self.annofile = allo.annofile.Annofile(self.filename,self. maxagents)
+			self.annofile = allo.annofile.Annofile(self.filename, self.maxagents)
+			return self.annofile
 		else:
 			raise AttributeError("'RaptorAnnofile' object has no attribute '{0}'".format(name))
 			
@@ -290,6 +292,44 @@ class Helium9Build(HeliumBuild):
 	 		   "".join([str(a) for a in self.raptorbuilds ]) + \
 	 		   "</heliumbuild>\n"
 		
+class Helium13Build(HeliumBuild):
+	""" Filenames, structure etc conform to Helium 13 """
+	def __init__(self, logpath, buildid, options=None):
+		super(Helium13Build,self).__init__(logpath, buildid, options)
+		self.mainantlog = MainAntLog(logpath, buildid, options)
+		self.raptorbuilds = []
+		#  mcl_201124_hw79u_04_ncp_main_build_ncpvariants.build_input_compile.log
+		#  ^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		#  | the buildid     | | the buildstage                                 |
+		#
+		# we have no way of knowing the buildstage names until the build team
+		# use the Helium option to turn on that logging. So we have to search
+		# for all the raptor logs in the compile folder that match the buildid.
+		
+		compiledir = os.path.join(logpath, "compile")
+		start = len(buildid) + 1
+		builds = []
+		for log in os.listdir(compiledir):
+			if log.startswith(buildid) \
+			and allo.utils.is_raptor_log(os.path.join(compiledir, log)):
+				builds.append(log[start:])
+				
+		for r in builds: 
+			try:
+				self.raptorbuilds.append(RaptorBuild(logpath, buildid, r, options))
+			except LogfileNotFound as ex:
+				sys.stderr.write(str(ex))
+
+	def __str__(self):
+
+		raptor_duration = reduce(lambda x, y: x + y,[y.build_duration for y in self.raptorbuilds],0)
+		return "<heliumbuild ver='9' id='{0}'>\n" \
+			   "<metric name='total_duration' value='{1}' />\n" \
+			   "<metric name='raptor_duration' value='{2}' />\n" \
+			   .format(self.buildid,  self.mainantlog.build_duration, raptor_duration) + \
+	 		   "".join([str(a) for a in self.raptorbuilds ]) + \
+	 		   "</heliumbuild>\n"
+
 
 class HeliumLogDir(object):
 	"""Multiple builds can be done one after another (usually when rebuilding 
@@ -304,7 +344,7 @@ class HeliumLogDir(object):
 		for b in logs.keys():
 			try:
 				sys.stderr.write("  Found build with id {0}\n".format(b))
-				build = Helium9Build(self.logpath, b, options)
+				build = Helium13Build(self.logpath, b, options)
 				self.builds.append(build)
 			except IOError as e:
 				sys.stderr.write("  Buildid {0} found but does not refer to a complete build\n".format(b))

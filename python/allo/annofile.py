@@ -29,6 +29,7 @@ class Annofile(xml.sax.handler.ContentHandler):
 		parser.setFeature(xml.sax.handler.feature_validation, False)
 		parser.setFeature(xml.sax.handler.feature_external_ges, False)
 		parser.setContentHandler(self)
+		parser.setErrorHandler(self)
 		try:
 			with open(name,"r") as f:
 				parser.parse(f)
@@ -118,6 +119,15 @@ class Annofile(xml.sax.handler.ContentHandler):
 		only one node
 		"""
 		return self.overallAggregateTime
+
+	def error(self,exc):
+		print ("parse error: {0}".format(exc))
+
+	def fatalError(self,exc):
+		print ("fatal parse error: {0}".format(exc))
+
+	def warning(self,exc):
+		print ("parse warning: {0}".format(exc))
 	
 	# Calculate two efficiencies: 
 	# first includes makefile parse time; second doesn't 

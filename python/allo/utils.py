@@ -22,6 +22,15 @@ import tempfile
 import itertools
 import heapq
 
+def is_raptor_log(path):
+	try:
+		with open(path, "rb") as f:
+			line1 = f.readline()
+			line2 = f.readline()
+			return line1.startswith("<?xml") and line2.startswith("<buildlog")
+	except IOError:
+		return False
+	
 def cat(input_list, output):
 	with open(output, "wb") as fout:
 		for input in input_list:

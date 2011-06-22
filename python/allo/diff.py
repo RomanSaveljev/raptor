@@ -30,16 +30,6 @@ sbs_home = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 cfg_path = os.path.join("lib", "config")
 
 
-def is_raptor_log(path):
-	try:
-		with open(path, "rb") as f:
-			line1 = f.readline()
-			line2 = f.readline()
-			return line1.startswith("<?xml") and line2.startswith("<buildlog")
-	except IOError:
-		return False
-	
-
 class NotADiffableLog(Exception):
 	pass
 
@@ -130,7 +120,7 @@ class DiffableLog(object):
 		self.summarise()
 		
 	def add_file(self, path):
-		if is_raptor_log(path):
+		if allo.utils.is_raptor_log(path):
 			self.logs.append(path)
 			if self.verbose:
 				print(path + " is a raptor log")
