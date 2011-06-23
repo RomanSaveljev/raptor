@@ -43,6 +43,7 @@
 		<param name='WHATLOG' default=''/>   <!-- emit formatted releasable info into the logs during the build -->
 		<param name='USE_PROFILER_FEEDBACK' default=''/> <!-- use the profiler feedback file for the builds -->
 		<param name='ARM_PROFILER_FILE' default=''/>
+		<param name='SHELL_CL_MAX' default=''/> <!-- optionally check the lengths of calls made in the shell -->
 	</interface>
 	<interface name="base.extension" extends="base.flm" flm="template_ext.flm">
 		<param name='TEMCOUNT'/>

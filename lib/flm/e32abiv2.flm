@@ -787,6 +787,16 @@ ifeq ($(STDCPP),1)
 SYSTEMINCLUDE:=$(SYSTEMINCLUDE) $(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(STDCPP_INCLUDE)))
 endif
 
+# If requested, create and use a command file for include paths
+CC_USER_INCLUDES:=$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))
+CC_SYSTEM_INCLUDES:=$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))
+CC_INCLUDES:=$(CC_USER_INCLUDES) $(CC_SYSTEM_INCLUDES)
+
+ifneq ($(USE_COMPILATION_COMMAND_FILE),)
+  CC_COMMAND_FILE:=$(INTERMEDIATEPATH)/cc.cmdfile
+  $(eval $(call createcommandfile,$(CC_COMMAND_FILE),$(CC_INCLUDES)))
+endif
+
 define option_replace
   # Process a single, combined, item of the form 'search<->replace' in order to modify the command line tool call
   # We split this into its component arguments for use in substitutions
@@ -823,21 +833,7 @@ $(eval TYPE:=$(if $(5),$(5),compile))
 # build)
 $(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
 
-# Create the lists of includes and macros. Needed in case a command file is required
-$(eval CC_USER_INC:=$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE))))
-$(eval CC_SYSTEM_INC:=$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE))))
-$(if $(FLMDEBUG),$(info <debug>System includes: $(CC_SYSTEM_INC)</debug>))
-
-$(eval CC_INCLUDES:=$(wordlist 1,20,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get the first 20 includes
-$(eval COMMAND_FILE_CONTENTS:=$(wordlist 21,20000,$(CC_USER_INC) $(CC_SYSTEM_INC))) # get all includes starting with the 21st
-$(eval COMMAND_FILE:=$(1).cmdfile)
-
-$(if $(FLMDEBUG),$(info <debug>All compiler includes: $(CC_INCLUDES)</debug>))
-$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file used: $(COMMAND_FILE)</debug>)))
-$(if $(COMMAND_FILE_CONTENTS),$(if $(FLMDEBUG),$(info <debug>Command file contents: $(COMMAND_FILE_CONTENTS)</debug>))) 
-
-$(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) | $(TRACE_THISCOMPONENT_ALLRULE)
-	$(call createcommandfile,$(COMMAND_FILE),$(COMMAND_FILE_CONTENTS))
+$(1): $(2) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) $(if $(USE_COMPILATION_COMMAND_FILE),$(CC_COMMAND_FILE),$(PROJECT_META_DEP)) | $(TRACE_THISCOMPONENT_ALLRULE)
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
@@ -851,8 +847,7 @@ $(1): $(2) $(PROJECT_META_DEP) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RE
 			$(if $(PREINCLUDE),$(PREINCLUDE_OPTION) ,)$(call concat, $(PREINCLUDE_OPTION) ,$(call dblquote,$(PREINCLUDE)))\
 			$(if $(SET_ARMINC),$(if $(RVCTINC),$(COMPILER_SYSTEM_INCLUDE_OPTION)$(call dblquote,$(RVCTINC)),),)       \
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                      \
-			$(CC_INCLUDES)  \
-			$(if $(COMMAND_FILE_CONTENTS),$(COMMANDFILE_OPTION)$(COMMAND_FILE),) \
+			$(if $(USE_COMPILATION_COMMAND_FILE),$(COMMANDFILE_OPTION)$(CC_COMMAND_FILE),$(CC_INCLUDES)) \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
 			$(if $(FEEDBACKFILE),$(COMPILER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
@@ -923,7 +918,7 @@ $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
 LISTING:: $(LISTINGTARGET)
 
-$(LISTINGTARGET): $(1) $(PROJECT_META_DEP)  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(LISTINGTARGET): $(1) $(if $(USE_COMPILATION_COMMAND_FILE),$(CC_COMMAND_FILE),$(PROJECT_META_DEP))  $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,e32listing,,$(1))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(CC) $(LICENSERETRY_OPTION) $(SYMBIAN_CCFLAGS) \
@@ -934,8 +929,7 @@ $(LISTINGTARGET): $(1) $(PROJECT_META_DEP)  $(if $(DEPENDFILE),,RESOURCE BITMAP 
 			$(if $(PREINCLUDE),$(PREINCLUDE_OPTION) ,)$(call concat, $(PREINCLUDE_OPTION) ,$(call dblquote,$(PREINCLUDE)))\
 			$(if $(SET_ARMINC),$(if $(RVCTINC),$(COMPILER_SYSTEM_INCLUDE_OPTION)$(call dblquote,$(RVCTINC)),),)       \
 			$(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$$(<D))                                                   \
-			$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(USERINCLUDE)))      \
-			$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$(call dblquote,$(SYSTEMINCLUDE)))  \
+			$(if $(USE_COMPILATION_COMMAND_FILE),$(COMMANDFILE_OPTION)$(CC_COMMAND_FILE),$(CC_INCLUDES)) \
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(NO_DEPEND_GENERATE),,$(DEPEND_OPTION) $(call dblquote,$(DEPENDFILENAME))) \
 			$$(call dblquote, $$<) $(OUTPUT_OPTION) $$(@) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
@@ -1023,7 +1017,7 @@ $(eval e32abiv2_PREFILE:=$(call mapcia2xxx,$(1),_.pre))
 $(eval e32abiv2_CPPFILE:=$(call mapcia2xxx,$(1),_.cpp))
 $(eval CLEANTARGETS:=$(CLEANTARGETS) $(e32abiv2_OFILE) $(e32abiv2_CPPFILE) $(e32abiv2_PREFILE))
 
-$(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(PROJECT_META_DEP)
+$(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(if $(USE_COMPILATION_COMMAND_FILE),$(CC_COMMAND_FILE),$(PROJECT_META_DEP))
 	$(call startrule,cia2cpp2o,,$(e32abiv2_CPPFILE)) \
 		$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 			$(CC) $(LICENSERETRY_OPTION) \
@@ -1031,11 +1025,9 @@ $(e32abiv2_OFILE): $(e32abiv2_CPPFILE) $(PROJECT_META_DEP)
 			$(if $(LTCG),$(LTCG_OPTION),) \
 			$(OPTION_COMPILER) \
 			$(call makemacrodef,-D,$(COMPILER_INTERWORK_DEFINES) $(CDEFS) $(CIADEFS)) $(CPP_LANG_OPTION)      \
-	 		$(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$$(call dblquote,$(USERINCLUDE)))     \
-	 		$(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$$(call dblquote,$(SYSTEMINCLUDE))) \
+			$(if $(USE_COMPILATION_COMMAND_FILE),$(COMMANDFILE_OPTION)$(CC_COMMAND_FILE),$(CC_INCLUDES)) \
 	 		$$(call dblquote, $$<) $(OUTPUT_OPTION) $$@ $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,cia2cpp2o)
-
 
 # preprocessed CIA file to a CPP file
 $(e32abiv2_CPPFILE): $(e32abiv2_PREFILE)
@@ -1051,12 +1043,11 @@ $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 $(eval e32abiv2_PREFILE_OPTIONS:= $(LICENSERETRY_OPTION) $(PREPROCESSOR_OPTION) $(CPP_OPTION) \
        $(SYMBIAN_CCFLAGS) $(call makemacrodef,-D,$(COMPILER_INTERWORK_DEFINES) $(CDEFS) $(CIADEFS)) $(CPP_LANG_OPTION) \
        $(if $(PREINCLUDE),$(PREINCLUDE_OPTION) ,)$$(call concat, $(PREINCLUDE_OPTION) ,$$(call dblquote,$(PREINCLUDE))) \
-       $(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$$(call dblquote,$(USERINCLUDE))) \
-       $(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$$(call dblquote,$(SYSTEMINCLUDE))) \
+       $(if $(USE_COMPILATION_COMMAND_FILE),$(COMMANDFILE_OPTION)$(CC_COMMAND_FILE),$(CC_INCLUDES)) \
        $(if $(ARMINC),$(if $(RVCTINC), $(COMPILER_SYSTEM_INCLUDE_OPTION)$$(call dblquote,$(RVCTINC)),),) )
 
 
-$(e32abiv2_PREFILE): $1 $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(e32abiv2_PREFILE): $1 $(if $(USE_COMPILATION_COMMAND_FILE),$(CC_COMMAND_FILE),$(PROJECT_META_DEP)) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,cia2cpp,,$1) \
 	$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 	$(CC) $(e32abiv2_PREFILE_OPTIONS) $(OUTPUT_OPTION) $$@ $$(call dblquote,$1) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
@@ -1088,8 +1079,7 @@ e32abiv2_asm_OPTIONS:=$(LICENSERETRY_OPTION) \
   $(CC_CORE_ARGS) \
   $(OPTION_COMPILER) \
   $(call makemacrodef,-D,$(COMPILER_INTERWORK_DEFINES) $(CDEFS)) \
-  $(if $(USERINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$$(call dblquote,$(USERINCLUDE)))     \
-  $(if $(SYSTEMINCLUDE),$(COMPILER_SYSTEM_INCLUDE_OPTION),)$$(call concat, $(COMPILER_SYSTEM_INCLUDE_OPTION),$$(call dblquote,$(SYSTEMINCLUDE)))
+  $(if $(USE_COMPILATION_COMMAND_FILE),$(COMMANDFILE_OPTION)$(CC_COMMAND_FILE),$(CC_INCLUDES))
 
 # note that the --no_rtti option cannot be passed with the -M option
 # so forcibly remove it when generating ASM dependencies.
@@ -1099,7 +1089,7 @@ define e32abiv2_asm
 $(eval DEPENDFILENAME:=$(1).d)
 $(eval DEPENDFILE:=$(wildcard $(DEPENDFILENAME)))
 
-$(1): $(2) $(PROJECT_META_DEP) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
+$(1): $(2) $(if $(USE_COMPILATION_COMMAND_FILE),$(CC_COMMAND_FILE),$(PROJECT_META_DEP)) $(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)
 	$(call startrule,asmcompile,,$(2)) \
 		$(if $(PERTURBSTARTTIME),$(RANSLEEP) $(PERTURBMSECS) ;,) \
 		$(CC) $(e32abiv2_asm_OPTIONS) \

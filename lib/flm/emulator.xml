@@ -26,7 +26,6 @@
 		<param name='CAPABILITYFLAG1' default='00000000u'/>
 		<param name='CAPABILITYFLAG2' default='00000000u'/>
 		<param name='COPY_FOR_STATIC_LINKAGE' default='0'/>
-		<param name='COMMANDFILE_OPTION' default='@'/>
 		<param name='DEBUGLIBRARY' default=''/>
 		<param name='DEFFILE' default=''/>
 		<param name='DOCUMENT' default=''/>
@@ -79,6 +78,7 @@
 		<param name='CC'/>
 		<param name='CDEFS' default=''/>
 		<param name='CFLAGS' default=''/>
+		<param name='COMMANDFILE_OPTION' default='@'/>
 		<param name='CPPONLYOPTION' default='-P'/>
 		<param name='CW_DEFAULT_LIBS'/>
 		<param name='CW_RUNTIME_STATIC'/>
@@ -88,6 +88,8 @@
 		<param name='EXPORT_TYPE'/>
 		<param name='LINKPATH'/>
 		<param name='LFLAGS' default=''/>
+		<param name='MODULE_DIR'/>
+		<param name='MODULE_NAME'/>
 		<param name='NAME_LOOKUP' default=''/>
 		<param name='OPEN_ENVIRONMENT' default=''/>
 		<param name='OPT.ADDCOMMAND'/>
@@ -117,8 +119,7 @@
 		<param name='OPT.WCHAR'/>
 		<param name='PREPDEF'/>
 		<param name='RC'/>
-		<param name='MODULE_DIR'/>
-		<param name='MODULE_NAME'/>
+		<param name='USE_COMPILATION_COMMAND_FILE' default=''/>
 	</interface>
 
 	<interface name="Emulator.exe" extends="Emulator.win32" flm="win32exe.flm">

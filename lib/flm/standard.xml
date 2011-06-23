@@ -193,6 +193,7 @@
 		<param name='SPLIT_OPTION'/>
 		<param name='TREAT_EXES_AS_SHARED'/>		
 		<param name='KERNEL_STATIC_RUNTIME_LIB'/>
+		<param name='USE_COMPILATION_COMMAND_FILE' default=''/>
 		<param name='USER_STATIC_RUNTIME_LIB'/>
 		<param name='USER_STATIC_RUNTIME_LIB_NESTED_EXCEPTIONS'/>
 		<param name='STATIC_LIBS_LIST'/>
