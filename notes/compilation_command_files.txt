@@ -1,5 +1,5 @@
 Raptor now supplies a variant, for optional use in e32 and emulator builds,
-that dumps lengthy elements of compiler calls into a command file, thus
+that puts lengthy elements of compiler calls into a command file, thus
 shortening the overall compilation command line length presented within the
 shell.
 
