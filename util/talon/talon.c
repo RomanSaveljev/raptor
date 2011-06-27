@@ -446,11 +446,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
-
-	/* Talon can look in a flags variable to alter it's behaviour */
-	int force_success = 0;
+	/* check command line lengths if a maximum is supplied */
 	int shell_cl_max = 0;
+	char *shell_cl_max_str = talon_getenv("TALON_SHELL_CL_MAX");
+	if (shell_cl_max_str)
+	{
+		shell_cl_max = atoi(shell_cl_max_str);
+		free(shell_cl_max_str); shell_cl_max_str = NULL;
+	}
+
+
+	/* Talon can look in a flags variable to alter its behaviour */
+	int force_success = 0;
 	char *flags_str = talon_getenv("TALON_FLAGS");
 	if (flags_str)
 	{
@@ -466,11 +473,6 @@ int main(int argc, char *argv[])
 		{
 			dotagging = 0;
 		}
-
-		/* check command line lengths if a maximum is supplied */
-		char *shell_cl_max_str = strstr(flags_str, "shell_cl_max:");
-		if (shell_cl_max_str)
-			shell_cl_max = atoi(shell_cl_max_str + strlen("shell_cl_max:"));
 
 		free(flags_str); flags_str = NULL;
 	}	
@@ -546,8 +548,7 @@ int main(int argc, char *argv[])
 				char status[STATUS_STRMAX];
 				char timestat[STATUS_STRMAX];
 				char warning[WARNING_STRMAX];
-
-				bzero(warning, WARNING_STRMAX);
+				warning[0] = '\0';
 
 				if (shell_cl_max)
 				{
@@ -558,6 +559,7 @@ int main(int argc, char *argv[])
 							"\n<warning>Command line length '%d' exceeds the shell limit on this system of '%d'.  " \
 							"If this recipe is a compile, try using the '.use_compilation_command_file' variant to reduce overall command line length.</warning>", \
 							cl_actual, shell_cl_max);
+						status[WARNING_STRMAX-1] = '\0';
 						}
 				}
 
