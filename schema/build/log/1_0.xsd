@@ -3,7 +3,7 @@
 
 	<xsd:annotation>
 		<xsd:documentation xml:lang="en">
-			Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
+			Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 			All rights reserved.
 			This component and the accompanying materials are made available
 			uunder the terms of the License "Eclipse Public License v1.0"
@@ -47,11 +47,11 @@
 
 	<xsd:complexType name="recipeType" mixed="true">
 		<xsd:sequence>
-		  <xsd:element name="time">
-	  		<xsd:complexType>
-		      <xsd:attribute name="start" type="xsd:decimal"/>
-		      <xsd:attribute name="elapsed" type="xsd:decimal"/>
-		    </xsd:complexType>
+			<xsd:element name="time">
+	  			<xsd:complexType>
+					<xsd:attribute name="start" type="xsd:decimal"/>
+					<xsd:attribute name="elapsed" type="xsd:decimal"/>
+				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="status">
 				<xsd:complexType>
@@ -64,6 +64,7 @@
 					<xsd:attribute name="reason" type="xsd:string"/>
 				</xsd:complexType>
 			</xsd:element>
+			<xsd:element name="warning" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string"/>
 		<xsd:attribute name="host" type="xsd:string"/>

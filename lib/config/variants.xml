@@ -306,4 +306,9 @@
 	<var name="nohrh">
 		<set name="VARIANT_HRH" value="$(SBS_HOME)/lib/config/empty.hrh"/>
 	</var>
+	
+	<!-- triggers builds to use command files in compilation calls, where supported -->
+	<var name="use_compilation_command_file">
+		<set name="USE_COMPILATION_COMMAND_FILE" value="TRUE"/>
+	</var>
 </build>

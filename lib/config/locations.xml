@@ -59,6 +59,7 @@
 		
 		<env name='HOSTPLATFORM_DIR' default='win32' /> 
 		<env name='HOSTPLATFORM' default='win 32' />
+		<set name='SHELL_CL_MAX' value='16380'/> <!-- cygwin/bash-specific command line length limitation -->
 		
 		<env name='SBS_CYGWIN' default='$(SBS_HOME)/$(HOSTPLATFORM_DIR)/cygwin' type='path'/>
 		<env name='SBS_MINGW' default='$(SBS_HOME)/$(HOSTPLATFORM_DIR)/mingw' type='path'/>

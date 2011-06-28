@@ -1,0 +1,49 @@
+Raptor now supplies a variant, for optional use in e32 and emulator builds,
+that puts lengthy elements of compiler calls into a command file, thus
+shortening the overall compilation command line length presented within the
+shell.
+
+The new variant, 'use_compilation_command_file', can be used as part of the
+build configuration e.g.:
+
+    sbs -c arm.v5.urel.rvct4_0.use_compilation_command_file
+    
+...or, at a more specific level, via the APPLY keyword in .mmp files e.g.:
+
+    TARGET        somebin.exe
+    TARGETTYPE    exe
+    UID           0x100039ce 0x00000001
+    LIBRARY       somelib.lib
+    SOURCE        somesrc.cpp
+    SYSTEMINCLUDE /epoc32/include
+    APPLY         use_compilation_command_file
+
+The variant is useful in situations where the expanded compilation command
+line length exceeds shell limits with the tools in use.  There is currently
+a known situation where this occurs using Cygwin and Bash in Windows builds;
+command lines over ~16380 chars can lead to cryptic EOF and syntax errors
+like the following:
+
+ compile    : src\somesrc.cpp  	[arm.v5.urel.gcce4_4_1]
+   /bin/sh: -c: line 0: unexpected EOF while looking for matching `"'
+   /bin/sh: -c: line 1: syntax error: unexpected end of file
+
+In the above situations, Raptor now generates the following warning to
+accompany the error:
+
+    sbs: warning: Command line length '*****' exceeds the shell limit on this
+    system of '16380'.  If this recipe is a compile, try using the
+    '.use_compilation_command_file' variant to reduce overall command line
+    length.
+
+The current implementation of the 'use_compilation_command_file' variant can
+help alleviate command line length failures for compiler calls by dumping all
+include paths into a temporary command file and referencing that instead.
+As include paths are what usually swell the typical compiler call, this should
+address the problem.
+
+Note: As this variant leads to the creation of a new file as part of the build,
+there will doubtless be at least some performance impact.  In addition, the
+include paths referenced in the build are no longer directly visible in the
+log.  As a result, it is recommended that this variant is used sparingly, and
+only when required to fix a build issue.
