@@ -316,12 +316,12 @@ class BaseMakefileSet(object):
 		makefile = self.makefiles[0].filename
 		makefile_mtime = 0
 		makefile_stat = 0
-
+		message_template = "incremental makefile generation: {0} is out-of-date"
 		try:
 			makefilestat = os.stat(makefile)
 			makefile_mtime = makefilestat[stat.ST_MTIME]
 		except OSError, e:
-			raise(OutOfDateException("incremental makefile generation: metadata is not uptodate: {0} doesn't exist".format(e.filename),items=[e.filename]))
+			raise(OutOfDateException(message_template.format(e.filename),items=[e.filename]))
 
 		try:
 			with open(self.metadepsfilename,"r") as mdf:
@@ -332,7 +332,7 @@ class BaseMakefileSet(object):
 						deptime = depstat[stat.ST_MTIME]
 
 						if deptime > makefile_mtime:
-							raise(OutOfDateException("OUTOFDATE: metadata deps: {0}".format(depfile),items=[depfile]))
+							raise(OutOfDateException(message_template.format(depfile),items=[depfile]))
 
 					if l.startswith(BaseMakefileSet.include_prefix):
 						gnudepfile = l[len(BaseMakefileSet.include_prefix):].strip("\r\n ")
@@ -352,10 +352,10 @@ class BaseMakefileSet(object):
 									deptime = depstat[stat.ST_MTIME]
 
 									if deptime > makefile_mtime:
-										raise(OutOfDateException("incremental makefile generation: outofdate {0} is newer than ".format(e.filename),items=[e.filename]))
+										raise(OutOfDateException(message_template.format(depfile),items=[depfile]))
 
 		except IOError,e:
-			raise(OutOfDateException("incremental makefile generation: metadata is not uptodate: {0} doesn't exist or has been altered".format(e.filename),items=[e.filename]))
+			raise(OutOfDateException(message_template.format(e.filename),items=[e.filename]))
 
 
 class MakefileSet(BaseMakefileSet):
