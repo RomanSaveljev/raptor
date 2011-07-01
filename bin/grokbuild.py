@@ -9,7 +9,7 @@
 
 """
 Gathers performance metrics from the logs of a complex multi-step build.
-Supports Helium 9 at the moment with Helium 13 coming soon [?].
+Supports Helium 13 at the moment
 
 Can also extract useful data from emake annotation files.
 """

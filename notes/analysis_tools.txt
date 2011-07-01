@@ -1,0 +1,75 @@
+Raptor Build Analysis Tools
+============================
+
+There are a growing number of tools for analysing raptor builds.  Tools become
+particularly important as the size and complexity of the builds becomes
+larger and one cannot merely "eyeball" the logs to find issues because it
+would take forever.
+
+
+Comparing Builds - is the new one a regression? sbs_diff.py
+------------------------------------------------------------
+The Log Differ (sbs_diff.py) allows one to compare the errors,
+types of components etc of one build versus a control build - enabling one
+to see immediately if there is some important difference despite the build
+logs being hundreds of megabytes.
+
+It processes both builds and then creates two files diff_left.txt and
+diff_right.txt which can be placed into a file difference viewer like Vimdiff,
+Meld, kdiff etc.  In a short format one can see the salient differences
+between two potentially enormous builds.
+
+Example - find all log files in two build output directories and compare
+errors between the two sets:
+
+python sbs_diff.py build1/logdir build2/logdir
+vimdiff diff_left.txt diff_right.txt
+
+Example - compare the logs of two specific builds:
+python sbs_diff.py build1/ui_build.log build2/ubuild.log
+vimdiff diff_left.txt diff_right.txt
+
+
+Finding Performance Problems
+============================
+
+
+Which jobs take the most time? - recipestats.py
+------------------------------------------------
+Recipestats produces a CSV file which can be imported into a spreadsheet
+to allow one to draw graphs.  It acts on a build log and for all recipe
+names it counts the number of instances and the total time so that one
+can see what dominates a build and where to aim efforts at performance
+improvement.
+
+Example:
+python $SBS_HOME/bin/recipestats.py  < logilename > stats.csv
+
+
+Performance of a sequence of Electric make builds - grokbuild.py
+-----------------------------------------------------------------
+
+Raptor produces as many as 5 makefiles per build and in a large
+build process raptor might be called 5 or more times. When using 
+Electric Make, a lot of performance information is available
+in annotation files of which there is one per makefile but it's
+a great effort to gather all this information together in one
+place so that one can compare it and spot problems.
+
+grokbuild.py looks for annotation files and also extracts performance
+data from raptor logs and combines it all into one XML output file.
+
+It expects to be given a path to an epocroot directory produced by 
+Helium build management tool.  It assumes that under this directory
+there are output/logs/makefile and output/logs/compile directories
+with the annofiles and raptor log files respectively.
+
+Example: 
+python $SBS_HOME/bin/grokbuild.py /build1 >build1_grokked.xml
+
+One can use gk2csv.py to convert this xml output into a CSV file
+to enable comparisons, sorting etc to be done in a spreadsheet.
+
+python $SBS_HOME/bin/gk2csv.py build1_grokked.xml > build1_grokked.csv
+
+

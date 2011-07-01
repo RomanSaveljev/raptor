@@ -121,13 +121,13 @@ class Annofile(xml.sax.handler.ContentHandler):
 		return self.overallAggregateTime
 
 	def error(self,exc):
-		print ("parse error: {0}".format(exc))
+		sys.stderr.write ("parse error: {0}\n".format(exc))
 
 	def fatalError(self,exc):
-		print ("fatal parse error: {0}".format(exc))
+		sys.stderr.write ("fatal parse error: {0}\n".format(exc))
 
 	def warning(self,exc):
-		print ("parse warning: {0}".format(exc))
+		sys.stderr.write ("parse warning: {0}\n".format(exc))
 	
 	# Calculate two efficiencies: 
 	# first includes makefile parse time; second doesn't 

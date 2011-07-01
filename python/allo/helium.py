@@ -87,7 +87,7 @@ class MainAntLog(HeliumLog):
 			build_duration = stop_time - start_time  # returns a timedelta object
 			self.build_duration = build_duration.seconds +  86400 * build_duration.days  # seconds
 		else:
-			sys.stderr.write("start time and/or stop time not avaialable.\n")
+			sys.stderr.write("start time and/or stop time not available.\n")
 			self.build_duration = 0
 			
 	def __str__(self):
@@ -169,13 +169,13 @@ class RaptorBuild(HeliumLog):
 			raise LogfileNotFound("missing log file: {0}\n".format(self.logfilename))
 		
 		self.annofile_refs = []	
-		self.build_duration = None
+		self.build_duration = None 
 		
 		status_re = re.compile("<status exit='([a-z]+)'")
 		compilation_re = re.compile("<recipe name='[^']*compile[^']*'")
 		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+)")
 		emake_maxagents_re = re.compile("--emake-maxagents=(\d+)")
-		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*)")
+		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*)</info>")
 		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>")
 		
 		self.recipes = { 'TOTAL':0, 'ok':0, 'failed':0, 'retry':0, 'COMPILE':0 }
@@ -203,7 +203,7 @@ class RaptorBuild(HeliumLog):
 				m = emake_invocation_re.match(l)
 				if m:
 					(adir, aname) = os.path.split(m.group(1))
-					if aname.find("pp")==-1: # no parallel parsing ones preferably
+					if aname.find("_pp_")==-1: # no parallel parsing ones preferably
 						sys.stderr.write("        found annotation file {0}\n".format(aname))
 						
 						# if --emake-maxagents is present then use that, otherwise use
@@ -233,6 +233,9 @@ class RaptorBuild(HeliumLog):
 		self.annofiles = []
 		for p in self.annofile_refs:
 			self.annofiles.append(RaptorAnnofile(p[0], buildid, p[1]))
+		if self.build_duration==None:
+			self.build_duration = 0
+			sys.stderr.write(" build duration was not found in raptor log: {0}".format(self.logfilename))
 
 	def __str__(self):
 		recipes = [" <metric name='raptor_{0}_recipes' value='{1}'/>\n".format(*x) for x in self.recipes.items()]
@@ -323,7 +326,7 @@ class Helium13Build(HeliumBuild):
 	def __str__(self):
 
 		raptor_duration = reduce(lambda x, y: x + y,[y.build_duration for y in self.raptorbuilds],0)
-		return "<heliumbuild ver='9' id='{0}'>\n" \
+		return "<heliumbuild ver='13' id='{0}'>\n" \
 			   "<metric name='total_duration' value='{1}' />\n" \
 			   "<metric name='raptor_duration' value='{2}' />\n" \
 			   .format(self.buildid,  self.mainantlog.build_duration, raptor_duration) + \
