@@ -26,6 +26,8 @@ import tempfile
 import unzip
 import zipfile
 
+
+
 tempdir = ""
 makensis_success = None
 zipfile_success = None
@@ -269,6 +271,10 @@ if __name__ == "__main__":
 				print("ERROR: directory {0} does not exist. Cannot build installer. Exiting...".format(dir))
 				sys.exit(2)
 
+	# For grabbing a copy of nsis:
+	sys.path.append(options.sbshome)
+	from python import urlget
+
 	# Create the license file
 	(licensetxtfile,licensetxtname) = writeLicense(win32supportdirs)
 
@@ -277,6 +283,30 @@ if __name__ == "__main__":
 	print("Using Raptor version {0} ...".format(raptorversion))
 
 	if not options.noexe:
+
+		got_zip = False
+
+
+		nsis_zip = "NSIS.zip"
+		try:
+			s = os.stat(nsis_zip)
+			got_zip = True
+		except OSError,e:
+			for url in [ "http://rene.europe.nokia.com/~raptorbot/files/NSIS.zip",
+						 "http://projects.developer.nokia.com/raptor/files/NSIS.zip" ]:
+				try:
+					print("Attempting to download {0} from {1}".format(nsis_zip,url))
+					urlget.get_http(url,nsis_zip)
+					got_zip = True
+					print("Download ok")
+				except Exception,e:
+					print("WARNING: couldn't get {0} from {1}: {2}".format(nsis_zip, url, str(e)))
+					continue
+
+		if not got_zip:
+			print("ERROR: don't have {0} and couldn't download it".format(nsis_zip))
+			sys.exit(3)
+			
 		makensispath = unzipnsis("." + os.sep + "NSIS.zip")
 		command_string = "{makensis} -DRAPTOR_LOCATION={sbs_home} " \
 					"{bvopt} -DCYGWIN_LOCATION={cygwin} " \
