@@ -1,0 +1,72 @@
+External Tools used by Raptor
+==============================
+
+For the sake of convenience Raptor has been bundled with many of the
+fundamental tools and libraries that are needed to bootstrap it from
+merely having the source code to being able to use it.
+
+If you have Raptor from an installer then this document is not likely
+to be of interest. It's about how one uses Raptor directly from the
+source repository.
+
+The benefit of bundling tools with the source is to make it ready to
+use on a variety of platforms without having to manually download and
+configure many items.
+
+This takes away some complexities and adds others.  In the case of some
+tools such as Python or Bash it lead to Raptor keeping a whole copy
+in its repository, to be uncompressed and built so as to ensure that
+a precise version of that tool was available even if that platform's
+default version was not up-to-date enough.
+
+These large compressed archives are not stored efficiently in most
+"current" SCMs and the inefficiency grows every time one attempts to
+add a new version.
+
+It has become less and less necessary to do this as better project
+hosting sites have become available.  It's now possible to let Raptors
+own bootstrapping scripts download what they need from a single worldwide
+download or from a set of alternatives and feel confident that
+the necessary items will always be available.
+
+
+Tools Needed when Bootstrapping Raptor
+---------------------------------------
+
+When one enters $SBS_HOME/util and types "make" to bootstrap Raptor,
+it will now not only build tools but actually fetch the source code of
+any external ones that it might need.
+
+Examples of external tools:
+Python
+GNU Bash Shell
+GNU Make
+"dialog" utility
+
+Download locations are chosen:
+1) To be the project's natural home location e.g. the GNU ftp site
+2) To have fallback locations where the item can also be found
+3) To use http://projects.developer.nokia.com/raptor/files if they cannot
+   be obtained any other way
+
+Tools that are created by the makefiles in the util/toolname.mk makefiles
+use wget to fetch from a list of alternatives. e.g. in make.mk the line:
+
+MAKE_TAR_URL:=http://mirrors.kernel.org/gnu/make/make-$(RAPTOR_MAKE_VER).tar.bz2 
+ http://www.nic.funet.fi/pub/gnu/ftp.gnu.org/pub/gnu/make/make-$(RAPTOR_MAKE_VER).tar.bz2
+
+.... indicates alternative locations to attempt to fetch the gnu make
+source from.
+
+Tools Used to Generate Installers
+---------------------------------
+
+NSIS installer
+--------------
+
+The raptorinstallermaker.py script in util/install-windows now downloads
+NSIS.zip which contains a specifically structured version of the NSIS
+installer creator.  It has hardcoded alternate source locations for
+this file.
+
+
