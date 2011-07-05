@@ -33,7 +33,7 @@ make: $(INSTALLROOT)/bin/make
 $(MAKE_TAR):
 		for url in $(MAKE_TAR_URL); do \
 		    wget $(MAKE_TAR_URL) -O $(MAKE_TAR); \
-			if [ $$? -eq 0 ]; then break; fi ;\
+			if [ $$$$? -eq 0 ]; then break; fi ;\
 		done
 	
 $(INSTALLROOT)/bin/make: $(MAKE_TAR) 

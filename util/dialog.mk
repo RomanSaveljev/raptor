@@ -47,7 +47,7 @@ $(INSTALLROOT)/bin/dialog: $(DIALOG_TAR)
 $(DIALOG_TAR):
 	for url in $(DIALOG_TAR_URL); do \
     	wget $(DIALOG_TAR_URL) -O $(DIALOG_TAR); \
-    	if [ $$? -eq 0 ]; then break; fi ;\
+    	if [ $$$$? -eq 0 ]; then break; fi ;\
 	done
 
 
