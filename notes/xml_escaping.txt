@@ -1,0 +1,19 @@
+
+From bug 114 it appears that most control characters are not allowed in CDATA
+sections. The XML spec says that only CTRL-I, CTRL-J and CTRL-M are allowed in
+the range ASCII 0-31. The rules for other ranges vary between XML 1.0 and
+XML 1.1 which is nasty, but probably irrelevant for us.
+
+A quick test shows that the Python XML parser raises "not well-formed" exceptions
+for any control character (except I,J,M) in a CDATA section.
+
+So, we need to make sure that ASCII 0-31 is converted to something else
+in CDATA sections. There is a curses.ascii module which has functions for testing
+and converting control characters. CTRL-A becomes the string "^A" etc.
+
+Applying this conversion inside the raptor_make.XMLEscapeLog function seems like
+a good bet. Since that already does escaping for "outside recipe" text and
+keeping all the conversions in one place is good. Copying strings in Python may
+be slow, but copies should be rare since we don't expect many of these control
+characters to be appearing.
+

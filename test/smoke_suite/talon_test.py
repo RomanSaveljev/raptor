@@ -21,9 +21,10 @@ import sys
 
 def run():
 	t = SmokeTest()
-	t.description =  """talon_test: two part test
+	t.description =  """talon_test: three part test
 	1) Test talon's -c option
 	2) Test talon with a script file that has some blank lines and a single non-blank command line
+	3) Test talon with a command that outputs control characters
 	"""
 
 	# Don't need these as we are not invoking Raptor
@@ -61,8 +62,8 @@ def run():
 	os.environ["TALON_RECIPEATTRIBUTES"]="component=talontest"
 
 	# First part of test - command line
-	t.name = "talon_test command line"
-	t.command = "%s -c %s" % (talon, commandline)
+	t.name = "talon_test_command_line"
+	t.command = "{0} -c {1}".format(talon, commandline)
 	t.targets = []
 	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\+ echo Command line invocation output" + 
 			".*\]\]><time start='\d+\.\d+' elapsed='\d+\.\d+' />" + 
@@ -71,15 +72,26 @@ def run():
 	t.run()
 
 	# Second part of test - script file
-	t.name = "talon_test script file"
-	t.command = "%s %s" % (talon, scriptfile)
+	t.name = "talon_test_script_file"
+	t.command = "{0} {1}".format(talon, scriptfile)
 	t.targets = []
 	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\+ echo Script file output" + 
 			".*\]\]><time start='\d+\.\d+' elapsed='\d+\.\d+' />" + 
 			".*<status exit='ok' attempt='1' />.*</recipe>"]
 
 	t.run()
+	
+	# a script which outputs control characters
+	scriptfile=ReplaceEnvs("$(SBS_HOME)/test/smoke_suite/test_resources/talon_test/ctrl.py")
 
+	t.name = "talon_test_control_chars"
+	t.command = '{0} -c "|name=ctrl;|python {1}"'.format(talon, scriptfile)
+	t.targets = []
+	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\]\].*</recipe>"]
+	# 0-31 decimal are not allowed, except for 9, 10 and 13
+	t.mustnotmatch = [ '[\000-\010\013\014\016-\037]' ]
+	t.run()
+	
 	# Print final result
 	t.name = "talon_test"
 	t.print_result()
