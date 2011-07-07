@@ -87,9 +87,16 @@ def run():
 	t.name = "talon_test_control_chars"
 	t.command = '{0} -c "|name=ctrl;|python {1}"'.format(talon, scriptfile)
 	t.targets = []
-	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*\]\].*</recipe>"]
-	# 0-31 decimal are not allowed, except for 9, 10 and 13
+	# the script writes "AAA", then each control char from 0 to 31, then "ZZZ".
+	# 0-31 decimal are not allowed in the output, except for 9, 10 and 13
 	t.mustnotmatch = [ '[\000-\010\013\014\016-\037]' ]
+	# do not try and match CTRL-I, CTRL-J and CTRL-M explicitly because
+	# line ending conversions will mess things up.
+	# the escaping hell at the end is to match ^[ ^\ ^] ^^ and ^_
+	t.mustmatch_multiline = ["<recipe component=talontest>.*<!\[CDATA\[.*" +
+							 "AAA\^@\^A\^B\^C\^D\^E\^F\^G\^H.*\^K\^L.*\^N\^O\^P\^\Q\^R\^S\^T\^U\^V\^W\^X\^Y\^Z\^\[\^\\\\\^\]\^\^\^_ZZZ" +
+							 ".*\]\].*</recipe>"]
+	
 	t.run()
 	
 	# Print final result

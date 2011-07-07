@@ -593,13 +593,47 @@ int main(int argc, char *argv[])
 			unsigned int iterator = 0;
 			unsigned int written = 0;
 			byteblock *bb;
-		
+			char sub[2] = "^@";
+			
 			if (descramble)	
 				sema_wait(&talon_sem);
 			while ((bb = buffer_getbytes(p->output, &iterator)))
 			{
-				if (bb->fill > 0)
+				if (bb->fill < 1)
+					continue;		/* empty buffer */
+					
+				if (dotagging)
 				{
+					/* the output is XML so we must replace any CTRL-characters */
+					char *ptr = &bb->byte0;
+					char *end = ptr + bb->fill;
+
+					char *start = ptr;
+					
+					while (ptr < end)
+					{
+						if (*ptr >= 0 && *ptr < 32 && *ptr != 9 && *ptr != 10 && *ptr != 13)
+						{
+							/* output any unwritten characters before this CTRL */
+							if (ptr > start)
+								write(STDOUT_FILENO, start, ptr - start);
+							
+							/* 0->@, 1->A, 2->B etc. */
+							sub[1] = *ptr + 64;
+							
+							/* output the modified CTRL character */
+							write(STDOUT_FILENO, sub, 2);
+							start = ptr + 1;
+						}
+						ptr++;
+					}
+					if (ptr > start)
+						write(STDOUT_FILENO, start, ptr - start);
+				}
+				else
+				{
+					/* the output isn't XML so write out the whole buffer as-is */
+					
 					written = write(STDOUT_FILENO, &bb->byte0, bb->fill);
 
 					DEBUG(("talon: wrote %d bytes out of %d\n", written, bb->fill));
