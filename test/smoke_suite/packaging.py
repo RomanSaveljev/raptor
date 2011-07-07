@@ -19,7 +19,6 @@ import os
 
 def run():
 	t = SmokeTest()
-	t.usebash = True
 	t.description = "Test the build and package of Raptor built applications using the createsis FLM"
 
 	t.name = "native_package"
@@ -159,6 +158,7 @@ __ENDOFPATCH__
 		tool_ext = ".exe"
 	
 	t.name= "qt_package"
+	t.usebash = True
 	t.command = "{qmake} && {patch} {raptor}".format(qmake=qmake_call.format(ext=tool_ext), patch=patch_bldinf, raptor=raptor_call)
 	t.targets = [
 		"$(EPOCROOT)/epoc32/data/z/private/10003a3f/import/apps/lottonumberpicker_reg.rsc",
