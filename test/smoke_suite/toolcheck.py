@@ -89,10 +89,10 @@ def run():
 			" -c default.self_version_check"
 	t.mustmatch = []
 	t.mustmatch_singleline = [
-	"sbs: error: tool 'SBS' from config 'none' did not return version \'2\\\.17\\\.\[0-9\]\+\' as required\\.",
+	"sbs: error: tool 'SBS' from config 'none' did not return version \'2\\\.99\\\.\[0-9\]\+\' as required\\.",
 	"Command '.*sbs.* --version' returned:",
 	"Check your environment and configuration: This version of Raptor is not suitable " + 
-	"for this SDK. Minimum version required is 2.17.0."	
+	"for this SDK. Minimum version required is 2.99.0."	
 		]
 	t.mustnotmatch = [
 	]
