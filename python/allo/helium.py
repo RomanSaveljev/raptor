@@ -175,7 +175,7 @@ class RaptorBuild(HeliumLog):
 		compilation_re = re.compile("<recipe name='[^']*compile[^']*'")
 		emake_invocation_re = re.compile("<info>Executing.*--emake-annofile=([^ ]+)")
 		emake_maxagents_re = re.compile("--emake-maxagents=(\d+)")
-		sbs_version_re = re.compile("<info>sbs: version ([^\n\r]*)</info>")
+		sbs_version_re = re.compile("<info>sbs: version ([^\n\r<]*)")
 		run_time_re = re.compile("<info>Run time ([0-9]+) seconds</info>")
 		
 		self.recipes = { 'TOTAL':0, 'ok':0, 'failed':0, 'retry':0, 'COMPILE':0 }
