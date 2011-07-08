@@ -1,19 +1,26 @@
 
-From bug 114 it appears that most control characters are not allowed in CDATA
-sections. The XML spec says that only CTRL-I, CTRL-J and CTRL-M are allowed in
-the range ASCII 0-31. The rules for other ranges vary between XML 1.0 and
-XML 1.1 which is nasty, but probably irrelevant for us.
+The output from tools run by Raptor will typically not be XML, so Raptor wraps
+all tool output in CDATA sections. For example,
 
-A quick test shows that the Python XML parser raises "not well-formed" exceptions
-for any control character (except I,J,M) in a CDATA section.
+<![CDATA[
++ python write_my_code.py
+writing MyClass.hxx
+writing MyClass.cpp
+]]>
 
-So, we need to make sure that ASCII 0-31 is converted to something else
-in CDATA sections. There is a curses.ascii module which has functions for testing
-and converting control characters. CTRL-A becomes the string "^A" etc.
+The text between "[CDATA[" and "]]" is arbitary, however there are some
+characters which are not permitted and will be rejected as bad XML by
+many XML parsers. Therefore Raptor will also translate these invalid
+characters into strings which are valid. For example, control characters
+in the ASCII range 0-31 are translated into "^@", "^A", "^B" etc. (except
+for CTRL-I, CTRL-J and CTRL-M which are allowed).
 
-Applying this conversion inside the raptor_make.XMLEscapeLog function seems like
-a good bet. Since that already does escaping for "outside recipe" text and
-keeping all the conversions in one place is good. Copying strings in Python may
-be slow, but copies should be rare since we don't expect many of these control
-characters to be appearing.
+In general, tools should not be writing non-printable characters to stdout
+and stderr anyway. But if they do, then at least you will see something
+sensible in the Raptor logs. For example,
+
+<![CDATA[
++ python hack_my_code.py
+error: don't hack it you ^F^O^O^L.
+]]>
 
