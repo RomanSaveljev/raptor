@@ -1337,6 +1337,11 @@ class Raptor(object):
 		"""
 		return self.fatalErrorState or ((self.errorCode != 0) and (not self.keepGoing))
 
+	def InitPlugins(self):
+		""" Find all the raptor plugins and put them into a pluginbox. """
+		if not self.systemPlugins.isAbsolute():
+			self.systemPlugins = self.home.Append(self.systemPlugins)
+		self.pbox = pluginbox.PluginBox(str(self.systemPlugins))
 
 	# log file open/close
 
@@ -1344,11 +1349,8 @@ class Raptor(object):
 		"""Open a log file for the various I/O methods to write to."""
 
 		try:
-			# Find all the raptor plugins and put them into a pluginbox.
-			if not self.systemPlugins.isAbsolute():
-				self.systemPlugins = self.home.Append(self.systemPlugins)
-
-			self.pbox = pluginbox.PluginBox(str(self.systemPlugins))
+			self.InitPlugins()
+			
 
 			self.raptor_params = BuildStats(self)
 
@@ -1523,6 +1525,9 @@ class Raptor(object):
 		# our "self" is a valid object for initialising an API Context
 		import raptor_api
 		api = raptor_api.Context(self)
+		
+		# intialise the plugs in case they are needed for the query
+		self.InitPlugins()
 		
 		print "<sbs version='{0}'>".format(raptor_version.numericversion())
 		

@@ -316,11 +316,32 @@ class Macro(Reply):
 		self.name = name
 		self.value = value
 
+class Filter(Reply):
+	def __init__(self, name, doc=None):
+		super(Filter,self).__init__()
+		self.name = name
+		if doc != None:
+			doc_lines = [ line.strip() for line in doc.split("\n") ]
+			# remove empty strings from the start of the list
+			while doc_lines[0] == "":
+				doc_lines.pop(0)
+			# remove empty strings from the end of the list
+			while doc_lines[-1] == "":
+				doc_lines.pop()
+			reformatted_doc =  "\n".join(doc_lines)
+			self.text = xml.sax.saxutils.escape("\n" + reformatted_doc + "\n")
+	
+	def __cmp__(self, other):
+		""" Add __cmp__ to enable comparisons between two Filter objects based upon name."""
+		return cmp(self.name, other.name)
+
+
 import generic_path
 import raptor
 import raptor_data
 import raptor_meta
 import re
+import xml.sax.saxutils
 
 class Context(object):
 	"""object to contain state information for API calls.
@@ -354,6 +375,10 @@ class Context(object):
 		elif query == "products":
 			variants = self.getproducts()
 			return "".join(map(str, variants)).strip()
+		
+		elif query == "filters":
+			filters = self.getfilters()
+			return "".join(map(str, filters)).strip()
 		
 		elif query.startswith("config"):
 			match = re.match("config\[(.*)\]", query)
@@ -406,6 +431,15 @@ class Context(object):
 				variants.append( Product(v.name) )
 		variants.sort()	
 		return variants
+	
+	def getfilters(self):
+		""" get a list of filter names """
+		filters = []
+		filters_dict = self.__raptor.pbox.getdetails()
+		for filter_item in filters_dict:
+			filters.append( Filter(filter_item, filters_dict[filter_item]) )
+		return filters
+	
 class BadQuery(Exception):
 	pass
 
