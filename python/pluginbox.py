@@ -73,5 +73,5 @@ class PluginBox(object):
 		details = {}
 		for plugin in self.pluginlist:
 			for c in plugin.classes:
-				details[str(c.__name__)] = c.__doc__
+				details[c.__name__] = c.__doc__
 		return details
