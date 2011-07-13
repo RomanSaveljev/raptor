@@ -1,0 +1,9 @@
+define test
+
+ALL::
+	$(info <debug>SBS=$(SBS)</debug>)
+
+endef
+
+$(eval $(call test))
+
