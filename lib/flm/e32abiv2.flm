@@ -536,10 +536,24 @@ LINKOBJECTS:=$(call relocatefiles,$(INTERMEDIATEPATH),$(SOURCE))
 # the list will contain the object files in the same order as the list of source files.
 LINKOBJECTS:=$(foreach FILE,$(LINKOBJECTS),$(basename $(FILE))$(if $(filter $(addprefix %,$(CIAFILEEXTENSIONS)),$(FILE)),_).o)
 
+
+# Set up variables if multifile compilation is being used. 
+# Files are grouped in separate multifile compilation based on their extension
+# CPP and C files get separate multifile objects and .via files
+# Dependency files don't work when using multifile compilation
 ifneq ($(MULTIFILE_ENABLED),)
-MULTIFILEOBJECT:=$(INTERMEDIATEPATH)/$(TARGET).$(POSTLINKFILETYPE)_$(VARIANTTYPE)_multifileobject.o
-MULTIFILE_VIAFILE:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_multifile.via
+NO_DEPEND_GENERATE:=0
+ifneq ($(strip $(CPPFILES)), )
+MULTIFILEOBJECT_CPP:=$(INTERMEDIATEPATH)/$(TARGET).$(POSTLINKFILETYPE)_$(VARIANTTYPE)_multifileobject_cpp.o
+MULTIFILE_VIAFILE_CPP:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_multifile_cpp.via
 endif
+ifneq ($(strip $(CFILES)), )
+MULTIFILEOBJECT_C:=$(INTERMEDIATEPATH)/$(TARGET).$(POSTLINKFILETYPE)_$(VARIANTTYPE)_multifileobject_c.o
+MULTIFILE_VIAFILE_C:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_multifile_c.via
+endif
+LINKOBJECTS_MULTIFILE:=$(MULTIFILEOBJECT_CPP) $(MULTIFILEOBJECT_C) $(CIAFILES_LINKOBJECTS) $(ASMFILES_LINKOBJECTS)
+endif
+
 
 ## Via file ####################################
 # list of all objects to be linked
@@ -576,11 +590,11 @@ define artarget_func
 # Ensure that, when generating .via files, that they do not start with a blank line - some versions of GCC's AR reject
 # any further content in the file if the first line is empty
 
-$(ARTARGET): $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT),$(LINKOBJECTS)) $(STDCPPTAGFILE)
-	$(if $(MULTIFILE_ENABLED),,@echo $(if $(STDCPPTAGFILE),"$(STDCPPTAGFILE)",-n "") > $(VIAFILE);
-	$(call groupin10,$(LINKOBJECTS)) ;)
+$(ARTARGET): $(LINKOBJECTS) $(STDCPPTAGFILE)
+	@echo $(if $(STDCPPTAGFILE),"$(STDCPPTAGFILE)",-n "") > $(VIAFILE);
+	$(call groupin10,$(LINKOBJECTS)) ;
 	$(call startrule,ar,FORCESUCCESS) \
-	$$(call dblquote,$(AR)) $(ARCHIVER_CREATE_OPTION) $$@ $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT),$(COMMANDFILE_OPTION)$(VIAFILE)) \
+	$$(call dblquote,$(AR)) $(ARCHIVER_CREATE_OPTION) $$@ $(COMMANDFILE_OPTION)$(VIAFILE) \
 	$(call endrule,ar)
 endef
 $(eval $(artarget_func))
@@ -682,7 +696,7 @@ $(if $(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),,\
       )))
 
 ## The actual link target, dependencies and build step
-$(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS),$(LINKOBJECTS)) $(e32abiv2_LIBS) $(ADDITIONAL_LIBS) $(LINKER_ENTRYPOINT_LIBDEP) $(if $(SUPPORTS_STDCPP_NEWLIB),$(CHECKLIB)) $(if $(HAVE_ORDERONLY),|,) $(EPOCROOT)/epoc32/build/TEM_LIB
+$(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(LINKOBJECTS_MULTIFILE),$(LINKOBJECTS)) $(e32abiv2_LIBS) $(ADDITIONAL_LIBS) $(LINKER_ENTRYPOINT_LIBDEP) $(if $(SUPPORTS_STDCPP_NEWLIB),$(CHECKLIB)) $(if $(HAVE_ORDERONLY),|,) $(EPOCROOT)/epoc32/build/TEM_LIB
 	$(if $(MULTIFILE_ENABLED),,@echo -n "" > $(VIAFILE);
 	$(call groupin10,$(LINKOBJECTS)) ;)
 	$(call startrule,linkandpostlink) \
@@ -703,7 +717,7 @@ $(E32TARGET): $(POSTLINKDEFFILE) $(POSTLINKER) $(if $(MULTIFILE_ENABLED),$(MULTI
 	  $(if $(LTCG),$(LTCG_OPTION),) \
 	  $(LINKER_SYMBOLS_OPTION) $(LINKER_SYMBOLS_FILE_OPTION)=$(call dblquote,$(MAPFILE)) \
   	  $(LINKEROPTION) \
-	  $(if $(MULTIFILE_ENABLED),$(call dblquote,$(MULTIFILEOBJECT) $(CIAFILES_LINKOBJECTS)),$(COMMANDFILE_OPTION)$(call dblquote,$(VIAFILE))) \
+	  $(if $(MULTIFILE_ENABLED),$(LINKOBJECTS_MULTIFILE),$(COMMANDFILE_OPTION)$(call dblquote,$(VIAFILE))) \
       $(if $(DOLINKERFEEDBACK),$(LINKER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILENAME)_temp)) \
 	  $(if $(LINKER_ADD_STATIC_RUNTIME),$(if $(STATIC_RUNTIME_LIB),$(LINKER_GROUP_START_OPTION) $(STATIC_RUNTIME_DIR)/$(STATIC_RUNTIME_LIB) $(LINKER_GROUP_END_OPTION),)) \
 	  $(call dblquote,$(e32abiv2_LIBS)) $(LINKER_DEFAULT_LIBS) && \
@@ -719,7 +733,7 @@ ifneq ($(DOPOSTLINK),)
 $(eval $(linktarget_func))
 endif # ifneq ($(DOPOSTLINK),)
 
-CLEANTARGETS:=$(CLEANTARGETS) $(VIAFILE) $(if $(DOLINKERFEEDBACK),$(FEEDBACKFILENAME)_temp $(FEEDBACKFILENAME)) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT))
+CLEANTARGETS:=$(CLEANTARGETS) $(VIAFILE) $(if $(DOLINKERFEEDBACK),$(FEEDBACKFILENAME)_temp $(FEEDBACKFILENAME)) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT_CPP) $(MULTIFILEOBJECT_C))
 WHATRELEASE:=$(WHATRELEASE) $(MAPFILE)
 
 endif # if TARGETTYPE lib
@@ -820,7 +834,7 @@ define e32abiv2_compile
 
 # $(1) : target file
 # $(2) : single source file or c++ source file list <=> MULTIFILE_ENABLED
-# $(3) : empty or c source file list <=> MULTIFILE_ENABLED
+# $(3) : via File name <=> MULTIFILE_ENABLED
 # $(4) : language specific options (e.g. C++ vs C)
 # $(5) : type (optional) - "compile" [default] or "preprocess"
 
@@ -836,7 +850,7 @@ $(eval FEEDBACKFILE:=$(if $(DOLINKERFEEDBACK),$(wildcard $(FEEDBACKFILENAME)),))
 $(1): $(2) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT)) $(FEEDBACKFILE) $(if $(USE_COMPILATION_COMMAND_FILE),$(CC_COMMAND_FILE),$(PROJECT_META_DEP)) | $(TRACE_THISCOMPONENT_ALLRULE)
 	$(call startrule,$(TYPE),,$(2))		\
 		$(if $(PERTURBSTARTTIME), $(RANSLEEP) $(PERTURBMSECS) ;,) \
-		$(if $(MULTIFILE_ENABLED), echo $(2) $(3) > $(MULTIFILE_VIAFILE) ;,) \
+		$(if $(MULTIFILE_ENABLED), echo $(2) > $(3) ;,) \
 		$(CC) $(LICENSERETRY_OPTION) \
 			$(if $(findstring preprocess,$(TYPE)),$(CPPONLYOPTION)) \
 			$(CC_CORE_ARGS) \
@@ -851,8 +865,8 @@ $(1): $(2) $(if $(MULTIFILE_ENABLED),,$(if $(DEPENDFILE),,RESOURCE BITMAP EXPORT
 			$(if $(NOHIDEALL),$(COMPILER_NO_HIDE_ALL_OPTION),) \
 			$(if $(or $(NO_DEPEND_GENERATE),$(findstring preprocess,$(TYPE))),,$(DEPEND_OPTION) $(call dblquote,$(1).d)) \
 			$(if $(FEEDBACKFILE),$(COMPILER_FEEDBACK_OPTION)$(call dblquote,$(FEEDBACKFILE))) \
-			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $(MULTIFILEOBJECT) \
-			$(COMMANDFILE_OPTION)$$(call dblquote, $(MULTIFILE_VIAFILE)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
+			$(if $(MULTIFILE_ENABLED),--multifile $(OUTPUT_OPTION) $$@ \
+			$(COMMANDFILE_OPTION)$$(call dblquote, $(3)),$(OUTPUT_OPTION) $$@ $$(call dblquote, $$<)) $(if $(USE_RVCT22_DELETE_WORKAROUND),$(RVCT22_DELETE_WORKAROUND)) \
 	$(call endrule,$(TYPE))
 
 ifeq ($(NO_DEPEND_GENERATE),)
@@ -872,15 +886,14 @@ SOURCETARGET_$(call sanitise,$(2)): $(1)
 
 endef
 
-# Evaluate .cpp and .c files in one go for multifile, cannot do in separate steps since we have the same target.
-# This implementation means the .c files will always get put at the end of the .via file. Maybe there is a better way to do this?
-$(if $(MULTIFILE_ENABLED),$(eval $(call e32abiv2_compile,$(MULTIFILEOBJECT),$(CPPFILES),$(CFILES),$(CPP_LANG_OPTION))),$(foreach F,$(CPPFILES),$(eval $(call e32abiv2_compile,$(call mapcpp2object,$(F)),$(F),$(CPP_LANG_OPTION)))))
-$(if $(MULTIFILE_ENABLED),,$(foreach F,$(CFILES),$(eval $(call e32abiv2_compile,$(call mapc2object,$(F)),$(F),$(C_LANG_OPTION)))))
+# Evaluate .cpp and .c files in separate groups for multifile.
+$(if $(MULTIFILE_ENABLED),$(eval $(call e32abiv2_compile,$(MULTIFILEOBJECT_CPP),$(CPPFILES),$(MULTIFILE_VIAFILE_CPP),$(CPP_LANG_OPTION))),$(foreach F,$(CPPFILES),$(eval $(call e32abiv2_compile,$(call mapcpp2object,$(F)),$(F),$(CPP_LANG_OPTION)))))
+$(if $(MULTIFILE_ENABLED),$(eval $(call e32abiv2_compile,$(MULTIFILEOBJECT_C),$(CFILES),$(MULTIFILE_VIAFILE_C),$(C_LANG_OPTION))),$(foreach F,$(CFILES),$(eval $(call e32abiv2_compile,$(call mapc2object,$(F)),$(F),$(C_LANG_OPTION)))))
 ifneq ($(TRANSFORM_CIA),1)
   $(if $(MULTIFILE_ENABLED),,$(foreach F,$(CIAFILES),$(eval $(call e32abiv2_compile,$(call mapcia2object,$(F)),$(F),$(CPP_LANG_OPTION) $(COMPILER_CIA_FLAGS) $(call makemacrodef,-D,$(CIADEFS))))))
 endif
 
-CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILE_VIAFILE) $(MULTIFILEOBJECT),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS))
+CLEANTARGETS:=$(CLEANTARGETS) $(if $(MULTIFILE_ENABLED),$(MULTIFILEOBJECT_CPP) $(MULTIFILEOBJECT_C) $(MULTIFILE_VIAFILE_CPP) $(MULTIFILE_VIAFILE_C),$(CPPFILES_LINKOBJECTS) $(CFILES_LINKOBJECTS) $(CIAFILES_LINKOBJECTS))
 
 
 ## Preprocess target ###################################################
