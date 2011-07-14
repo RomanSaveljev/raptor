@@ -118,7 +118,7 @@ parser.add_option("-l","--layer",action="append",dest="sys_def_layer",
                 help="Build a specific layer in the System Definition XML File. Multiple -l options can be given.")
 
 parser.add_option("-m","--makefile",action="store",dest="makefile",
-				help="Top-level makefile to be created.")
+				help="The basename of a set of makefiles.")
 
 parser.add_option("--mo",action="append",dest="make_option",
 				help="Option that must be passed through to the make engine. Multiple --mo options can be given.")
