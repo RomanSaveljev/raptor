@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -20,7 +20,7 @@ def run():
 	t = AntiTargetSmokeTest()
 	t.usebash = True
 	
-	command = "sbs -b smoke_suite/test_resources/rvct_multifile/group/bld.inf -c %s -f-"
+	command = "sbs -b smoke_suite/test_resources/rvct_multifile/group/bld.inf -c {} -f-"
 	maintargets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/rvct_multifile.dll.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/rvct_multifile.dll.sym",
@@ -45,16 +45,14 @@ def run():
 		r".*--multifile.*"
 			]
 	
-	t.id = "200a"
 	t.name = "rvct_multifile_build"
-	t.command = command % "armv5.multifile"
+	t.command = command.format("armv5.multifile")
 	t.targets = maintargets[:]	# Shallow, as we optionally extend later and then re-use
 	t.addbuildtargets('smoke_suite/test_resources/rvct_multifile/group/bld.inf', buildtargets)
 	t.mustmatch = mustmatch
 	t.mustnotmatch = []
 	t.run()
 		
-	t.id = "200b"
 	t.name = "rvct_multifile_clean"
 	t.command = "sbs -b smoke_suite/test_resources/rvct_multifile/group/bld.inf -c armv5.multifile clean"
 	t.targets = []
@@ -62,7 +60,6 @@ def run():
 	t.mustnotmatch = []
 	t.run()	
 		
-	t.id = "200"
 	t.name = "rvct_multifile"
 	t.print_result()
 	return t
