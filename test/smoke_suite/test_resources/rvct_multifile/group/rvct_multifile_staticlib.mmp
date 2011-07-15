@@ -15,13 +15,17 @@
 *
 */
 
-#include <e32def.h>
 
-#ifdef __cplusplus 
-extern "C" {
-#endif
-	TInt add(TInt,TInt);
-#ifdef __cplusplus
-}
-#endif
+TARGET rvct_multifile_staticlib.lib
+TARGETTYPE LIB
+
+OS_LAYER_SYSTEMINCLUDE_SYMBIAN
+SOURCEPATH ..\src
+SOURCE add.cpp sub.cpp testassembler.cpp
+SOURCE use_add.c use_sub.c
+SOURCE cia1.cia cia2.cia
+SOURCE asm1.s asm2.s 
+
+
+
 
