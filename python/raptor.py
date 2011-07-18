@@ -51,7 +51,7 @@ import json
 
 
 if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ or not "HOSTPLATFORM32_DIR" in os.environ:
-	print "Error: HOSTPLATFORM, HOSTPLATFORM_DIR and HOSTPLATFORM32_DIR must be set in the environment (this is usually done automatically by the startup script)."
+	sys.stderr.write("Error: HOSTPLATFORM, HOSTPLATFORM_DIR and HOSTPLATFORM32_DIR must be set in the environment (this is usually done automatically by the startup script).\n")
 	sys.exit(1)
 
 hostplatform = set(os.environ["HOSTPLATFORM"].split(" "))
@@ -1743,7 +1743,7 @@ def Main(argv):
 	except BuildCannotProgressException, e:
 		t = str(e)
 		if t != "":
-			print("sbs error: {0:s}".format(t))
+			sys.stderr.write("sbs error: {0:s}\n".format(t))
 		return 1
 
 
