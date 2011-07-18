@@ -14,3 +14,7 @@ SOURCE			test_mmp_apply.cpp
 
 APPLY apply_test_exported_var
 
+// tack on some common MACRO mistakes
+MACRO
+MACRO SINGLE=1
+MACRO DOUBLE 2

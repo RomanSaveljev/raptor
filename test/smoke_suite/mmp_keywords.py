@@ -333,9 +333,13 @@ def run():
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/test_mmp_apply.exe"
 		]
 	t.mustmatch_singleline = ["-DAPPLYTESTEXPORTEDVAR",
-	                          "-DAPPLYTESTAPPENDCDEFS"]
-	t.countmatch = [["<error.*APPLY unknown variant 'no_such_var'", 2]]
+	                          "-DAPPLYTESTAPPENDCDEFS",
+	                          "-DSINGLE=1",
+	                          "-DDOUBLE"]
+	t.countmatch = [["<error.*APPLY unknown variant 'no_such_var'", 2],
+				    ["<error.*MACRO names cannot start with a digit '2'", 2]]
 	t.errors = 2 # no_such_var for armv5 and winscw
+	t.errors += 2 # macro '2' error for armv5 and winscw
 	t.warnings = 0
 	t.returncode = 1
 	t.run()
