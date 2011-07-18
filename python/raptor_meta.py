@@ -1193,8 +1193,11 @@ class BldInfFile(MetaDataFile):
 
 			if not re.match(r'.*\S+', line):
 				continue
-			elif re.match(r'\s*' + aSection + r'\s*$', line, re.I):
-				activeSection = True
+			elif re.match(r'\s*' + aSection, line, re.I):
+				if line.lower().endswith(aSection.lower()):
+					activeSection = True
+				else:
+					self.log.Error("got '{0}' but only expected keyword {1} on this line".format(line, aSection), bldinf=str(self.filename))
 			elif re.match(r'\s*PRJ_\w+\s*$', line, re.I):
 				activeSection = False
 			elif activeSection:

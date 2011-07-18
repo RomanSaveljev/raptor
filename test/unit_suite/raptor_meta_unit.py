@@ -804,7 +804,45 @@ class TestRaptorMeta(unittest.TestCase):
 		self.assertEquals(err[0], "unmatched END statement in PRJ_TESTEXTENSIONS section")
 		self.assertTrue("bldinf" in err[1])
 		self.assertTrue(err[1]["bldinf"].endswith("bad_lone_end.inf"))
-			
+	
+	def testTextTrailingPrjKeywords(self):
+		bldInfTestRoot = self.__testRoot.Append('metadata/project/bld.infs')
+		depfiles=[]
+				
+		logger = BldInfLogger()
+		
+		# this bld.inf has text on the same line as PRJ_ keywords
+		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('prj_trailing_text.inf'),
+											  self.__gnucpp, depfiles=depfiles, log=logger)
+		
+		platforms = bldInfObject.getBuildPlatforms(self.defaultPlatform)
+		err = logger.errors[0]
+		self.assertEquals(err[0], "got 'PRJ_PLATFORMS there' but only expected keyword PRJ_PLATFORMS on this line")
+		
+		exports = bldInfObject.getExports(self.defaultPlatform)
+		err = logger.errors[1]
+		self.assertEquals(err[0], "got 'PRJ_EXPORTS should' but only expected keyword PRJ_EXPORTS on this line")
+		
+		testexports = bldInfObject.getTestExports(self.defaultPlatform)
+		err = logger.errors[2]
+		self.assertEquals(err[0], "got 'PRJ_TESTEXPORTS any' but only expected keyword PRJ_TESTEXPORTS on this line")
+		
+		mmps = bldInfObject.getMMPList(self.defaultPlatform)
+		err = logger.errors[3]
+		self.assertEquals(err[0], "got 'PRJ_MMPFILES not' but only expected keyword PRJ_MMPFILES on this line")
+		
+		testmmps = bldInfObject.getTestMMPList(self.defaultPlatform)
+		err = logger.errors[4]
+		self.assertEquals(err[0], "got 'PRJ_TESTMMPFILES text' but only expected keyword PRJ_TESTMMPFILES on this line")
+		
+		extensions = bldInfObject.getExtensions(self.defaultPlatform)
+		err = logger.errors[5]
+		self.assertEquals(err[0], "got 'PRJ_EXTENSIONS be' but only expected keyword PRJ_EXTENSIONS on this line")
+		
+		testextensions = bldInfObject.getTestExtensions(self.defaultPlatform)
+		err = logger.errors[6]
+		self.assertEquals(err[0], "got 'PRJ_TESTEXTENSIONS here' but only expected keyword PRJ_TESTEXTENSIONS on this line")
+				
 	def testBldInfIncludes(self):
 		bldInfTestRoot = self.__testRoot.Append('metadata/project/bld.infs/includes')
 		depfiles=[]
