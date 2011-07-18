@@ -1473,8 +1473,8 @@ class Raptor(object):
 		layers=[]
 		# Look for bld.infs or sysdefs in the current dir if none were specified
 		if self.systemDefinitionFile == None and len(self.commandline_layer) == 0:
+			cwd = os.getcwd()
 			if not self.preferBuildInfoToSystemDefinition:
-				cwd = os.getcwd()
 				self.systemDefinitionFile = self.FindSysDefIn(cwd)
 				if self.systemDefinitionFile == None:
 					aComponent = self.FindComponentIn(cwd)
