@@ -144,7 +144,7 @@ def run_make(make_process):
 
 	if make_process.filesystem == "unix":
 		p = subprocess.Popen(
-				args = [make_process.command], 
+				make_process.command, 
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT,
@@ -153,11 +153,10 @@ def run_make(make_process):
 				env = makeenv)
 	else:
 		p = subprocess.Popen(
-				args = [make_process.command],
+				make_process.command,
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT,
-				shell = False,
 				universal_newlines = True, 
 				env = makeenv)
 
