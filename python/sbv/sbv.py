@@ -27,9 +27,7 @@ sys.path.append("..")
 import allo.diff
 from buildrecord import *
 import subprocess
-
 import sdk
-
 
 
 class BuildWrapper(QObject):
@@ -93,6 +91,9 @@ class SDKWrapper(QObject):
 
 class SDKListModel(QAbstractListModel):
 	COLUMNS = ['sdk']
+	DEFAULT_LOCATIONS = {"linux" : [ os.path.expanduser(os.path.join("~", "epocroot", "epoc32")) ],
+						 "win" : [ drive + ":\\" for drive in ["D", "E", "X", "Y", "Z"] ]
+						 			 }
 
 	def __init__(self):
 		QAbstractListModel.__init__(self)
@@ -117,7 +118,16 @@ class SDKListModel(QAbstractListModel):
 			# already in the sdk list from before
 			if not env_er in self.sdk_manager.sdk_dict.values():
 				self.sdk_manager.add(env_er)
-			
+		
+		guessed_locations = [ loc for k in SDKListModel.DEFAULT_LOCATIONS.keys() if 
+				k in sys.platform.lower() for loc in SDKListModel.DEFAULT_LOCATIONS[k] ]
+		
+		for loc in guessed_locations:
+			if os.path.isdir(loc):
+				s = sdk.SDK(loc, None, "Discovered SDK at " + loc)
+				if not s in self.sdk_manager.sdk_dict.values():
+					self.sdk_manager.add(s)
+		
 		self.setRoleNames(dict(enumerate(SDKListModel.COLUMNS)))
 		
 		self._sdks.extend([SDKWrapper(sdk_id, self.sdk_manager.sdk_dict[sdk_id]) 
@@ -138,6 +148,13 @@ class SDKListModel(QAbstractListModel):
 		""" Remove the SDK whose is id sdk_id """
 		self.sdk_manager.remove(sdk_id)
 		self.initSdks()
+	
+	def sdk_info(self, sdk_id):
+		try:
+			requested_sdk = [ sdk for sdk in self._sdks if sdk.id == sdk_id ][0]
+			return requested_sdk.info
+		except:
+			return ""
 
 	changed = Signal()
 
@@ -377,6 +394,7 @@ class LogView(QObject):
 		self.rc.setContextProperty('controller', self.controller)
 		self.rc.setContextProperty('pyBuildListModel', self.build_list)
 		self.rc.setContextProperty('logpath', self.logpath)
+		self.rc.setContextProperty('info', sdk_model.sdk_info(id))
 		self.rc.setContextProperty('window', self.window)
 		self.view.setSource('logchooser.qml')
 		self.window.show()

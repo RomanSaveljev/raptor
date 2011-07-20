@@ -74,7 +74,7 @@ Rectangle {
                 TextEdit {
                     id: logpath_edit
                     width: logchooser.width
-                    text: logpath
+                    text: "Name: " + info + "; logpath: " + logpath
                     font.pointSize: 12
                     onTextChanged: controller.newlogpath(text)
                 }
