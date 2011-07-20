@@ -19,7 +19,7 @@ import Qt 4.7
 
 Rectangle {
     width: 480
-    color: "#666666"
+    color: "#6666DD"
     Column {
             TextEdit {
                 id: title

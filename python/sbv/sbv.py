@@ -28,6 +28,8 @@ import allo.diff
 from buildrecord import *
 import subprocess
 
+import sdk
+
 
 
 class BuildWrapper(QObject):
@@ -56,20 +58,20 @@ class BuildWrapper(QObject):
 	name = Property(unicode, _name, notify=changed)
 	checked = Property(bool, is_checked, notify=changed)
 
-class SDK(object):
-	def __init__(self, path):
-		self.path = path
-		self.sdkinfo =""
-
 class SDKWrapper(QObject):
 	""" Present a build in the list in a form that the gui can cope with """
-	def __init__(self, sdk):
+	def __init__(self, sdk_id, sdk):
 		QObject.__init__(self)
+		self._sdk_id = sdk_id
 		self._sdk = sdk
 		self._checked = False
+		print("Created sdk wrapper:\nsdk id: {0}\nsdk: {1}".format(self._sdk_id, self._sdk))
+	
+	def _id(self):
+		return self._sdk_id
 
 	def _path(self):
-		return self._sdk.path
+		return self._sdk.logpath
 
 	def _info(self):
 		return self._sdk.sdkinfo
@@ -82,7 +84,8 @@ class SDKWrapper(QObject):
 		self.changed.emit()
 
 	changed = Signal()
-
+	
+	id = Property(unicode, _id, notify=changed)
 	info = Property(unicode, _info, notify=changed)
 	path = Property(unicode, _path, notify=changed)
 	checked = Property(bool, is_checked, notify=changed)
@@ -91,17 +94,34 @@ class SDKWrapper(QObject):
 class SDKListModel(QAbstractListModel):
 	COLUMNS = ['sdk']
 
-	def __init__(self, sdkpaths):
+	def __init__(self):
 		QAbstractListModel.__init__(self)
-
-		try:
-			logpath = os.environ["SBS_BUILD_DIR"]
-		except KeyError,e:
-			logpath = os.path.join(os.environ["EPOCROOT"],"epoc32","build")
-
+		
+		# Initialise the SDK manager and read the SDK list from last time
+		self.sdk_manager = sdk.SdkManager()
+		self.sdk_manager.init_sdk_dict()
+		self.initSdks()
+	
+	def initSdks(self):
+		""" Initialise the list of SDKs for the list model """
+		self._sdks = []
+		
+		if "EPOCROOT" in os.environ:
+			er = os.environ["EPOCROOT"]
+			logpath = None
+			if "SBS_BUILD_DIR" in os.environ:
+				logpath = os.environ["SBS_BUILD_DIR"]
+			env_er = sdk.SDK(er, logpath)
+			
+			# Don't add the current environment's EPOCROOT if it's
+			# already in the sdk list from before
+			if not env_er in self.sdk_manager.sdk_dict.values():
+				self.sdk_manager.add(env_er)
+			
 		self.setRoleNames(dict(enumerate(SDKListModel.COLUMNS)))
-		self._sdks = [SDKWrapper(SDK(logpath))]
-		self._sdks.extend([SDKWrapper(SDK(p)) for p in sdkpaths])
+		
+		self._sdks.extend([SDKWrapper(sdk_id, self.sdk_manager.sdk_dict[sdk_id]) 
+						for sdk_id in self.sdk_manager.sdk_dict])
 
 	def rowCount(self, parent=QModelIndex()):
 		return len(self._sdks)
@@ -113,6 +133,11 @@ class SDKListModel(QAbstractListModel):
 		if index.isValid() and role == SDKListModel.COLUMNS.index('sdk'):
 			return self._sdks[index.row()]
 		return None
+	
+	def remove(self, sdk_id):
+		""" Remove the SDK whose is id sdk_id """
+		self.sdk_manager.remove(sdk_id)
+		self.initSdks()
 
 	changed = Signal()
 
@@ -167,11 +192,16 @@ class BuildListModel(QAbstractListModel):
 	logpath  = Property(unicode, _getlogpath, notify=changed)
 
 class BuildController(QObject):
-	def __init__(self, app, model):
+	def __init__(self, app, model, sdk_id, sdk_model):
 		QObject.__init__(self)
 		self.app = app
 		self.model = model
 		self._info = ".."
+		self.sdk_id = sdk_id
+		self.sdk_model = sdk_model
+		
+		print("self.model = {0}".format(self.model))
+		print("self.sdk_model = {0}".format(self.sdk_model))
 
 	@Slot(QObject)
 	def toggled(self, wrapper):
@@ -185,6 +215,15 @@ class BuildController(QObject):
 	def filterclean(self):
 		pass
 
+	@Slot()
+	def filternofailed(self):
+		pass
+	
+	@Slot()
+	def unregister(self):
+		print("Unregistering the sdk with id {0}".format(self.sdk_id))
+		self.sdk_model.remove(self.sdk_id)
+	
 	@Slot(str)
 	def newlogpath(self, logpath):
 		self.model.newlogpath(logpath)
@@ -202,7 +241,7 @@ class SDKController(QObject):
 	@Slot(QObject)
 	def toggled(self, wrapper):
 		wrapper.toggle_checked()
-		self.logviews.append(LogView(self.app, wrapper.path))
+		self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model))
 
 
 
@@ -252,7 +291,13 @@ class SDKController(QObject):
 
 	@Slot()
 	def quit(self):
+		print("Quit called...")
+		self.model.sdk_manager.shutdown()
 		self.app.quit()
+
+	@Slot()
+	def add_sdk(self):
+		print("Going to add a new SDK...")
 
 
 
@@ -260,9 +305,9 @@ class SDKView(QObject):
 	def __init__(self, app, window, logpath=None):
 		QObject.__init__(self)
 		self.app = app
-
-		self.sdk_list = SDKListModel(["sdkpath1","sdkpath2"])
-		self.controller = SDKController(app, self.sdk_list)
+		
+		self.sdk_list_model = SDKListModel()
+		self.controller = SDKController(app, self.sdk_list_model)
 
 		self.view = QDeclarativeView()
 		self.glw = QtOpenGL.QGLWidget()
@@ -271,8 +316,13 @@ class SDKView(QObject):
 		window.setCentralWidget(self.view)
 		self.rc = self.view.rootContext()
 		self.rc.setContextProperty('sdk_controller', self.controller)
-		self.rc.setContextProperty('pySDKListModel', self.sdk_list)
+		self.rc.setContextProperty('pySDKListModel', self.sdk_list_model)
 		self.view.setSource('sdkchooser.qml')
+	
+	@Slot()
+	def quit(self):
+		self.controller.quit()
+		
 
 class DiffView(QObject):
 	def __init__(self, app, difftext, leftfile, rightfile):
@@ -308,16 +358,15 @@ class DiffView(QObject):
 				yield build
 
 class LogView(QObject):
-	def __init__(self, app, logpath):
+	def __init__(self, app, logpath, id, sdk_model):
 		QObject.__init__(self)
 		self.app = app
-
-
 		self.logpath=logpath
+		
 		self.window = QMainWindow()
 		self.window.setWindowTitle("Raptor build viewer")
 		self.build_list = BuildListModel(self.logpath)
-		self.controller = BuildController(app, self.build_list)
+		self.controller = BuildController(app, self.build_list, id, sdk_model)
 
 		self.view = QDeclarativeView()
 		self.glw = QtOpenGL.QGLWidget()
@@ -328,20 +377,20 @@ class LogView(QObject):
 		self.rc.setContextProperty('controller', self.controller)
 		self.rc.setContextProperty('pyBuildListModel', self.build_list)
 		self.rc.setContextProperty('logpath', self.logpath)
+		self.rc.setContextProperty('window', self.window)
 		self.view.setSource('logchooser.qml')
 		self.window.show()
 
 	def checked(self):
 		for build in self.build_list.checked(): 
-				yield build
+			yield build
 			
 
 app = QApplication(sys.argv)
-
-
 sdkwin = QMainWindow()
-sbv = SDKView(app, window=sdkwin)
+sbv = SDKView(app, window = sdkwin)
 sdkwin.show()
+app.connect( app, SIGNAL("lastWindowClosed()"), sbv, SLOT( "quit()" ) )
 
 # Enter Qt main loop
 sys.exit(app.exec_())

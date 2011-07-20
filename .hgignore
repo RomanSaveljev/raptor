@@ -5,6 +5,8 @@
 \.project$
 \.pydevproject$
 .*what_failed$
+.*python.sbv.sbv\.qmlproject\.user$
+.*\.settings.org\.eclipse\.core\.resources\.prefs$
 
 linux-.*-.*/bin
 linux-.*-.*/bv

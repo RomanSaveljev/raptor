@@ -29,12 +29,12 @@ import Qt 4.7
      gradient: Gradient {
          GradientStop {
              position: 0
-             color: "#fffbfb"
+             color: "#fffbff"
          }
 
          GradientStop {
              position: 1
-             color: "#959595"
+             color: "#9595ff"
          }
      }
 
@@ -42,5 +42,10 @@ import Qt 4.7
      MouseArea { id: mr; anchors.fill: parent; onClicked: container.clicked() }
 
      Text {
-         id: txtItem; color: "#000000"; text: container.text; styleColor: "#cacaca"; anchors.centerIn: container;     }
+         id: txtItem; color: "#000000"; text: container.text; styleColor: "#cacaca"; anchors.centerIn: container; }
+
+     states: State {
+         name: "pressed"; when: mr.pressed == true
+         PropertyChanges { target: container; opacity: .5 }
+     }
  }
