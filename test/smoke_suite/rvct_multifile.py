@@ -14,10 +14,10 @@
 # Description: 
 #
 
-from raptor_tests import AntiTargetSmokeTest
+from raptor_tests import SmokeTest
 
 def run():
-	t = AntiTargetSmokeTest()
+	t = SmokeTest()
 	t.usebash = True
 
 	t.description = "Build the MMP as a DLL and make sure multifile compilation groups CPP and C files separately"

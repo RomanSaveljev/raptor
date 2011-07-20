@@ -538,11 +538,11 @@ LINKOBJECTS:=$(foreach FILE,$(LINKOBJECTS),$(basename $(FILE))$(if $(filter $(ad
 
 
 # Set up variables if multifile compilation is being used. 
-# Files are grouped in separate multifile compilation based on their extension
+# Files are grouped in separate multifile compilations based on their extension
 # CPP and C files get separate multifile objects and .via files
 # Dependency files don't work when using multifile compilation
 ifneq ($(MULTIFILE_ENABLED),)
-NO_DEPEND_GENERATE:=0
+NO_DEPEND_GENERATE:=1
 ifneq ($(strip $(CPPFILES)),)
 MULTIFILEOBJECT_CPP:=$(INTERMEDIATEPATH)/$(TARGET).$(POSTLINKFILETYPE)_$(VARIANTTYPE)_multifileobject_cpp.o
 MULTIFILE_VIAFILE_CPP:=$(INTERMEDIATEPATH)/$(TARGET)_$(VARIANTTYPE)_multifile_cpp.via
@@ -589,6 +589,8 @@ define artarget_func
 
 # Ensure that, when generating .via files, that they do not start with a blank line - some versions of GCC's AR reject
 # any further content in the file if the first line is empty
+# Also, disable multifile compilation when building static libraries, since it can potentially increase the size of any code
+# linking against that library.
 
 $(ARTARGET): $(LINKOBJECTS) $(STDCPPTAGFILE)
 	@echo $(if $(STDCPPTAGFILE),"$(STDCPPTAGFILE)",-n "") > $(VIAFILE);
