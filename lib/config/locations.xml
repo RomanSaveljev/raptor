@@ -125,6 +125,8 @@
 		<set name='GNUFIND' value='$(SBS_GNUFIND)' type='tool' versionCommand='$(GNUFIND) --version' versionResult='(GNU)?.*find.*(GNU)?.*'/>
 		<set name='GNUGREP' value='$(SBS_GNUGREP)' type='tool' versionCommand='$(GNUGREP) --version' versionResult='(GNU)?.*grep.*(GNU)?.*'/>
 		<set name='GNUSORT' value='$(SBS_GNUSORT)' type='tool' versionCommand='$(GNUSORT) --version' versionResult='(GNU)?.*sort.*(GNU)?.*'/>
+		<set name='GNUTR' value='$(SBS_GNUTR)' type='tool' versionCommand='$(GNUTR) --version' versionResult='(GNU)?.*tr.*(GNU)?.*'/>
+		<set name='GNUUNIQ' value='$(SBS_GNUUNIQ)' type='tool' versionCommand='$(GNUUNIQ) --version' versionResult='(GNU)?.*uniq.*(GNU)?.*'/>
 		<set name='GNUDIFF' value='$(SBS_GNUDIFF)' type='tool' versionCommand='$(GNUDIFF) --version' versionResult='(GNU)?.*diff.*(GNU)?.*'/>
 		<set name='ZIP' value="$(SBS_ZIP)" type='tool'/>
 		<set name='UNZIP' value="$(SBS_UNZIP)" type='tool'/>
