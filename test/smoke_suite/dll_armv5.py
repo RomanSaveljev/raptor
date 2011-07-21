@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -48,7 +48,6 @@ def run():
 	# Note that ABIv1 import libraries are only generated for RVCT-based armv5
 	# builds on Windows if the kit asks for it (off by default)
 	
-	t.id = "0009a"
 	t.name = "dll_armv5_rvct"
 	t.command = command % "armv5"
 	t.targets = maintargets[:]	# Shallow, as we optionally extend later and then re-use
@@ -57,13 +56,11 @@ def run():
 	t.mustnotmatch = mustnotmatch
 	t.run()
 	
-	t.id = "0009b"
 	t.name = "dll_armv5_rvct_abiv1"
 	t.command += " --configpath=test/config/abiv1kit"
 	t.targets.extend(abiv1libtargets)
 	t.run("windows")
 		
-	t.id = "0009c"
 	t.name = "dll_armv5_clean"
 	t.command = "sbs -b smoke_suite/test_resources/simple_dll/bld.inf -c armv5 clean"
 	t.targets = []
@@ -71,7 +68,6 @@ def run():
 	t.mustnotmatch = []
 	t.run()	
 		
-	t.id = "0009d"
 	t.name = "dll_armv5_gcce"
 	t.command = command % "gcce_armv5"
 	t.targets = maintargets
@@ -82,7 +78,6 @@ def run():
 	t.mustnotmatch = mustnotmatch
 	t.run()	
 	
-	t.id = "9"
 	t.name = "dll_armv5"
 	t.print_result()
 	return t

@@ -164,7 +164,9 @@ Section "Install Raptor" INSTALLRAPTOR
     	# Prepend PATH with $INSTDIR\bin
     	Push "$INSTDIR\bin" # First on stack
     	call PrependToPath
-	
+
+	${EndUnless}
+		
 	# Generate batch file to set environment variables for Raptor
 	StrCpy $RESULT "@REM Environment variables for ${INSTALLER_NAME}$\r$\nset PATH=$INSTDIR\bin;%PATH%$\r$\n"
 	SetOutPath "$INSTDIR"
