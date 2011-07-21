@@ -78,6 +78,7 @@ def run():
 	t.antitargets = abiv1libtargets
 	t.addbuildtargets('smoke_suite/test_resources/simple_dll/bld.inf', buildtargets)
 	t.mustmatch = mustmatch
+	t.mustmatch.append("-funsigned-bitfields")
 	t.mustnotmatch = mustnotmatch
 	t.run()	
 	

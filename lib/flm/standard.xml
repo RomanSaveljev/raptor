@@ -91,6 +91,7 @@
 		<param name='ASM_FLAGS'/>
 		<param name='ASM_OUTPUT_OPTION'/>
 		<param name='ARM_INSTRUCTION_SET'/>
+		<param name='BITFIELD_SIGN_OPTION' default=''/>
 		<param name='THUMB_INSTRUCTION_SET'/>
 		<param name='CC'/>
 		<param name='CC_ERRORS_CONTROL_OPTION'/>
