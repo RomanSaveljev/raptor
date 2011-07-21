@@ -35,6 +35,8 @@
 		<param name='GNUGREP'/>
 		<param name='GNUSED'/>
 		<param name='GNUSORT'/>
+		<param name='GNUTR'/>
+		<param name='GNUUNIQ'/>
 		<param name='SBS_JAVATC' default=''/>
 		<param name='ZIP'/>
 		<param name='UNZIP'/>

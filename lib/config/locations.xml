@@ -39,6 +39,8 @@
 		<env name='SBS_GNUFIND' default='$(SBS_USRBIN)/find' type='tool'/>
 		<env name='SBS_GNUGREP' default='$(SBS_SLASHBIN)/grep' type='tool'/>
 		<env name='SBS_GNUSORT' default='sort' type='tool'/>
+		<env name='SBS_GNUTR' default='$(SBS_USRBIN)/tr' type='tool'/>
+		<env name='SBS_GNUUNIQ' default='$(SBS_USRBIN)/uniq' type='tool'/>
 		<env name='SBS_SHELL' default="$(SBS_SLASHBIN)/bash" type='tool'/>
 		<env name='SBS_ZIP' default="$(SBS_USRBIN)/zip" type='tool'/>
 		<env name='SBS_UNZIP' default="$(SBS_USRBIN)/unzip" type='tool'/>
@@ -83,6 +85,8 @@
 		<env name='SBS_GNUFIND' default='$(COREUTILSBINDIR)/find.exe' type='tool'/>
 		<env name='SBS_GNUGREP' default='$(COREUTILSBINDIR)/grep.exe' type='tool'/>
 		<env name='SBS_GNUSORT' default='$(COREUTILSBINDIR)/sort.exe' type='tool'/>
+		<env name='SBS_GNUTR' default='$(COREUTILSBINDIR)/tr.exe' type='tool'/>
+		<env name='SBS_GNUUNIQ' default='$(COREUTILSBINDIR)/uniq.exe' type='tool'/>
 		<env name='SBS_SHELL' default="$(COREUTILSBINDIR)/sh.exe" type='tool'/>
 		<env name='SBS_ZIP' default="$(COREUTILSBINDIR)/zip.exe" type='tool'/>
 		<env name='SBS_UNZIP' default="$(COREUTILSBINDIR)/unzip.exe" type='tool'/>
