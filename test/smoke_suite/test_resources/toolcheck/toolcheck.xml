@@ -15,8 +15,8 @@
  </var> 
  
  <var name="self_version_check">
-  <env name='SBS' type='tool' versionCommand='$(SBS) --version' versionResult='2\.17\.[0-9]+' 
-       versionDescription='This version of Raptor is not suitable for this SDK. Minimum version required is 2.17.0.' />
+  <env name='SBS' type='tool' versionCommand='$(SBS) --version' versionResult='2\.99\.[0-9]+' 
+       versionDescription='This version of Raptor is not suitable for this SDK. Minimum version required is 2.99.0.' />
  </var>  
 
 </build>

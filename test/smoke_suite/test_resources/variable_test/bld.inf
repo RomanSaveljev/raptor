@@ -1,0 +1,11 @@
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+vartest.flm /epoc32/tools/makefile_templates/tools/
+vartest.xml /epoc32/tools/makefile_templates/tools/
+
+PRJ_EXTENSIONS
+START EXTENSION tools/vartest
+END
+

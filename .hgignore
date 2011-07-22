@@ -52,4 +52,8 @@ test/smoke_suite/test_resources/unfrozen/frozen/eabi/frozenu.def
 test/tmp
 
 util/build
+util/ext/Python-2.7.tar.bz2
+util/ext/bv.tgz
+util/ext/dialog-1.1-20080819.tar.gz
+util/ext/make-3.81.tar.bz2
 

@@ -1193,8 +1193,11 @@ class BldInfFile(MetaDataFile):
 
 			if not re.match(r'.*\S+', line):
 				continue
-			elif re.match(r'\s*' + aSection + r'\s*$', line, re.I):
-				activeSection = True
+			elif re.match(r'\s*' + aSection, line, re.I):
+				if line.lower().endswith(aSection.lower()):
+					activeSection = True
+				else:
+					self.log.Error("got '{0}' but only expected keyword {1} on this line".format(line, aSection), bldinf=str(self.filename))
 			elif re.match(r'\s*PRJ_\w+\s*$', line, re.I):
 				activeSection = False
 			elif activeSection:
@@ -1364,6 +1367,10 @@ class MMPRaptorBackend(MMPBackend):
 	def __debug(self, format, *extras):
 		if (self.__Raptor):
 			self.__Raptor.Debug(format, *extras)
+			
+	def __error(self, format, **attributes):
+		if (self.__Raptor):
+			self.__Raptor.Error(format, **attributes)
 
 	def __warn(self, format, *extras):
 		if (self.__Raptor):
@@ -1690,6 +1697,11 @@ class MMPRaptorBackend(MMPBackend):
 				if item.startswith('"') and item.endswith('"') \
 				or item.startswith("'") and item.endswith("'"):
 					item = item.strip("'\"")
+					
+				if item[0].isdigit():
+					self.__error("MACRO names cannot start with a digit '{0}'".format(item), bldinf=self.__bldInfFilename)
+					item = ""
+					
 			if name=='LIBRARY' or name=='DEBUGLIBRARY':
 				im = MMPRaptorBackend.library_re.match(item)
 				if not im:

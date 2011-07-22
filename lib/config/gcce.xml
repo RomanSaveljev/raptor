@@ -24,6 +24,7 @@
 		<set name="ASM_FLAGS" value="-c" />
 		<set name="ASM_OUTPUT_OPTION" value="-o"/>
 		<set name="ASSEMBLER_LISTING_OPTION" value="-S"/>
+		<set name="BITFIELD_SIGN_OPTION" value="-funsigned-bitfields"/>
 		<set name="BPABI_OPTION" value=""/>
 		<set name="C_LANG_OPTION" value="-x c"/>
 		<set name="CC.ARMV5" value="-march=armv5te"/>

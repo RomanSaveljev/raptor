@@ -68,3 +68,10 @@ class PluginBox(object):
 						classes.append(c)
 		return classes
 
+	def getdetails(self):
+		""" return a dictionary of plugins name:docstring """
+		details = {}
+		for plugin in self.pluginlist:
+			for c in plugin.classes:
+				details[c.__name__] = c.__doc__
+		return details

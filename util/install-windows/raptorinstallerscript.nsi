@@ -37,7 +37,6 @@ SetCompressor /SOLID lzma
 Var DIALOG
 Var RESULT # Generic variable to obtain results, and immediately thrown away after
 Var RESULT2 # Generic variable to obtain results, and immediately thrown away after
-Var SBS_HOME
 Var USERONLYINSTALL_HWND # HWND of radio button control for user-only installation
 Var ALLUSERSINSTALL_HWND # HWND of radio button control for system installation
 Var NOENVCHANGES_HWND    # HWND of radio button control for file-only installation
@@ -103,8 +102,6 @@ FunctionEnd
 # to the user.
 Section "Install Raptor" INSTALLRAPTOR
 	
-    StrCpy $SBS_HOME "SBS_HOME"
-	
     # Install Raptor
     SetOutPath "$INSTDIR\bin"
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\bin\*.* 
@@ -164,40 +161,14 @@ Section "Install Raptor" INSTALLRAPTOR
     	# Reset error flag
     	ClearErrors
     	
-    	# Write SBS_HOME variable; if it exists, the user will be asked if they want it to be overwritten.
-    	# Read the env var from the appropriate place
-    	!insertmacro ReadEnvVar $SBS_HOME $RESULT
-    	
-    	${Unless} ${Errors} # No errors, so $SBS_HOME exists
-    		DetailPrint "Env Var $SBS_HOME exists with value $RESULT"
-    		# Ask user if they want it replaced. If yes, write it, if no don't write it.
-    		MessageBox MB_YESNO|MB_ICONQUESTION "The ${INSTALLER_NAME} installer has detected that you already have the SBS_HOME environment variable set with value $RESULT. Would you like the installer to overwrite it with the value $INSTDIR? Click yes to over write with value $INSTDIR, and no to leave it as $RESULT." IDYES write_env_var_yes IDNO write_env_var_no
-    	${Else} # No env var named $SBS_HOME
-    		DetailPrint "Env Var $SBS_HOME does not exist!"
-    	${EndUnless}
-    	
-write_env_var_yes:
-    	# Write SBS_HOME to registry
-    	Push "SBS_HOME" # Third on stack
-    	Push "$INSTDIR" # Second on stack
-    	Push "" # First on stack
-    	
-    	# Needs env var name, env var value, then "" on the stack
-    	call WriteEnvVar
-    	
-    	# Prepend PATH with %SBS_HOME%\bin
-    	Push "%SBS_HOME%\bin" # First on stack
+    	# Prepend PATH with $INSTDIR\bin
+    	Push "$INSTDIR\bin" # First on stack
     	call PrependToPath
-    	goto end
-        
-write_env_var_no:
-    	DetailPrint "Not writing the environment variable $SBS_HOME."
-        
-end:
-    ${EndUnless} 
-	
+
+	${EndUnless}
+		
 	# Generate batch file to set environment variables for Raptor
-	StrCpy $RESULT "@REM Environment variables for ${INSTALLER_NAME}$\r$\nset SBS_HOME=$INSTDIR$\r$\nset PATH=%SBS_HOME%\bin;%PATH%$\r$\n"
+	StrCpy $RESULT "@REM Environment variables for ${INSTALLER_NAME}$\r$\nset PATH=$INSTDIR\bin;%PATH%$\r$\n"
 	SetOutPath "$INSTDIR"
 	!insertmacro WriteFile "RaptorEnv.bat" "$RESULT"
 SectionEnd
@@ -205,7 +176,7 @@ SectionEnd
 # Finishing up installation.
 Section
     ${Unless} $INSTALL_TYPE == "NO_ENV"
-    	# Refresh environment to get changes for SBS_HOME and PATH
+    	# Refresh environment to get changes for PATH
         !insertmacro RefreshEnv
     ${EndUnless}
 	
@@ -375,53 +346,6 @@ Section "Uninstall"
         DetailPrint "Failed to back up user environment due to an unknown error."
     ${EndIf}
 	
-	# Reset error flag
-	ClearErrors
-	
-	# Read user SBS_HOME
-	!insertmacro ReadUsrEnvVar "SBS_HOME" $RESULT
-	
-	${Unless} ${Errors} # No errors, so user %SBS_HOME% exists
-		DetailPrint "Removing user environment variable SBS_HOME ($RESULT)"
-		
-		# Reset error flag
-		ClearErrors
-		!insertmacro RmUsrEnvVar "SBS_HOME"
-		
-		${If} ${Errors}
-			DetailPrint "ERROR: The ${INSTALLER_NAME} uninstaller could not remove the user environment variable SBS_HOME."
-			DetailPrint "Please remove it manually."
-		${EndIf}
-		
-	${Else} # No env var named $SBS_HOME
-		DetailPrint "Note: Unable to find user environment variable SBS_HOME."
-		DetailPrint "If required, this variable may need to be removed manually."
-	${EndUnless}
-	
-	# Reset error flag
-	ClearErrors
-	
-	# Read system SBS_HOME
-	!insertmacro ReadSysEnvVar "SBS_HOME" $RESULT
-	
-	${Unless} ${Errors} # No errors, so system $SBS_HOME exists
-		DetailPrint "Removing system environment variable SBS_HOME ($RESULT)"
-		
-		# Reset error flag
-		ClearErrors
-		!insertmacro RmSysEnvVar "SBS_HOME"
-		
-		${If} ${Errors}
-			DetailPrint "ERROR: The ${INSTALLER_NAME} uninstaller could not remove the \
-            System environment variable SBS_HOME."
-			DetailPrint "Please remove it manually."
-		${EndIf}
-		
-	${Else} # No env var named $SBS_HOME
-		DetailPrint "Note: Unable to find system environment variable SBS_HOME."
-		DetailPrint "If required, this variable may need to be removed manually."
-	${EndUnless}
-	
 	################################# Clean up the path env vars #################################
 	# Reset error flag
 	ClearErrors
@@ -430,16 +354,16 @@ Section "Uninstall"
 	!insertmacro ReadUsrPath $RESULT
     DetailPrint "Read user Path: $RESULT"
 	
-	${Unless} ${Errors} # No errors, so user $SBS_HOME exists
+	${Unless} ${Errors} # No errors, so user Path exists
 		${If} $RESULT == "" # If it came back empty.
 			DetailPrint "No user Path available - nothing to do."
 		${Else}
-            ${If} $RESULT un.=~ "%SBS_HOME%\\bin;" # Only need to act if %SBS_HOME%\bin; is in the Path
-    			DetailPrint "Removing %SBS_HOME%\bin; from user path"
+            ${If} $RESULT un.=~ "$INSTDIR\\bin;" # Only need to act if $INSTDIR\bin; is in the Path
+    			DetailPrint "Removing $INSTDIR\bin; from user path"
     			
     			# Reset error flag and clean user Path
     			ClearErrors
-    			!insertmacro RemoveFromPathString $RESULT "%SBS_HOME%\bin;"
+    			!insertmacro RemoveFromPathString $RESULT "$INSTDIR\bin;"
     			
     			DetailPrint "DEBUG: User path $$RESULT = "
     	        DetailPrint "DEBUG: User path  $RESULT"
@@ -461,7 +385,7 @@ Section "Uninstall"
 		
 	${Else} # No user path
 		DetailPrint "Note: Unable to find user Path environment variable."
-		DetailPrint "Please check that the variable exists and remove %SBS_HOME\bin manually if required."
+		DetailPrint "Please check that the variable exists and remove $INSTDIR\bin manually if required."
 	${EndUnless}
     
     # Read system path
@@ -469,13 +393,13 @@ Section "Uninstall"
     DetailPrint "Read system Path: $RESULT"
     
     ${Unless} ${Errors} # No errors, so system path read OK.
-        ${If} $RESULT un.=~ "%SBS_HOME%\\bin;" # Only need to act if %SBS_HOME%\bin; is in the Path 
+        ${If} $RESULT un.=~ "$INSTDIR\\bin;" # Only need to act if $INSTDIR\bin; is in the Path 
         
-            DetailPrint "Removing %SBS_HOME%\bin; from system path"
+            DetailPrint "Removing $INSTDIR\bin; from system path"
             
             # Reset error flag
             ClearErrors
-            !insertmacro RemoveFromPathString $RESULT "%SBS_HOME%\bin;"
+            !insertmacro RemoveFromPathString $RESULT "$INSTDIR\bin;"
             DetailPrint "DEBUG: System Path $$RESULT = "
             DetailPrint "DEBUG: System Path $RESULT"
             ClearErrors
@@ -491,11 +415,11 @@ Section "Uninstall"
         ${EndIf}
     ${Else} # Some error reading system path
         DetailPrint "Note: Unable to read the system Path environment variable."
-        DetailPrint "Please check that the variable and remove %SBS_HOME\bin manually if required."
+        DetailPrint "Please check that the variable and remove $INSTDIR\bin manually if required."
     ${EndUnless}
 	
 	##########################################################################
-	# Refresh environment to get changes for SBS_HOME and PATH
+	# Refresh environment to get changes for PATH
     !insertmacro RefreshEnv
 	
 	# Unload registry plug in

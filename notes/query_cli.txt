@@ -1,7 +1,7 @@
 
 A new --query command-line option allows other tools to easily read raptor's
 configuration data without having to understand exactly how raptor config
-files work.
+files work. The output is presented in XML format.
 
 For example, all the valid build aliases which can be used to build with
 the -c option can be obtained using:
@@ -12,7 +12,24 @@ All the known product variants can be obtained using:
 
 sbs --query=products
 
-And the details of a particular configuration can be found using:
+In both cases, the output is sorted by name attribute.
+
+The details of a particular configuration can be found using:
 
 sbs --query=config[armv5_urel.n8]
+
+The following information is also printed for configurations:
+
+1. include paths used for preprocessing bld.infs and MMPs
+2. pre-include header file for preprocessing bld.infs and MMPs
+3. pre-include header file passed to the compiler in a build (if used)
+4. macros used to preprocess bld.infs and MMPs (with values, if explicitly set)
+5. core macros used in compilation preprocessing (with values, if explicitly set)
+6. available values to use as the targettype in MMP
+
+To obtain a list of available filters, use
+
+sbs --query=filters
+
+This also prints Python docstrings for each filter, where available.
 

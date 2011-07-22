@@ -19,6 +19,14 @@
 # module only, as it is the only programatic interface considered public. The
 # command line --query option is also implemented using this module.
 
+import generic_path
+import raptor
+import raptor_data
+import raptor_meta
+import re
+import xml.sax.saxutils
+import functools
+
 # constants
 ALL = 1
 
@@ -316,11 +324,21 @@ class Macro(Reply):
 		self.name = name
 		self.value = value
 
-import generic_path
-import raptor
-import raptor_data
-import raptor_meta
-import re
+@functools.total_ordering
+class Filter(Reply):
+	def __init__(self, name, doc=None):
+		super(Filter,self).__init__()
+		self.name = name
+		if doc != None:
+			reformatted_doc = ("".join([ line.lstrip("\t ") for line in doc.splitlines(True) ])).strip()
+			self.text = xml.sax.saxutils.escape("\n" + reformatted_doc + "\n")
+	
+	def __eq__(self, other):
+		""" Test if two Filter objects are "equal", i.e. have the same name """
+		return self.name == other.name
+	def __gt__(self, other):
+		""" Test if one Filter object is "greater than" the other  on name. """
+		return self.name > other.name
 
 class Context(object):
 	"""object to contain state information for API calls.
@@ -354,6 +372,10 @@ class Context(object):
 		elif query == "products":
 			variants = self.getproducts()
 			return "".join(map(str, variants)).strip()
+		
+		elif query == "filters":
+			filters = self.getfilters()
+			return "".join(map(str, filters)).strip()
 		
 		elif query.startswith("config"):
 			match = re.match("config\[(.*)\]", query)
@@ -406,6 +428,15 @@ class Context(object):
 				variants.append( Product(v.name) )
 		variants.sort()	
 		return variants
+	
+	def getfilters(self):
+		""" get a list of Filter class objects """
+		filters = []
+		filters_dict = self.__raptor.pbox.getdetails()
+		for filter_item in sorted(filters_dict.keys()):
+			filters.append( Filter(filter_item, filters_dict[filter_item]) )
+		return filters
+	
 class BadQuery(Exception):
 	pass
 

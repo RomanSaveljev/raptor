@@ -51,7 +51,7 @@ import json
 
 
 if not "HOSTPLATFORM" in os.environ or not "HOSTPLATFORM_DIR" in os.environ or not "HOSTPLATFORM32_DIR" in os.environ:
-	print "Error: HOSTPLATFORM, HOSTPLATFORM_DIR and HOSTPLATFORM32_DIR must be set in the environment (this is usually done automatically by the startup script)."
+	sys.stderr.write("Error: HOSTPLATFORM, HOSTPLATFORM_DIR and HOSTPLATFORM32_DIR must be set in the environment (this is usually done automatically by the startup script).\n")
 	sys.exit(1)
 
 hostplatform = set(os.environ["HOSTPLATFORM"].split(" "))
@@ -1337,6 +1337,11 @@ class Raptor(object):
 		"""
 		return self.fatalErrorState or ((self.errorCode != 0) and (not self.keepGoing))
 
+	def InitPlugins(self):
+		""" Find all the raptor plugins and put them into a pluginbox. """
+		if not self.systemPlugins.isAbsolute():
+			self.systemPlugins = self.home.Append(self.systemPlugins)
+		self.pbox = pluginbox.PluginBox(str(self.systemPlugins))
 
 	# log file open/close
 
@@ -1344,11 +1349,8 @@ class Raptor(object):
 		"""Open a log file for the various I/O methods to write to."""
 
 		try:
-			# Find all the raptor plugins and put them into a pluginbox.
-			if not self.systemPlugins.isAbsolute():
-				self.systemPlugins = self.home.Append(self.systemPlugins)
-
-			self.pbox = pluginbox.PluginBox(str(self.systemPlugins))
+			self.InitPlugins()
+			
 
 			self.raptor_params = BuildStats(self)
 
@@ -1471,8 +1473,8 @@ class Raptor(object):
 		layers=[]
 		# Look for bld.infs or sysdefs in the current dir if none were specified
 		if self.systemDefinitionFile == None and len(self.commandline_layer) == 0:
+			cwd = os.getcwd()
 			if not self.preferBuildInfoToSystemDefinition:
-				cwd = os.getcwd()
 				self.systemDefinitionFile = self.FindSysDefIn(cwd)
 				if self.systemDefinitionFile == None:
 					aComponent = self.FindComponentIn(cwd)
@@ -1523,6 +1525,9 @@ class Raptor(object):
 		# our "self" is a valid object for initialising an API Context
 		import raptor_api
 		api = raptor_api.Context(self)
+		
+		# intialise the plugs in case they are needed for the query
+		self.InitPlugins()
 		
 		print "<sbs version='{0}'>".format(raptor_version.numericversion())
 		
@@ -1738,7 +1743,7 @@ def Main(argv):
 	except BuildCannotProgressException, e:
 		t = str(e)
 		if t != "":
-			print("sbs error: {0:s}".format(t))
+			sys.stderr.write("sbs error: {0:s}\n".format(t))
 		return 1
 
 

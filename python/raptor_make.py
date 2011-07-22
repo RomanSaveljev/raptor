@@ -144,7 +144,7 @@ def run_make(make_process):
 
 	if make_process.filesystem == "unix":
 		p = subprocess.Popen(
-				args = [make_process.command], 
+				make_process.command, 
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT,
@@ -153,24 +153,20 @@ def run_make(make_process):
 				env = makeenv)
 	else:
 		p = subprocess.Popen(
-				args = [make_process.shell, '-c', make_process.command],
+				make_process.command,
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT,
-				shell = False,
 				universal_newlines = True, 
 				env = makeenv)
 
-	# When using an [emake] annotation file all the output from make is redirected
-	# to .stdout and .stderr files. Those files are read when the make process exits
-	# and only then is the output passed on to the filters. We still read from the
-	# subprocess pipe here in case there is any unexpected output from the shell
-	# that might block the subprocess.
+	# When using an [emake] annotation file we read from the subprocess pipe
+	# here but don't do anything with the output. If we didn't read the output
+	# then that might block the subprocess.
 	#
-	# Without an annotation file, make errors are still redirected to a .stderr
-	# file since we don't really care about seeing them immediately. But standard
-	# output is not redirected, it is read from the subprocess pipe and passed
-	# to the filters immediately so that users can see the build progressing.
+	# Without an annotation file, the output is read from the subprocess pipe
+	# and passed to the filters immediately so that users can see the build
+	# progressing.
 	
 	stream = p.stdout
 	for line in XMLEscapeLog(stream):
@@ -185,9 +181,8 @@ def run_make(make_process):
 
 def log_output(make_process):
 	""" A function to send the output from a previously run make command to the
-	    log filters. This is needed for safely injecting the stderr output by
-	    escaping it and making sure it isn't interleaved with stdout. Also, for
-	    emake builds this is where we copy the stdout from the annotation file.
+	    log filters. This is needed for emake builds where we extract the text
+	    from the annotation file.
 	"""
 	if not make_process.hasrun:
 		return
@@ -198,20 +193,11 @@ def log_output(make_process):
 		try:
 			for l in XMLEscapeLog(AnnoFileParseOutput(annofilename)):
 				make_process.logstream.write(l)
-		except Exception,e:
-			sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, make_process.command, str(e)))
-				
-	# Take all the stderr output that went into the .stderr file
-	# and put it back into the log, but safely so it can't mess up
-	# xml parsers.
-	try:
-		errfile = open(make_process.stderrfilename, "r")
-		for line in errfile:
-			make_process.logstream.write(escape(line))
-		errfile.close()
-	except Exception,e:
-		sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(make_process.command, str(e)))
-
+		except Exception as e:
+			if make_process.returncode == 0:
+				# emake did not error so we should have got an annotation file.
+				sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, make_process.command, str(e)))
+	
 
 class MakeProcess(object):
 	""" A process of make program """
@@ -400,7 +386,7 @@ FLMDEBUG:={10}
 
 include {11}
 
-""" .format(     raptor.name, raptor_version.fullversion(),
+""" .format( raptor.name, raptor_version.fullversion(),
 		 self.global_make_variables['HOSTPLATFORM'],
 		 self.global_make_variables['HOSTPLATFORM_DIR'],
 		 self.global_make_variables['HOSTPLATFORM32_DIR'],
@@ -412,8 +398,6 @@ include {11}
 		 flmdebug_setting,
 		 self.raptor.systemFLM.Append('globals.mk') )
 
-		
-		
 		# Unless dependency processing has been eschewed via the CLI, use a .DEFAULT target to
 		# trap missing dependencies (ignoring user config files that we know are usually absent)
 		if not (self.raptor.noDependGenerate or self.raptor.noDependInclude):
@@ -762,20 +746,6 @@ include {0}
 			if addTargets:
 				command += " " + " ".join(addTargets)
 
-			# Send stderr to a file so that it can't mess up the log (e.g.
-			# clock skew messages from some build engines scatter their
-			# output across our xml.
-			stderrfilename = makefilename+'.stderr'
-			stdoutfilename = makefilename+'.stdout'
-			command += " 2>'{0}' ".format(stderrfilename)
-
-			# Keep a copy of the stdout too in the case of using the 
-			# annofile - so that we can trap the problem that
-			# makes the copy-log-from-annofile workaround necessary
-			# and perhaps determine when we can remove it.
-			if self.copyLogFromAnnoFile:
-				command += " >'{0}' ".format(stdoutfilename)
-
 			# Substitute the makefile name for any occurrence of #MAKEFILE#
 			command = command.replace("#MAKEFILE#", makefilename)
 
@@ -796,9 +766,6 @@ include {0}
 			mproc.filesystem = self.raptor.filesystem
 			mproc.logstream = self.raptor.out
 			mproc.copyLogFromAnnoFile = self.copyLogFromAnnoFile
-			mproc.stderrfilename = stderrfilename
-			mproc.stdoutfilename = stdoutfilename
-			mproc.shell = raptor_data.ToolSet.shell
 
 			make_processes.append(mproc)
 
