@@ -63,7 +63,6 @@ class SDKWrapper(QObject):
 		self._sdk_id = sdk_id
 		self._sdk = sdk
 		self._checked = False
-		print("Created sdk wrapper:\nsdk id: {0}\nsdk: {1}".format(self._sdk_id, self._sdk))
 	
 	def _id(self):
 		return self._sdk_id
@@ -102,6 +101,20 @@ class SDKListModel(QAbstractListModel):
 		self.sdk_manager = sdk.SdkManager()
 		self.sdk_manager.init_sdk_dict()
 		self.initSdks()
+	
+	# bool QAbstractItemModel::removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() ) [virtual]
+	def removeRows(self, row, count, parent = QModelIndex()):
+		# beginRemoveRows ( const QModelIndex & parent, int first, int last ) 
+		self.beginRemoveRows(parent, row, row + count - 1)
+		
+		sdk = self._sdks[row]
+		
+		self.sdk_manager.remove(sdk.id)
+		del self._sdks[row]
+		
+		self.initSdks()
+		self.endRemoveRows()
+		
 	
 	def initSdks(self):
 		""" Initialise the list of SDKs for the list model """
@@ -258,9 +271,12 @@ class SDKController(QObject):
 	@Slot(QObject)
 	def toggled(self, wrapper):
 		wrapper.toggle_checked()
-		self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model))
-
-
+		self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model, 128))
+		
+#		selectionModel = self.model.selectionModel()
+#		for i in selectionModel.selectedIndexes():
+#			print("Selected indices are : {0}".format(i))		
+     
 
 	def checked_logs(self):
 		for lv in self.logviews:
@@ -312,9 +328,10 @@ class SDKController(QObject):
 		self.model.sdk_manager.shutdown()
 		self.app.quit()
 
-	@Slot()
-	def add_sdk(self):
+	@Slot(str, str, str)
+	def add_sdk(self, info, epocroot, logpath):
 		print("Going to add a new SDK...")
+		print("New SDK:\ninfo:\"{0}\", epocroot: {1}, logpath: {2}".format(info, epocroot, logpath))
 
 
 
@@ -375,7 +392,7 @@ class DiffView(QObject):
 				yield build
 
 class LogView(QObject):
-	def __init__(self, app, logpath, id, sdk_model):
+	def __init__(self, app, logpath, id, sdk_model, row_number):
 		QObject.__init__(self)
 		self.app = app
 		self.logpath=logpath
@@ -396,6 +413,7 @@ class LogView(QObject):
 		self.rc.setContextProperty('logpath', self.logpath)
 		self.rc.setContextProperty('info', sdk_model.sdk_info(id))
 		self.rc.setContextProperty('window', self.window)
+		self.rc.setContextProperty('row', row_number)
 		self.view.setSource('logchooser.qml')
 		self.window.show()
 

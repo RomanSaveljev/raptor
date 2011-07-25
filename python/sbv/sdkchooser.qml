@@ -22,6 +22,15 @@ Rectangle {
     width: 320
     height: 122
     color: "white"
+
+    NewSDKSelector {
+        id: new_sdk_selector;
+        state: "off";
+        width: chooser.width;
+        height: chooser.height;
+        // controller: "sdk_controller"
+    }
+
     Component {
         id: sdkDelegate
         Rectangle {
@@ -91,8 +100,11 @@ Rectangle {
         SButton {
             id: sdkregister
             width: parent.width
-            text: "Add SDK..."
-            onClicked: { sdk_controller.add_sdk() }
+            text: "add SDK..."
+            onClicked: {
+                new_sdk_selector.state = "on";
+                console.log("After new_sdk_selector.state = \"on\";")
+            }
         }
         SButton {
             id: diffbutton

@@ -109,7 +109,9 @@ Rectangle {
                     id: nofailedbutton
                     width: parent.width
                     text: "nofailed"
-                    onClicked:  controller.filternofailed()
+                    onClicked: { controller.filternofailed();
+                        console.log("Row number: ",row)
+                    }
                 }
 
                 SButton {

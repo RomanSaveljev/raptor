@@ -123,19 +123,6 @@ class SdkManager(object):
 			self.sdk_dict[current_id] = s
 			current_id = current_id + 1	
 
-#		with open(self.config_file, "r") as f:
-#			for line in f:
-#				try:
-#					l = line.rstrip()
-#					if l: # Ignore blank lines
-#						s = eval(l)
-#						print("Created sdk \n{0}".format(s))
-#						self.sdk_dict[current_id] = s
-#						current_id = current_id + 1
-#				except Exception as e:
-#					print("Failed to create SDK object from the following line from the SDK list\n" + 
-#					"{0}\nError was: {1}\n".format(line, e))
-	
 	def __write_sdks(self):
 		"""Write the SDK's repr to the config_file. The file format is one SDK 
 		per line and is the repr of the SDK-class's constructor call. The file is
@@ -144,7 +131,6 @@ class SdkManager(object):
 		with open(self.config_file, "w") as f:
 			f.write("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<sdklist>\n")
 			for sdk_id in self.sdk_dict:
-				print("Saving SDK id: {0} sdk: {1}\n".format(sdk_id, self.sdk_dict[sdk_id]))
 				f.write("{0}\n".format(self.sdk_dict[sdk_id]))
 			f.write("</sdklist>")
 	
@@ -153,7 +139,7 @@ class SdkManager(object):
 		if os.path.isfile(self.config_file):
 			self.__read_sdks()
 		else:
-			print("No config file found at {0}.".format(self.config_file))
+			print("No config file found at {0}. SDK list cannot be initialised.".format(self.config_file))
 	
 	def add(self, new_sdk):
 		""" Add an SDK to the dictionary. """
