@@ -87,6 +87,7 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 						otherwise relative to aFileRoot
 	|-prefix 		: relative to aFileRoot
 	+-prefix 		: relative to $(EPOCROOT)/epoc32"""
+
 	
 	# Both reference and fileroot can have backslashes - so convert them.
 	reference = aReference.replace('\\', '/')
@@ -140,7 +141,7 @@ def resolveSymbianPath(aFileRoot, aReference, aMainType="", aSubType="", aEPOCRO
 	
 	if isinstance(resolvedPath, list):
 		# In this case, this is a list of export destinations, 
-		makefilePath = map(lambda x: str(generic_path.Path(x)), resolvedPath)
+		makefilePath = [str(generic_path.Path(x)) for x in resolvedPath]
 	else:
 		makefilePath = str(generic_path.Path(resolvedPath))
 	
@@ -158,7 +159,6 @@ class ExternalTool(object):
 		self.__Output = []
 
 	def call(self, aArgs):		
-		print "RUNNNING: {0} {1}".format(self.__Tool, aArgs)
 		(input, output) = os.popen2(self.__Tool + " " + aArgs)
 		self.__Output = output.read()
 		return output.close() 
@@ -222,12 +222,12 @@ def copyfile(_source, _destination):
 		try:
 			sourceStat = os.stat(source_str)
 			sourceMTime = sourceStat[stat.ST_MTIME]
-		except OSError, e:
+		except OSError as e:
 			message = "Source of copyfile does not exist:  " + str(source)
 			raise IOError(message)
 		try:
 			destMTime = os.stat(dest_str)[stat.ST_MTIME]
-		except OSError, e:
+		except OSError as e:
 			pass # destination doesn't have to exist
 
 		if destMTime == 0 or destMTime < sourceMTime:
@@ -239,8 +239,8 @@ def copyfile(_source, _destination):
 			# preserve permissions
 			shutil.copy(source_str, dest_str)
 
-	except Exception,e:
-		message = "Could not update " + dest_str + " from " + source_str + " : " + str(e)
+	except Exception as e:
+		message = "Could not update {0} from {1}:{2}".format(dest_str,source_str,str(e))
 		raise IOError(message)
 
 	return 
@@ -259,12 +259,13 @@ def read_command_file(filename, used):
 
 	args = []
 	try:
-		file = open(filename, "r")
-		for line in file.readlines():
-			args.extend(line.split())
-		file.close()
-	except:
-		raise IOError("couldn't read command file '{0}'".format(filename))
+		with open(filename, "r") as file:
+			for line in file.readlines():
+				args.extend(line.split())
+	except UnicodeDecodeError as e:
+		raise e
+	except Exception as e:
+		raise IOError("couldn't read command file '{0}' because: {1}".format(filename, str(e)))
 
 	# expand any command files in the options we just read.
 	# making sure we don't get stuck in a loop.

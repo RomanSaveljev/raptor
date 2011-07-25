@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -53,7 +53,6 @@ def run():
 	hostPlatformTargets = genericTargets + windowsTargets
 	hostPlatformOffset = ""
 
-	t.id = "0098a"
 	t.name = "baseline_build"
 	t.description = "Build a component with source and resource files that are dependent on header files exported in the build"
 	t.command = """
@@ -90,7 +89,6 @@ def run():
 	]
 
 	
-	t.id = "0098b"
 	t.name ="touched_header_dependencies"
 	t.description = "Touch the exported header files and check that only the related source and resource files are re-built"
 	t.command = """
@@ -101,7 +99,6 @@ def run():
 	t.run()
 
 	
-	t.id = "0098c"
 	t.name ="redundant_header_dependencies"
 	t.description = """
 		Build the component again, but manipulate it so that (a) it no longer has a dependency on the exported header files and
@@ -123,21 +120,20 @@ def run():
 	t.run()
 	
 
-	t.id = "0098d"
 	t.name ="invalid_dependency_files"
 	t.description = "Invalidate dependency files, then make sure we can clean and re-build successfully"
 	buildLocation = "$(EPOCROOT)/epoc32/build/" + BldInfFile.outputPathFragment('smoke_suite/test_resources/dependencies/bld.inf') + "/dependency_"
         # use one long bash command so that we can capture 
 	# the output in a way that isn't messed up with all the ordering confused.
-	t.command = " echo \"making directory for logfile ${SBSLOGFILE}\" ; mkdir -p `dirname ${SBSLOGFILE} 2>/dev/null` ; { sleep 1 ; set -x ; \
+	t.command = " echo \"making directory for logfile ${{SBSLOGFILE}}\" ; mkdir -p `dirname ${{SBSLOGFILE}} 2>/dev/null` ; {{ sleep 1 ; set -x ; \
 touch smoke_suite/test_resources/dependencies/dependency.cpp; \
-echo INVALIDATE_ARMV5_DEPENDENCY_FILE >> %s/armv5/urel/dependency.o.d ; \
-echo INVALIDATE_WINSCW_DEPENDENCY_FILE >> %s/winscw/urel/dependency.o.d ;\
-echo INVALIDATE_TOOLS2_DEPENDENCY_FILE >> %s/dependency_exe/tools2/rel/%s/dependency.o.d ;\
-echo INVALIDATE_RESOURCE_DEPENDENCY_FILE >> %s/dependency__resource_apps.rsc.d ;\
+echo INVALIDATE_ARMV5_DEPENDENCY_FILE >> {0}/armv5/urel/dependency.o.d ; \
+echo INVALIDATE_WINSCW_DEPENDENCY_FILE >> {0}/winscw/urel/dependency.o.d ;\
+echo INVALIDATE_TOOLS2_DEPENDENCY_FILE >> {0}/dependency_exe/tools2/rel/{1}/dependency.o.d ;\
+echo INVALIDATE_RESOURCE_DEPENDENCY_FILE >> {0}/dependency__resource_apps.rsc.d ;\
 sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel ;\
 sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel clean ;\
-sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel ; } > ${SBSLOGFILE} 2>&1; grep 'missing separator' ${SBSLOGFILE} " %(buildLocation, buildLocation, buildLocation, hostPlatformOffset, buildLocation)
+sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel ; }} > ${{SBSLOGFILE}} 2>&1; grep 'missing separator' ${{SBSLOGFILE}} ".format(buildLocation, hostPlatformOffset)
 	# We expect an error from the first build due to the deliberate dependency file corruption
 	t.mustmatch = [
 		".*dependency.o.d:[0-9]+: \*\*\* missing separator"
@@ -149,7 +145,6 @@ sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel 
 	t.run(hostPlatform)
 
 
-	t.id = "0098e"
 	t.name ="no_depend_include"
 	t.description = "Invalidate dependency files in order to confirm they aren't processed when --no-depend-include is used"
 	buildLocation = "$(EPOCROOT)/epoc32/build/" + BldInfFile.outputPathFragment('smoke_suite/test_resources/dependencies/bld.inf') + "/dependency_"
@@ -166,7 +161,6 @@ sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel 
 	t.run(hostPlatform)
 
 
-	t.id = "0098f"
 	t.name ="no_depend_generate"
 	t.description = "Invalidate and remove dependency files in order to confirm they are neither included nor re-generated when --no-depend-generate is used"
 	buildLocation = "$(EPOCROOT)/epoc32/build/" + BldInfFile.outputPathFragment('smoke_suite/test_resources/dependencies/bld.inf') + "/dependency_"
@@ -192,7 +186,6 @@ sbs -b smoke_suite/test_resources/dependencies/bld.inf -c default -c tools2_rel 
 	os.remove("smoke_suite/test_resources/dependencies/dependency.cpp")
 	os.remove("smoke_suite/test_resources/dependencies/dependency.rss")
 
-	t.id = "98"
 	t.name = "dependencies"
 	t.print_result()
 	return t

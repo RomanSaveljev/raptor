@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -30,7 +30,7 @@ def run():
 		elf2e32 = "$(EPOCROOT)/epoc32/tools/elf2e32"
 
 	description = """This test attempts to check that an exe gets the capabilities that we requested.  It's ARM specific since it uses elf2e32. Tries to demonstrate capabilties being turned off then on in the mmp."""
-	command = "sbs -b smoke_suite/test_resources/simple/capability.inf -c %s -m ${SBSMAKEFILE} -f ${SBSLOGFILE} && " + \
+	command = "sbs -b smoke_suite/test_resources/simple/capability.inf -c {0} -m ${{SBSMAKEFILE}} -f ${{SBSLOGFILE}} && " + \
 			  elf2e32 + " --dump=s  --e32input=$(EPOCROOT)/epoc32/release/armv5/urel/test_capability.exe"
 	targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test_capability.exe",
@@ -66,10 +66,9 @@ def run():
 	]
 	warnings = 0
 	
-	t.id = "0107"
 	t.name = "capability_arm"
 	t.description = description
-	t.command = command % "arm.v5.urel.gcce4_4_1"
+	t.command = command.format("arm.v5.urel.gcce4_4_1")
 	t.targets = targets
 	t.mustmatch = mustmatch
 	t.mustnotmatch = mustnotmatch

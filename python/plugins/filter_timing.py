@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -49,17 +49,17 @@ class FilterTiming(filter_interface.Filter):
 				dirname = str(self.raptor.logFileName.Dir())
 				if dirname and not os.path.isdir(dirname):
 					os.makedirs(dirname)
-			except os.error, e:
+			except os.error as e:
 				if e.errno != errno.EEXIST:
-					sys.stderr.write("%s : error: cannot create directory " +
-							"%s\n" % (raptor.name, dirname))
+					sys.stderr.write("{0} : error: cannot create directory {1}\n".format(
+							raptor.name, dirname))
 					return False
 			try:
 				self.out = open(str(self.path), "w")
 			except:
 				self.out = None
-				sys.stderr.write("%s : error: cannot write log %s\n" %\
-					(raptor.name, self.path))
+				sys.stderr.write("{0} : error: cannot write log {1}\n" .format(
+						raptor.name, self.path))
 				return False
 		self.start_times = {}
 		self.all_durations = []

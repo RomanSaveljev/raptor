@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -15,6 +15,7 @@
 # Base Class for defining filter classes
 # All filter classes that get defined should derive from this base class
 #
+
 
 class Filter(object):
 	
@@ -148,7 +149,7 @@ class FilterSAX(Filter, xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHan
 		"finish off"
 		try:
 			self.parser.close()
-		except Exception, ex:
+		except Exception as ex:
 			sys.stderr.write(self.formatError(str(ex)))
 			self.ok = False
 			
@@ -188,7 +189,7 @@ class PerRecipeFilter(FilterSAX):
 
 		if hash=='self':
 			hash=self.__dict__
-		if hash.has_key(key):
+		if key in hash:
 			return hash[key]
 		else:
 			return 'undef'
@@ -249,12 +250,12 @@ class PerRecipeFilter(FilterSAX):
 	# Private methods
 	def __setHashElements(self, fro, to, keys):
 		for key in keys:
-			if fro.has_key(key):
+			if key in fro:
 				to[key] = fro[key]
 
 	def __delData(self, keys):
 		for key in keys:
-			if self.__dict__.has_key(key):
+			if key in self.__dict__:
 				del self.__dict__[key]
 
 import csv
@@ -703,7 +704,7 @@ class LogMessageClassifier(FilterSAX):
 					missing_tag.text += dep + "\n"
 				self.record(missing_tag, Records.ERROR)
 						
-		except Exception,e:
+		except Exception as e:
 			return self.err("could not close temporary file " + str(e))
 	
 	def readregex(self, csvfile):
@@ -716,7 +717,7 @@ class LogMessageClassifier(FilterSAX):
 		"""
 		regexlist = []
 		try:
-			reader = csv.reader(open(csvfile, "rb"))
+			reader = csv.reader(open(csvfile, "r"))
 			for row in reader:
 				try:
 					type = None
@@ -740,7 +741,7 @@ class LogMessageClassifier(FilterSAX):
 						regexlist.append((regex, type))
 				except:
 					self.moan("ignored bad regex '%s' in file '%s'" % (row[1], csvfile))
-		except Exception, ex:
+		except Exception as ex:
 			self.err("cannot read regex file '%s': %s" % (csvfile, str(ex)))
 			return []
 		

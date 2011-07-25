@@ -20,7 +20,7 @@ import sys
 import os
 
 profile_basename = None
-if os.environ.has_key('SBS_PROFILE_BASENAME'):
+if 'SBS_PROFILE_BASENAME' in os.environ:
 	profile_basename = os.environ['SBS_PROFILE_BASENAME']
 	import cProfile
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:
 		sys.stderr.write("ERROR: sbs: Terminated by control-c or break\n")
 		sys.exit(255)
-	except ValueError, exc:
+	except ValueError as exc:
 		sys.stderr.write("ERROR: sbs: {0}".format(str(exc)))
 		sys.exit(255)
 

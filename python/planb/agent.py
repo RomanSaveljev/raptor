@@ -1,5 +1,5 @@
 
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -66,7 +66,7 @@ class Connect(object):
 	"""
 	def __init__(self):
 		# ignore the user's flags, all ours start with --planb
-		flags = filter(lambda x: x.startswith("--planb"), sys.argv)
+		flags = [x for x in sys.argv if x.startswith("--planb")]
 
 		parser = optparse.OptionParser()
 		parser.add_option("--planb-debug", action="store_true", dest="debug", default=False)
@@ -81,9 +81,8 @@ class Connect(object):
 		# load a parameter dictionary if we can
 		if self.dir:
 			self.pickle = os.path.join(self.dir, "pickle")
-			file = open(self.pickle, "rb")
-			self.parameters = pickle.load(file)
-			file.close()
+			with open(self.pickle, "rb") as file:
+				self.parameters = pickle.load(file)
 		else:
 			self.parameters = {}
 		
@@ -91,9 +90,9 @@ class Connect(object):
 			self.debug = (self.parameters['FLMDEBUG'] == '1')
 			
 		if self.debug:
-			print "parameter values"
-			for (k,v) in self.parameters.items():
-				print "\t", k, "=", v
+			print("parameter values")
+			for (k,v) in list(self.parameters.items()):
+				print("\t{0}={1}".format(k,v))
 					
 		self.targets = []
 		self.directories = set()
@@ -157,52 +156,50 @@ class Connect(object):
 		for phase in ['BITMAP', 'RESOURCE', 'ALL']:
 			if phase in phases:
 				filename = os.path.join(self.dir, phase)
-				file = open(filename, "w")
-				
-				if first_phase:
-					# create all the directories in the first phase.
-					# this is a candidate for feeding info back to the main
-					# python process do act on rather than doing it in make.
-					file.write("$(call makepath,{0})\n\n".format(" ".join(self.directories)))
-					first_phase = False
-					
-				releasables = []
-				cleaners = []
-				
-				for t in phases[phase]:
-					pre_reqs = " ".join(t.inputs)
-					if t.outputs:
-						main_target = t.outputs[0].filename
-						macro = "raptor_recipe"
-					else:
-						main_target = phase
-						macro = "raptor_phony_recipe"
-				
-					file.write("$(call {0},{1},{2},{3},{4})\n\n".format(macro, t.title, main_target, pre_reqs, t.run))
-					
-					# extra dependencies
-					if main_target != phase:
-						file.write("{0}:: {1}\n\n".format(phase, main_target))
-						
-					if len(t.outputs) > 1:
-						for other in t.outputs[1:]:
-							file.write("{0}: {1}\n\n".format(main_target, other.filename))
-					
-					# release and clean info
-					for output in t.outputs:
-						if output.releasable:
-							releasables.append(output.filename)
-						else:
-							cleaners.append(output.filename)
+				with open(filename, "w") as file:
+						if first_phase:
+							# create all the directories in the first phase.
+							# this is a candidate for feeding info back to the main
+							# python process do act on rather than doing it in make.
+							file.write("$(call makepath,{0})\n\n".format(" ".join(self.directories)))
+							first_phase = False
 							
-				if releasables:
-					file.write("$(call raptor_release,{0})\n\n".format(" ".join(releasables)))
-				
-				if cleaners:
-					file.write("$(call raptor_clean,{0})\n\n".format(" ".join(cleaners)))
+						releasables = []
+						cleaners = []
 						
-				file.close()
-				print "generated makefile =", filename
+						for t in phases[phase]:
+							pre_reqs = " ".join(t.inputs)
+							if t.outputs:
+								main_target = t.outputs[0].filename
+								macro = "raptor_recipe"
+							else:
+								main_target = phase
+								macro = "raptor_phony_recipe"
+						
+							file.write("$(call {0},{1},{2},{3},{4})\n\n".format(macro, t.title, main_target, pre_reqs, t.run))
+							
+							# extra dependencies
+							if main_target != phase:
+								file.write("{0}:: {1}\n\n".format(phase, main_target))
+								
+							if len(t.outputs) > 1:
+								for other in t.outputs[1:]:
+									file.write("{0}: {1}\n\n".format(main_target, other.filename))
+							
+							# release and clean info
+							for output in t.outputs:
+								if output.releasable:
+									releasables.append(output.filename)
+								else:
+									cleaners.append(output.filename)
+									
+						if releasables:
+							file.write("$(call raptor_release,{0})\n\n".format(" ".join(releasables)))
+						
+						if cleaners:
+							file.write("$(call raptor_clean,{0})\n\n".format(" ".join(cleaners)))
+						
+				print("generated makefile = {0}".format(filename))
 		
 		# write out the dependency file for incremental makefile generation
 		#
@@ -213,10 +210,11 @@ class Connect(object):
 		done_target = os.path.join(self.dir, "done")
 		depends = os.path.join(self.dir, "depend.mk")
 		file = open(depends, "w")
-		file.write("%s: %s\n" % (done_target, sys.argv[0]))
+		file.write("{0}: {1}\n".format(done_target, sys.argv[0]))
+
 				
 		if self.pickle:
-			file.write("%s: %s\n" % (done_target, self.pickle))
+			file.write("{0}: {1}\n".format(done_target, self.pickle))
 					
 		file.close()
 				

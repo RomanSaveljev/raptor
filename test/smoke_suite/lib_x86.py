@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -29,8 +29,8 @@ def run():
 
 	# Convenience method to list generated source build output
 	def __generatedFiles(aConfig):
-		udeb = "etest_lib/%s/udeb/" % aConfig
-		urel = "etest_lib/%s/urel/" % aConfig
+		udeb = "etest_lib/{0}/udeb/".format(aConfig)
+		urel = "etest_lib/{0}/urel/".format(aConfig)
 	
 		generated = []
 		for i in range(1, 100):

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -107,7 +107,7 @@ class TestFilterInterface(unittest.TestCase):
 				self.recipes = self.recipes[1:]
 
 				for key in testRecipe.keys():
-					if not self.__dict__.has_key(key):
+					if key not in self.__dict__:
 						self.failed = True
 						sys.stdout.write('FAIL: self.{0} not set\n'.format(key))
 					elif self.__dict__[key] != testRecipe[key]:

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -17,6 +17,7 @@
 
 
 import re
+import io
 
 
 # General log structure
@@ -30,7 +31,7 @@ mwError = re.compile('(.+:\d+:(?! (note|warning):) .+|mw(ld|cc)sym2(.exe)?:(?! (
 mwWarning = re.compile('.+:\d+: warning: .+|mw(ld|cc)sym2(.exe)?: warning: .+')
 
 
-class AutoFlushedStream(file):
+class AutoFlushedStream(io.FileIO):
 	""" Wrapper for STDOUT/STDERR streams to ensure that a flush is performed
 	after write methods.
 	Use to avoid buffering when log output in real time is required."""
@@ -188,7 +189,7 @@ class Recipe(object):
 	def getDetail(self, aItem):
 		"""Retrieve attribute detail from recipe tags.
 		Class data flags provide known items e.g. getDetail(Recipe.source)"""
-		if self.__detail.has_key(aItem):
+		if aItem in self.__detail:
 			return self.__detail[aItem]
 		
 	def getCalls(self):

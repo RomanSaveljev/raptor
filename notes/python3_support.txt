@@ -1,0 +1,35 @@
+Python 3 Support
+==================
+
+Python 3 is a major update to the Python programming language.
+Raptor now supports being run with Python 3.1.x or 3.2.x as well 
+as Python 2.6.5 and up.
+
+How to use Python 3 with Raptor
+--------------------------------
+
+Set the variable SBS_PYTHON3 before running raptor e.g.
+on Linux -
+   export SBS_PYTHON3=/usr/bin/python3 
+or Windows -
+   set SBS_PYTHON3=e:\apps\python321\python.exe
+
+Raptor will then use python 3 for running itself. Note
+that if SBS_PYTHON is also set then SBS_PYTHON3 takes 
+precedence and Raptor will still run under Python 3.
+
+Python scripts that are run in the main build e.g mifconv.py
+are still executed with Python 2 (as specified by the "SBS_PYTHON" variable).
+
+Python 3 Benefits
+------------------
+
+Python 3 supports a number of programming features that are of interest
+to Raptor e.g.
+
+* PEP 3148, a new futures library for concurrent programming 
+* an overhauled GIL implementation that reduces
+  contention
+
+These features make it possible to solve problems and do so quickly.
+

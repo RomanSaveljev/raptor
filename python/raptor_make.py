@@ -57,6 +57,9 @@ def XMLEscapeLog(stream):
 	inRecipe = False
 
 	for line in stream:
+		if type(line) is not str:
+			line=line.decode("utf-8")
+
 		if line.startswith("<recipe"):
 			inRecipe = True
 		elif line.startswith("</recipe"):
@@ -271,7 +274,7 @@ class MakeEngine(object):
 				try:
 					self.annoFileName = string_following("--emake-annofile=", [opt for opt in self.raptor.makeOptions if opt.startswith("--emake-annofile")][0])
 					self.raptor.Info("annofile: " + self.annoFileName)
-				except IndexError, bad_index:
+				except IndexError as bad_index:
 					cannot_use_anno_msg = "Cannot copy log from annotation file as no annotation filename was specified via the option --mo=--emake-annofile=<filename>"
 					if self.emakeCm:
 						self.raptor.Error(cannot_use_anno_msg) # Only an error if requested use of cm
@@ -477,7 +480,7 @@ include {0}
 					self.WriteConfiguredSpec(config_makefileset, s, c, False)
 
 			makefileset.close()
-		except Exception,e:
+		except Exception as e:
 			tb = traceback.format_exc()
 			if not self.raptor.debugOutput:
 				tb=""
@@ -505,7 +508,7 @@ include {0}
 			try:
 				iface = spec.GetInterface(self.raptor.cache)
 
-			except raptor_data.MissingInterfaceError, e:	
+			except raptor_data.MissingInterfaceError as e:	
 				self.raptor.Error("No interface for '{0}'".format(spec.name))
 				return
 
@@ -519,7 +522,8 @@ include {0}
 			# So we need to find all the values before we can write
 			# anything out.
 			md5hash = hashlib.md5()
-			md5hash.update(iface.name)
+			md5hash.update(iface.name.encode("utf-8"))
+
 
 			# we need an Evaluator to get parameter values for this
 			# Specification in the context of this Configuration
@@ -535,7 +539,7 @@ include {0}
 						value = ""
 
 				parameters.append((k, value))
-				md5hash.update(value)
+				md5hash.update(value.encode("utf-8"))
 
 			# parameters required by the interface
 			for p in iface.GetParams(self.raptor.cache):
@@ -605,11 +609,11 @@ include {0}
 		# create a combined hash of the FLM parameters and the global variables
 		# as we add the globals to the parameter dictionary we just made.
 		md5hash = hashlib.md5()
-		md5hash.update(hash)
+		md5hash.update(hash.encode("utf-8"))
 		
 		for k in sorted(self.global_make_variables.keys()):
 			value = self.global_make_variables[k]
-			md5hash.update(k + value)
+			md5hash.update((k + value).encode())
 			dictionary[k] = value
 			
 		planbdir = directory + "/" + md5hash.hexdigest()
@@ -788,8 +792,11 @@ include {0}
 					if not self.raptor.keepGoing:
 						break
 				
-			except Exception,e:
-				self.raptor.Error("Exception '{0}' during '{1}'".format(str(e), command))
+			except Exception as e:
+				tb = traceback.format_exc()
+				if not self.raptor.debugOutput:
+					tb=""
+				self.raptor.Error("Exception '{0}' during '{1}' {2}".format(str(e), command, tb))
 				break
 			finally:
 				# Still report end-time of the build

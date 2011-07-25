@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -46,13 +46,11 @@ class BootstrapFilter(filter_interface.Filter):
 		if text.startswith("<error>"):
 			start = text.find(">")
 			end = text.rfind("<")
-			self.out.write(str(raptor.name) + ": error: %s\n" \
-					% text[(start + 1):end])
+			self.out.write(str(raptor.name) + ": error: {0}\n".format(text[(start + 1):end]))
 		elif text.startswith("<warning"):
 			start = text.find(">")
 			end = text.rfind("<")
-			self.out.write(str(raptor.name) + ": warning: %s\n" \
-					% text[(start + 1):end])
+			self.out.write(str(raptor.name) + ": warning: {0}\n".format(text[(start + 1):end]))
 		elif "error" in text or "warning" in text:
 			self.out.write(text)
 		return True
@@ -102,7 +100,7 @@ class FilterList(filter_interface.Filter):
 		for p in possiblefilters:
 			name = p.__name__.lower()
 			if name in filterdict:
-				raise ValueError("filters found in SBS_HOME/python/plugins which have duplicate name: %s " % p.__name__)
+				raise ValueError("filters found in SBS_HOME/python/plugins which have duplicate name: {0} ".format(p.__name__))
 			else:
 				filterdict[name] = p
 		
@@ -131,8 +129,7 @@ class FilterList(filter_interface.Filter):
 				unfound.append(f)
 
 		if unfound != []:
-			raise ValueError("requested filters not found: %s \
-			\nAvailable filters are: %s" % (str(unfound), self.format_output_list(possiblefilters)))
+			raise ValueError("requested filters not found: {0} \nAvailable filters are: {1}".format(unfound, self.format_output_list(possiblefilters)))
 
 		if self.filters == []:
 			self.out = [BootstrapFilter()]
@@ -141,7 +138,7 @@ class FilterList(filter_interface.Filter):
 			for filter in self.filters:
 				try:
 					ok = filter.open(raptor_instance)
-				except Exception, e:
+				except Exception as e:
 					sys.stderr.write(filter.formatError(str(e)))
 					ok = False
 
@@ -149,7 +146,7 @@ class FilterList(filter_interface.Filter):
 					self.out.append(filter)
 				else:
 					sys.stderr.write(str(raptor.name) + \
-							": error: Cannot open filter: %s\n" % str(filter))
+							": error: Cannot open filter: {0}\n".format(filter))
 					
 			if self.out == []:
 				sys.stderr.write(str(raptor.name) + \
@@ -169,7 +166,7 @@ class FilterList(filter_interface.Filter):
 		for filter in self.out:
 			try:
 				filter.write(text)
-			except Exception,e:
+			except Exception as e:
 				traceback.print_exc(file=sys.stdout)
 				sys.stdout.write("Called from: \n")
 				traceback.print_stack(file=sys.stdout)
@@ -179,7 +176,7 @@ class FilterList(filter_interface.Filter):
 		if len(badfilters) > 0:
 			for f in badfilters:
 				self.out.remove(f) # dump the filter in case it causes repeated exceptions
-				sys.stdout.write("Removed filter %s because it generated an exception\n" % type(f))
+				sys.stdout.write("Removed filter {0} because it generated an exception\n".format(type(f)))
 
 			if len(self.out) == 0:
 				sys.stdout.write("Falling back to bootstrap filter\n")
@@ -209,8 +206,5 @@ class FilterList(filter_interface.Filter):
 		"""
 			formats available filters
 		"""
-		filters_formatted = ""
-		for pl in possiblefilters:
-			filters_formatted += "\n  " + pl.__name__
-		return filters_formatted
+		return "\n  ".join([pl.__name__ for pl in possiblefilters])
 		

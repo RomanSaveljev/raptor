@@ -38,7 +38,7 @@ class TestRaptor(unittest.TestCase):
 		try:
 			r = raptor.Raptor("dirname")
 			self.fail() # should have had an exception
-		except raptor.BuildCannotProgressException,e:
+		except raptor.BuildCannotProgressException as e:
 			# picked up that dirname doesn't exist
 			pass
 		

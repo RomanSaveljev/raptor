@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -19,7 +19,6 @@ from xml.etree.ElementTree import parse
 
 def run():
 	t = SmokeTest()
-	t.id = "84"
 	t.name = "xml_invalid_chars"
 	t.description = """Tests the validity of XML when output with characters
 			not-allowed in XML are sent to the filters
@@ -46,7 +45,7 @@ def run():
 	if t.result == SmokeTest.PASS:
 		
 		log = t.logfile()
-		print ("Testing validity of XML file " + log)
+		print("Testing validity of XML file {0}".format(log))
 		
 		logfile = open(ReplaceEnvs(log), "r")
 		

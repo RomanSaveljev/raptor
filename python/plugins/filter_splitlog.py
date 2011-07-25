@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -38,7 +38,7 @@ class FilterSplitlog(filter_interface.Filter):
 				dirname = str(self.raptor.logFileName.Dir())
 				if dirname and not os.path.isdir(dirname):
 					os.makedirs(dirname)
-			except os.error, e:
+			except os.error as e:
 				if e.errno != errno.EEXIST:
 					sys.stderr.write("%s : error: cannot create directory " +
 							"%s\n" % (raptor.name, dirname))

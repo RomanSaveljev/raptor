@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -91,7 +91,7 @@ class MetadataPlatform(object):
 			uniq.update(key)
 
 			self.key = key
-			self.key_md5 = "p_" + uniq.hexdigest()
+			self.key_md5 = "p_" + (uniq.encode().hexdigest()).decode()
 			del uniq
 
 
@@ -112,8 +112,8 @@ class ExportPlatform(MetadataPlatform):
 		# and use that as a signature for the exports.
 		return  hash(self.epocroot + self.variant_hrh + self.systeminclude + self.testcode + self.export)
 
-	def __cmp__(self, other):
-		return cmp(self.hash(), other.hash())
+	def __eq__(self, other):
+		return self.hash() == other.hash()
 
 	@classmethod 
 	def fromConfigs(cls, configsToBuild, build):

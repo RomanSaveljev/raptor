@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -19,7 +19,6 @@ from raptor_tests import where
 
 def run():
 	t = SmokeTest()
-	t.id = "0012a"
 	t.name = "dll_armv5_winscw_freeze"
 	t.description = """Builds a component with unfrozen exports from clean,
 		followed by a FREEZE, a further CLEAN and then a check that new .def
@@ -34,10 +33,10 @@ def run():
 	
 	t.command = """
 sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_freeze.mmp -c armv5 -c winscw CLEAN > /dev/null &&
-export PERL="%s" &&
+export PERL="{0}" &&
 sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_freeze.mmp -c armv5 -c winscw > /dev/null &&
-sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_freeze.mmp -c armv5_urel -c winscw_urel FREEZE -m ${SBSMAKEFILE} -f ${SBSLOGFILE}
-""" % perl_location
+sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_freeze.mmp -c armv5_urel -c winscw_urel FREEZE -m ${{SBSMAKEFILE}} -f ${{SBSLOGFILE}}
+""".format(perl_location)
 
 	t.targets = [
 		"smoke_suite/test_resources/unfrozen/frozen/bwins/frozenu.def",
@@ -48,16 +47,15 @@ sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_fre
 	t.run()
 	
 	
-	t.id = "0012b"
 	t.name = "armv5_re-freeze_with_removed_export"
 	
 	t.command = "sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
-			+ " -p frozen_with_removed_export.mmp -c armv5_urel ;" \
-			+ " sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
-			+ " -p frozen_with_removed_export.mmp FREEZE" \
-			+ " -c armv5_urel.remove_freeze" \
-			+ " -m ${SBSMAKEFILE} -f ${SBSLOGFILE} &&" \
-			+ " grep -ir '_ZN10CMessenger11ShowMessageEv @ 1 NONAME ABSENT' $(SBS_HOME)/test/smoke_suite/test_resources/unfrozen/frozen/eabi/frozenu.def"
+			" -p frozen_with_removed_export.mmp -c armv5_urel ;" \
+			" sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
+			" -p frozen_with_removed_export.mmp FREEZE" \
+			" -c armv5_urel.remove_freeze" \
+			" -m ${SBSMAKEFILE} -f ${SBSLOGFILE} &&" \
+			" grep -ir '_ZN10CMessenger11ShowMessageEv @ 1 NONAME ABSENT' $(SBS_HOME)/test/smoke_suite/test_resources/unfrozen/frozen/eabi/frozenu.def"
 			
 	t.targets = []
 	t.mustmatch = [
@@ -69,16 +67,15 @@ sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_fre
 	t.run()
 	
 	
-	t.id = "0012c"
 	t.name = "winscw_re-freeze_with_removed_export"
 	
 	t.command = "sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
-			+ " -p frozen_with_removed_export.mmp -c winscw_urel ;" \
-			+ " sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
-			+ " -p frozen_with_removed_export.mmp FREEZE" \
-			+ " -c winscw_urel.remove_freeze" \
-			+ " -m ${SBSMAKEFILE} -f ${SBSLOGFILE} &&" \
-			+ " grep -ir '?ShowMessage@CMessenger@@QAEXXZ @ 3 NONAME ABSENT' $(SBS_HOME)/test/smoke_suite/test_resources/unfrozen/frozen/bwins/frozenu.def"
+			" -p frozen_with_removed_export.mmp -c winscw_urel ;" \
+			" sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
+			" -p frozen_with_removed_export.mmp FREEZE" \
+			" -c winscw_urel.remove_freeze" \
+			" -m ${SBSMAKEFILE} -f ${SBSLOGFILE} &&" \
+			" grep -ir '?ShowMessage@CMessenger@@QAEXXZ @ 3 NONAME ABSENT' $(SBS_HOME)/test/smoke_suite/test_resources/unfrozen/frozen/bwins/frozenu.def"
 
 	t.mustmatch = [
 		"\?ShowMessage@CMessenger@@QAEXXZ @ 3 NONAME ABSENT"
@@ -87,7 +84,6 @@ sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_fre
 	t.run()
 	
 
-	t.id = "0012d"
 	t.name = "efreeze_info"
 	
 	t.command = "sbs -b smoke_suite/test_resources/unfrozen/freeze.inf" \
@@ -102,7 +98,6 @@ sbs -b smoke_suite/test_resources/unfrozen/freeze.inf -p unfrozensymbols_for_fre
 	t.run()
 
 
-	t.id = "12"
 	t.name = "dll_armv5_winscw_freeze"
 	t.print_result()
 	return t

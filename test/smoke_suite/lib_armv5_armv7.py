@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -29,8 +29,8 @@ def run():
 
 	# Convenience method to list generated source build output
 	def __generatedFiles(aConfig):
-		udeb = "etest_lib/%s/udeb/" % aConfig
-		urel = "etest_lib/%s/urel/" % aConfig
+		udeb = "etest_lib/{0}/udeb/".format(aConfig)
+		urel = "etest_lib/{0}/urel/".format(aConfig)
 	
 		generated = []
 		for i in range(1, 100):
@@ -55,7 +55,6 @@ def run():
 		]
 	armv5buildtargets.extend(__generatedFiles("armv5"))
 		
-	t.id = "0013a"
 	t.name = "lib_armv5_rvct"
 	t.command = "sbs -b smoke_suite/test_resources/simple_lib/bld.inf -c armv5 LIBRARY"
 	t.targets = armv5targets
@@ -64,7 +63,6 @@ def run():
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL
 		
-	t.id = "0013b"
 	t.name = "lib_armv5_clean"
 	t.command = "sbs -b smoke_suite/test_resources/simple_lib/bld.inf -c armv5 clean"
 	t.targets = []
@@ -72,7 +70,6 @@ def run():
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL
 
-	t.id = "0013c"
 	t.name = "lib_armv5_gcce"
 	t.command = "sbs -b smoke_suite/test_resources/simple_lib/bld.inf -c gcce_armv5 LIBRARY"
 	t.targets = armv5targets
@@ -81,7 +78,6 @@ def run():
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL
 	t.name = "lib_armv7"
-	t.id = "0013d"
 	t.command = "sbs -b smoke_suite/test_resources/simple_lib/bld.inf -c armv7 LIBRARY"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv7/udeb/etest.lib",
@@ -100,7 +96,6 @@ def run():
 		result = SmokeTest.FAIL
 	
 
-	t.id = "13"
 	t.name = "lib_armv5_armv7"
 	t.result = result
 	t.print_result()

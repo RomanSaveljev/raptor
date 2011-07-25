@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -51,7 +51,7 @@ class TestRaptorXML(unittest.TestCase):
 		
 	def testSystemDefinitionProcessing(self):
 		# Make formatting neater
-		print
+		print("")
 		expectedBldInfs = [generic_path.Join(self.__sysDefRoot, "simple/bld.inf"),\
 						generic_path.Join(self.__sysDefRoot, "basics/helloworld/Bld.inf")]
 		
@@ -64,7 +64,7 @@ class TestRaptorXML(unittest.TestCase):
 		
 	
 		sourceroot = ""
-		if os.environ.has_key('SOURCEROOT'):
+		if 'SOURCEROOT' in os.environ:
 			sourceroot = os.environ['SOURCEROOT']
 		os.environ['SOURCEROOT'] = self.__sysDefRoot.GetLocalString()
 		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__nullSysDefRoot)

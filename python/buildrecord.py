@@ -97,12 +97,12 @@ class BuildRecord(object):
 		with open(filename,"r") as f:
 			try:
 				json_structure  = json.load(f)
-			except Exception,e:
+			except Exception as e:
 				raise Exception("Bad build record format - json deserialisation failed.")
 
 		try:
 			kargs = json_structure['buildrecord']
-		except Exception,e:
+		except Exception as e:
 			raise Exception("Bad build record format - buildrecord property not found in buildrecord file.")
 
 		# the json structure matches what must be passed into the constructor
@@ -110,7 +110,7 @@ class BuildRecord(object):
 		try:
 			makefilesets = [ raptor_makefile.BaseMakefileSet.from_json(json_makefileset) 
 					 for json_makefileset in kargs['makefilesets']]
-		except raptor_makefile.JsonMakefileDecodeError,e:
+		except raptor_makefile.JsonMakefileDecodeError as e:
 			raise Exception("Bad build record format: makefilesets element did not decode: {0}".format(str(e)))
 		
 
@@ -119,7 +119,7 @@ class BuildRecord(object):
 
 		try:
 			br = BuildRecord(**kargs)
-		except TypeError,e:
+		except TypeError as e:
 			raise Exception("Bad build record format: settings must be present for {0} but they were {1}: {2}: {3}".format(BuildRecord.stored_attrs, str(kargs), filename, str(e)))
 
 
@@ -180,7 +180,7 @@ class BuildRecord(object):
 				brf  = os.path.join(adir,b)
 				try:
 					brfiles.append((brf, os.stat(brf)[stat.ST_MTIME]))
-				except OSError, e:
+				except OSError as e:
 					pass
 
 		# sort so newest are first
@@ -207,7 +207,7 @@ class BuildRecord(object):
 					rcount += 1
 					if rcount > maxcount:
 						break
-			except Exception,e:
+			except Exception as e:
 				print(e)
 				BuildRecord.parsefails.append(e)	# parse errors should not be fatal - just means that the build record is from an old version of raptor.  There is no way to report the fact that they happened though and that's not so nice.  This exception list just makes it feasible to debug a problem if one occurs.
 
@@ -252,7 +252,7 @@ class BuildRecord(object):
 
 			# No exception so all must be up-to-date
 			return True
-		except raptor_makefile.OutOfDateException,e:
+		except raptor_makefile.OutOfDateException as e:
 			triggers.extend(e.items)
 
 		return False

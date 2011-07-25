@@ -80,7 +80,7 @@ def ReplaceEnvs(item):
 				val = val.rstrip("/")
 			item = item.replace("$(" + e + ")", val)
 		except KeyError:
-			print e, "is not set in the environment"
+			print(e+" is not set in the environment")
 			raise ValueError
 				
 	return item
@@ -100,7 +100,7 @@ def where(input_file):
 				try:
 					stat = os.stat(current_file)
 					locations.append(current_file)
-				except OSError, error:
+				except OSError as error:
 					pass
 	else:
 		whichproc = subprocess.Popen(args=["which", input_file], 
@@ -108,14 +108,17 @@ def where(input_file):
 					stderr=subprocess.STDOUT,
 					shell=False,
 					universal_newlines=True)
-		output = whichproc.stdout.readlines()
+
+		output,err = whichproc.communicate()
+		output = output.split("\n")
+		
 		whichproc.wait()
 
 		if len(output) > 0:
 			locations.append(output[0:(len(output) - 1)])
 				
 	if len(locations) == 0:
-		print "Error: " + input_file + " not defined in PATH environment variable"
+		print("Error: {0} not defined in PATH environment variable".format(input_file))
 	else:
 		return locations[0]
 	
@@ -125,7 +128,7 @@ def clean_epocroot():
 	not present in the manifest file
 	"""
 	epocroot = os.path.abspath(os.environ['EPOCROOT']).replace('\\','/')
-	print "Cleaning Epocroot: %s" % epocroot
+	print("Cleaning Epocroot: {0}".format(epocroot))
 	all_files = {} # dictionary to hold all files
 	folders = [] # holds all unique folders in manifest
 	host_platform = os.environ["HOSTPLATFORM_DIR"]
@@ -166,7 +169,7 @@ def clean_epocroot():
 							os.chmod(name, stat.S_IRWXU)
 							os.remove(name)
 						except:							
-							print "\nEPOCROOT-CLEAN ERROR:"
+							print("\nEPOCROOT-CLEAN ERROR:")
 							traceback.print_exc(None, sys.stdout)
 									
 			# This loop handles folders
@@ -180,12 +183,12 @@ def clean_epocroot():
 					try:
 						rmtree(ReplaceEnvs(name))
 					except:
-						print "\nEPOCROOT-CLEAN ERROR:"
+						print("\nEPOCROOT-CLEAN ERROR:")
 						traceback.print_exc(None, sys.stdout)
-	except IOError,e:
-		print e
+	except IOError as e:
+		print(e)
 	
-	print "Epocroot Cleaned"
+	print("Epocroot Cleaned")
 
 def grep(file, string):
 	return
@@ -268,8 +271,8 @@ class SmokeTest(object):
 					self.result = SmokeTest.PASS
 			else:
 				self.skip(platform)
-		except Exception, e:
-			print e
+		except Exception as e:
+			print(e)
 			self.result = SmokeTest.FAIL
 		
 		# print the result of this run()
@@ -289,14 +292,14 @@ class SmokeTest(object):
 			string += "\n" + self.name + ": "
 		
 		if value:
-			print string + value
+			print(string + value)
 		else:
 			if result == SmokeTest.PASS:
 				string += "PASSED"
 			elif result == SmokeTest.FAIL:
 				string += "FAILED"
 			
-			print string 
+			print(string) 
 	
 	def runnable(self, platform):
 		# can this test run on this platform?	
@@ -309,7 +312,7 @@ class SmokeTest(object):
 		return (isWin == wantWin)
 
 	def skip(self, platform):
-		print "\nSKIPPING:", self.name, "for", platform
+		print("\nSKIPPING: {0} for {1}".format(self.name, platform))
 
 	def logfileOption(self):
 		return "-f " + self.logfile();
@@ -335,7 +338,7 @@ class SmokeTest(object):
 					else:
 						os.remove(tgt)
 				except OSError:
-					print "Could not remove", tgt, "before the test"
+					print("Could not remove {0} before the test".format(tgt))
 					return False
 		return True
 
@@ -359,8 +362,8 @@ class SmokeTest(object):
 	def pretest(self):
 		# what to do before the test runs
 		
-		print "\nTEST:", self.name
-		print "LOGFILE:", self.logfile()
+		print("\nTEST: " + self.name)
+		print("LOGFILE: " + self.logfile())
 
 		return self.clean()
 			
@@ -375,7 +378,7 @@ class SmokeTest(object):
 					" " + self.makefileOption() + 
 					" " + self.logfileOption())
 	
-		print "COMMAND:", command
+		print("COMMAND: "+ command)
 
 		# Any environment settings specific to this test
 		shellenv = os.environ.copy()
@@ -420,10 +423,10 @@ class SmokeTest(object):
 			self.output = std_out + std_err
 			
 		if debug_mode_active:
-			print self.output
+			print(self.output)
 
 		if p.returncode != self.returncode:
-			print "RETURN: got", p.returncode, "expected", self.returncode
+			print("RETURN: got {0} expected {1}".format(p.returncode, self.returncode))
 			return False
 			
 		return True
@@ -478,28 +481,28 @@ class SmokeTest(object):
 		for expr in self.mustmatch_singleline + self.mustmatch:
 			if not re.search(expr, self.output, re.MULTILINE):
 				self.outputok = False
-				print "OUTPUTMISMATCH: output did not match: %s" % expr
+				print("OUTPUTMISMATCH: output did not match: {0}".format(expr))
 		
 		for expr in self.mustnotmatch_singleline + self.mustnotmatch:
 			if re.search(expr, self.output, re.MULTILINE):
 				self.outputok = False
-				print "OUTPUTMISMATCH: output should not have matched: %s" % expr
+				print("OUTPUTMISMATCH: output should not have matched: {0}".format(expr))
 
 		for expr in self.mustmatch_multiline:
 			if not re.search(expr, self.output, re.DOTALL):
 				self.outputok = False
-				print "OUTPUTMISMATCH: output did not match: %s" % expr
+				print("OUTPUTMISMATCH: output did not match: {0}".format(expr))
 
 		for expr in self.mustnotmatch_multiline:
 			if re.search(expr, self.output, re.DOTALL):
 				self.outputok = False
-				print "OUTPUTMISMATCH: output should not have matched: %s" % expr
+				print("OUTPUTMISMATCH: output should not have matched: {0}".format(expr))
 
 		for (expr,num) in self.countmatch:
 			expr_re = re.compile(expr)
 			matchnum = len(expr_re.findall(self.output))
 			if  matchnum != num:
-				print "OUTPUTMISMATCH: %d matches occurred when %d were expected: %s" % (matchnum, num, expr)
+				print("OUTPUTMISMATCH: {0:d} matches occurred when {1:d} were expected: {2}".format(matchnum, num, expr))
 				self.outputok = False
 
 		# Ignore errors/warnings if they are set to (-1)
@@ -519,7 +522,7 @@ class SmokeTest(object):
 		# something was wrong :-(
 	
 		if len(missing) != self.missing:
-			print "MISSING: %d, expected %s" % (len(missing), self.missing)
+			print("MISSING: {0:d}, expected {1}".format(len(missing), self.missing))
 			
 			# Missing entries are lists containing either a single missing file, or multiple alternative
 			# files that were all found to be missing when checked
@@ -529,16 +532,16 @@ class SmokeTest(object):
 						suffix = " or"
 					else:
 						suffix = "" 
-					print "\t%s" % (file) + suffix
+					print("\t{0}{1}".format(file,suffix))
 			
 		if warn != self.warnings:
-			print "WARNINGS: %d, expected %d" % (warn, self.warnings)
+			print("WARNINGS: {0:d}, expected {1:d}".format(warn, self.warnings))
 		
 		if error != self.errors:
-			print "ERRORS: %d, expected %d" % ( error, self.errors)
+			print("ERRORS: {0:d}, expected {1:d}".format( error, self.errors))
 		
 		if exception != self.exceptions:
-			print "EXCEPTIONS: %d, expected %d" % (exception, self.exceptions)
+			print("EXCEPTIONS: {0:d}, expected {1:d}".format(exception, self.exceptions))
 		
 		return False
 	
@@ -582,7 +585,7 @@ class GenericSmokeTest(SmokeTest):
 			file.write(self.output)
 			file.close()
 		except:
-			print "Could not save stdout in", logfile
+			print("Could not save stdout in " + logfile)
 			return False
 		
 		# do the base class things too
@@ -627,7 +630,7 @@ class CheckWhatSmokeTest(SmokeTest):
 				if self.output_expected_only_once:
 					outlines_left.remove(line) 
 			else:
-				print "OUTPUT NOT FOUND:", line
+				print("OUTPUT NOT FOUND: " + line)
 				ok = False
 		
 		# and check for extra lines that we didn't expect, optionally filtered
@@ -635,13 +638,13 @@ class CheckWhatSmokeTest(SmokeTest):
 			if self.regexlinefilter and not self.regexlinefilter.match(line):
 				continue
 			if not line in seen:
-				print "UNEXPECTED OUTPUT:", line
+				print("UNEXPECTED OUTPUT: " + line)
 				ok = False
 		
 		# and check for lines that we expected to see only once
 		if self.output_expected_only_once:
 			for line in outlines_left:
-				print "OUTPUT MORE THAN ONCE:", line
+				print("OUTPUT MORE THAN ONCE: " + line)
 				ok = False
 
 			
@@ -671,7 +674,7 @@ class AntiTargetSmokeTest(SmokeTest):
 		for t in self.antitargets:
 			tgt = os.path.normpath(ReplaceEnvs(t))
 			if os.path.exists(tgt):
-				print "UNWANTED", tgt
+				print("UNWANTED "+ tgt)
 				ok = False
 				
 		# do the base class things too

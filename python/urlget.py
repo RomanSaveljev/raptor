@@ -17,22 +17,22 @@
 # Fetch a file via http
 #
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import sys
 import os
 
 def get_http(url, outfile):
-	opener = urllib2.build_opener()
+	opener = urllib.request.build_opener()
 
 	# ...and install it globally so it can be used with urlopen.
-	urllib2.install_opener(opener)
+	urllib.request.install_opener(opener)
 
-	fin = urllib2.urlopen(url) 
+	fin = urllib.request.urlopen(url) 
 	with open(outfile,"w")  as fout:
+		inbytes = fin.read()
+		while inbytes:
+			fout.write(inbytes)
 			inbytes = fin.read()
-			while inbytes:
-				fout.write(inbytes)
-				inbytes = fin.read()
 
 
 if __name__ == "__main__":
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
 	try:
 		get_http(url, outfile)
-		print ("downloaded {0}".format(outfile))
+		print("downloaded {0}".format(outfile))
 	except Exception as e:
 		sys.stderr.write("error: download failed: {0}\n".format(str(e)))
 		sys.exit(3)

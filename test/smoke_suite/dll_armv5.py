@@ -20,7 +20,7 @@ def run():
 	t = AntiTargetSmokeTest()
 	t.usebash = True
 	
-	command = "sbs -b smoke_suite/test_resources/simple_dll/bld.inf -c %s -f-"
+	command = "sbs -b smoke_suite/test_resources/simple_dll/bld.inf -c {0} -f-"
 	maintargets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/createstaticdll.dll.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/createstaticdll.dll.sym",
@@ -49,7 +49,7 @@ def run():
 	# builds on Windows if the kit asks for it (off by default)
 	
 	t.name = "dll_armv5_rvct"
-	t.command = command % "armv5"
+	t.command = command.format("armv5")
 	t.targets = maintargets[:]	# Shallow, as we optionally extend later and then re-use
 	t.addbuildtargets('smoke_suite/test_resources/simple_dll/bld.inf', buildtargets)
 	t.mustmatch = mustmatch
@@ -69,7 +69,7 @@ def run():
 	t.run()	
 		
 	t.name = "dll_armv5_gcce"
-	t.command = command % "gcce_armv5"
+	t.command = command.format("gcce_armv5")
 	t.targets = maintargets
 	t.antitargets = abiv1libtargets
 	t.addbuildtargets('smoke_suite/test_resources/simple_dll/bld.inf', buildtargets)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -93,7 +93,7 @@ class FilterClean(filter_interface.Filter):
 					dirs.add(directory)
 					
 			self.tmp.close()	# this also deletes the temporary file
-		except Exception,e:
+		except Exception as e:
 			sys.stderr.write("sbs: problem reading temporary file for FilterClean: %s\n" % str(e))
 			self.ok = False
 		
@@ -116,7 +116,7 @@ class FilterClean(filter_interface.Filter):
 	def removeFile(self, path):
 		try:
 			os.unlink(path)
-		except Exception, e:
+		except Exception as e:
 			sys.stderr.write("sbs: could not remove " + path + "\n")
 			sys.stderr.write(str(e) + "\n")
 		
@@ -124,9 +124,9 @@ class FilterClean(filter_interface.Filter):
 	def saveItem(self, path):
 		"put path into a temporary file."
 		try:
-			self.tmp.write(path + "\n")
-		except:
-			sys.stderr.write("sbs: could not write temporary file in FilterClean\n")
+			self.tmp.write((path + "\n").encode("utf-8"))
+		except Exception as e:
+			sys.stderr.write("sbs: could not write temporary file in FilterClean: {0}\n".format(str(e)))
 			self.ok = False
 	
 			

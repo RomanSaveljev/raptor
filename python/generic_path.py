@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -31,7 +31,7 @@ driveRE = re.compile('^[A-Za-z]:$')
 
 # Base class
 
-class Path:
+class Path(object):
 	"""This class represents a file path.
 	
 	A generic path object supports operations without needing to know
@@ -288,9 +288,14 @@ class Path:
 		GetShortPathNameA.argtypes = LPSTR, LPSTR, DWORD
 		
 		buffer = ctypes.create_string_buffer(MAX_PATH)
-		GetShortPathNameA(self.path, buffer, MAX_PATH)
-		
-		spacesafe = buffer.value
+
+		# if strings are unicode (e.g. python3) then we need to convert
+		if type(b"") is not str:
+			GetShortPathNameA(self.path.encode(), buffer, MAX_PATH)
+			spacesafe = buffer.value.decode()
+		else:
+			GetShortPathNameA(self.path, buffer, MAX_PATH)
+			spacesafe = buffer.value
 		
 		if not spacesafe or not os.path.exists(spacesafe):
 			return None
@@ -319,7 +324,7 @@ def CurrentDir():
 
 def NormalisePathList(aList):
 	"""Convert a list of strings into a list of Path objects"""
-	return map(lambda x: Path(x), aList)
+	return [Path(x) for x in aList]
 
 def Where(afile):
 	"""Return the location of a file 'afile' in the system path.

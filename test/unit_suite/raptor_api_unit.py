@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -69,13 +69,13 @@ class TestRaptorApi(unittest.TestCase):
 		
 		# metadata
 				
-		metadatamacros = map(lambda x: str(x.name+"="+x.value) if x.value else str(x.name), config.metadata.platmacros)
+		metadatamacros = [str(x.name+"="+x.value) if x.value else str(x.name) for x in config.metadata.platmacros]
 		metadatamacros.sort()
 		results = ['SBSV2=_____SBSV2', '__GNUC__=3']
 		results.sort()
 		self.failUnlessEqual(metadatamacros, results)
 		
-		includepaths = map(lambda x: str(x.path), config.metadata.includepaths)
+		includepaths = [str(x.path) for x in config.metadata.includepaths]
 		includepaths.sort()
 
 		# This result is highly dependent on the epocroot being used to test against.
@@ -98,7 +98,7 @@ class TestRaptorApi(unittest.TestCase):
 		
 		# build
 		
-		sourcemacros = map(lambda x: str(x.name+"="+x.value) if x.value else str(x.name), config.build.sourcemacros)
+		sourcemacros = [str(x.name+"="+x.value) if x.value else str(x.name) for x in config.build.sourcemacros]
 		results = ['__BBB__', '__AAA__', '__DDD__=first_value', '__CCC__', '__DDD__=second_value']
 		self.failUnlessEqual(sourcemacros, results)
 		
@@ -107,7 +107,7 @@ class TestRaptorApi(unittest.TestCase):
 
 		expectedtypes = ["one", "two"]
 		expectedtypes.sort()
-		types = map(lambda t:t.name, config.build.targettypes)
+		types = [t.name for t in config.build.targettypes]
 		types.sort()
 		self.failUnlessEqual(types, expectedtypes)
 

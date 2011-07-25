@@ -66,8 +66,8 @@ if options.test_home != None:
 		os.environ["HOME"] = os.environ["SBS_HOME"] + "/test/custom_options/" \
 				+ home_dir + "/"
 	else:
-		print "Warning: Path to custom .sbs_init.xml file not found (" + \
-				home_dir + ")\nUsing defaults..."
+		print("Warning: Path to custom .sbs_init.xml file not found (" + \
+				home_dir + ")\nUsing defaults...")
 		options.test_home = None
 
 
@@ -108,31 +108,31 @@ class TestRun(object):
 
 	def show(self):
 		for test_suite in self.test_suites:
-			print "\n\n" + str(test_suite.suite_dir) + ":\n"
+			print("\n\n{0:s}\n".format(str(test_suite.suite_dir)))
 				
 			if len(test_suite.test_set) < 1:
-				print "No tests run"
+				print("No tests run")
 			else:
-				print "PASSED: " + str(test_suite.pass_total)
-				print "FAILED: " + str(test_suite.fail_total)
+				print("PASSED: {0:d}".format(test_suite.pass_total))
+				print("FAILED: {0:d}".format(test_suite.fail_total))
 				if test_suite.skip_total > 0:
-					print "SKIPPED: " + str(test_suite.skip_total)
+					print("SKIPPED: {0:d}".format(test_suite.skip_total))
 				if test_suite.exception_total > 0:
-					print "EXCEPTIONS: " + str(test_suite.exception_total)
+					print("EXCEPTIONS: {0:d}".format(test_suite.exception_total))
 		
 				if test_suite.fail_total > 0:
-					print "\nFAILED TESTS:"
+					print("\nFAILED TESTS:")
 					
 					# Add each failed test to what_failed and print it
 					for test in test_suite.failed_tests:
-						print "\t", test
+						print("\t{0}".format(test))
 		
 				if test_suite.exception_total > 0:
-					print "\nERRONEOUS TESTS:"
+					print("\nERRONEOUS TESTS:")
 					
 					# Add each erroneous test to what_failed and print it
 					for test in test_suite.error_tests:
-						print "\t", test
+						print("\t{0}".format(test))
 
 	def read_what_failed(self):
 		""" Read and parse the what_failed file, to determine which tests
@@ -165,8 +165,8 @@ class TestRun(object):
 							self.previous_failures[line] = set()
 						suite = self.previous_failures[line]
 				if unnamed_suite:
-					print "ERROR: what_failed corrupt; does not begin with a suite name"
-		except IOError, e:
+					print("ERROR: what_failed corrupt; does not begin with a suite name")
+		except IOError as e:
 			# If what_failed file is not present, that's OK.
 			pass
 
@@ -225,7 +225,7 @@ class Suite(TestRun):
 		self.end_times = {}
 		self.test_set = []
 
-		print "\n\nRunning " + str(self.suite_dir) + "..."
+		print("\n\nRunning " + str(self.suite_dir) + "...")
 
 		# Iterate through all files in specified directory
 		for test in os.listdir(self.suite_dir):
@@ -266,7 +266,7 @@ class Suite(TestRun):
 					test_number_text += ("    So far " + str(self.exception_total) +
 							" ERRONEOUS")
 				
-				print test_number_text
+				print(test_number_text)
 				
 				test_object = test.run()
 				
@@ -291,7 +291,7 @@ class Suite(TestRun):
 				
 				run_time_seconds = (str(run_time.seconds) + "." +
 						str(format_milliseconds(run_time.microseconds)))
-				print ("RunTime: " + run_time_seconds + "s")
+				print("RunTime: " + run_time_seconds + "s")
 				# Add to pass/fail count and save result to dictionary
 				if test_object.result == raptor_tests.SmokeTest.PASS:
 					self.pass_total += 1
@@ -305,11 +305,11 @@ class Suite(TestRun):
 					self.skip_total += 1
 				# Clean epocroot after running each test if --clean option is specified
 				if options.clean:
-					print "\nCLEANING TEST RESULTS..."
+					print("\nCLEANING TEST RESULTS...")
 					raptor_tests.clean_epocroot()
 					
 			except:
-				print "\nTEST ERROR:"
+				print("\nTEST ERROR:")
 				traceback.print_exc(None, sys.stdout)    # None => all levels
 				self.exception_total += 1
 				self.error_tests.append(name)
@@ -320,7 +320,7 @@ class Suite(TestRun):
 		seconds = (str(runtime.seconds) + "." +
 				str(format_milliseconds(runtime.microseconds)))
 
-		print ("\n" + str(self.suite_dir) + " RunTime: " + seconds + "s")
+		print("\n" + str(self.suite_dir) + " RunTime: " + seconds + "s")
 
 
 
@@ -386,15 +386,15 @@ class SuiteRun(TestRun):
 			options_dir = "defaults)"
 		else:
 			options_dir = "'" + options.test_home + "' options file)"
-		print "\n(Tests run using %s" %options_dir
+		print("\nTests run using {0}".format(options_dir))
 
 		# Summarise the entire test run
 		if self.suitepattern and (suiteCount == 0):
-			print "\nNo suites matched specification '" + self.suitepattern + \
-					"'\n"
+			print("\nNo suites matched specification '" + self.suitepattern + \
+					"'\n")
 		else:
-			print "Overall summary (%d suites, %d tests):" \
-					%(suiteCount, self.test_total)
+			print("Overall summary ({0:d} suites, {1:d} tests):".format(
+					suiteCount, self.test_total))
 			self.show()
 			self.write_what_failed()
 

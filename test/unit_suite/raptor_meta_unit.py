@@ -168,7 +168,7 @@ class TestRaptorMeta(unittest.TestCase):
 		
 		# Get the version of CPP that we are using and hope it's correct
 		# since there is no tool check.
-		if os.environ.has_key('SBS_GNUCPP'):
+		if 'SBS_GNUCPP' in os.environ:
 			self.__gnucpp = os.environ['SBS_GNUCPP']
 		else: 
 			self.__gnucpp = "cpp" 
@@ -182,7 +182,7 @@ class TestRaptorMeta(unittest.TestCase):
 
 		try:
 			 preProcessor.preprocess()
-		except Exception, e:
+		except Exception as e:
 			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
 			self.assertTrue(re.match('^Preprocessor exception', e.Text))
 
@@ -191,7 +191,7 @@ class TestRaptorMeta(unittest.TestCase):
 		try:
 			configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot, 
 														    self.__variant_cfg_root.Append("missing"))
-		except Exception, e:
+		except Exception as e:
 			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
 			self.assertTrue(re.match('^Could not read variant configuration file.*$', e.Text))
 			
@@ -199,7 +199,7 @@ class TestRaptorMeta(unittest.TestCase):
 		try:
 			configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot,
 														    self.__variant_cfg_root.Append("empty_cfg.cfg"))
-		except Exception, e:
+		except Exception as e:
 			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
 			self.assertTrue(re.match('No variant file specified in .*', e.Text))
 					
@@ -207,7 +207,7 @@ class TestRaptorMeta(unittest.TestCase):
 		try:
 			configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot,
 														    self.__variant_cfg_root.Append("invalid_cfg.cfg"))
-		except Exception, e:
+		except Exception as e:
 			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
 			self.assertTrue(re.match('Variant file .* does not exist', e.Text))
 				
@@ -287,7 +287,10 @@ class TestRaptorMeta(unittest.TestCase):
 		self.assertEquals(aExportObject.getAction(), aAction)
 		
 		if aArguments:
-			self.assertItemsEqual(aExportObject.getArguments(), aArguments)
+			if sys.version_info[0] > 2: # python 2 and 3 differ
+				self.assertEqual(aExportObject.getArguments(), aArguments)
+			else:
+				self.assertItemsEqual(aExportObject.getArguments(), aArguments)
 	
 	def assertEqualsOrContainsPath(self, aRequirement, aCandidate):
 		# If aRequirement is a list, which it might well be, we should
@@ -688,10 +691,10 @@ class TestRaptorMeta(unittest.TestCase):
 			if (testParameter.startswith("STDVAR_")):
 				stdvar = testParameter.replace("STDVAR_", "")
 				stdvalue = aTestParameters.get(testParameter)
-				self.assertTrue(testVariables.has_key(stdvar))
+				self.assertTrue(stdvar in testVariables)
 				self.assertEquals(testVariables.get(stdvar), aTestParameters.get(testParameter))
 			else:
-				self.assertTrue(testOptions.has_key(testParameter))
+				self.assertTrue(testParameter in testOptions)
 				self.assertEquals(testOptions.get(testParameter), aTestParameters.get(testParameter))
 
 
@@ -887,7 +890,7 @@ class TestRaptorMeta(unittest.TestCase):
 		parseresult = None
 		try:
 			parseresult = mmpParser.parse(mmpContent, mmpBackend)
-		except Exception,e:
+		except Exception as e:
 			pass
 			
 		self.assertTrue(parseresult)

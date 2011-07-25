@@ -53,11 +53,11 @@ class Cache:
 		# Create pathlist - this will be of length one if gPathOrGPathList is a
 		# generic path object; otherwise it's a list so just make all supplied paths generic
 		if isinstance(gPathOrGPathList, list):
-			pathlist = map(lambda x: x.GetLocalString(), gPathOrGPathList)
+			pathlist = [x.GetLocalString() for x in gPathOrGPathList]
 		elif isinstance(gPathOrGPathList, generic_path.Path):
 			pathlist = [gPathOrGPathList.GetLocalString()]
 		else:
-			self.raptor.Warn("Empty list or blank path supplied.")
+			self.raptor.Warn("Empty list or blank path supplied: '{}'".format(str(gPathOrGPathList)))
 
 		# Only when debugging, print the list. The for loop will be
 		# skipped if not in debug mode
@@ -103,8 +103,8 @@ class Cache:
 			try:
 				objects = raptor_xml.Read(self.raptor, fullpath)
 
-			except raptor_xml.XMLError:
-				self.raptor.Warn("Failed to read XML file {0}".format(fullpath))
+			except raptor_xml.XMLError as e:
+				self.raptor.Warn("Failed to read XML file {0} because {1}".format(fullpath,str(e)))
 				continue
 
 			self.raptor.Debug("{0} objects found in XML file {1}".format(len(objects), fullpath))
@@ -159,7 +159,7 @@ class Cache:
 	def FindNamedInterface(self, name, cacheID = ""):
 		try:
 			return self.interfaces[cacheID][name]
-		except KeyError, e:
+		except KeyError as e:
 			if cacheID == "":
 				raise e
 			else:
@@ -185,7 +185,7 @@ class Cache:
 	def AddVariant(self, obj):
 		# anonymous variants can never be referenced, so ignore them
 		if obj.name:
-			if self.variants.has_key(obj.name):
+			if obj.name in self.variants:
 				self.WarnDuplicate("variant", self.variants[obj.name], obj)
 				return
 

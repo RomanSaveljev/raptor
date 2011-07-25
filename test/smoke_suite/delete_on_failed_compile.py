@@ -54,7 +54,7 @@ def run():
 			"test_/armv5/urel/test6.o"  ])
 	sbshome = os.environ["SBS_HOME"].replace("\\","/").rstrip("/")
 	t.command = base_command.replace("armv5", "armv5.fake_compiler") + \
-	" --configpath=%s/test/smoke_suite/test_resources/simple/compilervariants" % sbshome
+	" --configpath={0}/test/smoke_suite/test_resources/simple/compilervariants".format(sbshome)
 	t.run()
 	
 	t.name = "delete_on_failed_compile_reallyclean_02"
@@ -87,8 +87,8 @@ def run():
 			"test_/armv5/urel/test6.o"  ])
 	
 	t.command = base_command.replace("armv5", "armv5.fake_compiler") + " -e make_test " \
-	+ " --configpath=%s/test/smoke_suite/test_resources/simple/compilervariants " % sbshome \
-	+ " --configpath=%s/test/smoke_suite/test_resources/simple/makevariants" % sbshome
+	+ " --configpath={0}/test/smoke_suite/test_resources/simple/compilervariants ".format(sbshome) \
+	+ " --configpath={0}/test/smoke_suite/test_resources/simple/makevariants".format(sbshome)
 	t.run()
 	
 	t.name = "delete_on_failed_compile_reallyclean_03"

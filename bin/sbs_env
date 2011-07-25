@@ -86,9 +86,10 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	export PATH=$__MINGW__/bin:/bin:$__SBS__/$HOSTPLATFORM_DIR/bin:$PATH
 
 	# The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
-	#  1. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
-	#  2. the python shipped locally with Raptor (if present)
-	#  3. the python on the system PATH and PYTHONPATH/PYTHONHOME set in the system environment
+	#  1. the SBS_PYTHON3 environment variable (if set)
+	#  2. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
+	#  3. the python shipped locally with Raptor (if present)
+	#  4. the python on the system PATH and PYTHONPATH/PYTHONHOME set in the system environment
 
 	# Python variables need to run in Cygwin but be understandable to a
 	# windows-centric interpreter, so we must use "mixed form" filenames.
@@ -99,7 +100,9 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	
 	__LOCAL_PYTHON__=$($m $SBS_HOME/win32/python27/python.exe)
 
-	if [ -n "$SBS_PYTHON" ]; then
+	if [ -n "$SBS_PYTHON3" ]; then
+		__PYTHON__=$SBS_PYTHON3
+	elif [ -n "$SBS_PYTHON" ]; then
 		__PYTHON__=$SBS_PYTHON
 	elif [ -f "$__LOCAL_PYTHON__" ]; then
 		__PYTHON__=$__LOCAL_PYTHON__
@@ -116,7 +119,10 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	fi
 	export PYTHONPATH="$PYTHONPATH;$($m "$SBS_HOME/python")"
 else	
-	if [ -n "$SBS_PYTHON" ]; then
+	if [ -n "$SBS_PYTHON3" ]; then
+			export PYTHONPATH=${SBS_PYTHONPATH:-$PYTHONPATH}:$SBS_HOME/python
+			export __PYTHON__=$SBS_PYTHON3
+	elif [ -n "$SBS_PYTHON" ]; then
 			export PYTHONPATH=${SBS_PYTHONPATH:-$PYTHONPATH}:$SBS_HOME/python
 			export __PYTHON__=$SBS_PYTHON
 	else

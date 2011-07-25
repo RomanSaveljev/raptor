@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -30,9 +30,9 @@ def run():
 
 	
 	description = """This tests the whatcomp filter.  As a byproduct it uses (and thus smoke-tests) sbs_filter.py"""
-	command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c %s -m ${SBSMAKEFILE} -f ${SBSLOGFILE} what  && " + \
-		  "EPOCROOT='%s' sbs_filter --filters FilterWhatComp < ${SBSLOGFILE} &&" % relative_epocroot + \
-		  "EPOCROOT='%s' sbs_filter --filters FilterWhatComp < ${SBSLOGFILE}"  % abs_epocroot
+	command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c {0} -m ${{SBSMAKEFILE}} -f ${{SBSLOGFILE}} what  && " + \
+		  "EPOCROOT='{0}' sbs_filter --filters FilterWhatComp < ${{{{SBSLOGFILE}}}} &&".format(relative_epocroot) + \
+		  "EPOCROOT='{0}' sbs_filter --filters FilterWhatComp < ${{{{SBSLOGFILE}}}}".format(abs_epocroot)
 	targets = [
 		]	
 	buildtargets = [
@@ -57,17 +57,15 @@ def run():
 	]
 	warnings = 0
 	
-	t.id = "0106a"
 	t.name = "whatcomp_basic"
 	t.description = description
-	t.command = command % "arm.v5.urel.gcce4_4_1"
+	t.command = command.format("arm.v5.urel.gcce4_4_1")
 	t.targets = targets
 	t.mustmatch = mustmatch
 	t.mustnotmatch = mustnotmatch
 	t.warnings = warnings
 	t.run()
 
-	t.id = "0106b"
 	t.name = "whatcomp_component_repeated"
 	t.description = """
 			It is possible for what information about a component to not be grouped
@@ -88,7 +86,6 @@ def run():
 	t.warnings = 0
 	t.run()
 
-	t.id = "0106"
 	t.name = "whatcomp"
 	t.print_result()
 	return t

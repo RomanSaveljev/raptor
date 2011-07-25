@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -34,7 +34,7 @@ class TestRaptorMake(unittest.TestCase):
 		for file in fileList:
 			name = file.GetLocalString()
 			if not os.path.exists(name):
-				print "did not find", name
+				print("did not find", name)
 				return False
 		return True
 	
@@ -42,7 +42,7 @@ class TestRaptorMake(unittest.TestCase):
 		for file in fileList:
 			name = file.GetLocalString()
 			if os.path.exists(name):
-				print "found unwanted", name
+				print("found unwanted", name)
 				return False
 		return True
 	

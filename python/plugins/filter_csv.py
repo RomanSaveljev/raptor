@@ -1,5 +1,5 @@
 
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -70,14 +70,14 @@ class CSV(filter_interface.LogMessageClassifier):
 		if self.out and self.out != sys.stdout:
 			try:
 				self.out.close()
-			except Exception, e:
+			except Exception as e:
 				self.err("could not close CSV " + str(e))
 		return self.ok
 	
 	def sbs_version(self, version_string):
 		try:
 			self.out.write('info,sbs,version,"' + version_string + '"\n')
-		except Exception, e:
+		except Exception as e:
 			self.err("could not write CSV " + str(e))
 		return self.ok
 	
@@ -102,7 +102,7 @@ class CSV(filter_interface.LogMessageClassifier):
 		
 		try:
 			self.out.write(",".join([thing,component,configuration,text]) + "\n")
-		except Exception, e:
+		except Exception as e:
 			self.err("could not write CSV " + str(e))
 		return self.ok
 	

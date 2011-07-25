@@ -29,17 +29,16 @@ def run():
 
 	result = SmokeTest.PASS
 
-	t.id = "0091a"
 	t.name = "non_ascii_argument"
 
+	t.usebash = True
 	# The dash in "-c" is an en dash, not a normal ASCII dash.
-	t.command = "sbs -b smoke_suite/test_resources/simple_dll/bld.inf –c armv5"
+	t.command = r'set -x;sbs -b smoke_suite/test_resources/simple_dll/bld.inf `echo -e "\x96"`c armv5'
 
 	t.run()
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL
 
-	t.id = "0091b"
 	t.name = "non_ascii_commandfile"
 
 	t.command = "sbs --command=smoke_suite/test_resources/non_ascii/cmd.txt"
@@ -48,7 +47,6 @@ def run():
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL
 
-	t.id = "91"
 	t.name = "non_ascii"
 	t.result = result
 	t.print_result()

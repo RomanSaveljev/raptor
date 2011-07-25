@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -22,7 +22,6 @@ def run():
 	t = SmokeTest()
 	t.usebash = True
 	result = SmokeTest.PASS
-	t.id="1000001"
 
 	description = """This test checks that the incremental parsing feature
 		works and that it rebuilds makefiles if and only if the
@@ -64,7 +63,7 @@ def run():
 	for trg in targets:
 		try:
 			os.unlink(ReplaceEnvs(trg))
-		except OSError,e:
+		except OSError as e:
 			pass
 	# Ensure that all makefiles, build records etc from the past are 
 	# removed so that this test can run completely "cleanly"
@@ -81,7 +80,6 @@ def run():
 	os.makedirs(os.environ["SBS_BUILD_DIR"])
 
 	t.name = "incremental_force"
-	t.id="1000001a"
 	t.description = """ do a straightforward non-incremental build """
 	t.command = command + " -c arm.v5.urel.gcce4_4_1"
 	t.targets = targets
@@ -99,7 +97,6 @@ def run():
 	t.run(noclean=True)
 
 	t.name = "incremental_donothing"
-	t.id="1000001b"
 	t.description = """ do a straightforward non-incremental build """
 	t.command = command + " -c arm.v5.urel.gcce4_4_1 --ip=on"
 	t.targets = targets
@@ -109,7 +106,6 @@ def run():
 	t.run(noclean=True)
 
 	t.name = "incremental_touched_source_file"
-	t.id="1000001c"
 	t.description = """ do a straightforward incremental build having changed a source file """
 	t.command = "touch $SBS_HOME/test/smoke_suite/test_resources/simple/test.cpp; " + command + " -c arm.v5.urel.gcce4_4_1 --ip=on"
 	t.targets = targets
@@ -131,7 +127,6 @@ def run():
 	t.run(noclean=True)
 
 	t.name = "incremental_touched_mmp_file"
-	t.id="1000001d"
 	t.description = """ do a straightforward incremental build having changed an mmp file """
 	t.command = "sleep 1; touch $SBS_HOME/test/smoke_suite/test_resources/simple/simple.mmp; sleep 1; " + command + " -c arm.v5.urel.gcce4_4_1 --ip=on"
 	t.targets = targets
@@ -153,12 +148,11 @@ def run():
 	t.run(noclean=True)
 
 	t.name = "incremental_changed_configuration"
-	t.id="1000001e"
 	t.description = """ do a straightforward incremental build having changed the configuration """
 	t.command = command + " -c arm.v5.udeb.gcce4_4_1 --ip=on"
 	# need udeb versions for this part of the test
-	t.targets = map(lambda x: x.replace("urel", "udeb"), targets)
-	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", map(lambda x: x.replace("urel", "udeb"), buildtargets))
+	t.targets = [x.replace("urel", "udeb") for x in targets]
+	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", [x.replace("urel", "udeb") for x in buildtargets])
 
 	t.mustmatch = [	
 					"incremental makefile generation: cannot reuse any pre-existing makefiles",

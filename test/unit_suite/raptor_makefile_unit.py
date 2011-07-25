@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -29,10 +29,10 @@ def unlinkall(files):
 	for f in files:
 		try:
 			os.unlink(f)
-			#print "testsetup: Erased %s" % f	
+			#print ("testsetup: Erased {0}".format(f))
 			continue
-		except OSError,e:
-			#print "testsetup: No need to erase %s" % f
+		except OSError as e:
+			#print("testsetup: No need to erase {0}".format(f))
 			continue
 
 
@@ -40,14 +40,14 @@ def checkall(files):
 	status = True
 	for f in files:
 		if not os.path.isfile(f):
-			print "Missing: %s" % f
+			print("Missing: " + f)
 			status = False
 	return status 
 
 class TestMakefile(unittest.TestCase):
 	"Very basic testing of makefile creation class"
 	def setUp(self):
-		print "Setup"
+		print("Setup")
 		self.assertTrue(os.path.isdir(epocroot))
 		unlinkall( [ topdir + "Makefile1",
 			topdir + "Makefile2.testinterface1",
@@ -86,7 +86,7 @@ class TestMakefile(unittest.TestCase):
 
 class TestMakefileSet(unittest.TestCase):
 	def setUp(self):
-		print "Setup TestMakefileSet"
+		print("Setup TestMakefileSet")
 		unlinkall( [ topdir + "Makefile4",
 		  topdir + "Makefile4.bitmap",
 		  topdir + "Makefile4.default",

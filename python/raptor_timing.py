@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -140,14 +140,14 @@ class Timing(object):
 			match = re.match(re.compile(".*object_type='(?P<object_type>.*?)'"),
 					source)
 			attributes["object_type"] = match.group("object_type")
-		except AttributeError, e:
-			print e
+		except AttributeError as e:
+			print(e)
 			attributes["object_type"] = ""
 		try:
 			match = re.match(re.compile(".*task='(?P<task>.*?)'"), source)
 			attributes["task"] = match.group("task")
-		except AttributeError, e:
-			print e
+		except AttributeError as e:
+			print(e)
 			attributes["task"] = ""
 		try:
 			match = re.match(re.compile(".*key='(?P<key>.*?)'"), source)

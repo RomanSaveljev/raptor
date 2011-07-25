@@ -336,7 +336,7 @@ unpaged
 			mp = MMPParser()
 			try:
 				result = mp.parse(i['text'],tester)
-			except ParseException,e:
+			except ParseException as e:
 				pass
 			self.assertEquals(result[0],'MMP')
 			self.assertNotEquals(re.search(i['mustmatch'],tester.output,re.M),None)

@@ -171,7 +171,7 @@ class FilterTerminal(filter_interface.Filter):
 		self.make_returned_error = False
 		
 	def isMakeWarning(self, text):
-                """A simple test for warnings.
+		"""A simple test for warnings.
                 Can be extended do to more comprehensive checking."""
 		# generic warnings checked
 		# array of make_warning_expr holds all the possible values

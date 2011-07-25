@@ -1,5 +1,5 @@
 
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -24,7 +24,7 @@ def run():
 
 	# create some empty source files just to test createvmaps command file handling:
 	test_cpp_files = []
-	for i in xrange(0,16):
+	for i in range(0,16):
 		tf = "smoke_suite/test_resources/bv/variant1/test_createvmap{0:02}.cpp".format(i)
 		f = open(tf,"w+")
 		f.close()
@@ -312,7 +312,6 @@ def run():
 	bldinf = 'smoke_suite/test_resources/bv/bld.inf'
 	sbscommand = "sbs -b {0} -c armv5 -c armv5.test_bv_1 -c armv5.test_bv_2 -c armv5.test_bv_3 -f- --configpath=test/smoke_suite/test_resources/bv/config/variants".format(bldinf)
 	
-	t.id = "56a"
 	t.description = """Build variant and invariant components.
 		In this default mode of operation, all components build for the non-product armv5 config whereas
 		only variant components build for the armv5.* bv configs."""
@@ -350,7 +349,6 @@ def run():
 
 
 	
-	t.id = "56b"
 	t.description = """Build variant and invariant components using an os_properties.xml that sets FEATUREVARIANTSAFE=1.
 		With FEATUREVARIANTSAFE only invariant components build for the non-product armv5 config and
 		only variant components build for the armv5.* bv configs.""" 
@@ -395,7 +393,6 @@ def run():
 	srcWithout = " -s " + bvdata + "/without_macros.cpp"
 	badSrc = " -s " + bvdata + "/with_errors.cpp"
 
-	t.id = "56c"
 	t.name = "createvmap exits with an error"
 	t.usebash = True
 	t.command = createvmap
@@ -405,7 +402,6 @@ def run():
 	t.run()
 
 	
-	t.id = "56d"
 	t.name = "createvmap shows cpp errors"
 	t.usebash = True
 	t.command = createvmap + vmap + bvcpp + preinc + listA + badSrc
@@ -415,7 +411,6 @@ def run():
 	t.run()
 	
 	
-	t.id = "56e"
 	t.name = "createvmap errors on missing feature list"
 	t.usebash = True
 	t.command = createvmap + vmap + bvcpp + preinc + listC + srcWith
@@ -425,7 +420,6 @@ def run():
 	t.run()
 	
 	
-	t.id = "56f"
 	t.name = "createvmap warns on featureless code"
 	t.usebash = True
 	t.command = createvmap + vmap + bvcpp + preinc + listA + srcWithout
@@ -435,7 +429,6 @@ def run():
 	t.run()
 	
 	
-	t.id = "56g"
 	t.name = "createvmap creates the right vmap file"
 	t.usebash = True
 	t.command = createvmap + vmap + bvcpp + preinc + listA + listB + srcWith + srcWithout + " && cat " + vmapfile
@@ -451,7 +444,6 @@ def run():
 	
 	
 	# print the overall result
-	t.id = "56"
 	t.name = "featurevariants"
 	t.print_result()
 	return t

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -20,7 +20,6 @@ from raptor_meta import BldInfFile
 
 def run():
 	t = SmokeTest()
-	t.id = "30"
 	t.name =  "resource"
 	t.command = "sbs  -b smoke_suite/test_resources/simple_gui/Bld.inf RESOURCE"
 	t.targets = [
@@ -49,7 +48,6 @@ def run():
 	
 	t.run()
 
-	t.id="30a"
 	t.name =  "no_depend_gen_resource"
 	t.usebash = True
 	t.description =  """Check that dependent resources still build correctly even when we turn dependency generation off.  This
@@ -92,7 +90,7 @@ def run():
 		"onelang_/onelang_onelang_sc.rsg.rpp",
 		"testresource_/testresource_testresource.rsc.rpp"])
 
-	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel -c winscw_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -c winscw_urel -f ${SBSLOGFILE} -m ${SBSMAKEFILE} && grep 'epoc32.include.test[^ ]*.rsg' %s && { X=`md5sum $(EPOCROOT)/epoc32/release/winscw/urel/z/resource/anotherresource/testresource.rsc` && Y=`md5sum $(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc` && [ \"${X%% *}\" != \"${Y%% *}\" ] ; }  && wc -l %s " % (res_depfile, res_depfile)
+	t.command = "sbs -b smoke_suite/test_resources/resource/group/bld.inf  -c armv5_urel -c winscw_urel reallyclean ; sbs --no-depend-generate -j 16 -b smoke_suite/test_resources/resource/group/bld.inf -c armv5_urel -c winscw_urel -f ${{SBSLOGFILE}} -m ${{SBSMAKEFILE}} && grep 'epoc32.include.test[^ ]*.rsg' {0} && {{ X=`md5sum $(EPOCROOT)/epoc32/release/winscw/urel/z/resource/anotherresource/testresource.rsc` && Y=`md5sum $(EPOCROOT)/epoc32/data/z/resource/testresource/testresource.rsc` && [ \"${{X%% *}}\" != \"${{Y%% *}}\" ] ; }}  && wc -l {1} ".format(res_depfile, res_depfile)
 
 
 	t.mustnotmatch = []
@@ -103,7 +101,6 @@ def run():
 
 	t.run()
 	
-	t.id="30b"
 	t.name =  "resource_corner_cases_reallyclean"
 	t.usebash = True
 	t.description =  """ Additional corner cases for resources:
@@ -117,7 +114,6 @@ def run():
 	t.mustmatch = []
 	t.run()
 	
-	t.id="30c"
 	t.name =  "resource_corner_cases"
 	t.usebash = True
 	t.description =  """ Additional corner cases for resources:
@@ -139,7 +135,6 @@ def run():
 	t.run()
 
 
-	t.id = "30d"
 	t.name =  "resource_rsg_casefolding_fail"
 	t.command = "sbs -b smoke_suite/test_resources/resource/rsg_casefolding/bld.inf RESOURCE"
 	t.targets = []
@@ -149,7 +144,6 @@ def run():
 	t.returncode = 1
 	t.run("linux")
 
-	t.id = "30e"
 	t.name =  "resource_rsg_casefolding_pass"
 	t.command = "sbs -b smoke_suite/test_resources/resource/rsg_casefolding/bld.inf --use-rsg-casefolding RESOURCE"
 	t.targets = []

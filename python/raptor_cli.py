@@ -227,7 +227,7 @@ def DoRaptor(Raptor, args):
 				if ord(c) > 127:
 					Raptor.Error(non_ascii_error)
 					return False
-	except IOError, e:
+	except IOError as e:
 		Raptor.Error(str(e))
 		return False
 	except UnicodeDecodeError:
@@ -301,7 +301,7 @@ def DoRaptor(Raptor, args):
 		if not values:
 			pass
 		else:
-			if type(values) == types.ListType: # Check if the argument type is a list or a string. If list, then iterate through it and call the functions
+			if type(values) is list: # Check if the argument type is a list or a string. If list, then iterate through it and call the functions
 				for val in values:
 					keepGoing = (call_function(val) and keepGoing)
 			else:
@@ -309,9 +309,9 @@ def DoRaptor(Raptor, args):
 
 	return keepGoing
 
-def CommandFile(file):
-	"this should never be called because we expand --command in this module."
-	print raptor.name + ": error: command file '%s' was not expanded" % file
+def CommandFile(filename):
+	"This should never be called because we expand --command in this module."
+	print( "{0}: error: command file '{1}' was not expanded".format(raptor.name,filename))
 	return False
 
 # end of the raptor_cli module

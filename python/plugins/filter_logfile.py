@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -29,8 +29,10 @@ class FilterLogfile(filter_interface.Filter):
 
 		self.raptor = raptor_instance
 		self.logFileName = self.raptor.logFileName
+
 		# insert the time into the log file name
 		if self.logFileName:
+			self.openedbyme = True
 			self.logFileName.path = self.logFileName.path.replace("%TIME",
 					self.raptor.timestring)
 	
@@ -38,7 +40,7 @@ class FilterLogfile(filter_interface.Filter):
 				dirname = str(self.raptor.logFileName.Dir())
 				if dirname and not os.path.isdir(dirname):
 					os.makedirs(dirname)
-			except os.error, e:
+			except os.error as e:
 				if e.errno != errno.EEXIST:
 					sys.stderr.write("%s : error: cannot create directory %s\n" % \
 						(str(raptor.name), dirname))
@@ -52,6 +54,7 @@ class FilterLogfile(filter_interface.Filter):
 				return False
 		else:
 			self.out = sys.stdout
+			self.openedbyme = False
 
 		return True
 
@@ -69,6 +72,9 @@ class FilterLogfile(filter_interface.Filter):
 
 	def close(self):
 		"""Close the log file"""
+
+		if not self.openedbyme: # don't close files we didn't open e.g. stdout
+			return True
 
 		try:
 			self.out.close()

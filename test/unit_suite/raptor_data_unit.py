@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2006-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -32,7 +32,7 @@ class TestRaptorData(unittest.TestCase):
 		
 	def SetEnv(self, name, value):
 		# set environment variable and remember the old value (if there is one)		
-		if os.environ.has_key(name):
+		if name in os.environ:
 			self.envStack[name] = os.environ[name]
 		os.environ[name] = value
 		
@@ -41,7 +41,7 @@ class TestRaptorData(unittest.TestCase):
 			
 	def RestoreEnv(self, name):
 		# put environment back to its state before SetEnv
-		if self.envStack.has_key(name):
+		if name in self.envStack:
 			os.environ[name] = self.envStack[name]
 		else:
 			del os.environ[name]    # was not defined
@@ -407,7 +407,7 @@ class TestRaptorData(unittest.TestCase):
 		try:
 			eval = aRaptor.GetEvaluator(None, toolVar.GenerateBuildUnits(aRaptor.cache)[0])
 			value = eval.Get("ENVVAR_TOOL_WITH_SPACES")
-		except Exception, e:
+		except Exception as e:
 			exceptionText = str(e)
 			
 		if self.isWin():
@@ -421,7 +421,7 @@ class TestRaptorData(unittest.TestCase):
 		try:
 			eval = aRaptor.GetEvaluator(None, toolchainpathVar.GenerateBuildUnits(aRaptor.cache)[0])
 			value = eval.Get("ENVVAR_TOOLCHAINPATH_WITH_SPACES")
-		except Exception, e:
+		except Exception as e:
 			exceptionText = str(e)
 			
 		if self.isWin():
@@ -438,14 +438,14 @@ class TestRaptorData(unittest.TestCase):
 		exceptionText = ""
 		try:
 			eval = aRaptor.GetEvaluator(None, toolVar.GenerateBuildUnits(aRaptor.cache)[0])
-		except Exception, e:
+		except Exception as e:
 			exceptionText = str(e)
 		self.assertTrue(exceptionText.startswith(invalidValueException % ("ENVVAR_TOOL_WITH_SPACES", "tool")))
 
 		exceptionText = ""
 		try:
 			eval = aRaptor.GetEvaluator(None, toolchainpathVar.GenerateBuildUnits(aRaptor.cache)[0])
-		except Exception, e:
+		except Exception as e:
 			exceptionText = str(e)			
 		self.assertTrue(exceptionText.startswith(invalidValueException % ("ENVVAR_TOOLCHAINPATH_WITH_SPACES", "toolchainpath")))
 
@@ -464,7 +464,7 @@ class TestRaptorData(unittest.TestCase):
 		try:	
 			eval = aRaptor.GetEvaluator(None, var.GenerateBuildUnits(aRaptor.cache)[0] )
 			badval = eval.Get("RAPTOR_SAYS_NO")
-		except raptor_data.UninitialisedVariableException, e:
+		except raptor_data.UninitialisedVariableException as e:
 			return
 
 		self.assertTrue(False)

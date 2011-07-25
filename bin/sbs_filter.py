@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Symbian Foundation License v1.0"
@@ -21,9 +21,9 @@ import traceback
 
 # intercept the -h option
 if "-h" in sys.argv or "--help" in sys.argv:
-	print "usage:", sys.argv[0], "[sbs options]"
-	print "  The log data is read from stdin."
-	print "  Type 'sbs -h' for a list of sbs options."
+	print("usage: {0} [sbs options]".format(sys.argv[0]))
+	print("  The log data is read from stdin.")
+	print("  Type 'sbs -h' for a list of sbs options.")
 	sys.exit(0)
 	
 # get the absolute path to this script
@@ -60,10 +60,10 @@ try:
 	# Open the requested plugins using the pluginbox
 	the_raptor.out.open(raptor_params, the_raptor.filterList, pbox)
 
-except ValueError, e:
+except ValueError as e:
 	sys.stderr.write("error: problem while creating filters: {0}\n".format(str(e)))
 	sys.exit(1)
-except Exception, e:
+except Exception as e:
 	# Unrecognised exception: print a traceback
 	sys.stderr.write("error: problem while creating filters: {0}\n".format(str(e)))
 	traceback.print_exc()
@@ -75,7 +75,7 @@ try:
 	while line:
 		line = sys.stdin.readline()
 		the_raptor.out.write(line)
-except Exception,e:
+except Exception as e:
 	sys.stderr.write("error: problem while filtering: %s\n" % str(e))
 	traceback.print_exc()
 	sys.exit(1)

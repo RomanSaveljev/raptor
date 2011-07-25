@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -51,7 +51,7 @@ SYSTEMINCLUDE	/epoc32/include
 	dirlen = len(dirname)
 	fileLen = length_limit - dirlen - numLen - extLen
 	if fileLen < 0:
-		print "Error: Your test path is too long for the longfilenames test to work"
+		print("Error: Your test path is too long for the longfilenames test to work")
 		sys.exit()
 	fileName = string[0:fileLen]
 
@@ -60,7 +60,7 @@ SYSTEMINCLUDE	/epoc32/include
 	f.writelines(targetinfo)
 	f.writelines("\nSOURCE		" + cpp + ".cpp\n")
 	while mmpStart <= mmpStop:
-		sourceinfo = "SOURCE		" + fileName + '_%03d' %mmpStart + ".cpp " + '\n'
+		sourceinfo = "SOURCE		" + fileName + '_{0:03d}'.format(mmpStart) + ".cpp " + '\n'
 		f.writelines(sourceinfo)
 		mmpStart += 1
 	f.close()
@@ -68,7 +68,7 @@ SYSTEMINCLUDE	/epoc32/include
 	# File generating utility
 	while cppStart <= cppStop:
 		t = str(cppStart)
-		filename = dirname + fileName + '_%03d' %cppStart + '.cpp'
+		filename = dirname + fileName + '_{0:03d}'.format(cppStart) + '.cpp'
 		content = 'int x' + t + ' = 1;'
 		f = open (filename, 'w')
 		f.write (content)
@@ -77,7 +77,6 @@ SYSTEMINCLUDE	/epoc32/include
 
 
 	t = SmokeTest()
-	t.id = "79"
 	t.name = "longfilenames"
 	t.command = "sbs -b smoke_suite/test_resources/longfilenames/bld.inf -c winscw"
 	t.description = """Ensure that winscw links with large amounts of object files with long names are buildable.
@@ -99,12 +98,12 @@ SYSTEMINCLUDE	/epoc32/include
 		"longfilenames_exe/winscw/urel/longfilenames_urel_objects.lrf"]
 		)
 	
-	basefilename = "longfilenames_exe/winscw/urel/" + fileName + "_%03d.%s"
+	basefilename = "longfilenames_exe/winscw/urel/" + fileName + "_{0:03d}.{1}"
 	for i in range(1, 271):		
 		t.addbuildtargets('smoke_suite/test_resources/longfilenames/bld.inf', [
-			basefilename % (i, "dep"),
-			basefilename % (i, "o"),
-			basefilename % (i, "o.d")
+			basefilename.format(i, "dep"),
+			basefilename.format(i, "o"),
+			basefilename.format(i, "o.d")
 			]
 		)
 

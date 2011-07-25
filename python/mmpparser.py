@@ -28,8 +28,12 @@
 # being able to use python to define the grammar.
 
 
-from pyparsing import *
 import sys
+if sys.version_info[0] == 2:
+	from pyparsing_py2 import *
+else:
+	from pyparsing_py3 import *
+
 # For multiline matching we must exclude \n from the list of whitespace
 # characters.  If we don't then Parse Elements like OneOrMore won't stop
 # at line boundaries.
@@ -82,7 +86,7 @@ class Mediator(object):
 	def __getattr__(self,name):
 		def caller(*args, **kwargs):
 			for c in self.original.__class__.__mro__:
-				if c.__dict__.has_key(name):
+				if name in c.__dict__:
 					return c.__dict__[name](self.original,*args, **kwargs)
 			raise TypeError() 
 		return caller

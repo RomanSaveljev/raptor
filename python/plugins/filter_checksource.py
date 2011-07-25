@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -119,7 +119,7 @@ if not raptor_utilities.getOSPlatform().startswith("linux"):
 		def startelement(self, name, attrs):
 			# Check the source code cpp files - obtained from the "source" 
 			# attribute of compile and other tags 
-			if 'source' in attrs.keys():
+			if 'source' in attrs:
 				if attrs['source'] != "":
 					self.filestocheck.append(attrs['source'])
 			
@@ -227,13 +227,13 @@ if not raptor_utilities.getOSPlatform().startswith("linux"):
 					dep = os.path.abspath(dep).replace('\\', '/')
 					self.checksource(dep)
 					
-			except Exception, e:
-				sys.stderr.write("sbs: FilterCheckSource failed: %s\n" % str(e))
+			except Exception as e:
+				sys.stderr.write("sbs: FilterCheckSource failed: {0}\n".format(str(e)))
 				
 			if self.errors == 0:
 				sys.stdout.write("No checksource errors found\n")
 			else:
-				sys.stdout.write("\n %d checksource errors found in the build\n" % self.errors)
+				sys.stdout.write("\n {0} checksource errors found in the build\n".format(self.errors))
 			
 		
 		def checksource(self, path):
@@ -243,7 +243,7 @@ if not raptor_utilities.getOSPlatform().startswith("linux"):
 				self.checked.append(normedpath)
 				try:
 					realpath = self.casechecker.checkcase(normedpath)
-				except IOError, e:
+				except IOError as e:
 					# file does not exist so just return
 					return
 										
@@ -267,7 +267,7 @@ if not raptor_utilities.getOSPlatform().startswith("linux"):
 			path = path.replace('\\', '/')
 			
 			if not os.path.exists(path):
-				raise IOError, path + " does not exist"
+				raise IOError(path + " does not exist")
 				
 			parts = path.split('/')
 			
@@ -284,7 +284,7 @@ if not raptor_utilities.getOSPlatform().startswith("linux"):
 					
 					for dirItem in dirItems:
 						if os.path.isdir(os.path.join(dirBeingChecked, dirItem)):
-							if not cacheItem.has_key(dirItem):
+							if dirItem not in cacheItem:
 								cacheItem[dirItem] = {}
 							
 							if not found:
@@ -334,10 +334,10 @@ if not raptor_utilities.getOSPlatform().startswith("linux"):
 			lines = []
 			try:
 				fh = open(dotdfile, "r")
-			except IOError, e:
-				print "Error: Failed to open file \"%s\": %s" % (dotdfile, e.strerror)
-			except Exception, e:
-				print "Error: Unknown error: %s" % str(e)
+			except IOError as e:
+				print("Error: Failed to open file \"{0}\": {1}".format(dotdfile, e.strerror))
+			except Exception as e:
+				print("Error: Unknown error: {0}".format(str(e)))
 			else:
 				lines = fh.readlines()
 				fh.close()

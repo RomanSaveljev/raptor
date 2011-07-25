@@ -57,9 +57,8 @@ def Read(Raptor, filename):
 	# try to read and parse the XML file
 	try:
 		dom = xml.dom.minidom.parse(filename)
-
-	except: # a whole bag of exceptions can be raised here
-		raise XMLError
+	except Exception as e: # a whole bag of exceptions can be raised here
+		raise XMLError(str(e))
 
 	# <build> is always the root element
 	build = dom.documentElement
@@ -162,7 +161,7 @@ class SystemModelComponent(generic_path.Path):
 		return self.__LayerName
 
 	def GetContainerName(self, aContainerType):
-		if self.__ContainerNames.has_key(aContainerType):
+		if aContainerType in self.__ContainerNames:
 			return self.__ContainerNames[aContainerType]
 		return ""
 
@@ -231,7 +230,7 @@ class SystemModel(object):
 		if not layername in self.__LayerList:
 			self.__LayerList.append(layername)
 
-		if not self.__LayerDetails.has_key(layername):
+		if layername not in self.__LayerDetails:
 			self.__LayerDetails[layername] = []
 		self.__LayerDetails[layername].append(component)
 
@@ -325,7 +324,7 @@ class SystemModel(object):
 		try:
 			self.__DOM = xml.dom.minidom.parse(self.__SystemDefinitionFile)
 
-		except Exception,e: # a whole bag of exceptions can be raised here
+		except Exception as e: # a whole bag of exceptions can be raised here
 			self.__Logger.Error("Failed to parse XML file {0}: {1}".format(self.__SystemDefinitionFile,str(e)))
 			return False
 
@@ -359,17 +358,17 @@ class SystemModel(object):
 		elif self.__Version['MAJOR'] == 2 or self.__Version['MAJOR'] == 3:
 			# 2.0.x and 3.0.0 formats support SOURCEROOT or SRCROOT as an environment specified base - we respect this, unless
 			# explicitly overridden on the command line
-			if os.environ.has_key('SRCROOT'):
+			if 'SRCROOT' in os.environ:
 				self.__ComponentRoot = generic_path.Path(os.environ['SRCROOT'])
-			elif os.environ.has_key('SOURCEROOT'):
+			elif 'SOURCEROOT' in os.environ:
 				self.__ComponentRoot = generic_path.Path(os.environ['SOURCEROOT'])
 
 			if self.__SystemDefinitionBase and self.__SystemDefinitionBase != ".":
 				self.__ComponentRoot = self.__SystemDefinitionBase
-				if os.environ.has_key('SRCROOT'):
+				if 'SRCROOT' in os.environ:
 					self.__Logger.Info("Command line specified System Definition file base \'{0}\'"
                                                            " overriding environment SRCROOT \'{1}\'".format(self.__SystemDefinitionBase, os.environ['SRCROOT']))
-				elif os.environ.has_key('SOURCEROOT'):
+				elif 'SOURCEROOT' in os.environ:
 					self.__Logger.Info("Command line specified System Definition file base \'{0}\'"
                                                            " overriding environment SOURCEROOT \'{1}\'".format(self.__SystemDefinitionBase, os.environ['SOURCEROOT']))
 		else:
@@ -449,7 +448,7 @@ class SystemModel(object):
 		if not aElement.parentNode.hasAttribute(self.__IdAttribute) :
 			currentLayer = aElement.getAttribute(self.__IdAttribute)
 
-			if not self.__LayerDetails.has_key(currentLayer):
+			if currentLayer not in self.__LayerDetails:
 				self.__LayerDetails[currentLayer] = []
 
 			if not currentLayer in self.__LayerList:
@@ -469,7 +468,7 @@ class SystemModel(object):
 					rootValue = aElement.getAttribute("root")
 
 					if rootValue:
-						if os.environ.has_key(rootValue):
+						if rootValue in os.environ:
 							bldInfRoot = generic_path.Path(os.environ[rootValue])
 						else:
 							# Assume that this is an error i.e. don't attempt to resolve in relation to SOURCEROOT

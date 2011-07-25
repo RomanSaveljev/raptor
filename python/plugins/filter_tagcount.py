@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -38,9 +38,9 @@ class FilterTagCounter(filter_interface.FilterSAX):
 	def startElement(self, name, attributes):
 		if name == "buildlog":
 			# print out the attributes of the "top" element
-			print "version:"
-			for a,v in attributes.items():
-				print a, "=", v
+			print("version:")
+			for a,v in list(attributes.items()):
+				print("{0}={1}".format(a,v))
 		
 		# push name onto the stack of names and increment the count
 		self.names.append(name)
@@ -60,15 +60,15 @@ class FilterTagCounter(filter_interface.FilterSAX):
 	
 	def endDocument(self):
 		# report
-		print "\nsummary:"
+		print("\nsummary:")
 		for name,nos in sorted(self.count.items()):
 			if name in self.interesting or len(self.interesting) == 0:
-				print name, nos[0], nos[1]
+				print("{0} {1} {2}".format(name, nos[0], nos[1]))
 			
-		print "\nparsing:"
-		print "errors =", self.errors
-		print "fatals =", self.fatals
-		print "warnings =", self.warns
+		print("\nparsing:")
+		print("errors = {0:d}".format(self.errors))
+		print("fatals = {0:d}".format(self.fatals))
+		print("warnings = {0:d}".format(self.warns))
 	
 	def error(self, exception):
 		self.errors += 1

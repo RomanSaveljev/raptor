@@ -28,14 +28,21 @@
 :foundhome 
 
 @REM The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
-@REM 1. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
-@REM 2. the python shipped locally with Raptor (if present)
-@REM 3. the python on the system PATH and PYTHONPATH/PYTHONHOME set in the system environment
+@REM 1. the SBS_PYTHON3 environment variable (if set)
+@REM 2. the SBS_PYTHON and SBS_PYTHONPATH environment variables (if set)
+@REM 3. the python shipped locally with Raptor (if present)
+@REM 4. the python on the system PATH and PYTHONPATH/PYTHONHOME set in the system environment
 
 @SET __LOCAL_PYTHON__=%SBS_HOME%\win32\python27\python.exe
+
+@IF NOT "%SBS_PYTHON3%"=="" GOTO sbspython3
 @IF NOT "%SBS_PYTHON%"=="" GOTO sbspython
 @IF EXIST %__LOCAL_PYTHON__% GOTO localpython
 @SET __PYTHON__=python.exe
+@GOTO sbspythonpath
+
+:sbspython3
+@SET __PYTHON__=%SBS_PYTHON3%
 @GOTO sbspythonpath
 
 :sbspython

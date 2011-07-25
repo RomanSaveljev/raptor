@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -19,7 +19,6 @@ import os
 
 def run():
 	t = SmokeTest()
-	t.id = "77"
 	t.name = "whatlog_cache"
 	t.description = """Test sbsv2cache.py cache file generation using Raptor .whatlog variant output.
 		This is currently a Windows only activity due to CBR tools restrictions."""
@@ -33,12 +32,12 @@ def run():
 	# Build something using the .whatlog variant.  Take the build log and give it to sbsv2cache.py, deducing
 	# the location of the generated cache file from the verbose output.  If generated, dump the cache file to
 	# STDOUT so we can validate the content in this test script.  Clean up when finished.
-	t.command = """sbs -b smoke_suite/test_resources/simple_gui/Bld.inf -f ${SBSLOGFILE} -m ${SBSMAKEFILE} -c armv5.whatlog -c winscw.whatlog 
-		CACHEFILE=`%s $SBS_HOME/bin/sbsv2cache.py -v -s -o $EPOCROOT/epoc32/build/abldcache -l $SBSLOGFILE | sed -n \'s#Creating: ##p\'`
-		if [ -n \"${CACHEFILE:+x}\" ]; then
+	t.command = """sbs -b smoke_suite/test_resources/simple_gui/Bld.inf -f ${{SBSLOGFILE}} -m ${{SBSMAKEFILE}} -c armv5.whatlog -c winscw.whatlog 
+		CACHEFILE=`{0} $SBS_HOME/bin/sbsv2cache.py -v -s -o $EPOCROOT/epoc32/build/abldcache -l $SBSLOGFILE | sed -n \'s#Creating: ##p\'`
+		if [ -n \"${{CACHEFILE:+x}}\" ]; then
 			cat $CACHEFILE
 		fi
-		rm -r $EPOCROOT/epoc32/build/abldcache""" % pythonRun
+		rm -r $EPOCROOT/epoc32/build/abldcache""".format(pythonRun)
 		
 	t.targets = [
 		"$(EPOCROOT)/epoc32/data/z/resource/apps/helloworld.mbm",

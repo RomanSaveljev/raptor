@@ -66,7 +66,7 @@ class HostPlatform(object):
 
 # Make sure not to start up on an unsupported platform
 if not HostPlatform.IsKnown(HostPlatform.hostplatform):
-	raise Exception("raptor_data module loaded on an unrecognised platform '%s'. Expected one of %s" % (HostPlatform.hostplatform, str(HostPlatform.hostplatforms)))
+	raise Exception("raptor_data module loaded on an unrecognised platform '{0}'. Expected one of {1}".format(HostPlatform.hostplatform, str(HostPlatform.hostplatforms)))
 
 
 # raptor_data module classes
@@ -164,7 +164,7 @@ class VariantContainer(Model):
 
 
 	def AddVariant(self, variant):
-		if type(variant) is types.StringTypes:
+		if type(variant) is str:
 			variant = VariantRef(ref = variant)
 
 
@@ -185,7 +185,7 @@ class VariantContainer(Model):
 					missing_variants.append(var.ref)
 
 		if len(missing_variants) > 0:
-			raise MissingVariantException("Missing variants '%s'", " ".join(missing_variants))
+			raise MissingVariantException("Missing variants '{0}'".format(" ".join(missing_variants)))
 
 		return self.variants
 
@@ -203,7 +203,7 @@ class Interface(Model):
 		self.paramgroups = []
 
 	def __str__(self):
-		return "<interface name='%s'>" % self.name + "</interface>"
+		return "<interface name='{0}'></interface>".format(self.name)
 
 	def FindParent(self, cache):
 		try:
@@ -307,7 +307,7 @@ class Interface(Model):
 class InterfaceRef(Reference):
 
 	def __str__(self):
-		return "<interfaceRef ref='%s'/>" % self.ref
+		return "<interfaceRef ref='{0}'/>".format(self.ref)
 
 	def Resolve(self, cache):
 		try:
@@ -328,7 +328,7 @@ class Specification(VariantContainer):
 
 
 	def __str__(self):
-		s = "<spec name='%s'>" % str(self.name)
+		s = "<spec name='{0}'>".format(str(self.name))
 		s += VariantContainer.__str__(self)
 		for c in self.childSpecs:
 			s += str(c) + '\n'
@@ -375,7 +375,7 @@ class Specification(VariantContainer):
 				return self.interface
 
 			except BadReferenceError:
-				raise MissingInterfaceError("Missing interface %s" % self.interface.ref)
+				raise MissingInterfaceError("Missing interface {0}".format(self.interface.ref))
 
 	def AddChild(self, child):
 		if isinstance(child, Specification):
@@ -444,12 +444,10 @@ class Filter(Specification):
 		self.variableValues = {}            #
 
 	def __str__(self, prefix = ""):
-		s = "<filter name='%s'>\n"% self.name
-		s += "<if config='%s'>\n" % " | ".join(self.configNames)
-		s += Specification.__str__(self)
-		s += "</if>\n <else>\n"
-		s += str(self.Else)
-		s += " </else>\n</filter>\n"
+		s = "<filter name='{0}'>\n" \
+		 "<if config='{1}'>\n" \
+		 "</if>\n <else>\n{2}" \
+		 " </else>\n</filter>\n".format(self.name, " | ".join(self.configNames), Specification.__str__(self),str(self.Else))
 		return s
 
 
@@ -462,14 +460,14 @@ class Filter(Specification):
 
 	def SetVariableCondition(self, variableName, variableValues):
 		self.variableNames = set([variableName])
-		if type(variableValues) == types.ListType:
+		if type(variableValues) is list:
 			self.variableValues[variableName] = set(variableValues)
 		else:
 			self.variableValues[variableName] = set([variableValues])
 
 	def AddVariableCondition(self, variableName, variableValues):
 		self.variableNames.add(variableName)
-		if type(variableValues) == types.ListType:
+		if type(variableValues) is list:
 			self.variableValues[variableName] = set(variableValues)
 		else:
 			self.variableValues[variableName] = set([variableValues])
@@ -601,8 +599,7 @@ class Append(Operation):
 
 
 	def __str__(self):
-		attributes = "name='" + self.name + "' value='" + self.value + "' separator='" + self.separator + "'"
-		return "<append %s/>" % attributes
+		return "<append name='{0}' value='{1}' separator='{2}'/>".format(self.name,self.value,self.separator)
 
 
 	def Apply(self, oldValue):
@@ -640,8 +637,7 @@ class Prepend(Operation):
 
 
 	def __str__(self, prefix = ""):
-		attributes = "name='" + self.name + "' value='" + self.value + "' separator='" + self.separator + "'"
-		return "<prepend %s/>" % prefix
+		return "{0}<prepend name='{1}' value='{2}' separator='{3}'/>".format(prefix, self.name, self.value, self.separator)
 
 
 	def Apply(self, oldValue):
@@ -736,9 +732,9 @@ class Env(Set):
 			attributes += " default='" + self.default + "'"
 
 		if type == "tool":
-			attributes += " versionCommand='" + self.versionCommand + "' versionResult='" + self.versionResult + "'"
+			attributes += " versionCommand='{0}' versionResult='{1}'".format(self.versionCommand,self.versionResult)
 
-		return "<env %s/>" % attributes
+		return "<env {0}/>".format(attributes)
 
 
 	def Apply(self, oldValue):
@@ -752,8 +748,8 @@ class Env(Set):
 					try:
 						path = generic_path.Path(value)
 						value = str(path.Absolute())
-					except ValueError,e:
-						raise BadToolValue("the environment variable %s is incorrect: %s" % (self.name, str(e)))
+					except ValueError as e:
+						raise BadToolValue("the environment variable {0} is incorrect: {1}".format(self.name, str(e)))
 					
 					if self.type in ["tool", "toolchainpath"]:
 						# if  we're dealing with tool-related values, then make sure that we can get "safe"
@@ -764,7 +760,7 @@ class Env(Set):
 							spaceSafeValue = path.GetSpaceSafePath()
 						
 							if not spaceSafeValue:
-								raise BadToolValue("the environment variable %s is incorrect - it is a '%s' type but contains spaces that cannot be neutralised: %s" % (self.name, self.type, value))
+								raise BadToolValue("the environment variable {0} is incorrect - it is a '{1}' type but contains spaces that cannot be neutralised: {2}".format(self.name, self.type, value))
 							
 							value = spaceSafeValue	
 				elif value.endswith('\\'):
@@ -777,7 +773,7 @@ class Env(Set):
 			if self.default != None:
 				value = self.default
 			else:
-				raise BadToolValue("%s is not set in the environment and has no default" % self.name)
+				raise BadToolValue("{0} is not set in the environment and has no default".format(self.name))
 
 		return value
 
@@ -929,7 +925,7 @@ class Variant(Model, Config):
 		while pname is not None and pname is not '':
 			try:
 				parent = cache.FindNamedVariant(pname)
-			except KeyError,e:
+			except KeyError as e:
 				break
 			if parent.name == progenitor:
 				return True
@@ -938,7 +934,9 @@ class Variant(Model, Config):
 		return False
 
 	def __str__(self):
-		s = "<var name='%s' extends='%s'>\n" % (self.name, self.extends)
+		s = "<var name='{0}' extends='{1}'>\n".format(self.name, self.extends)
+		for ref in self.variantRefs:
+			s += "{0}\n".format(str(ref))
 		for op in self.ops:
 			s +=  str(op) + '\n'
 		s += "</var>"
@@ -950,7 +948,7 @@ class VariantRef(Reference):
 		Reference.__init__(self, ref = ref)
 
 	def __str__(self):
-		return "<varRef ref='%s'/>" % self.ref
+		return "<varRef ref='{0}'/>".format(self.ref)
 
 	def Resolve(self, cache):
 		try:
@@ -973,7 +971,7 @@ class Alias(Model, Config):
 		self.variants = []
 
 	def __str__(self):
-		return "<alias name='%s' meaning='%s'/>" % (self.name, self.meaning)
+		return "<alias name='{0}' meaning='{1}'/>".format(self.name, self.meaning)
 
 	def SetProperty(self, key, val):
 		if key == "name":
@@ -1001,7 +999,7 @@ class Alias(Model, Config):
 					missing_variants.append(r.ref)
 				
 			if len(missing_variants) > 0:
-				raise MissingVariantException("Missing variants '%s'" % " ".join(missing_variants))
+				raise MissingVariantException("Missing variants '{0}'".format(" ".join(missing_variants)))
 
 	def GenerateBuildUnits(self, cache):
 		self.Resolve(cache)
@@ -1026,7 +1024,7 @@ class AliasRef(Reference):
 		Reference.__init__(self, ref)
 
 	def __str__(self):
-		return "<aliasRef ref='%s'/>" % self.ref
+		return "<aliasRef ref='{0}'/>".format(self.ref)
 
 	def Resolve(self, cache):
 		try:
@@ -1058,7 +1056,7 @@ class Group(Model, Config):
 		return self.name and self.childRefs
 
 	def __str__(self):
-		s = "<group name='%s'>" % self.name
+		s = "<group name='{0}'>".format(self.name)
 		for r in self.childRefs:
 			s += str(r)
 		s += "</group>"
@@ -1077,7 +1075,7 @@ class Group(Model, Config):
 				obj.ClearModifiers()
 				try:
 					refMods = r.GetModifiers(cache)
-				except BadReferenceError,e:
+				except BadReferenceError as e:
 					missing_variants.append(str(e))
 				else:
 					for m in refMods + self.modifiers:
@@ -1086,7 +1084,7 @@ class Group(Model, Config):
 					units.extend( obj.GenerateBuildUnits(cache) )
 
 		if len(missing_variants) > 0:
-			raise MissingVariantException("Missing variants '%s'" % " ".join(missing_variants))
+			raise MissingVariantException("Missing variants '{0}'".format(" ".join(missing_variants)))
 
 		return units
 
@@ -1097,7 +1095,7 @@ class GroupRef(Reference):
 		Reference.__init__(self, ref)
 
 	def __str__(self):
-		return "<groupRef ref='%s' mod='%s'/>" % (self.ref, ".".join(self.modifiers))
+		return "<groupRef ref='{0}' mod='{1}'/>".format(self.ref, ".".join(self.modifiers))
 
 	def Resolve(self, cache):
 		try:
@@ -1171,11 +1169,11 @@ def GetBuildUnits(configNames, cache, logger):
 					obj = x.Resolve(cache)
 					modObj = copy.copy(obj)
 					modObj.modifiers = x.GetModifiers(cache)
-				except BadReferenceError,e:
+				except BadReferenceError as e:
 					logger.Error("Unknown reference '{0}'".format(str(e)))
 				else:
 					models.append(modObj)
-		except Exception, e:
+		except Exception as e:
 			logger.Error(str(e))
 
 	return units
@@ -1193,13 +1191,14 @@ class Tool(object):
 	log = raptor_utilities.nulllog
 
 	# For use in dealing with tools that return non-ascii version strings.
-	nonascii = ""
-	identity_chartable = chr(0)
-	for c in xrange(1,128):
-		identity_chartable += chr(c)
-	for c in xrange(128,256):
-		nonascii += chr(c)
-		identity_chartable += " "
+	if sys.version_info[0] <= 2:
+		nonascii = bytearray()
+		identity_chartable = bytearray(128)
+		for c in range(0,128):
+			identity_chartable[c] = c
+		for c in range(128,256):
+			nonascii.append(c)
+			identity_chartable.append(ord(" "))
 
 	def __init__(self, name, command, versioncommand, versionresult, id="", versiondescription = None):
 		self.name = name
@@ -1220,7 +1219,7 @@ class Tool(object):
 		self.versioncommand = toolset.ExpandAll(self.versioncommand)
 		self.versionresult  = toolset.ExpandAll(self.versionresult)
 		self.command = toolset.ExpandAll(self.command)
-		self.key = hashlib.md5(self.versioncommand + self.versionresult).hexdigest()
+		self.key = hashlib.md5((self.versioncommand + self.versionresult).encode("utf-8")).hexdigest()
 		
 		# We need the tool's date to find out if we should check it.
 		try:
@@ -1234,16 +1233,16 @@ class Tool(object):
 				# If it really is not a simple command then we won't be able to get a date and
 				# we won't be able to tell if it is altered or updated - too bad!
 				testfile = generic_path.Where(self.command)
-				#self.log.Debug("toolcheck: tool '%s' was found on the path at '%s' ", self.command, testfile)
+				#self.log.Debug("toolcheck: tool '{0}' was found on the path at '{1}' ".format(self.command, testfile))
 				if testfile is None:
 					raise Exception("Can't be found in path")
 
 			if not os.path.isfile(testfile):
-				raise Exception("tool %s appears to not be a file %s", self.command, testfile)
+				raise Exception("tool {0} appears to not be a file {1}".format(self.command, testfile))
 				
 			testfile_stat = os.stat(testfile)
 			self.date = testfile_stat.st_mtime
-		except Exception,e:
+		except Exception as e:
 			# We really don't mind if the tool could not be dated - for any reason
 			Tool.log.Debug("toolcheck: '{0}={1}' cannot be dated - this is ok, but the toolcheck won't be able to tell when a new version of the tool is installed. ({2})".format(self.name, self.command, str(e)))
 			pass
@@ -1265,13 +1264,16 @@ class Tool(object):
 				p = subprocess.Popen(args=[shell, "-c", self.versioncommand], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=c_locale_env)
 				log.Debug("Checking tool '{0}' for version '{1}'".format(self.name, self.versionresult))
 				versionoutput,err = p.communicate()
-			except Exception,e:
+			except Exception as e:
 				versionoutput=None
 
 		# Some tools return version strings with unicode characters! 
 		# There is no good response other than a lot of decoding and encoding.
 		# Simpler to ignore it:
-		versionoutput_a = versionoutput.translate(Tool.identity_chartable,"")
+		if sys.version_info[0] > 2:
+			versionoutput_a = str(versionoutput)
+		else:
+			versionoutput_a = versionoutput.translate(Tool.identity_chartable,"")
 
 		if versionoutput_a and self.vre.search(versionoutput_a) != None:
 			log.Debug("tool '{0}' returned an acceptable version '{1}'".format(self.name, versionoutput_a))
@@ -1295,7 +1297,7 @@ def envhash(irrelevant_vars):
 	envid = hashlib.md5()
 	for k in os.environ:
 		if k not in irrelevant_vars:
-			envid.update(os.environ[k])
+			envid.update(os.environ[k].encode("utf-8"))
 	return envid.hexdigest()[:16]
 
 
@@ -1388,7 +1390,7 @@ class ToolSet(object):
 										ce[name] = val
 									self.__toolcheckcache[toolhistory[0]] = ce
 								log.Info("Loaded toolcheck cache: {0}".format(self.cachefilename))
-							except Exception, e:
+							except Exception as e:
 								log.Info("Ignoring garbled toolcheck cache: {0} ({1})".format(self.cachefilename, str(e)))
 								self.__toolcheckcache = {}
 									
@@ -1397,7 +1399,7 @@ class ToolSet(object):
 					else:
 						log.Info("Toolcheck cache not loaded = marker missing: {0} {1}".format(self.cachefilename, ToolSet.filemarker))
 					f.close()
-				except IOError, e:
+				except IOError as e:
 					log.Info("Failed to load toolcheck cache: {0}".format(self.cachefilename))
 		else:
 			log.Debug("Toolcheck cachefile not created because EPOCROOT not set in environment.")
@@ -1412,7 +1414,7 @@ class ToolSet(object):
 			if ToolSet.shell_re.search(shellversion_out) == None:
 				self.log.Error("A critical tool, '{0}', did not return the required version '{1}':\n{2}\nPlease check that '{3}' is in the path.".format(ToolSet.shell, ToolSet.shell_version, shellversion_out, ToolSet.shell))
 				self.valid = False
-		except Exception,e:
+		except Exception as e:
 			self.log.Error("A critical tool could not be found.\nPlease check that '{0}' is in the path. ({1})".format(ToolSet.shell,  str(e)))
 			self.valid = False
 
@@ -1437,12 +1439,12 @@ class ToolSet(object):
 				try:
 					t = cache[tool.key]
 						
-				except KeyError,e:
+				except KeyError as e:
 					pass
 				else:
 					# if the cache has an entry for the tool then see if the date on
 					# the tool has changed (assuming the tool is a simple executable file)
-					if t.has_key('date') and (tool.date is None or (tool.date - t['date'] > 0.1))  :
+					if 'date' in t and (tool.date is None or (tool.date - t['date'] > 0.1))  :
 						self.log.Debug("toolcheck forced: '{0}'  changed since the last check: {1} < {2}".format(tool.command, str(t['date']), str(tool.date)))
 					else:
 						t['age'] = 0 # we used it so it's obviously needed
@@ -1455,7 +1457,7 @@ class ToolSet(object):
 
 			try:
 				tool.check(ToolSet.shell, evaluator, log = self.log)
-			except ToolErrorException, e:
+			except ToolErrorException as e:
 				self.valid = False
 				self.log.Error("{0}\n".format(str(e)))
 
@@ -1477,7 +1479,7 @@ class ToolSet(object):
 				f = open(self.cachefilename, "w+")
 				f.write(ToolSet.filemarker+"\n")
 				f.write(ToolSet.tool_env_id+"\n")
-				for k,ce in cache.iteritems():
+				for k,ce in cache.items():
 
 					# If a tool has not been used for an extraordinarily long time
 					# then forget it - to prevent the cache from clogging up with old tools.
@@ -1486,13 +1488,13 @@ class ToolSet(object):
 
 					if ce['valid'] and ce['age'] < 100:
 						ce['age'] += 1
-						f.write("%s," % k)
-						for n,v in ce.iteritems():
-							f.write("%s=%s," % (n,str(v)))
+						f.write(k+",")
+						for n,v in ce.items():
+							f.write("{0}={1},".format(n,str(v)))
 					f.write("\n")
 				f.close()
 				self.log.Info("Created/Updated toolcheck cache: {0}\n".format(self.cachefilename))
-			except Exception, e:
+			except Exception as e:
 				self.log.Info("Could not write toolcheck cache: {0}".format(str(e)))
 		return self.valid
 
@@ -1545,7 +1547,7 @@ class Evaluator(object):
 
 				try:
 					newValue = op.Apply(oldValue)
-				except BadToolValue, e:
+				except BadToolValue as e:
 					unfound_values.append(str(e))
 					newValue = "NO_VALUE_FOR_" + op.name
 					
@@ -1574,7 +1576,7 @@ class Evaluator(object):
 			unresolved = False
 			for k, v in self.dict.items():
 				if v.find('$(' + k + ')') != -1:
-						raise RecursionException("Recursion Detected in variable '%s' in configuration '%s' " % (k,configName))
+						raise RecursionException("Recursion Detected in variable '{0}' in configuration '{1}' ".format(k,configName))
 				else:
 					expanded = self.ExpandAll(v, specName, configName)
 
@@ -1610,7 +1612,7 @@ class Evaluator(object):
 
 	def ResolveMatching(self, pattern):
 		""" Return a dictionary of all variables that match the pattern """
-		for k,v in self.dict.iteritems():
+		for k,v in self.dict.items():
 			if pattern.match(k):
 				yield (k,v)
 
@@ -1633,7 +1635,7 @@ class Evaluator(object):
 				expansion = self.dict[r]
 			else:
 				# no expansion for $(r)
-				unset_variables.append("Unset variable '%s' used in spec '%s' with config '%s'" % (r, spec, config))
+				unset_variables.append("Unset variable '{0}' used in spec '{1}' with config '{2}'".format(r, spec, config))
 			if expansion != None:
 				value = value.replace("$(" + r + ")", expansion)
 

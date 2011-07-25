@@ -140,8 +140,8 @@ class ModelNode(object):
 	def __hash__(self):
 		return hash(self.id)
 
-	def __cmp__(self,other):
-		return cmp(self.id, other)
+	def __eq__(self,other):
+		return self.id == other.id
 
 	def __iter__(self):
 		return iter(self.children)
@@ -222,7 +222,7 @@ class ModelNode(object):
 		metadepsfilename = makefile + ".metadeps"
 		try:
 			os.makedirs(str(generic_path.Path(makefile).Dir()))
-		except OSError,e:
+		except OSError as e:
 			pass # if the dir is already there
 
 
@@ -356,13 +356,17 @@ class QtProComponent(BldinfComponent):
 		incdir = build.metaeval.Get("QMAKE_INCDIR_QT")
 		headers = build.metaeval.Get("QT_HEADERS")
 
-		command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, spec, self.qtpro_filename, self.bldinf_filename, headers, moc,uic,rcc)
 		makeenv = os.environ.copy()
 
-		build.Debug("qmake command: {0}".format(command))
 		if isunix:
+			command =	[qmake, "-spec", spec, str(self.qtpro_filename), "-o",str(self.bldinf_filename), 
+		"QMAKE_INCDIR_QT=" + headers,
+		"QMAKE_MOC=" + moc,
+		"QMAKE_UIC=" + uic, 
+		"QMAKE_RCC=" + rcc]
+			build.Debug("qmake command: {0}".format(command))
 			p = subprocess.Popen(
-					args = [shell, '-c', command],
+					args = command,
 					bufsize = 65535,
 					stdout = subprocess.PIPE,
 					stderr = subprocess.STDOUT,
@@ -370,12 +374,14 @@ class QtProComponent(BldinfComponent):
 					universal_newlines = True, 
 					env = makeenv)
 		else:
+			command = "{0} -spec {1} {2} -o {3} QMAKE_INCDIR_QT={4} QMAKE_MOC={5} QMAKE_UIC={6} QMAKE_RCC={7}".format(qmake, spec, self.qtpro_filename, self.bldinf_filename, headers, moc,uic,rcc)
+			build.Debug("qmake command: {0}".format(command))
 			p = subprocess.Popen(
-					args = [command], 
+					args = command, 
 					bufsize = 65535,
 					stdout = subprocess.PIPE,
 					stderr = subprocess.STDOUT,
-					shell = True,
+					shell = False,
 					env = makeenv)
 		stream = p.stdout
 		self.qmake_output = []
@@ -450,7 +456,7 @@ class Layer(ModelNode):
 		for c in self.children:
 			try:
 				components.append(c.render_bldinf(build))
-			except QmakeErrorException, e:
+			except QmakeErrorException as e:
 				build.Error(str(e))
 
 		if len(components) > 0:
@@ -464,7 +470,7 @@ class Layer(ModelNode):
 				self.specs = list(build.generic_specs)
 				self.specs.extend(metaReader.ReadBldInfFiles(components, doexport = build.doExport, dobuild = not build.doExportOnly))
 
-			except raptor_meta.MetaDataError, e:
+			except raptor_meta.MetaDataError as e:
 				build.Error(e.Text)
 
 		self.unfurled = True
@@ -476,7 +482,7 @@ class Layer(ModelNode):
 		""" Split layer's components into blocks for parallel parsing """
 		nc = len(self.children)
 		number_blocks = build.jobs
-		block_size = (nc / number_blocks) + 1
+		block_size = int((nc / number_blocks) + 1)
 		component_blocks = [] # list of mini-layers, split up for parallel parsing
 
 		b = 0
@@ -805,9 +811,9 @@ class Raptor(object):
 
 						if newValue != None:
 							# got a string for the value
-							if type(value) == types.BooleanType:
+							if type(value) == bool:
 								newValue = (newValue.lower() != "false")
-							elif type(value) == types.IntType:
+							elif type(value) == int:
 								newValue = int(newValue)
 							elif isinstance(value, generic_path.Path):
 								newValue = generic_path.Path(newValue)
@@ -833,8 +839,7 @@ class Raptor(object):
 				return aGenericPath
 
 		# make generic paths absolute (if required)
-		self.configPath = map(mkAbsolute, self.configPath)
-
+		self.configPath = [mkAbsolute(p) for p in self.configPath]
 		self.cache.Load(self.configPath)
 
 		if not self.systemFLM.isAbsolute():
@@ -1063,7 +1068,7 @@ class Raptor(object):
 
 	def PrintVersion(self,dummy):
 		global name
-		print name, "version", raptor_version.fullversion()
+		print("{0} version {1}".format(name, raptor_version.fullversion()))
 		self.mission = Raptor.M_VERSION
 		return True
 
@@ -1196,7 +1201,7 @@ class Raptor(object):
 			try:
 				evaluator = self.GetEvaluator(None, b, gathertools=True)
 				config_ok = self.CheckToolset(evaluator, b.name)
-			except raptor_data.UninitialisedVariableException,e:
+			except raptor_data.UninitialisedVariableException as e:
 				tool_problems.append(b.name)
 				self.Error("{0} is a bad configuration: {1}".format(b.name,str(e)))
 
@@ -1368,7 +1373,7 @@ class Raptor(object):
                                        " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"{3} {4}\">\n".format(
 				       raptor_version.fullversion(), namespace, progress_namespace, namespace, schema))
 			self.logOpen = True
-		except Exception,e:
+		except Exception as e:
 			self.out = sys.stdout # make sure that we can actually get errors out.
 			self.logOpen = False
 			self.FatalError("Unable to open the output logs: {0}".format(str(e)))
@@ -1391,11 +1396,8 @@ class Raptor(object):
 
 	@staticmethod
 	def attributeString(dictionary):
-		"turn a dictionary into a string of XML attributes"
-		atts = ""
-		for a,v in dictionary.items():
-			atts += " " + a + "='" + v + "'"
-		return atts
+		"""Turn a dictionary into a string of XML attributes"""
+		return "".join([" {0}='{1}'".format(a,v) for  a,v in dictionary.items()])
 
 	def Info(self, msg, **attributes):
 		"""Send an information message to the configured channel
@@ -1408,7 +1410,7 @@ class Raptor(object):
 			try:
 				self.out.write(raptor_timing.Timing.discovery_string(object_type = object_type,
 						count = count))
-			except Exception, exception:
+			except Exception as exception:
 				self.Error(exception.Text, function = "InfoDiscoveryTime")
 
 	def InfoStartTime(self, object_type, task, key):
@@ -1416,7 +1418,7 @@ class Raptor(object):
 			try:
 				self.out.write(raptor_timing.Timing.start_string(object_type = object_type,
 						task = task, key = key))
-			except Exception, exception:
+			except Exception as exception:
 				self.Error(exception.Text, function = "InfoStartTime")
 
 	def InfoEndTime(self, object_type, task, key):
@@ -1424,7 +1426,7 @@ class Raptor(object):
 			try:
 				self.out.write(raptor_timing.Timing.end_string(object_type = object_type,
 						task = task, key = key))
-			except Exception, exception:
+			except Exception as exception:
 				self.Error(exception.Text, function = "InfoEndTime")
 
 	def Debug(self, msg, **attributes):
@@ -1529,16 +1531,16 @@ class Raptor(object):
 		# intialise the plugs in case they are needed for the query
 		self.InitPlugins()
 		
-		print "<sbs version='{0}'>".format(raptor_version.numericversion())
+		print("<sbs version='{0}'>".format(raptor_version.numericversion()))
 		
 		for q in self.queries:
 			try:
-				print api.stringquery(q)
+				print(api.stringquery(q))
 				
-			except Exception, e:
+			except Exception as e:
 				self.Error("exception '{0}' with query '{1}'".format(str(e), q))
 		
-		print "</sbs>"	
+		print("</sbs>")	
 		return self.errorCode
 	
 	def Build(self):
@@ -1604,7 +1606,7 @@ class Raptor(object):
 				if len(buildUnitsToBuild) >= 0:
 					layers = self.GetLayersFromCLI()
 
-				componentCount = reduce(lambda x,y : x + y, [len(cg) for cg in layers])
+				componentCount = sum([len(cg) for cg in layers])
 
 				if not componentCount > 0:
 					raise BuildCannotProgressException("No components to build.")
@@ -1626,7 +1628,7 @@ class Raptor(object):
 			if not self.maker:
 				try:
 					self.maker = raptor_make.MakeEngine(self, self.makeEngine)
-				except raptor_make.BadMakeEngineException,e:
+				except raptor_make.BadMakeEngineException as e:
 					self.Error("Unable to use make engine: {0} ".format(str(e)))
 					
 
@@ -1657,12 +1659,12 @@ class Raptor(object):
 					# create specs for a specific group of components
 					try:
 						l.realise(self)
-					except raptor_make.CannotWriteMakefileException,e:
+					except raptor_make.CannotWriteMakefileException as e:
 						pass # raptor_make will report these errors itself
 						
 				try:
 					self.build_record.to_file()
-				except Exception,e:
+				except Exception as e:
 					self.Info("Couldn't write build record file: {0}".format(str(e)))
 
 			else: 
@@ -1675,7 +1677,7 @@ class Raptor(object):
 							key = makefileset.metadepsfilename)
 				
 
-		except BuildCannotProgressException,b:
+		except BuildCannotProgressException as b:
 			if str(b) != "":
 				self.Info(str(b))
 
@@ -1740,7 +1742,7 @@ def Main(argv):
 			return b.Query()
 	
 		return b.Build()
-	except BuildCannotProgressException, e:
+	except BuildCannotProgressException as e:
 		t = str(e)
 		if t != "":
 			sys.stderr.write("sbs error: {0:s}\n".format(t))

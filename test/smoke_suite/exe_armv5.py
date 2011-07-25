@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -23,8 +23,8 @@ def run():
 
 	description = """This test is testing 2 states of keywords, DEBUGGABLE on its own and with DEBUGGABLE_UDEBONLY together; in their mmp's
 			make a new mmp change the target so that it generates another exe, and search together with that exe name when testing second test"""
-	command = "sbs -b smoke_suite/test_resources/simple/bld.inf -b smoke_suite/test_resources/simple/debuggable_bld.inf -c %s -m ${SBSMAKEFILE} -f ${SBSLOGFILE} && " + \
-			"grep -i '.*elf2e32.*--debuggable.*' ${SBSLOGFILE};"
+	command = "sbs -b smoke_suite/test_resources/simple/bld.inf -b smoke_suite/test_resources/simple/debuggable_bld.inf -c {0} -m ${{SBSMAKEFILE}} -f ${{SBSLOGFILE}} && " \
+			"grep -i '.*elf2e32.*--debuggable.*' ${{SBSLOGFILE}};"
 	targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/test.exe",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/test.exe.map",
@@ -81,10 +81,9 @@ def run():
 	]
 	warnings = 1
 	
-	t.id = "0001a"
 	t.name = "exe_armv5_rvct"
 	t.description = description
-	t.command = command % "armv5"
+	t.command = command.format("armv5")
 	t.targets = targets
 	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", buildtargets)
 	t.mustmatch = mustmatch
@@ -94,7 +93,6 @@ def run():
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL
 		
-	t.id = "0001b"
 	t.name = "exe_armv5_clean"
 	t.command = "sbs -b smoke_suite/test_resources/simple/bld.inf -c armv5 clean"
 	t.targets = []
@@ -106,9 +104,8 @@ def run():
 		result = SmokeTest.FAIL	
 	
 
-	t.id = "0001c"
 	t.name = "exe_armv5_gcce"
-	t.command = command % "gcce_armv5"
+	t.command = command.format("gcce_armv5")
 	t.targets = targets
 	t.addbuildtargets("smoke_suite/test_resources/simple/bld.inf", buildtargets)
 	t.mustmatch = mustmatch
@@ -123,7 +120,6 @@ def run():
 	# missing files properly when used from sbs_filter.py:
 	import os
 	abs_epocroot = os.path.abspath(os.environ["EPOCROOT"])
-	t.id = "0001d"
 	t.command = "rm $(EPOCROOT)/epoc32/release/armv5/udeb/test.exe.map; sbs_filter  --filters=FilterCheck < ${SBSLOGFILE}"
 	t.targets = []
 	t.mustmatch = ["MISSING:[ 	]+" + abs_epocroot.replace("\\","\\\\") + ".epoc32.release.armv5.udeb.test\.exe\.map.*"]
@@ -134,7 +130,6 @@ def run():
 
 	if t.result == SmokeTest.FAIL:
 		result = SmokeTest.FAIL	
-	t.id = "1"
 	t.name = "exe_armv5"
 	t.result = result
 	t.print_result()

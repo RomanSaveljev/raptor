@@ -1,5 +1,5 @@
 
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -95,7 +95,7 @@ class HTML(filter_interface.LogMessageClassifier):
 			self.index.write("</tr>")
 			
 			# the list of configuration names in alphabetical order
-			names = self.configurations.keys()
+			names = list(self.configurations.keys())
 			names.sort()
 			
 			# print the "unknown" configuration results first
@@ -119,7 +119,7 @@ class HTML(filter_interface.LogMessageClassifier):
 			self.index.write("</tr>")
 			
 			# the list of component names in alphabetical order
-			names = self.components.keys()
+			names = list(self.components.keys())
 			names.sort()
 			
 			# print the "unknown" component results first
@@ -134,14 +134,14 @@ class HTML(filter_interface.LogMessageClassifier):
 			self.index.write("</table>")	
 			self.index.write("</body></html>")
 			self.index.close()
-		except Exception, e:
+		except Exception as e:
 			self.err("could not close index " + str(e))
 		return self.ok
 	
 	def sbs_version(self, version_string):
 		try:
 			self.index.write("<p><tt>sbs " + version_string + "</tt>")
-		except Exception, e:
+		except Exception as e:
 			self.err("could not write to index " + str(e))
 		return self.ok
 	

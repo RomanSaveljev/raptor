@@ -74,7 +74,7 @@ class BaseMakefile(object):
 		try:
 			mf_ = json_structure['makefile']
 			mf = cls(mf_['filename'], mf_['callcount'], mf_['defaulttargets'])
-		except KeyError, e:	
+		except KeyError as e:	
 			raise JsonMakefileDecodeError("Makefile deserialised from json was invalid: keyerror on {0} :: {1}  ".format(str(e), str(json_structure))) 
 
 		return mf
@@ -104,22 +104,22 @@ class Makefile(BaseMakefile):
 
 	def open(self):
 		if self.dead:
-			raise Exception, "Attempt to reopen completed makefile %s " % (self.filename)
+			raise Exception("Attempt to reopen completed makefile {0} ".format(self.filename))
 
 		if self.file is None:
 			directory = self.filename.Dir()
 			if not (str(directory) == "" or directory.Exists()):
 				try:
 					os.makedirs(directory.GetLocalString())
-				except Exception,e:
-					raise Exception, "Cannot make directory '%s' for file '%s' in '%s': %s " % (str(directory),str(self.filename),str(self.directory),str(e))
+				except Exception as e:
+					raise Exception("Cannot make directory '{0}' for file '{1}' in '{2}': {3} ".format(str(directory),str(self.filename),str(self.directory),str(e)))
 
 			self.file = open(str(self.filename),"w+")
 			
 			self.file.write('# GENERATED MAKEFILE : DO NOT EDIT\n\n')
 			if self.selector.defaulttarget:
-				self.file.write('MAKEFILE_GROUP:=%s\n.PHONY:: %s\n%s:: # Default target\n' \
-							% (self.selector.defaulttarget, self.selector.defaulttarget, self.selector.defaulttarget))
+				self.file.write('MAKEFILE_GROUP:={0}\n.PHONY:: {1}\n{2}:: # Default target\n'.format( 
+					self.selector.defaulttarget, self.selector.defaulttarget, self.selector.defaulttarget))
 			else:
 				self.file.write('MAKEFILE_GROUP:=DEFAULT\n')
 			if self.prologue != None:
@@ -128,13 +128,13 @@ class Makefile(BaseMakefile):
 			if self.defaulttargets != None:
 				self.file.write('# dynamic default targets\n')
 				for defaulttarget in self.defaulttargets:
-					self.file.write('.PHONY:: %s\n' % defaulttarget)
-					self.file.write('%s:\n' % defaulttarget)
+					self.file.write('.PHONY:: {0}\n'.format(defaulttarget))
+					self.file.write('{0}:\n'.format(defaulttarget))
 				self.file.write('\n')
 			
 	def addChild(self, child):
 		self.open()
-		self.file.write("include %s\n" % child.filename)
+		self.file.write("include {0}\n".format(child.filename))
 		child.open()
 
 	def createChild(self, subdir):
@@ -171,17 +171,17 @@ class Makefile(BaseMakefile):
 
 		self.open()
 		# now we can write the values into the makefile
-		self.file.write("# call %s, count %s\n" % (flmpath,self.callcount))
-		self.file.write("SBS_SPECIFICATION:=%s\n" % specname)
-		self.file.write("SBS_CONFIGURATION:=%s\n\n" % configname)
+		self.file.write("# call {0}, count {1}\n".format(flmpath,self.callcount))
+		self.file.write("SBS_SPECIFICATION:={0}\n".format(specname))
+		self.file.write("SBS_CONFIGURATION:={0}\n\n".format(configname))
 
 		if guard:
-			self.file.write("ifeq ($(%s),)\n%s:=1\n\n" % (guard, guard))
+			self.file.write("ifeq ($({0}),)\n{1}:=1\n\n".format(guard, guard))
 		
 		for (p, value) in parameters:
-			self.file.write("%s:=%s\n" % (p, value))
+			self.file.write("{0}:={1}\n".format(p, value))
 	
-		self.file.write("include %s\n" % flmpath)
+		self.file.write("include {0}\n".format(flmpath))
 		self.file.write("MAKEFILE_LIST:= # work around potential gnu make stack overflow\n\n")
 		
 		if guard:
@@ -196,7 +196,7 @@ class Makefile(BaseMakefile):
 
 		self.open()
 		# now we can write the values into the makefile
-		self.file.write("include %s\n" % (makefilename+"."+self.selector.name))
+		self.file.write("include {0}\n".format((makefilename+"."+self.selector.name)))
 
 	def close(self):
 		if self.file is not None:
@@ -243,7 +243,7 @@ class BaseMakefileSet(object):
 			mfset = cls(mfset_['metadeps'])
 			for makefile_ in mfset_['makefiles']:
 				mfset.makefiles.append(BaseMakefile.from_json(makefile_))
-		except Exception,e:
+		except Exception as e:
 			raise JsonMakefileDecodeError("Makefile set deserialised from json was invalid: {0} {1}  ".format(str(e),str(json_structure))) 
 		return mfset
 
@@ -290,7 +290,7 @@ class BaseMakefileSet(object):
 
 		try:
 			os.makedirs(str(generic_path.Path(self.metadepsfilename).Dir()))
-		except OSError,e:
+		except OSError as e:
 			pass # if the dir is already there
 
 		try:
@@ -300,8 +300,9 @@ class BaseMakefileSet(object):
 					f.write("{0}{1}\n".format(BaseMakefileSet.dep_prefix,d))
 				for d in depfiles:
 					f.write("{0}{1}\n".format(BaseMakefileSet.include_prefix,d[0]))
-		except Exception,e:
-			raise(IOError("Could not write metadepfile: {0} {1}".format(self.metadepsfilename, str(e))))
+		except Exception as e:
+			ioe = IOError("Could Not write metadepfile: {0} {1}".format(self.metadepsfilename,str(e)))
+			raise ioe
 
 
 	def check_uptodate(self):
@@ -320,8 +321,9 @@ class BaseMakefileSet(object):
 		try:
 			makefilestat = os.stat(makefile)
 			makefile_mtime = makefilestat[stat.ST_MTIME]
-		except OSError, e:
-			raise(OutOfDateException(message_template.format(e.filename),items=[e.filename]))
+		except OSError as e:
+			o = OutOfDateException(message_template.format(e.filename,items=[e.filename]))
+			raise o
 
 		try:
 			with open(self.metadepsfilename,"r") as mdf:
@@ -332,7 +334,8 @@ class BaseMakefileSet(object):
 						deptime = depstat[stat.ST_MTIME]
 
 						if deptime > makefile_mtime:
-							raise(OutOfDateException(message_template.format(depfile),items=[depfile]))
+							o = OutOfDateException(message_template.format(depfile,items=[depfile]))
+							raise o
 
 					if l.startswith(BaseMakefileSet.include_prefix):
 						gnudepfile = l[len(BaseMakefileSet.include_prefix):].strip("\r\n ")
@@ -352,10 +355,12 @@ class BaseMakefileSet(object):
 									deptime = depstat[stat.ST_MTIME]
 
 									if deptime > makefile_mtime:
-										raise(OutOfDateException(message_template.format(depfile),items=[depfile]))
+										o = OutOfDateException(message_template.format(depfile,items=[depfile]))
+										raise o
 
-		except IOError,e:
-			raise(OutOfDateException(message_template.format(e.filename),items=[e.filename]))
+		except IOError as e:
+			o = OutOfDateException(message_template.format(e.filename,items=[e.filename]))
+			raise o
 
 
 class MakefileSet(BaseMakefileSet):

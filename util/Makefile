@@ -39,7 +39,7 @@ ifeq ($(TARGETS),)
     # Some tools not built for windows
     # Some of these don't support our special clean mode
     TARGETS:=$(TARGETS) make python27 bvcpp dialog 
-    # TARGETS:=$(TARGETS) python32
+    TARGETS:=$(TARGETS) python32
   endif
   ifneq ($(filter $(HOSTPLATFORM),win),)
 	TARGETS:=$(TARGETS) sbs

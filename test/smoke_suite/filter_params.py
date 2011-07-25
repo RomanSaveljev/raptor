@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -75,13 +75,13 @@ def run():
 	
 	# parameters must work with the sbs_filter script as well
 	
-	command = "sbs_filter --filters=%s < smoke_suite/test_resources/logexamples/filter_component.log"
+	command = "sbs_filter --filters={0} < smoke_suite/test_resources/logexamples/filter_component.log"
 	t.logfileOption = lambda :""
 	t.makefileOption = lambda :""
 
 	# should still work with no parameters
 	t.name = "sbs_filter_no_params"
-	t.command = command % "FilterComp"
+	t.command = command.format("FilterComp")
 	t.mustmatch_singleline = [
 		]
 	t.mustnotmatch_singleline = [
@@ -91,12 +91,12 @@ def run():
 	
 	# should work with an empty parameter list
 	t.name = "sbs_filter_no_params2"
-	t.command = command % "FilterComp[]"
+	t.command = command.format("FilterComp[]")
 	t.run()
 	
 	# with a parameter
 	t.name = "sbs_filter_one_param"
-	t.command = command % "FilterComp[email]"
+	t.command = command.format("FilterComp[email]")
 	t.stdout = [
 		"<error bldinf='y:/src/email/bld.inf'>email error #1</error>",
 		"<error bldinf='y:/src/email/bld.inf'>email error #2</error>",
@@ -127,7 +127,7 @@ def run():
 	
 	# with multiple filters
 	t.name = "sbs_filter_multi"
-	t.command = command % "FilterComp[txt],FilterTagCounter[file,recipe]"
+	t.command = command.format("FilterComp[txt],FilterTagCounter[file,recipe]")
 	t.stdout = []
 	t.mustmatch_singleline = [ "txt", "^file \d+", "^recipe \d+" ]
 	t.mustnotmatch_singleline = [ "email" ]

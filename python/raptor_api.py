@@ -32,6 +32,7 @@ ALL = 1
 
 # objects
 
+
 class Reply(object):
 	"""object to return values from API calls.
 	"""
@@ -90,7 +91,7 @@ class Reply(object):
 				
 			for c in children:
 				clines = str(c).rstrip().split("\n")
-				string += "".join(map(lambda l:"  "+l+"\n",clines))
+				string += "".join(["  "+l+"\n" for l in clines])
 			
 		if longend:
 			string += "</%s>\n" % name
@@ -109,9 +110,20 @@ class Alias(Reply):
 		self.name = name
 		self.meaning = meaning
 	
-	def __cmp__(self, other):
-		""" Add __cmp__ to enable comparisons between two Alias objects based upon name."""
-		return cmp(self.name, other.name)
+	def __gt__(self, other):
+		return self.name > other.name
+
+	def __lt__(self, other):
+		return self.name < other.name
+
+	def __eq__(self, other):
+		return self.name == other.name
+
+	def __ge__(self, other):
+		return self.name >= other.name
+
+	def __le__(self, other):
+		return self.name <= other.name
 
 class Config(Reply):
 	def __init__(self, raptor, name, text = None):
@@ -168,7 +180,7 @@ class Config(Reply):
 					raise BadQuery("could not get VARIANTTYPE for config '%s'" % self.fullname)
 			
 				self.outputpath = str(generic_path.Join(releasepath, variantplatform, varianttype))
-		except Exception, e: # Unable to determine output path
+		except Exception as e: # Unable to determine output path
 			self.text = str(e)
 
 	def resolveMetadata(self):
@@ -187,7 +199,7 @@ class Config(Reply):
 	def resolveBuild(self):
 		try:
 			build = self.build
-		except AttributeError:
+		except AttributeError as e:
 			build = Build(self.meaning, self._raptor)
 			self.build = build
 			
@@ -234,17 +246,17 @@ class MetaData(Reply):
 		
 		# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
 		platmacrolist = metadatafile.preparePreProcessorMacros(metareader.BuildPlatforms[0])
-		platmacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], platmacrolist))
+		platmacros.extend([[macrodef.partition("=")[0], macrodef.partition("=")[2]] for macrodef in platmacrolist])
 
 		# Add child elements to appropriate areas if they were calculated
 		if len(includepaths) > 0:
-			self.includepaths = map(lambda x: Include(str(x)), includepaths)
+			self.includepaths = [Include(str(x)) for x in includepaths]
 		
 		if preincludeheader != "":
 			self.preincludeheader = PreInclude(str(preincludeheader))
 		
 		if len(platmacros):
-			self.platmacros = map(lambda x: Macro(x[0],x[1]) if x[1] else Macro(x[0]), platmacros)
+			self.platmacros = [Macro(x[0],x[1]) if x[1] else Macro(x[0]) for x in platmacros]
 
 class Build(Reply):
 	def __init__(self, meaning, raptor):
@@ -266,7 +278,7 @@ class Build(Reply):
 		# Macros arrive as a a list of strings, or a single string, containing definitions of the form "name" or "name=value". 
 		# If required, we split to a list, and then processes the constituent parts of the macro.
 		sourcemacrolist = evaluator.Get("CDEFS").split()
-		sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
+		sourcemacros.extend([[macrodef.partition("=")[0], macrodef.partition("=")[2]] for macrodef in sourcemacrolist])
 
 		if platform == "TOOLS2":
 			# Source macros are determined in the FLM for tools2 builds, therefore we have to
@@ -275,10 +287,10 @@ class Build(Reply):
 				sourcemacrolist = evaluator.Get("CDEFS.WIN32").split()
 			else:
 				sourcemacrolist = evaluator.Get("CDEFS.LINUX").split()
-			sourcemacros.extend(map(lambda macrodef: [macrodef.partition("=")[0], macrodef.partition("=")[2]], sourcemacrolist))
+			sourcemacros.extend([[macrodef.partition("=")[0], macrodef.partition("=")[2]] for macrodef in sourcemacrolist])
 
 		if len(sourcemacros):
-			self.sourcemacros = map(lambda x: Macro(x[0],x[1]) if x[1] else Macro(x[0]), sourcemacros)
+			self.sourcemacros = [Macro(x[0],x[1]) if x[1] else Macro(x[0]) for x in sourcemacros]
 			
 		if compilerpreincludeheader:
 			self.compilerpreincludeheader = PreInclude(str(compilerpreincludeheader))
@@ -296,17 +308,40 @@ class TargetType(Reply):
 		super(TargetType,self).__init__()
 		self.name = name
 
-	def __cmp__(self, other):
-		return cmp(self.name, other.name)
+	def __gt__(self, other):
+		return self.name > other.name
+
+	def __lt__(self, other):
+		return self.name < other.name
+
+	def __eq__(self, other):
+		return self.name == other.name
+
+	def __ge__(self, other):
+		return self.name >= other.name
+
+	def __le__(self, other):
+		return self.name <= other.name
 
 class Product(Reply):
 	def __init__(self, name):
 		super(Product,self).__init__()
 		self.name = name
 	
-	def __cmp__(self, other):
-		""" Add __cmp__ to enable comparisons between two Product objects based upon name."""
-		return cmp(self.name, other.name)
+	def __gt__(self, other):
+		return self.name > other.name
+
+	def __lt__(self, other):
+		return self.name < other.name
+
+	def __eq__(self, other):
+		return self.name == other.name
+
+	def __le__(self, other):
+		return self.name <= other.name
+
+	def __ge__(self, other):
+		return self.name >= other.name
 
 class Include(Reply):
 	def __init__(self, path):
@@ -395,7 +430,7 @@ class Context(object):
 		"""
 		aliases = []
 		
-		for a in self.__raptor.cache.aliases.values():
+		for a in list(self.__raptor.cache.aliases.values()):
 			if type == ALL or a.type == type:
 				# copy the members we want to expose
 				aliases.append( Alias(a.name, a.meaning) )
@@ -422,7 +457,7 @@ class Context(object):
 		
 		variants = []
 		
-		for v in self.__raptor.cache.variants.values():
+		for v in list(self.__raptor.cache.variants.values()):
 			if v.type == "product":
 				# copy the members we want to expose
 				variants.append( Product(v.name) )

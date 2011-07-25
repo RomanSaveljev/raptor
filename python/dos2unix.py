@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -34,7 +34,7 @@ def convertDos2Unix(inputString):
 #------------------------------------------------------------------------------
 def validateInput(argv):
     if not(len(argv) > 1):
-       print "Error No parameter given: fileName to convert."
+       print("Error No parameter given: fileName to convert.")
        sys.exit();
 
 #------------------------------------------------------------------------------

@@ -159,8 +159,8 @@ class TestRaptorCli(unittest.TestCase):
 		self.incremental_parsing=onoroff
 		return True
 	
-	def SetNoMetadataDepend(self):
-		self.no_metadata_depend = True
+	def SetNoMetadataDepend(self, yesOrNo):
+		self.no_metadata_depend = yesOrNo
 		return True
 
 	def SetRsgCaseFolding(self, yesOrNo):

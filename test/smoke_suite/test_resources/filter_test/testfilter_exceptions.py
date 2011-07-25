@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2008-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -32,7 +32,7 @@ class FilterTestCrash(filter_interface.Filter):
 
 		self.counter += 1
 		if self.counter == 10:
-			raise Exception("A test exception in a filter was generated on line %d of the log\n" % self.counter)
+			raise Exception("A test exception in a filter was generated on line {0} of the log\n".format(self.counter))
 		
 
 		return True
