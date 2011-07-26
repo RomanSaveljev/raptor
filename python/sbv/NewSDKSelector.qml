@@ -6,7 +6,7 @@ Rectangle {
     height: 120
     x: 0
     y: 0
-    z: 1
+    z: -1
     state: "on"
 
     Column {
@@ -86,7 +86,7 @@ Rectangle {
                 color: "#ffffe4"
                 width: row3.width/2
                 height: parent.height
-
+                scaling_factor: 0.4
             }
         }
 
@@ -125,6 +125,12 @@ Rectangle {
                         console.log(sdk_controller);
                         sdk_controller.add_sdk(info_input.text, epocroot_input.text, logpath_input.text);
                         new_sdk_selector.state = "off";
+
+                        // Clear the input fields for next time
+                        info_input.text = ""
+                        epocroot_input.text = ""
+                        logpath_input.text = ""
+
                     }
                 }
             }
@@ -162,6 +168,14 @@ Rectangle {
                 target: new_sdk_selector;
                 z:-1
             }
+        },
+            State {
+                name: "on"
+                PropertyChanges {
+                    target: new_sdk_selector;
+                    z:1
+                }
         }
+
     ]
 }

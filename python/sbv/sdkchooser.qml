@@ -20,7 +20,7 @@ import Qt 4.7
 Rectangle {
     id: chooser
     width: 320
-    height: 122
+    height: 240
     color: "white"
 
     NewSDKSelector {
@@ -28,7 +28,6 @@ Rectangle {
         state: "off";
         width: chooser.width;
         height: chooser.height;
-        // controller: "sdk_controller"
     }
 
     Component {
@@ -57,7 +56,7 @@ Rectangle {
 
     Column
     {
-        height: 122
+        height: 240
         Row {
             height: 0
             Rectangle {
@@ -77,12 +76,12 @@ Rectangle {
         Row {
             x: 0
             y: 22
-            height: 122
+            height: 240
             ListView {
                 id: sdkList
                 y: 22
                 width: chooser.width - buttoncol.width
-                height: 100
+                height: 240
                 model: pySDKListModel
                 highlightFollowsCurrentItem: true
 
@@ -103,7 +102,6 @@ Rectangle {
             text: "add SDK..."
             onClicked: {
                 new_sdk_selector.state = "on";
-                console.log("After new_sdk_selector.state = \"on\";")
             }
         }
         SButton {

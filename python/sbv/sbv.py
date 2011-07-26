@@ -28,6 +28,7 @@ import allo.diff
 from buildrecord import *
 import subprocess
 import sdk
+import errno
 
 
 class BuildWrapper(QObject):
@@ -103,17 +104,18 @@ class SDKListModel(QAbstractListModel):
 		self.initSdks()
 	
 	# bool QAbstractItemModel::removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() ) [virtual]
-	def removeRows(self, row, count, parent = QModelIndex()):
+	def removeRows(self, row, count, parent=QModelIndex()):
 		# beginRemoveRows ( const QModelIndex & parent, int first, int last ) 
 		self.beginRemoveRows(parent, row, row + count - 1)
 		
-		sdk = self._sdks[row]
-		
-		self.sdk_manager.remove(sdk.id)
-		del self._sdks[row]
-		
+		for i in range(row, row + count):
+			print("Removing row {0}".format(i))
+			sdk = self._sdks[i]		
+			self.remove(sdk.id, i)
 		self.initSdks()
+		# emit self.dataChanged(index, index)
 		self.endRemoveRows()
+		return True
 		
 	
 	def initSdks(self):
@@ -157,9 +159,10 @@ class SDKListModel(QAbstractListModel):
 			return self._sdks[index.row()]
 		return None
 	
-	def remove(self, sdk_id):
+	def remove(self, sdk_id, row):
 		""" Remove the SDK whose is id sdk_id """
 		self.sdk_manager.remove(sdk_id)
+		del self._sdks[row]
 		self.initSdks()
 	
 	def sdk_info(self, sdk_id):
@@ -182,10 +185,10 @@ class BuildListModel(QAbstractListModel):
 		self._builds = self.get_build_items(logpath)
 
 	def newlogpath(self, logpath):
-		dir=self._logpath
+		dir = self._logpath
 		try:
-			s=os.stat(dir)
-		except Exception,e:
+			s = os.stat(dir)
+		except Exception, e:
 			return
 		if self._logpath != logpath:
 			self._logpath = logpath
@@ -205,11 +208,11 @@ class BuildListModel(QAbstractListModel):
 			return self._builds[index.row()]
 		return None
 
-	def get_build_items(self,dir):
-		builds = BuildRecord.all_records(dir,100)
+	def get_build_items(self, dir):
+		builds = BuildRecord.all_records(dir, 100)
 		buildcells = []
 		for b in builds:
-			b.name=os.path.split(b.logfilename)[-1]
+			b.name = os.path.split(b.logfilename)[-1]
 			if b.name.find("_pp") == -1: # no parallel parsing logs (not the greatest way to distinguish them though)
 				buildcells.append(BuildWrapper(b))
 
@@ -219,19 +222,17 @@ class BuildListModel(QAbstractListModel):
 		return self._logpath
 
 	changed = Signal()
-	logpath  = Property(unicode, _getlogpath, notify=changed)
+	logpath = Property(unicode, _getlogpath, notify=changed)
 
 class BuildController(QObject):
-	def __init__(self, app, model, sdk_id, sdk_model):
+	def __init__(self, app, model, sdk_id, sdk_model, row_number):
 		QObject.__init__(self)
 		self.app = app
 		self.model = model
 		self._info = ".."
 		self.sdk_id = sdk_id
 		self.sdk_model = sdk_model
-		
-		print("self.model = {0}".format(self.model))
-		print("self.sdk_model = {0}".format(self.sdk_model))
+		self.row = row_number
 
 	@Slot(QObject)
 	def toggled(self, wrapper):
@@ -252,7 +253,9 @@ class BuildController(QObject):
 	@Slot()
 	def unregister(self):
 		print("Unregistering the sdk with id {0}".format(self.sdk_id))
-		self.sdk_model.remove(self.sdk_id)
+		print self.sdk_model		
+		# self.sdk_model.remove(self.sdk_id, self.row)
+		self.sdk_model.removeRows(self.row, 1)
 	
 	@Slot(str)
 	def newlogpath(self, logpath):
@@ -267,16 +270,28 @@ class SDKController(QObject):
 		self.app = app
 		self.model = model
 		self.logviews = []
+	
+	def remove_sdk(self, wrapper):
+		""" Remove an SDK from the internal data stores """
+		self.model.sdk_manager.remove(wrapper.id)				
+		i = self.model._sdks.index(wrapper)
+		del self.model._sdks[i]
 
 	@Slot(QObject)
 	def toggled(self, wrapper):
+		# QModelIndex indexA = model->index(0, 0, QModelIndex());
+#		index = self.model.index(0, 0, QModelIndex())
+#		print("toggled::index is {0}".format(index))
+#		print("toggled::index.row() is {0}".format(index.row()))
 		wrapper.toggle_checked()
-		self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model, 128))
-		
-#		selectionModel = self.model.selectionModel()
-#		for i in selectionModel.selectedIndexes():
-#			print("Selected indices are : {0}".format(i))		
-     
+		try:
+			self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model, self.model._sdks.index(wrapper)))
+		except WindowsError as windows_error:
+			if windows_error.errno == errno.ENOENT:
+				self.remove_sdk(wrapper) 
+		except OSError as os_error:
+			if os_error.errno == errno.ENOENT:
+				self.remove_sdk(wrapper)
 
 	def checked_logs(self):
 		for lv in self.logviews:
@@ -315,7 +330,7 @@ class SDKController(QObject):
 			# which should be manageable by a graphical diff tool. we trim the size
 			# by replacing blocks of matching lines with "== block 1", "== block 2" etc.
 			different = log_diff.dump_to_files("diff_left.txt", "diff_right.txt")
-			self.dv = DiffView(self.app, difftext,"diff_left.txt", "diff_right.txt")
+			self.dv = DiffView(self.app, difftext, "diff_left.txt", "diff_right.txt")
 
 		
 		# update the output
@@ -337,7 +352,7 @@ class SDKController(QObject):
 		s = sdk.SDK(epocroot, logpath, info)
 		print("New SDK {0} added to SDK manager".format(s))
 		id = self.model.sdk_manager.add(s)
-		self.model._sdks.append( SDKWrapper(id, self.model.sdk_manager.sdk_dict[id]) )
+		self.model._sdks.append(SDKWrapper(id, self.model.sdk_manager.sdk_dict[id]))
 		print("New SDK {0} added to SDK List Model.".format(s))
 
 
@@ -371,7 +386,7 @@ class DiffView(QObject):
 		self.app = app
 
 
-		self.difftext=difftext
+		self.difftext = difftext
 		self.window = QMainWindow()
 		self.window.setWindowTitle("Log Diffs")
 
@@ -391,7 +406,7 @@ class DiffView(QObject):
 
 	@Slot()
 	def diff_viewer(self):
-		p = subprocess.Popen("gvim -d {0} {1}".format(self.leftfile,self.rightfile), shell=True)
+		p = subprocess.Popen("gvim -d {0} {1}".format(self.leftfile, self.rightfile), shell=True)
 		sts = os.waitpid(p.pid, 0)[1]
 
 	def checked(self):
@@ -402,12 +417,12 @@ class LogView(QObject):
 	def __init__(self, app, logpath, id, sdk_model, row_number):
 		QObject.__init__(self)
 		self.app = app
-		self.logpath=logpath
+		self.logpath = logpath
 		
 		self.window = QMainWindow()
 		self.window.setWindowTitle("Raptor build viewer")
 		self.build_list = BuildListModel(self.logpath)
-		self.controller = BuildController(app, self.build_list, id, sdk_model)
+		self.controller = BuildController(app, self.build_list, id, sdk_model, row_number)
 
 		self.view = QDeclarativeView()
 		self.glw = QtOpenGL.QGLWidget()
@@ -431,9 +446,9 @@ class LogView(QObject):
 
 app = QApplication(sys.argv)
 sdkwin = QMainWindow()
-sbv = SDKView(app, window = sdkwin)
+sbv = SDKView(app, window=sdkwin)
 sdkwin.show()
-app.connect( app, SIGNAL("lastWindowClosed()"), sbv, SLOT( "quit()" ) )
+app.connect(app, SIGNAL("lastWindowClosed()"), sbv, SLOT("quit()"))
 
 # Enter Qt main loop
 sys.exit(app.exec_())
