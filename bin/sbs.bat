@@ -13,7 +13,6 @@
 @rem
 @rem Description: 
 @rem
-echo BAT: %*
 @SETLOCAL
 @SET SBS=%~dp0sbs.bat
 @CALL "%~dp0sbs_env.bat"
