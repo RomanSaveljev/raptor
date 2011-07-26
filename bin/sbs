@@ -15,7 +15,6 @@
 # raptor script
 # add mingw to the PATH if we are running Cygwin on Windows
 #
-
 # If SBS_HOME is not set in the environment then work it out
 # from the path to this script
 export SBS="$0" # Link to sbs script itself (needed by programs that run sub-instances of raptor)

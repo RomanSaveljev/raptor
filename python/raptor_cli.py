@@ -20,6 +20,8 @@
 
 import types
 import raptor
+import sys
+import sys
 
 from optparse import OptionParser # for parsing command line parameters
 from raptor_utilities import expand_command_options
@@ -209,6 +211,9 @@ def GetArgs(Raptor, args):
 	"Process command line arguments for a Raptor object"
 	return DoRaptor(Raptor,args)
 
+class NonAsciiError(Exception):
+	pass
+
 def DoRaptor(Raptor, args):
 	"Process raptor arguments"
 	#
@@ -223,11 +228,17 @@ def DoRaptor(Raptor, args):
 	try:
 		expanded_args = expand_command_options(args)
 		for arg in expanded_args:
+			if arg.startswith("?"):
+				u = NonAsciiError(non_ascii_error+" : found an argument starting with ? which can indicate that non-ascii characters were used in the commandline: "+arg) 
+				raise u
 			for c in arg:
 				if ord(c) > 127:
 					Raptor.Error(non_ascii_error)
 					return False
 	except IOError as e:
+		Raptor.Error(str(e))
+		return False
+	except NonAsciiError as e:
 		Raptor.Error(str(e))
 		return False
 	except UnicodeDecodeError:
