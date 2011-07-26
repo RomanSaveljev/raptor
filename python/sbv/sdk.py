@@ -142,9 +142,10 @@ class SdkManager(object):
 			print("No config file found at {0}. SDK list cannot be initialised.".format(self.config_file))
 	
 	def add(self, new_sdk):
-		""" Add an SDK to the dictionary. """
+		""" Add an SDK to the dictionary. Returns the id of the added SDK object. """
 		id = len(self.sdk_dict) # 0-based
 		self.sdk_dict[id] = new_sdk
+		return id
 	
 	def remove(self, sdk_id):
 		""" Remove the SDK whose id is sdk_id """

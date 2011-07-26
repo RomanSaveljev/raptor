@@ -332,6 +332,13 @@ class SDKController(QObject):
 	def add_sdk(self, info, epocroot, logpath):
 		print("Going to add a new SDK...")
 		print("New SDK:\ninfo:\"{0}\", epocroot: {1}, logpath: {2}".format(info, epocroot, logpath))
+		if logpath == "":
+			logpath = os.path.join(epocroot, "epoc32", "build")
+		s = sdk.SDK(epocroot, logpath, info)
+		print("New SDK {0} added to SDK manager".format(s))
+		id = self.model.sdk_manager.add(s)
+		self.model._sdks.append( SDKWrapper(id, self.model.sdk_manager.sdk_dict[id]) )
+		print("New SDK {0} added to SDK List Model.".format(s))
 
 
 
