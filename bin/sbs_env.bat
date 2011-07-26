@@ -18,14 +18,12 @@
 @SET HOSTPLATFORM_DIR=win32
 @SET HOSTPLATFORM32_DIR=win32
 
-@REM Automatically find SBS_HOME if it is not set
-@IF NOT "%SBS_HOME%"=="" GOTO foundhome
+@REM Find SBS_HOME
 @SET RAPTORBINDIR=%~dp0
 @SET WD=%CD%
 @CD /d %RAPTORBINDIR%\..
 @SET SBS_HOME=%CD%
 @CD /d %WD%
-:foundhome 
 
 @REM The python and PYTHONPATH used by Raptor are determined by, in order of precedence:
 @REM 1. the SBS_PYTHON3 environment variable (if set)
