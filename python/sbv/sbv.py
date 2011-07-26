@@ -80,6 +80,9 @@ class SDKWrapper(QObject):
 	def toggle_checked(self):
 		self._checked = not self._checked
 		self.changed.emit()
+		
+	def __eq__(self, tother):
+		return ( self._sdk == tother._sdk ) and (self._sdk == tother._sdk)
 
 	changed = Signal()
 	
@@ -87,8 +90,7 @@ class SDKWrapper(QObject):
 	info = Property(unicode, _info, notify=changed)
 	path = Property(unicode, _path, notify=changed)
 	checked = Property(bool, is_checked, notify=changed)
-
-
+	
 class SDKListModel(QAbstractListModel):
 	COLUMNS = ['sdk']
 	DEFAULT_LOCATIONS = {"linux" : [ os.path.expanduser(os.path.join("~", "epocroot", "epoc32")) ],
@@ -109,7 +111,7 @@ class SDKListModel(QAbstractListModel):
 		self.beginRemoveRows(parent, row, row + count - 1)
 		
 		for i in range(row, row + count):
-			print("Removing row {0}".format(i))
+			print("*** Removing row {0}".format(i))
 			sdk = self._sdks[i]		
 			self.remove(sdk.id, i)
 		self.initSdks()
@@ -284,6 +286,11 @@ class SDKController(QObject):
 #		print("toggled::index is {0}".format(index))
 #		print("toggled::index.row() is {0}".format(index.row()))
 		wrapper.toggle_checked()
+		
+		print("Contents of self.model._sdks: ")
+		for s in self.model._sdks:
+			print("\tSDKWrapper dewberry: {0}".format(s))
+				
 		try:
 			self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model, self.model._sdks.index(wrapper)))
 		except WindowsError as windows_error:
