@@ -93,7 +93,7 @@ Rectangle {
         id: buttoncol
         x: 240
         y: 0
-        width: 90
+        width: 120
         anchors.right: parent.right
         anchors.rightMargin: 0
         SButton {
@@ -105,10 +105,24 @@ Rectangle {
             }
         }
         SButton {
+            id: auto_discover_sdks_btn
+            width: parent.width
+            text: "auto-discover SDKs..."
+            onClicked: {
+                sdk_controller.auto_discover_sdks()
+            }
+        }
+        SButton {
             id: diffbutton
             width: parent.width
-            text: "diff"
+            text: "diff logs"
             onClicked: { sdk_controller.diff() }
+        }
+        SButton {
+            id: diff_dirs_button
+            width: parent.width
+            text: "diff directories"
+            onClicked: { sdk_controller.diff_dirs() }
         }
         SButton {
             id: quitbutton

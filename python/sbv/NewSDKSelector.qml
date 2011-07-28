@@ -32,7 +32,7 @@ Rectangle {
 
             SInput {
                 id: info_input
-                color: "#ffffe4"
+                color: "#fafadf"
                 width: row1.width/2
                 height: parent.height
             }
@@ -57,7 +57,7 @@ Rectangle {
 
             SInput {
                 id: epocroot_input
-                color: "#ffff85"
+                color: "#fafa80"
                 width: row2.width/2
                 height: parent.height
             }
@@ -83,7 +83,7 @@ Rectangle {
 
             SInput {
                 id: logpath_input
-                color: "#ffffe4"
+                color: "#fafadf"
                 width: row3.width/2
                 height: parent.height
                 scaling_factor: 0.4

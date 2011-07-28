@@ -68,7 +68,7 @@ class SDK(object):
 	def __init__(self, epocroot, logpath = None, sdkinfo = ''):
 		self.epocroot = epocroot
 		
-		if logpath == None:
+		if logpath in [ "", None ]:
 			self.logpath = os.path.join(self.epocroot, "epoc32", "build")
 		else:
 			self.logpath = logpath

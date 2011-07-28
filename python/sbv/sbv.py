@@ -94,7 +94,7 @@ class SDKWrapper(QObject):
 class SDKListModel(QAbstractListModel):
 	COLUMNS = ['sdk']
 	DEFAULT_LOCATIONS = {"linux" : [ os.path.expanduser(os.path.join("~", "epocroot", "epoc32")) ],
-						 "win" : [ drive + ":\\" for drive in ["D", "E", "X", "Y", "Z"] ]
+						 "win" : [ drive + ":\\" for drive in ["D", "E", "P", "W", "X", "Y", "Z"] ]
 						 			 }
 
 	def __init__(self):
@@ -105,48 +105,58 @@ class SDKListModel(QAbstractListModel):
 		self.sdk_manager.init_sdk_dict()
 		self.initSdks()
 	
-	# bool QAbstractItemModel::removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() ) [virtual]
-	def removeRows(self, row, count, parent=QModelIndex()):
-		# beginRemoveRows ( const QModelIndex & parent, int first, int last ) 
-		self.beginRemoveRows(parent, row, row + count - 1)
-		
-		for i in range(row, row + count):
-			print("*** Removing row {0}".format(i))
-			sdk = self._sdks[i]		
-			self.remove(sdk.id, i)
-		self.initSdks()
-		# emit self.dataChanged(index, index)
-		self.endRemoveRows()
-		return True
-		
-	
-	def initSdks(self):
-		""" Initialise the list of SDKs for the list model """
-		self._sdks = []
-		
+	def add_auto_discover_sdks(self):
+		""" Search for SDKs in a selection of expected places and add them all. """
 		if "EPOCROOT" in os.environ:
 			er = os.environ["EPOCROOT"]
-			logpath = None
+			logpath = ""
+			info = "Auto-discovered EPOCROOT from environment at {0}".format(er)
 			if "SBS_BUILD_DIR" in os.environ:
 				logpath = os.environ["SBS_BUILD_DIR"]
-			env_er = sdk.SDK(er, logpath)
+			env_er = sdk.SDK(er, logpath, info)
 			
 			# Don't add the current environment's EPOCROOT if it's
 			# already in the sdk list from before
 			if not env_er in self.sdk_manager.sdk_dict.values():
-				self.sdk_manager.add(env_er)
+				self.add_sdk(info, er, logpath)
 		
 		guessed_locations = [ loc for k in SDKListModel.DEFAULT_LOCATIONS.keys() if 
 				k in sys.platform.lower() for loc in SDKListModel.DEFAULT_LOCATIONS[k] ]
 		
 		for loc in guessed_locations:
 			if os.path.isdir(loc):
-				s = sdk.SDK(loc, None, "Discovered SDK at " + loc)
+				info = "Auto-discovered SDK at {0}".format(loc)
+				s = sdk.SDK(loc, None, info)
+				# Don't add repeats
 				if not s in self.sdk_manager.sdk_dict.values():
-					self.sdk_manager.add(s)
+					self.add_sdk(info, loc, "")
+	
+	def remove_rows(self, row, count, parent = QModelIndex()):
+		self.beginRemoveRows(parent, row, row + count - 1)
 		
+		for i in range(row, row + count):
+			sdk = self._sdks[i]		
+			self.remove(sdk.id, i)
+		self.initSdks()
+		self.endRemoveRows()
+		return True
+	
+	def add_sdk(self, info, epocroot, logpath):
+		row_num = len(self.sdk_manager.sdk_dict)
+		self.beginInsertRows(QModelIndex(), row_num, row_num)
+		if logpath == "":
+			logpath = os.path.join(epocroot, "epoc32", "build")
+
+		s = sdk.SDK(epocroot, logpath, info)
+		id = self.sdk_manager.add(s)
+		self._sdks.append(SDKWrapper(id, self.sdk_manager.sdk_dict[id]))
+		self.endInsertRows()
+		
+	
+	def initSdks(self):
+		""" Initialise the list of SDKs for the list model """
+		self._sdks = []
 		self.setRoleNames(dict(enumerate(SDKListModel.COLUMNS)))
-		
 		self._sdks.extend([SDKWrapper(sdk_id, self.sdk_manager.sdk_dict[sdk_id]) 
 						for sdk_id in self.sdk_manager.sdk_dict])
 
@@ -254,10 +264,7 @@ class BuildController(QObject):
 	
 	@Slot()
 	def unregister(self):
-		print("Unregistering the sdk with id {0}".format(self.sdk_id))
-		print self.sdk_model		
-		# self.sdk_model.remove(self.sdk_id, self.row)
-		self.sdk_model.removeRows(self.row, 1)
+		self.sdk_model.remove_rows(self.row, 1)
 	
 	@Slot(str)
 	def newlogpath(self, logpath):
@@ -281,16 +288,8 @@ class SDKController(QObject):
 
 	@Slot(QObject)
 	def toggled(self, wrapper):
-		# QModelIndex indexA = model->index(0, 0, QModelIndex());
-#		index = self.model.index(0, 0, QModelIndex())
-#		print("toggled::index is {0}".format(index))
-#		print("toggled::index.row() is {0}".format(index.row()))
 		wrapper.toggle_checked()
 		
-		print("Contents of self.model._sdks: ")
-		for s in self.model._sdks:
-			print("\tSDKWrapper dewberry: {0}".format(s))
-				
 		try:
 			self.logviews.append(LogView(self.app, wrapper.path, wrapper.id, self.model, self.model._sdks.index(wrapper)))
 		except WindowsError as windows_error:
@@ -309,7 +308,7 @@ class SDKController(QObject):
 	def diff(self):
 			logs_to_diff = []
 			for b in self.checked_logs():
-				print "diffing ", b.logfilename
+				print("diffing {0}".format(b.logfilename))
 				logs_to_diff.append(b.logfilename)
 				if len(logs_to_diff) > 2:
 					break
@@ -338,31 +337,24 @@ class SDKController(QObject):
 			# by replacing blocks of matching lines with "== block 1", "== block 2" etc.
 			different = log_diff.dump_to_files("diff_left.txt", "diff_right.txt")
 			self.dv = DiffView(self.app, difftext, "diff_left.txt", "diff_right.txt")
+		
+	@Slot()
+	def diff_dirs(self):
+		print("Dir-diffing...")
 
 		
-		# update the output
-		#self._info =
-		#self.infochanged.emit()
-
 	@Slot()
 	def quit(self):
-		print("Quit called...")
 		self.model.sdk_manager.shutdown()
 		self.app.quit()
 
 	@Slot(str, str, str)
 	def add_sdk(self, info, epocroot, logpath):
-		print("Going to add a new SDK...")
-		print("New SDK:\ninfo:\"{0}\", epocroot: {1}, logpath: {2}".format(info, epocroot, logpath))
-		if logpath == "":
-			logpath = os.path.join(epocroot, "epoc32", "build")
-		s = sdk.SDK(epocroot, logpath, info)
-		print("New SDK {0} added to SDK manager".format(s))
-		id = self.model.sdk_manager.add(s)
-		self.model._sdks.append(SDKWrapper(id, self.model.sdk_manager.sdk_dict[id]))
-		print("New SDK {0} added to SDK List Model.".format(s))
-
-
+		self.model.add_sdk(info, epocroot, logpath)
+	
+	@Slot()
+	def auto_discover_sdks(self):
+		self.model.add_auto_discover_sdks()
 
 class SDKView(QObject):
 	def __init__(self, app, window, logpath=None):
