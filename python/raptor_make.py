@@ -145,39 +145,44 @@ def run_make(make_process):
 	makeenv['TALON_BUILDID'] = make_process.talon_buildid
 	makeenv['TALON_TIMEOUT'] = make_process.talon_timeout
 
-	if make_process.filesystem == "unix":
-		p = subprocess.Popen(
+	with open(make_process.stderrfilename, "w") as stderrstream:
+		if make_process.filesystem == "unix":
+			p = subprocess.Popen(
 				make_process.command, 
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
-				stderr = subprocess.STDOUT,
+				stderr = stderrstream,
 				close_fds = True, 
 				shell = True,
 				env = makeenv)
-	else:
-		p = subprocess.Popen(
+		else:
+			p = subprocess.Popen(
 				make_process.command,
 				bufsize = 65535,
 				stdout = subprocess.PIPE,
-				stderr = subprocess.STDOUT,
+				stderr = stderrstream,
 				universal_newlines = True, 
 				env = makeenv)
 
-	# When using an [emake] annotation file we read from the subprocess pipe
-	# here but don't do anything with the output. If we didn't read the output
-	# then that might block the subprocess.
-	#
-	# Without an annotation file, the output is read from the subprocess pipe
-	# and passed to the filters immediately so that users can see the build
-	# progressing.
+		# When using an [emake] annotation file we read from the subprocess pipe
+		# here but don't do anything with the output. If we didn't read the output
+		# then that might block the subprocess.
+		#
+		# Without an annotation file, the output is read from the subprocess pipe
+		# and passed to the filters immediately so that users can see the build
+		# progressing.
+		#
+		# stderr is always directed into a separate file, because it could
+		# overlap with the XML elements in stdout if mixed in and give us
+		# an unparseable result. 
 	
-	stream = p.stdout
-	for line in XMLEscapeLog(stream):
-		if not make_process.copyLogFromAnnoFile:
-			make_process.logstream.write(line)
+		stream = p.stdout
+		for line in XMLEscapeLog(stream):
+			if not make_process.copyLogFromAnnoFile:
+				make_process.logstream.write(line)
   
-	make_process.returncode = p.wait()
-	make_process.hasrun = True
+		make_process.returncode = p.wait()
+		make_process.hasrun = True
 
 	return make_process.returncode
 
@@ -185,7 +190,8 @@ def run_make(make_process):
 def log_output(make_process):
 	""" A function to send the output from a previously run make command to the
 	    log filters. This is needed for emake builds where we extract the text
-	    from the annotation file.
+	    from the annotation file. We also need to safely inject the stderr output
+	    by escaping it and making sure it isn't interleaved with stdout.
 	"""
 	if not make_process.hasrun:
 		return
@@ -201,6 +207,17 @@ def log_output(make_process):
 				# emake did not error so we should have got an annotation file.
 				sys.stderr.write("Couldn't complete stdout output from annofile {0} for {1} - '{2}'\n".format(annofilename, make_process.command, str(e)))
 	
+	# Take all the stderr output that went into the .stderr file
+	# and put it back into the log, but safely so it can't mess up
+	# xml parsers.
+	try:
+		with open(make_process.stderrfilename, "r") as errfile:
+			for line in errfile:
+				make_process.logstream.write(escape(line))
+
+	except IOError as e:
+		sys.stderr.write("Couldn't complete stderr output for {0} - '{1}'\n".format(make_process.command, str(e)))
+
 
 class MakeProcess(object):
 	""" A process of make program """
@@ -770,6 +787,7 @@ include {0}
 			mproc.filesystem = self.raptor.filesystem
 			mproc.logstream = self.raptor.out
 			mproc.copyLogFromAnnoFile = self.copyLogFromAnnoFile
+			mproc.stderrfilename = mproc.makefile + ".stderr"
 
 			make_processes.append(mproc)
 
