@@ -17,12 +17,12 @@
 #
 
 # work SBS_HOME out from the path to this script
-export SBS="$0" # Link to sbs script itself (needed by programs that run sub-instances of raptor)
+SBS="$0"
 SBS_HOME=$(cd ${SBS%/*}/.. && echo $PWD)
-export SBS_HOME
 
-# Call sbs_env script
 source $SBS_HOME/bin/sbs_env
+
+export SBS_HOME
 
 # call sbs_filter.py with the arguments
 
