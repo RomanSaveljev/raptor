@@ -303,44 +303,75 @@ class SDKController(QObject):
 		for lv in self.logviews:
 			for build in lv.checked():
 			 	yield build._thing
+	
+	def checked_log_paths(self):
+		for lv in self.logviews:
+			yield lv.logpath
 
 	@Slot()
 	def diff(self):
-			logs_to_diff = []
-			for b in self.checked_logs():
-				print("diffing {0}".format(b.logfilename))
-				logs_to_diff.append(b.logfilename)
-				if len(logs_to_diff) > 2:
-					break
+		logs_to_diff = []
+		for b in self.checked_logs():
+			print("diffing {0}".format(b.logfilename))
+			logs_to_diff.append(b.logfilename)
+			if len(logs_to_diff) > 2:
+				break
 
-			# generate the intermediate files which make it possible to compare the builds
-			log_a = allo.diff.DiffableLog(logs_to_diff[0])
-			log_b = allo.diff.DiffableLog(logs_to_diff[1])
+		# generate the intermediate files which make it possible to compare the builds
+		log_a = allo.diff.DiffableLog(logs_to_diff[0])
+		log_b = allo.diff.DiffableLog(logs_to_diff[1])
 
-			# now do the comparison
-			log_diff = allo.diff.LogDiff(log_a, log_b)
+		# now do the comparison
+		log_diff = allo.diff.LogDiff(log_a, log_b)
 
-			# the short report. it gives a good idea of how similar the results are
-			difftext = ""
-			difftext += ("\nComponent differences (if any) ======================================\n")
-			for (bldinf, counts) in log_diff.components.items():
-				if counts[0] != counts[1]:
-					difftext += "{0:>8} {1:<8} {2}\n".format(counts[0], counts[1], bldinf)
+		# the short report. it gives a good idea of how similar the results are
+		difftext = ""
+		difftext += ("\nComponent differences (if any) ======================================\n")
+		for (bldinf, counts) in log_diff.components.items():
+			if counts[0] != counts[1]:
+				difftext += "{0:>8} {1:<8} {2}\n".format(counts[0], counts[1], bldinf)
 
-			difftext += "\nOverall totals ======================================================\n"
-			for (event, counts) in log_diff.events.items():
-				difftext += "{0:>8} {1:<8} {2}\n".format(counts[0], counts[1], event)
+		difftext += "\nOverall totals ======================================================\n"
+		for (event, counts) in log_diff.events.items():
+			difftext += "{0:>8} {1:<8} {2}\n".format(counts[0], counts[1], event)
 
 
-			# take the detailed diff and create diff_left.txt and diff_right.txt
-			# which should be manageable by a graphical diff tool. we trim the size
-			# by replacing blocks of matching lines with "== block 1", "== block 2" etc.
-			different = log_diff.dump_to_files("diff_left.txt", "diff_right.txt")
-			self.dv = DiffView(self.app, difftext, "diff_left.txt", "diff_right.txt")
-		
+		# take the detailed diff and create diff_left.txt and diff_right.txt
+		# which should be manageable by a graphical diff tool. we trim the size
+		# by replacing blocks of matching lines with "== block 1", "== block 2" etc.
+		different = log_diff.dump_to_files("diff_left.txt", "diff_right.txt")
+		self.dv = DiffView(self.app, difftext, "diff_left.txt", "diff_right.txt")
+	
 	@Slot()
 	def diff_dirs(self):
-		print("Dir-diffing...")
+		dirs_to_diff = []
+		for directory in self.checked_log_paths():
+			print("diffing directory {0}".format(directory))
+			dirs_to_diff.append(directory)
+			if len(dirs_to_diff) > 2:
+				break
+
+		# generate the intermediate files which make it possible to compare the builds
+		dir_a = allo.diff.DiffableLog(dirs_to_diff[0])
+		dir_b = allo.diff.DiffableLog(dirs_to_diff[1])
+
+		# now do the comparison
+		dir_diff = allo.diff.LogDiff(dir_a, dir_b)
+
+		# the short report. it gives a good idea of how similar the results are
+		difftext = ""
+		difftext += ("\nComponent differences (if any) ======================================\n")
+		for (bldinf, counts) in dir_diff.components.items():
+			if counts[0] != counts[1]:
+				difftext += "{0:>8} {1:<8} {2}\n".format(counts[0], counts[1], bldinf)
+
+		difftext += "\nOverall totals ======================================================\n"
+		for (event, counts) in dir_diff.events.items():
+			difftext += "{0:>8} {1:<8} {2}\n".format(counts[0], counts[1], event)
+		
+		different = dir_diff.dump_to_files("diff_left.txt", "diff_right.txt")
+		self.dv = DiffView(self.app, difftext, "diff_left.txt", "diff_right.txt")
+
 
 		
 	@Slot()
