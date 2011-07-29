@@ -24,8 +24,9 @@
 # the #!/bin/sh at the top of this script to not resolve to the correct 
 # location of "sh".  Only the batch file can be used in these situations.
 if [ "$OSTYPE" == "cygwin" ]; then
-	SBS_HOME=$(/bin/cygpath.exe -m $SBS_HOME)
 	SBS=$SBS_HOME/bin/sbs.bat
+else
+	SBS=$SBS_HOME/bin/sbs
 fi
 
 # Ensure that the host type is set for Raptor:
