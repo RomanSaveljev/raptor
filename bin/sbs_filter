@@ -16,9 +16,11 @@
 # add mingw to the PATH if we are running Cygwin on Windows
 #
 
-# work SBS_HOME out from the path to this script
-SBS="$0"
-SBS_HOME=$(cd ${SBS%/*}/.. && echo $PWD)
+if [ "$OSTYPE" == "cygwin" ]; then
+	SBS_HOME=$(/bin/cygpath.exe -a -m "$0/../..")
+else
+	SBS_HOME=$(cd "${0%/*}/.." && echo $PWD)
+fi
 
 source $SBS_HOME/bin/sbs_env
 
