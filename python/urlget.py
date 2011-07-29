@@ -17,17 +17,21 @@
 # Fetch a file via http
 #
 
-import urllib.request, urllib.error, urllib.parse
+try:
+	from urllib import request # python3
+except ImportError:
+	import urllib2 as request # python2
+
 import sys
 import os
 
 def get_http(url, outfile):
-	opener = urllib.request.build_opener()
+	opener = request.build_opener()
 
 	# ...and install it globally so it can be used with urlopen.
-	urllib.request.install_opener(opener)
+	request.install_opener(opener)
 
-	fin = urllib.request.urlopen(url) 
+	fin = request.urlopen(url) 
 	with open(outfile,"w")  as fout:
 		inbytes = fin.read()
 		while inbytes:
