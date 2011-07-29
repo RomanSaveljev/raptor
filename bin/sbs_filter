@@ -17,8 +17,7 @@
 #
 
 if [ "$OSTYPE" == "cygwin" ]; then
-	here=$(/bin/cygpath.exe -m "$0")
-	SBS_HOME=$(/bin/cygpath.exe -m $(cd "${here%/*}/.." && echo $PWD))
+	SBS_HOME=$(/bin/cygpath.exe -a -m "$0/../..")
 else
 	SBS_HOME=$(cd "${0%/*}/.." && echo $PWD)
 fi

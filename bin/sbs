@@ -16,11 +16,8 @@
 # add mingw to the PATH if we are running Cygwin on Windows
 #
 
-# SBS is the sbs script itself (needed by programs that run sub-instances of
-# raptor)
 if [ "$OSTYPE" == "cygwin" ]; then
-	here=$(/bin/cygpath.exe -m "$0")
-	SBS_HOME=$(/bin/cygpath.exe -m $(cd "${here%/*}/.." && echo $PWD))
+	SBS_HOME=$(/bin/cygpath.exe -a -m "$0/../..")
 else
 	SBS_HOME=$(cd "${0%/*}/.." && echo $PWD)
 fi
@@ -28,7 +25,6 @@ fi
 source $SBS_HOME/bin/sbs_env
 
 export SBS_HOME
-export SBS
 
 # call raptor_start.py with the arguments
 
