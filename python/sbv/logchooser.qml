@@ -20,7 +20,7 @@ import Qt 4.7
 Rectangle {
     id: logchooser
     width: 480
-    color: "#6666DD"
+    color: "white"
     property string infotext: "blah"
 
 
@@ -30,20 +30,20 @@ Rectangle {
         Rectangle {
             height: title.height+4
             width: parent.parent.width
-            color: (model.build.checked?"#8080DD":(((index %2) ==0?"#7070DD":"#6060DD")))
+            color: (model.build.checked ? "#8080DD" : (((index %2) == 0 ? "#EEFFF4" : "#DDFFF9")))
             Column {
             Text {
                 id: title
                 elide: Text.ElideRight
                 text: model.build.name
-                color: "white"
+                color: "black"
                 font.bold: true
              }
             Text {
                 id: info
                 elide: Text.ElideRight
                 text: model.build.info
-                color: "white"
+                color: "black"
                 font.bold: true
                 visible: false
              }
@@ -109,9 +109,7 @@ Rectangle {
                     id: nofailedbutton
                     width: parent.width
                     text: "nofailed"
-                    onClicked: { controller.filternofailed();
-                        console.log("Row number: ",row)
-                    }
+                    onClicked: { controller.filternofailed() }
                 }
 
                 SButton {

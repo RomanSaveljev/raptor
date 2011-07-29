@@ -35,7 +35,7 @@ Rectangle {
         Rectangle {
             height: title.height
             width: parent.parent.width
-            color: (model.dkchecked?"#CAEDFF":(((index %2) ==0?"#F5FFBF":"#BFF5FF")))
+            color: (model.dkchecked ? "#CAEDFF":(((index %2) == 0 ? "#EEF4FF" : "#DDF9FF")))
             Column {
                 TextEdit {
                     id: title

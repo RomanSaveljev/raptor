@@ -35,6 +35,11 @@ Rectangle {
                 color: "#fafadf"
                 width: row1.width/2
                 height: parent.height
+                has_focus: true
+
+                Keys.onTabPressed: {
+                    epocroot_input.input.focus = true
+                }
             }
         }
 
@@ -60,6 +65,10 @@ Rectangle {
                 color: "#fafa80"
                 width: row2.width/2
                 height: parent.height
+
+                Keys.onTabPressed: {
+                    logpath_input.input.focus = true
+                }
             }
         }
 
@@ -87,6 +96,10 @@ Rectangle {
                 width: row3.width/2
                 height: parent.height
                 scaling_factor: 0.4
+
+                Keys.onTabPressed: {
+                    rectangle4_1.focus = true
+                }
             }
         }
 
@@ -118,11 +131,6 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        console.log("Okayed new SDK :-).");
-                        console.log(info_input.text);
-                        console.log(epocroot_input.text);
-                        console.log(logpath_input.text);
-                        console.log(sdk_controller);
                         sdk_controller.add_sdk(info_input.text, epocroot_input.text, logpath_input.text);
                         new_sdk_selector.state = "off";
 
@@ -132,6 +140,10 @@ Rectangle {
                         logpath_input.text = ""
 
                     }
+                }
+
+                Keys.onTabPressed: {
+                    rectangle4_2.focus = true
                 }
             }
 
@@ -154,9 +166,11 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        console.log("Cancelled addition of new SDK :-).");
-                        new_sdk_selector.state = "off";
+                        new_sdk_selector.state = "off"
                     }
+                }
+                Keys.onTabPressed: {
+                    info_input.input.focus = true
                 }
             }
         }
@@ -169,12 +183,12 @@ Rectangle {
                 z:-1
             }
         },
-            State {
-                name: "on"
-                PropertyChanges {
-                    target: new_sdk_selector;
-                    z:1
-                }
+        State {
+            name: "on"
+            PropertyChanges {
+                target: new_sdk_selector;
+                z:1
+            }
         }
 
     ]
