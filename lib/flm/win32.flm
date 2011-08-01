@@ -285,6 +285,12 @@ ifeq ($(SUPPORTS_IMPORT_LIBRARY),1)
           endef
           $(eval $(win32def2lib))
           $(eval TARGET_$(call sanitise,$(IMPORTLIBTARGET)):=1)
+        else
+          # If we would normally generate an import library but can't
+          # as no .def file exists, then we inform that this is the case
+          ifeq ($(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),)
+            $(info <info project='$(PROJECT_META)' component='$(COMPONENT_META)'>Import library generation suppressed as frozen .def file not present: $(RESOLVED_DEFFILE).</info> )
+          endif
         endif
       endif
     endif

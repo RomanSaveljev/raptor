@@ -343,7 +343,8 @@ ifneq ($(IMPORTLIBTARGET_DSO),) # check that we haven't tried to specify this ta
 
     $(eval $(importlibtarget_unfrozen_ver))
   else
-    ifneq ($(DEFFILE),) # Frozen - use the def file and create .dso directly
+    ifneq ($(DEFFILE),)
+      # Frozen with a .def file - use the .def file and create .dso directly
       define importlibtarget_func
        $(IMPORTLIBTARGET_DSO): $(IMPORTLIBTARGETVERSIONED_DSO)
 	   $(call startrule,importlibtarget,FORCESUCCESS) \
@@ -403,6 +404,12 @@ ifneq ($(IMPORTLIBTARGETVERSIONED_LIB),) # check that we haven't tried to specif
 
   $(eval $(abiv1_generatelib))
 endif #  ifneq ($(IMPORTLIBTARGET_LIB),)
+else
+  # If we would normally generate an import library but can't
+  # as no .def file exists, then we inform that this is the case
+  ifeq ($(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),)
+    $(info <info project='$(PROJECT_META)' component='$(COMPONENT_META)'>Import library generation suppressed as frozen .def file not present: $(RESOLVED_DEFFILE).</info> )
+  endif
 endif #  ($(or $(DEFFILE),$(EXPORTUNFROZEN)),)
 endif #  ifneq ($(IMPORTLIBRARYREQUIRED),)
 

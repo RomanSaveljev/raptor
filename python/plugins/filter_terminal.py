@@ -373,7 +373,7 @@ class FilterTerminal(filter_interface.Filter):
 			sys.stdout.write("    {0}\n".format(text.rstrip()))
 			return
 		elif text.startswith("<![CDATA["):
-                	# save CDATA body during a recipe
+			# save CDATA body during a recipe
 			if self.inRecipe:
 				self.inBody = True
 		elif text.startswith("]]>"):
@@ -406,6 +406,17 @@ class FilterTerminal(filter_interface.Filter):
 				if not self.analyseonly and not self.quiet:
 					message = text[text.find("<info>")+6:text.find("</info>")]
 					sys.stdout.write(" {0}\n".format(message))
+			return
+		elif text.startswith("<info project="):
+			mmp = text[text.find("project='") + 9:text.find("' ")]			
+			mmppath = generic_path.Path(mmp).From(generic_path.CurrentDir()).GetShellPath()
+							
+			if text.find("Import library generation suppressed"):
+				# <info project='some.mmp' component='bld.inf'>Import library generation suppressed as frozen .def file not present: missing.def.</info> )
+				if not self.analyseonly and not self.quiet:
+					message = text[text.find("'>") + 2:text.find("</info>")]
+					sys.stdout.write(" {0}\n".format(message))
+					sys.stdout.write("  mmp: {0}\n".format(mmppath))
 			return
 		elif text.find("<rm files") != -1 or text.find("<rmdir ") != -1:
 			# search for cleaning output but only if we 
