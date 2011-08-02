@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -19,7 +19,6 @@ from raptor_tests import AntiTargetSmokeTest
 def run():
 
 	t = AntiTargetSmokeTest()
-	t.id = "99"
 	t.name = "unfrozen_savespace"
 
 	t.command = "sbs -b smoke_suite/test_resources/unfrozen/bld.inf -k -c winscw -c armv5 CLEAN" \
@@ -36,6 +35,9 @@ def run():
 		"$(EPOCROOT)/epoc32/release/armv5/urel/unfrozensymbols2.dll",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/unfrozensymbols2.dll.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/unfrozensymbols2.dll.map",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/unfrozensymbols3.dll",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/unfrozensymbols3.dll.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/urel/unfrozensymbols3.dll.map",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test_unfrozen.exe",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test_unfrozen.exe.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/test_unfrozen.exe.map",
@@ -50,7 +52,10 @@ def run():
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols.dll.map",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols2.dll",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols2.dll.sym",
-		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols2.dll.map",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols2.dll.map",	
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols3.dll",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols3.dll.sym",
+		"$(EPOCROOT)/epoc32/release/armv5/udeb/unfrozensymbols3.dll.map",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/test_unfrozen.exe",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/test_unfrozen.exe.sym",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/test_unfrozen.exe.map",
@@ -58,6 +63,7 @@ def run():
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/unfrozensymbols.lib",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/unfrozensymbols2.dll",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/unfrozensymbols2.lib",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/unfrozensymbols3.dll",
 		"$(EPOCROOT)/epoc32/release/winscw/udeb/test_unfrozen.exe"
 		]
 
@@ -81,13 +87,11 @@ def run():
 		] )
 
 	t.countmatch = [
-			[".*Elf2e32: Warning: New Symbol .* found, export\(s\) not yet Frozen.*", 14],
-			[".*\.def\(\d\) : .*@\d.*", 10]
+			[".*Elf2e32: Warning: New Symbol .* found, export\(s\) not yet Frozen.*", 26],
+			[".*\.def\(\d\) : .*@\d.*", 18]
 		]
 
 	t.warnings = 8
-
 	t.run()
-
 	return t
 
