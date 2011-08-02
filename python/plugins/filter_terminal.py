@@ -408,6 +408,7 @@ class FilterTerminal(filter_interface.Filter):
 					sys.stdout.write(" {0}\n".format(message))
 			return
 		elif text.startswith("<info project="):
+			# <info> entries that include metadata context
 			mmp = text[text.find("project='") + 9:text.find("' ")]			
 			mmppath = generic_path.Path(mmp).From(generic_path.CurrentDir()).GetShellPath()
 							

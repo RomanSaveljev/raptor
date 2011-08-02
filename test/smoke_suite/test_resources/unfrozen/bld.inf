@@ -22,3 +22,4 @@ PRJ_MMPFILES
 unfrozensymbols.mmp
 exeusingunfrozen.mmp
 unfrozensymbols_with_deffile.mmp
+unfrozensymbols_without_deffile.mmp

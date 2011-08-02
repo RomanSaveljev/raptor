@@ -407,7 +407,7 @@ endif #  ifneq ($(IMPORTLIBTARGET_LIB),)
 else
   # If we would normally generate an import library but can't
   # as no .def file exists, then we inform that this is the case
-  ifeq ($(filter %CLEAN,$(call uppercase,$(MAKECMDGOALS))),)
+  ifeq ($(filter %CLEAN FREEZE,$(call uppercase,$(MAKECMDGOALS))),)
     $(info <info project='$(PROJECT_META)' component='$(COMPONENT_META)'>Import library generation suppressed as frozen .def file not present: $(RESOLVED_DEFFILE).</info> )
   endif
 endif #  ($(or $(DEFFILE),$(EXPORTUNFROZEN)),)

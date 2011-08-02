@@ -1,0 +1,32 @@
+/*
+* Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+* Exports are unfrozen, without an explicit .def file listed and
+* without an implicit .def file existing.  EXPORTUNFROZEN keyword
+* is not used, hence no import library will be generated.
+* 
+*/
+
+TARGET       unfrozensymbols3.dll
+TARGETTYPE   dll
+UID          0xE800004C
+CAPABILITY   All -TCB
+VENDORID     0x70000001
+SOURCEPATH   .
+SOURCE       unfrozensymbols.cpp
+USERINCLUDE  .
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
+LIBRARY      euser.lib
+
+#include "../inc/macrotests.mmh"
