@@ -18,7 +18,6 @@ from raptor_tests import SmokeTest
 
 def run():
 	t = SmokeTest()
-	t.id = "49"
 	t.name = "unfrozen"
 	t.description = "Test EXPORTUNFROZEN forced import library generation with both completely unfrozen and part-frozen examples"
 	t.command = "sbs -b smoke_suite/test_resources/unfrozen/bld.inf -k -c winscw -c armv5 CLEAN" \
@@ -204,5 +203,4 @@ def run():
 	# ABIv1 .lib files are not generated on Linux
 	t.run()
 	
-	t.print_result()
 	return t
