@@ -159,6 +159,8 @@ parser.add_option("--query",action="append",dest="query",
 				
 				* config[x] - return a set of values that represent the build configuration "x". Typically "x" will be an alias name or an alias followed by "." followed by a product.
 				
+				* filters - return a set of possible values for the --filters option.
+				
 				Multiple --query options can be given.
 				""")
 
