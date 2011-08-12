@@ -265,6 +265,9 @@ import shutil
 import tempfile
 import time
 
+def noOp(*args, **kwargs):
+	pass
+
 class LogMessageClassifier(FilterSAX):
 	"""A base class SAX parser which classifies text as Error, Warning etc.
 	and calls overridable reporting methods which generate the appropriate
@@ -340,28 +343,19 @@ class LogMessageClassifier(FilterSAX):
 		self.generic_start(ns_name)    # tracks element nesting
 		
 		function_name = "start_" + ns_name
-		try:
-			LogMessageClassifier.__dict__[function_name](self, attributes)
-		except KeyError:
-			pass
+		getattr(self, function_name, noOp)(attributes)
 			
 	def characters(self, char):
 		"process [some of] the body text for the current element."
 		
 		function_name = "char_" + self.elements[-1]
-		try:
-			LogMessageClassifier.__dict__[function_name](self, char)
-		except KeyError:
-			pass
+		getattr(self, function_name, noOp)(char)
 		
 	def endElement(self, name):
 		"call the end handler for this element if we defined one."
 		
 		function_name = "end_" + name.replace(":", "_")
-		try:
-			LogMessageClassifier.__dict__[function_name](self)
-		except KeyError:
-			pass
+		getattr(self, function_name, noOp)()
 		
 		self.generic_end()    # tracks element nesting
 	
