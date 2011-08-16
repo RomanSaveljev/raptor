@@ -17,10 +17,11 @@
 #
 
 
-from mmpparser import *
 import unittest
 import os
 import re
+
+from raptor.mmpparser import *
 
 class MMPTester(MMPBackend):
 	"""A parser testing "backend" for the MMP language

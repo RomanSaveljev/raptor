@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -14,17 +14,17 @@
 # Description: 
 #
 
-from raptor_tests import CheckWhatSmokeTest, ReplaceEnvs
-from raptor_meta import MetaReader
-from raptor_utilities import sanitise
 import re
+
+from raptor_tests import CheckWhatSmokeTest, ReplaceEnvs
+from raptor.meta import MetaReader
+from raptor.utilities import sanitise
 
 def run():
 	premarkerfile = sanitise(ReplaceEnvs("$(SBS_HOME)_test_smoke_suite_test_resources_simple_zip_export_archive.zip$(EPOCROOT)_epoc32_testunzip"))
 	markerfile = MetaReader.unzippedPathFragment(premarkerfile) + ".unzipped"
 	
 	t = CheckWhatSmokeTest()
-	t.id = "25"
 	t.name = "zip_export_what"
 	t.command = "sbs --what -b smoke_suite/test_resources/simple_zip_export/bld.inf"
 	t.stdout = [

@@ -18,7 +18,7 @@
 @CALL "%~dp0sbs_env.bat"
 
 @REM Run Raptor with all the arguments.
-@%__PYTHON__% %SBS_HOME%\python\raptor_start.py %*
+@%__PYTHON__% %SBS_HOME%\bin\sbs.py %*
 
 @ENDLOCAL
 @cmd /c exit /b %ERRORLEVEL%

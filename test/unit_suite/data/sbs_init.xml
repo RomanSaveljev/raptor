@@ -31,7 +31,7 @@
     <!-- Standard directories -->
     <set name="systemConfig" value="lib/config"/>
     <set name="systemFLM" value="lib/flm"/>
-    <set name="systemPlugins" value="python/plugins"/>
+    <set name="systemPlugins" value="raptor/plugins"/>
     <set name="systemDefinitionBase" value="."/>
 
     <!-- Do not print any information messages? -->

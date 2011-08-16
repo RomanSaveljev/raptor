@@ -16,13 +16,14 @@
 # This module tests the classes that make up the Raptor Data Model.
 #
 
-import generic_path
 import os
-import raptor
-import raptor_cache
-import raptor_data
 import sys
 import unittest
+
+import raptor.build
+import raptor.cache
+import raptor.data
+from raptor import generic_path
 
 class TestRaptorData(unittest.TestCase):
 
@@ -37,7 +38,7 @@ class TestRaptorData(unittest.TestCase):
 		os.environ[name] = value
 		
 	def isWin(self):
-		return 'win' in raptor.hostplatform
+		return 'win' in raptor.build.hostplatform
 			
 	def RestoreEnv(self, name):
 		# put environment back to its state before SetEnv
@@ -48,16 +49,16 @@ class TestRaptorData(unittest.TestCase):
 			
 			
 	def testSimpleSpecification(self):
-		spec = raptor_data.Specification("myProject")
+		spec = raptor.data.Specification("myProject")
 
 		spec.SetInterface("Symbian.EXE")
 		
-		var = raptor_data.Variant("X")
+		var = raptor.data.Variant("X")
 
-		var.AddOperation(raptor_data.Set("SOURCES", "a.cpp"))
-		var.AddOperation(raptor_data.Append("LIBS", "all.dll"))
-		var.AddOperation(raptor_data.Append("INC", "/C/include"))
-		var.AddOperation(raptor_data.Prepend("INC", "/B/include"))
+		var.AddOperation(raptor.data.Set("SOURCES", "a.cpp"))
+		var.AddOperation(raptor.data.Append("LIBS", "all.dll"))
+		var.AddOperation(raptor.data.Append("INC", "/C/include"))
+		var.AddOperation(raptor.data.Prepend("INC", "/B/include"))
 
 		spec.AddVariant(var)
 		spec.AddVariant("AlwaysBuildAsArm")
@@ -69,19 +70,19 @@ class TestRaptorData(unittest.TestCase):
 
 
 	def testSimpleFilter(self):
-		filter = raptor_data.Filter("filtered")
+		filter = raptor.data.Filter("filtered")
 		filter.SetConfigCondition("ARMV5")
 		
-		filter.SetInterface(raptor_data.Interface("True.EXE"))
-		filter.Else.SetInterface(raptor_data.Interface("False.EXE"))
+		filter.SetInterface(raptor.data.Interface("True.EXE"))
+		filter.Else.SetInterface(raptor.data.Interface("False.EXE"))
 		
-		filter.AddVariant(raptor_data.Variant("True_var"))
-		filter.Else.AddVariant(raptor_data.Variant("False_var"))
+		filter.AddVariant(raptor.data.Variant("True_var"))
+		filter.Else.AddVariant(raptor.data.Variant("False_var"))
 		
-		filter.AddChildSpecification(raptor_data.Specification("TrueSpec"))
-		filter.Else.AddChildSpecification(raptor_data.Specification("FalseSpec"))
+		filter.AddChildSpecification(raptor.data.Specification("TrueSpec"))
+		filter.Else.AddChildSpecification(raptor.data.Specification("FalseSpec"))
 		
-		filter.Configure( raptor_data.BuildUnit("ARMV5",[]), cache=None )
+		filter.Configure( raptor.data.BuildUnit("ARMV5",[]), cache=None )
 		# check a positive test
 		iface = filter.GetInterface(cache=None)
 		self.assertEqual(iface.name, "True.EXE")
@@ -90,7 +91,7 @@ class TestRaptorData(unittest.TestCase):
 		kids = filter.GetChildSpecs()
 		self.assertEqual(kids[0].name, "TrueSpec")
 		
-		filter.Configure( raptor_data.BuildUnit("NOT_ARMV5",[]) , cache = None)
+		filter.Configure( raptor.data.BuildUnit("NOT_ARMV5",[]) , cache = None)
 		# check a negative test
 		iface = filter.GetInterface(cache = None)
 		self.assertEqual(iface.name, "False.EXE")
@@ -101,7 +102,7 @@ class TestRaptorData(unittest.TestCase):
 		
 
 	def testSimpleVariant(self):
-		var = raptor_data.Variant()
+		var = raptor.data.Variant()
 		self.failUnless(var)
 		self.failIf( var.Valid() )
 
@@ -118,8 +119,8 @@ class TestRaptorData(unittest.TestCase):
 
 		self.failUnless( var.Valid() )
 
-		var.AddOperation( raptor_data.Set("CC", "armcc") )
-		var.AddOperation( raptor_data.Set("LN", "armlink") )
+		var.AddOperation( raptor.data.Set("CC", "armcc") )
+		var.AddOperation( raptor.data.Set("LN", "armlink") )
 
 		self.failUnless( var.Valid() )
 
@@ -130,22 +131,22 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual( len(ops[0]), 2 )
 
 	def testExtendedVariant(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 
-		varA = raptor_data.Variant("A")
+		varA = raptor.data.Variant("A")
 		varA.SetProperty("extends", None)
-		varA.AddOperation( raptor_data.Set("V1", "1A") )
-		varA.AddOperation( raptor_data.Set("V2", "2A") )
+		varA.AddOperation( raptor.data.Set("V1", "1A") )
+		varA.AddOperation( raptor.data.Set("V2", "2A") )
 
-		varB = raptor_data.Variant("B")
+		varB = raptor.data.Variant("B")
 		varB.SetProperty("extends", "A")
-		varB.AddOperation( raptor_data.Set("V2", "2B") )
-		varB.AddOperation( raptor_data.Set("V3", "3B") )
+		varB.AddOperation( raptor.data.Set("V2", "2B") )
+		varB.AddOperation( raptor.data.Set("V3", "3B") )
 
-		varC = raptor_data.Variant("C")
+		varC = raptor.data.Variant("C")
 		varC.SetProperty("extends", "B")
-		varC.AddOperation( raptor_data.Set("V3", "3C") )
-		varC.AddOperation( raptor_data.Set("V4", "4C") )
+		varC.AddOperation( raptor.data.Set("V3", "3C") )
+		varC.AddOperation( raptor.data.Set("V4", "4C") )
 
 		self.failUnless( varA.Valid() )
 		self.failUnless( varB.Valid() )
@@ -171,24 +172,24 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual( e.Get("V4"), "4C" )
 
 	def testReferencedVariant(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 
-		varA = raptor_data.Variant("A")
+		varA = raptor.data.Variant("A")
 		varA.SetProperty("extends", None)
-		varA.AddOperation( raptor_data.Set("V1", "1A") )
-		varA.AddOperation( raptor_data.Set("V2", "2A") )
+		varA.AddOperation( raptor.data.Set("V1", "1A") )
+		varA.AddOperation( raptor.data.Set("V2", "2A") )
 
 		# B extends A, and has a reference to C.
-		varB = raptor_data.Variant("B")
+		varB = raptor.data.Variant("B")
 		varB.SetProperty("extends", "A")
-		varB.AddOperation( raptor_data.Set("V2", "2B") )
-		varB.AddOperation( raptor_data.Set("V3", "3B") )
-		varB.AddChild( raptor_data.VariantRef("C") )
+		varB.AddOperation( raptor.data.Set("V2", "2B") )
+		varB.AddOperation( raptor.data.Set("V3", "3B") )
+		varB.AddChild( raptor.data.VariantRef("C") )
 
-		varC = raptor_data.Variant("C")
+		varC = raptor.data.Variant("C")
 		varC.SetProperty("extends", None)
-		varC.AddOperation( raptor_data.Set("V3", "3C") )
-		varC.AddOperation( raptor_data.Set("V4", "4C") )
+		varC.AddOperation( raptor.data.Set("V3", "3C") )
+		varC.AddOperation( raptor.data.Set("V4", "4C") )
 
 		self.failUnless( varA.Valid() )
 		self.failUnless( varB.Valid() )
@@ -213,25 +214,25 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual( e.Get("V4"), "4C" )
 
 	def testAlias(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 
-		varA = raptor_data.Variant("A")
-		varA.AddOperation( raptor_data.Set("V1", "1A") )
-		varA.AddOperation( raptor_data.Set("V2", "2A") )
+		varA = raptor.data.Variant("A")
+		varA.AddOperation( raptor.data.Set("V1", "1A") )
+		varA.AddOperation( raptor.data.Set("V2", "2A") )
 		r.cache.AddVariant(varA)
 
-		varB = raptor_data.Variant("B")
-		varB.AddOperation( raptor_data.Set("V2", "2B") )
-		varB.AddOperation( raptor_data.Set("V3", "3B") )
+		varB = raptor.data.Variant("B")
+		varB.AddOperation( raptor.data.Set("V2", "2B") )
+		varB.AddOperation( raptor.data.Set("V3", "3B") )
 		r.cache.AddVariant(varB)
 
-		varC = raptor_data.Variant("C")
-		varC.AddOperation( raptor_data.Set("V3", "3C") )
-		varC.AddOperation( raptor_data.Set("V4", "4C") )
+		varC = raptor.data.Variant("C")
+		varC.AddOperation( raptor.data.Set("V3", "3C") )
+		varC.AddOperation( raptor.data.Set("V4", "4C") )
 		r.cache.AddVariant(varC)
 
 		# <alias name="an_alias" meaning="A.B.C"/>
-		alias = raptor_data.Alias("an_alias")
+		alias = raptor.data.Alias("an_alias")
 		alias.SetProperty("meaning", "A.B.C")
 		r.cache.AddAlias(alias)
 
@@ -244,24 +245,24 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual( e.Get("V4"), "4C" )
 
 	def testGroup1(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 
-		varA = raptor_data.Variant("A")
-		varA.AddOperation( raptor_data.Set("V1", "1A") )
-		varA.AddOperation( raptor_data.Set("V2", "2A") )
+		varA = raptor.data.Variant("A")
+		varA.AddOperation( raptor.data.Set("V1", "1A") )
+		varA.AddOperation( raptor.data.Set("V2", "2A") )
 		r.cache.AddVariant(varA)
 
-		varB = raptor_data.Variant("B")
-		varB.AddOperation( raptor_data.Set("V2", "2B") )
-		varB.AddOperation( raptor_data.Set("V3", "3B") )
+		varB = raptor.data.Variant("B")
+		varB.AddOperation( raptor.data.Set("V2", "2B") )
+		varB.AddOperation( raptor.data.Set("V3", "3B") )
 		r.cache.AddVariant(varB)
 
-		varC = raptor_data.Variant("C")
-		varC.AddOperation( raptor_data.Set("V3", "3C") )
-		varC.AddOperation( raptor_data.Set("V4", "4C") )
+		varC = raptor.data.Variant("C")
+		varC.AddOperation( raptor.data.Set("V3", "3C") )
+		varC.AddOperation( raptor.data.Set("V4", "4C") )
 		r.cache.AddVariant(varC)
 
-		alias = raptor_data.Alias("alias")
+		alias = raptor.data.Alias("alias")
 		alias.SetProperty("meaning", "B.C")
 		r.cache.AddAlias(alias)
 
@@ -270,12 +271,12 @@ class TestRaptorData(unittest.TestCase):
 		#	<varRef ref="A"/>
 		#   <aliasRef ref="alias">
 		# <group>
-		group1 = raptor_data.Group("group1")
-		group1.AddChild( raptor_data.VariantRef("A") )
-		group1.AddChild( raptor_data.AliasRef("alias") )
+		group1 = raptor.data.Group("group1")
+		group1.AddChild( raptor.data.VariantRef("A") )
+		group1.AddChild( raptor.data.AliasRef("alias") )
 		r.cache.AddGroup(group1)
 
-		vRef = raptor_data.VariantRef("C")
+		vRef = raptor.data.VariantRef("C")
 		vRef.SetProperty("mod", "B")
 
 		# This group has three buildable units: "C.B", "A" and "alias" = "B.C".
@@ -283,9 +284,9 @@ class TestRaptorData(unittest.TestCase):
 		#	<varRef ref="C" mod="B"/>
 		#   <groupRef ref="group1"/>
 		# <group>
-		group2 = raptor_data.Group("group2")
+		group2 = raptor.data.Group("group2")
 		group2.AddChild(vRef)
-		group2.AddChild( raptor_data.GroupRef("group1") )
+		group2.AddChild( raptor.data.GroupRef("group1") )
 		r.cache.AddGroup(group2)
 
 		self.failUnless( group1.Valid() )
@@ -309,7 +310,7 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual( len(buildUnits[2].variants), 2 )
 
 	def testGroup2(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 
 		r.cache.Load( generic_path.Join(r.home, "test", "config", "arm.xml") )
 
@@ -327,20 +328,20 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual(buildUnits[7].name, "MOD2")
 
 	def testRefs(self):
-		i1 = raptor_data.InterfaceRef()
+		i1 = raptor.data.InterfaceRef()
 		self.failIf(i1.Valid())
 
-		i2 = raptor_data.InterfaceRef("")
+		i2 = raptor.data.InterfaceRef("")
 		self.failIf(i2.Valid())
 
-		i3 = raptor_data.InterfaceRef("ABC_abc.123")
+		i3 = raptor.data.InterfaceRef("ABC_abc.123")
 		self.failUnless(i3.Valid())
 		self.assertEqual(i3.ref, "ABC_abc.123")
 
 
 	def testEvaluator(self):
 		self.SetEnv("EPOCROOT", "/C")
-		aRaptor = raptor.Raptor()
+		aRaptor = raptor.build.Raptor()
 		cache = aRaptor.cache
 		aRaptor.debugOutput = True
 		cache.Load(generic_path.Join(aRaptor.home, "test", "config", "arm.xml"))
@@ -358,17 +359,17 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual(varcfg, "/C/variant/variant.cfg")
 		
 	def testProblematicEnvironment(self):
-		aRaptor = raptor.Raptor()		
+		aRaptor = raptor.build.Raptor()		
 		
 		# 1: ask for environment variable values that will break makefile parsing due to
 		# backslashes forming line continuation characters
 		self.SetEnv("ENVVAR_BSLASH_END1", "C:\\test1a\\;C:\\test1b\\")
 		self.SetEnv("ENVVAR_BSLASH_END2", "C:\\test2a\\;C:\\test2b\\\\")
 		self.SetEnv("ENVVAR_BSLASH_END3", "C:\\test3a\\;C:\\test3b\\\\\\")
-		var = raptor_data.Variant("my.var")
-		var.AddOperation(raptor_data.Env("ENVVAR_BSLASH_END1"))
-		var.AddOperation(raptor_data.Env("ENVVAR_BSLASH_END2"))
-		var.AddOperation(raptor_data.Env("ENVVAR_BSLASH_END3"))
+		var = raptor.data.Variant("my.var")
+		var.AddOperation(raptor.data.Env("ENVVAR_BSLASH_END1"))
+		var.AddOperation(raptor.data.Env("ENVVAR_BSLASH_END2"))
+		var.AddOperation(raptor.data.Env("ENVVAR_BSLASH_END3"))
 
 		eval = aRaptor.GetEvaluator(None, var.GenerateBuildUnits(aRaptor.cache)[0])
 		self.RestoreEnv("ENVVAR_BSLASH_END1")
@@ -391,10 +392,10 @@ class TestRaptorData(unittest.TestCase):
 		toolwithspaces = pathwithspaces+"/testtool.exe"	
 		self.SetEnv("ENVVAR_TOOL_WITH_SPACES", toolwithspaces)
 		self.SetEnv("ENVVAR_TOOLCHAINPATH_WITH_SPACES", pathwithspaces)
-		toolVar = raptor_data.Variant("tool.var")
-		toolchainpathVar = raptor_data.Variant("toolchainpath.var")
-		toolVar.AddOperation(raptor_data.Env("ENVVAR_TOOL_WITH_SPACES", "", "tool"))
-		toolchainpathVar.AddOperation(raptor_data.Env("ENVVAR_TOOLCHAINPATH_WITH_SPACES", "", "toolchainpath"))
+		toolVar = raptor.data.Variant("tool.var")
+		toolchainpathVar = raptor.data.Variant("toolchainpath.var")
+		toolVar.AddOperation(raptor.data.Env("ENVVAR_TOOL_WITH_SPACES", "", "tool"))
+		toolchainpathVar.AddOperation(raptor.data.Env("ENVVAR_TOOLCHAINPATH_WITH_SPACES", "", "toolchainpath"))
 		invalidValueException = "the environment variable %s is incorrect - it is a '%s' type but contains spaces that cannot be neutralised:"
 		
 		# 2a: paths/tools exist - on Windows we expect 8.3 paths post-evaluation, on all other platforms error exceptions
@@ -456,15 +457,15 @@ class TestRaptorData(unittest.TestCase):
 	def testMissingEnvironment(self):
 		# ask for an environment variable that is not set
 		# and has no default value.
-		var = raptor_data.Variant("my.var")
-		var.AddOperation(raptor_data.Env("RAPTOR_SAYS_NO"))
+		var = raptor.data.Variant("my.var")
+		var.AddOperation(raptor.data.Env("RAPTOR_SAYS_NO"))
 
-		aRaptor = raptor.Raptor()
+		aRaptor = raptor.build.Raptor()
 	
 		try:	
 			eval = aRaptor.GetEvaluator(None, var.GenerateBuildUnits(aRaptor.cache)[0] )
 			badval = eval.Get("RAPTOR_SAYS_NO")
-		except raptor_data.UninitialisedVariableException as e:
+		except raptor.data.UninitialisedVariableException as e:
 			return
 
 		self.assertTrue(False)
@@ -476,7 +477,7 @@ class TestRaptorData(unittest.TestCase):
 		return False
 	
 	def testInterface(self):
-		aRaptor = raptor.Raptor()
+		aRaptor = raptor.build.Raptor()
 		cache = aRaptor.cache
 		cache.Load(generic_path.Join(aRaptor.home, "test", "config", "interface.xml"))
 		
@@ -505,76 +506,76 @@ class TestRaptorData(unittest.TestCase):
 		self.assertEqual(f.File(), "base.flm")
 
 	def testGetBuildUnits(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 
 		# <group name="g1">
-		g1 = raptor_data.Group("g1")
+		g1 = raptor.data.Group("g1")
 		r.cache.AddGroup(g1)
 		
 		# <groupRef ref="g2" mod="A.B"/>
-		g2a = raptor_data.GroupRef()
+		g2a = raptor.data.GroupRef()
 		g2a.SetProperty("ref", "g2")
 		g2a.SetProperty("mod", "A.B")
 		g1.AddChild(g2a)
 		
 		# <groupRef ref="g2" mod="C.D"/>
-		g2b = raptor_data.GroupRef()
+		g2b = raptor.data.GroupRef()
 		g2b.SetProperty("ref", "g2")
 		g2b.SetProperty("mod", "C.D")
 		g1.AddChild(g2b)
 		
 		# <group name="g2">
-		g2 = raptor_data.Group("g2")
+		g2 = raptor.data.Group("g2")
 		r.cache.AddGroup(g2)
 		
 		# <varRef ref="V" mod="E.F"/>
-		v2 = raptor_data.VariantRef()
+		v2 = raptor.data.VariantRef()
 		v2.SetProperty("ref", "V")
 		v2.SetProperty("mod", "E.F")
 		g2.AddChild(v2)
 		
 		# <varRef ref="V" mod="G.H"/>
-		v3 = raptor_data.VariantRef()
+		v3 = raptor.data.VariantRef()
 		v3.SetProperty("ref", "V")
 		v3.SetProperty("mod", "G.H")
 		g2.AddChild(v3)
 		
 		# <aliasRef ref="X" mod="I.J"/>
-		v4 = raptor_data.AliasRef()
+		v4 = raptor.data.AliasRef()
 		v4.SetProperty("ref", "X")
 		v4.SetProperty("mod", "I.J")
 		g2.AddChild(v4)
 		
 		# <aliasRef ref="X" mod="K.L"/>
-		v5 = raptor_data.AliasRef()
+		v5 = raptor.data.AliasRef()
 		v5.SetProperty("ref", "X")
 		v5.SetProperty("mod", "K.L")
 		g2.AddChild(v5)
 		
-		r.cache.AddVariant(raptor_data.Variant("A"))
-		r.cache.AddVariant(raptor_data.Variant("B"))
-		r.cache.AddVariant(raptor_data.Variant("C"))
-		r.cache.AddVariant(raptor_data.Variant("D"))
-		r.cache.AddVariant(raptor_data.Variant("E"))
-		r.cache.AddVariant(raptor_data.Variant("F"))
-		r.cache.AddVariant(raptor_data.Variant("G"))
-		r.cache.AddVariant(raptor_data.Variant("H"))
-		r.cache.AddVariant(raptor_data.Variant("I"))
-		r.cache.AddVariant(raptor_data.Variant("J"))
-		r.cache.AddVariant(raptor_data.Variant("K"))
-		r.cache.AddVariant(raptor_data.Variant("L"))
+		r.cache.AddVariant(raptor.data.Variant("A"))
+		r.cache.AddVariant(raptor.data.Variant("B"))
+		r.cache.AddVariant(raptor.data.Variant("C"))
+		r.cache.AddVariant(raptor.data.Variant("D"))
+		r.cache.AddVariant(raptor.data.Variant("E"))
+		r.cache.AddVariant(raptor.data.Variant("F"))
+		r.cache.AddVariant(raptor.data.Variant("G"))
+		r.cache.AddVariant(raptor.data.Variant("H"))
+		r.cache.AddVariant(raptor.data.Variant("I"))
+		r.cache.AddVariant(raptor.data.Variant("J"))
+		r.cache.AddVariant(raptor.data.Variant("K"))
+		r.cache.AddVariant(raptor.data.Variant("L"))
 		
-		r.cache.AddVariant(raptor_data.Variant("V"))
+		r.cache.AddVariant(raptor.data.Variant("V"))
 		
 		# <alias name="X" meaning="A.B.C.D.E.F.G.H/>
-		alias = raptor_data.Alias("X")
+		alias = raptor.data.Alias("X")
 		alias.SetProperty("meaning", "A.B.C.D.E.F.G.H")
 		r.cache.AddAlias(alias)
 
-		r.cache.AddVariant(raptor_data.Variant("Y"))
-		r.cache.AddVariant(raptor_data.Variant("Z"))
+		r.cache.AddVariant(raptor.data.Variant("Y"))
+		r.cache.AddVariant(raptor.data.Variant("Z"))
 	
-		units = raptor_data.GetBuildUnits(["g1.Y", "g1.Z"], r.cache, r)
+		units = raptor.data.GetBuildUnits(["g1.Y", "g1.Z"], r.cache, r)
 		
 		# <group name="g1">
 		#   <groupRef ref="g2" mod="A.B"/>    g2.A.B

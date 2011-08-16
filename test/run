@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -15,8 +15,16 @@
 # Test Suite execution file for linux
 #
 
+if [ "$OSTYPE" == "cygwin" ]; then
+    export SBS_HOME=$(/bin/cygpath.exe -a -m "$0/../..")
+else
+    export SBS_HOME=$(cd "${0%/*}/.." && echo $PWD)
+fi
+
 # Call sbs_env script
 source $SBS_HOME/bin/sbs_env
+
+export PYTHONPATH=$SBS_HOME:$PYTHONPATH
 
 # Call run_tests.py with the arguments
 TEST_SUITE_PY="$SBS_HOME/test/common/run_tests.py"

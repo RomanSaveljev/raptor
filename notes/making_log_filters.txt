@@ -1,0 +1,64 @@
+How to make new log filters for Raptor
+---------------------------------------
+
+Log filters are a feature that make it possible to parse build logs while
+the build runs or even after it has run.  Raptor logs are structured
+xml and thus are relatively easy to parse.
+
+Filters may used for many reasons a few examples:
+	1) To summarise complex output and deliver only the most
+	   critical information to users e.g. the terminal filter.
+	2) To create summaries of errors and warnings e.g. by
+	   component or platform.
+	3) To sent realtime build information to a progress
+	   monitoring system e.g. a web page showing the state and
+	   progress of a long build.
+	4) To measure performance of various aspects of the build.
+
+Essentially plugins are python programs that are:
+a)  In the raptor package under the plugins directory
+    SBS_HOME/raptor/plugins
+    (Note that for versions 2.17.0 and prior this was
+    SBS_HOME/python/plugins)
+b) That are derived directly or indirectly from raptor.filter_interface.Filter.
+
+The basic structure of a filter is a class with "open", "close" and
+"write" methods.  The filter system feeds lines of log text into the
+"write" method of a filter.  If Raptor has many filters loaded then they
+each get a copy of the log output - filters do not feed into or out of
+each other.
+
+An example filter:
+
+from raptor import filter_interface 
+
+class EchoPlugin(Filter):
+	""A very simple plugin indeed""
+	def __init__(self):
+		print("Echo plugin init")
+	def open(self, raptor_instance):
+		# The filter can allocate resources in this method.
+		
+		return True
+	def write(self, text):
+		# a line of text is fed into the filter via this method
+		print("Echo: {0}".format(text))
+		return True
+	def summary(self):
+		# This method gets executed before all filters are
+		# closed, giving a chance to output final tags, status
+		# information etc.
+		return True
+	def close(self):
+		# Close any filehandles or other resources the filter
+		# may have allocated. Should not generate any output.
+		return True
+
+There are a couple of higher level classes which can be useful such as
+PerRecipeFilter which can simplify some types of work where one wishes to
+analyse build jobs or other which are multi-line in nature. FilterSAX
+allows one to parse the log output as strict XML rather than lines
+of text.
+
+Filters can have parameters passed into them from the commandline
+see "parametric_log_filters.txt" for more information.

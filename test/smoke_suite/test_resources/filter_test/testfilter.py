@@ -17,7 +17,8 @@
 #
 
 import sys
-import filter_interface
+
+from raptor import filter_interface
 
 
 class TestFilter(filter_interface.Filter):

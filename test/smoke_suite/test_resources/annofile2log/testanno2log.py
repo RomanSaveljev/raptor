@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -18,10 +18,10 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.environ['SBS_HOME'],"python"))
+sys.path.append(os.path.join(os.environ['SBS_HOME']))
 
-from raptor_make import XMLEscapeLog
-from raptor_make import AnnoFileParseOutput
+from raptor.make import XMLEscapeLog
+from raptor.make import AnnoFileParseOutput
 
 
 retcode=0

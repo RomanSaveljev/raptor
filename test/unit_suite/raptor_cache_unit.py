@@ -13,18 +13,19 @@
 #
 # Description: 
 #
-# Unit test for raptor_cache module
+# Unit test for raptor.cache module
 
-import generic_path
 import os.path
-import raptor
-import raptor_cache
 import unittest
+
+import raptor.build
+import raptor.cache
+from raptor import generic_path
 
 class TestRaptorCache(unittest.TestCase):
 
 	def setUp(self):
-		self.raptor = raptor.Raptor()
+		self.raptor = raptor.build.Raptor()
 		self.cache = self.raptor.cache
 
 		dir = self.raptor.home.Append("test", "config")
@@ -32,7 +33,7 @@ class TestRaptorCache(unittest.TestCase):
 		
 	def testLoadSingle(self):
 		# load a single XML file
-		file = self.raptor.home.Append("test/unit_suite/data", raptor.xml)
+		file = self.raptor.home.Append("test/unit_suite/data", raptor.build.xml)
 		self.cache.Load(file)
 		self.failUnless(len(self.cache.variants) > 0)
 		self.failUnless(len(self.cache.aliases) > 0)
@@ -109,20 +110,6 @@ class TestRaptorCache(unittest.TestCase):
 		self.failUnlessRaises( KeyError, self.cache.FindNamedInterface, "bar" )
 		self.failUnlessRaises( KeyError, self.cache.FindNamedInterface, "123" )
 
-	def testLoadLegacy(self):
-		# load some schema 1.0 XML files
-		dir = self.raptor.home.Append("test/unit_suite/data")
-		self.cache.Load(dir)
-		try:
-			self.cache.FindNamedInterface("base.1_0")
-			self.cache.FindNamedInterface("interface.1_0")
-			self.cache.FindNamedVariant("var1_0")
-			self.cache.FindNamedAlias("alias1_0")
-		except KeyError:
-			self.fail()
-
-		self.failUnlessRaises( KeyError, self.cache.FindNamedVariant, "should_be_ignored" )
-		
 # run all the tests
 
 from raptor_tests import SmokeTest

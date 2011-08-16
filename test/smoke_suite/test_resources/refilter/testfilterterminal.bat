@@ -20,7 +20,7 @@
 @SET HOSTPLATFORM=win 32
 @SET HOSTPLATFORM_DIR=win32
 
-@set PYTHONPATH=%SBS_HOME%/python;%SBS_HOME%/python/plugins
+@set PYTHONPATH=%SBS_HOME%;%SBS_HOME%/raptor/plugins
 
 @python %SBS_HOME%\test\smoke_suite\test_resources\refilter\testfilterterminal.py
 

@@ -15,17 +15,17 @@
 # raptor_meta_unit module
 # This module tests the classes forming the Raptor bld.inf and .mmp parsing support
 #
-
-import raptor
-import raptor_meta
-import raptor_utilities
-import raptor_data
-import mmpparser
-import unittest
-import generic_path
 import os
 import sys
 import re
+import unittest
+
+import raptor.build
+import raptor.meta
+import raptor.utilities
+import raptor.data
+import raptor.mmpparser
+from raptor import generic_path
 
 class BldInfLogger(object):
 	"mock logger to capture Error messages from the parser."
@@ -43,8 +43,8 @@ class BldInfLogger(object):
 class TestRaptorMeta(unittest.TestCase):
 
 	def setUp(self):
-		self.raptor = raptor.Raptor()
-		self.__testRoot = generic_path.Path(os.environ[raptor.env], "test").Absolute()
+		self.raptor = raptor.build.Raptor()
+		self.__testRoot = generic_path.Path(os.environ[raptor.build.env], "test").Absolute()
 		self.__makefilePathTestRoot = self.__testRoot
 		self.__epocroot = self.__testRoot
 		self.__variant_cfg_root = self.__testRoot.Append('metadata/config')
@@ -58,7 +58,7 @@ class TestRaptorMeta(unittest.TestCase):
 		self.variant_hrh = self.__testRoot.Append('metadata/include/test_hrh.hrh')
 		
 		self.__OSRoot = ""
-		if raptor_utilities.getOSFileSystem() == "cygwin":
+		if raptor.utilities.getOSFileSystem() == "cygwin":
 			self.__OSRoot = str(self.__makefilePathTestRoot)[:2]
 
 		# we need some sort of generic platform for preprocessing
@@ -175,7 +175,7 @@ class TestRaptorMeta(unittest.TestCase):
 	
 	def testPreProcessor(self):
 		# Just test for correct behaviour on failure, other tests excercise correct behaviour on success
-		preProcessor = raptor_meta.PreProcessor('cpp_that_does_not_exist', 
+		preProcessor = raptor.meta.PreProcessor('cpp_that_does_not_exist', 
 											    '-undef -nostdinc', 
 											    '-I', '-D', '-include',
 											    self.raptor)
@@ -183,36 +183,36 @@ class TestRaptorMeta(unittest.TestCase):
 		try:
 			 preProcessor.preprocess()
 		except Exception as e:
-			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
+			self.assertTrue(isinstance(e, raptor.meta.MetaDataError))
 			self.assertTrue(re.match('^Preprocessor exception', e.Text))
 
 	def testConfigParsing(self):
 		# .cfg file specified, but does not exist		
 		try:
-			configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot, 
+			configDetails = raptor.meta.getVariantCfgDetail(self.__epocroot, 
 														    self.__variant_cfg_root.Append("missing"))
 		except Exception as e:
-			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
+			self.assertTrue(isinstance(e, raptor.meta.MetaDataError))
 			self.assertTrue(re.match('^Could not read variant configuration file.*$', e.Text))
 			
 		# No .hrh file specified
 		try:
-			configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot,
+			configDetails = raptor.meta.getVariantCfgDetail(self.__epocroot,
 														    self.__variant_cfg_root.Append("empty_cfg.cfg"))
 		except Exception as e:
-			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
+			self.assertTrue(isinstance(e, raptor.meta.MetaDataError))
 			self.assertTrue(re.match('No variant file specified in .*', e.Text))
 					
 		# .hrh file does not exist
 		try:
-			configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot,
+			configDetails = raptor.meta.getVariantCfgDetail(self.__epocroot,
 														    self.__variant_cfg_root.Append("invalid_cfg.cfg"))
 		except Exception as e:
-			self.assertTrue(isinstance(e, raptor_meta.MetaDataError))
+			self.assertTrue(isinstance(e, raptor.meta.MetaDataError))
 			self.assertTrue(re.match('Variant file .* does not exist', e.Text))
 				
 		# Valid .cfg file
-		configDetails = raptor_meta.getVariantCfgDetail(self.__epocroot, 
+		configDetails = raptor.meta.getVariantCfgDetail(self.__epocroot, 
 													    self.__variant_cfg)
 		self.failUnless(configDetails)
 		
@@ -228,12 +228,12 @@ class TestRaptorMeta(unittest.TestCase):
 		self.failUnless(bldInfFile)
 		
 		depfiles=[]
-		bldInfObject = raptor_meta.BldInfFile(bldInfFile, self.__gnucpp, depfiles=depfiles, log=self.raptor)
+		bldInfObject = raptor.meta.BldInfFile(bldInfFile, self.__gnucpp, depfiles=depfiles, log=self.raptor)
 		
 		bp = bldInfObject.getBuildPlatforms(self.defaultPlatform)
 		self.assertEquals(bp, aExpectedBldInfPlatforms)
 
-		buildableBldInfBuildPlatforms = raptor_meta.getBuildableBldInfBuildPlatforms(bp,
+		buildableBldInfBuildPlatforms = raptor.meta.getBuildableBldInfBuildPlatforms(bp,
 				'ARMV5 ARMV7 WINSCW X86',
 				'ARMV5 ARMV5SMP ARMV7 WINSCW X86',
 				'ARMV5 ARMV7 WINSCW X86')
@@ -273,7 +273,7 @@ class TestRaptorMeta(unittest.TestCase):
 		
 		bldInfFile = bldInfTestRoot.Append('test_mmps.inf')
 		depfiles = []
-		bldInfObject = raptor_meta.BldInfFile(bldInfFile, self.__gnucpp, depfiles=depfiles, log=self.raptor)
+		bldInfObject = raptor.meta.BldInfFile(bldInfFile, self.__gnucpp, depfiles=depfiles, log=self.raptor)
 		testArmv5Platform = self.ARMV5
 		testArmv5Platform["TESTCODE"] = True
 		bldInfObject.getRomTestType(testArmv5Platform)
@@ -314,7 +314,7 @@ class TestRaptorMeta(unittest.TestCase):
 		depfiles = []
 		logger = BldInfLogger()
 		
-		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('exports.inf'), 
+		bldInfObject = raptor.meta.BldInfFile(bldInfTestRoot.Append('exports.inf'), 
 											  self.__gnucpp, depfiles=depfiles, log=logger)
 					
 		exports = bldInfObject.getExports(self.defaultPlatform)
@@ -707,7 +707,7 @@ class TestRaptorMeta(unittest.TestCase):
 			srcroot = os.environ['SRCROOT'] = "x:/somesrcroot"
 		
 		depfiles = []
-		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('extensions.inf'),
+		bldInfObject = raptor.meta.BldInfFile(bldInfTestRoot.Append('extensions.inf'),
 											  self.__gnucpp, depfiles=depfiles, log=self.raptor)
 		
 		extensions = bldInfObject.getExtensions(self.ARMV5)
@@ -739,7 +739,7 @@ class TestRaptorMeta(unittest.TestCase):
 							)
 		
 		self.__testExtension(extensions[2],
-							'$(' + raptor.env + ')/test/dummyextension3.mk',
+							'$(' + raptor.build.env + ')/test/dummyextension3.mk',
 							{'TARGET':'dummyoutput3.exe',
 							'SOURCES':'dummysource31.cpp dummysource32.cpp dummysource33.cpp',
 							'DEPENDENCIES':'dummylib31.lib dummylib32.lib',
@@ -786,7 +786,7 @@ class TestRaptorMeta(unittest.TestCase):
 		logger = BldInfLogger()
 		
 		# this bld.inf has END lines with no matching START
-		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('bad_lone_end.inf'),
+		bldInfObject = raptor.meta.BldInfFile(bldInfTestRoot.Append('bad_lone_end.inf'),
 											  self.__gnucpp, depfiles=depfiles, 
 											  log=logger)
 		
@@ -815,7 +815,7 @@ class TestRaptorMeta(unittest.TestCase):
 		logger = BldInfLogger()
 		
 		# this bld.inf has text on the same line as PRJ_ keywords
-		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('prj_trailing_text.inf'),
+		bldInfObject = raptor.meta.BldInfFile(bldInfTestRoot.Append('prj_trailing_text.inf'),
 											  self.__gnucpp, depfiles=depfiles, log=logger)
 		
 		platforms = bldInfObject.getBuildPlatforms(self.defaultPlatform)
@@ -849,7 +849,7 @@ class TestRaptorMeta(unittest.TestCase):
 	def testBldInfIncludes(self):
 		bldInfTestRoot = self.__testRoot.Append('metadata/project/bld.infs/includes')
 		depfiles=[]
-		bldInfObject = raptor_meta.BldInfFile(bldInfTestRoot.Append('top_level.inf'),
+		bldInfObject = raptor.meta.BldInfFile(bldInfTestRoot.Append('top_level.inf'),
 											  self.__gnucpp, depfiles=depfiles, log=self.raptor)
 		Root = str(bldInfTestRoot)
 		
@@ -869,12 +869,12 @@ class TestRaptorMeta(unittest.TestCase):
 		mmpMakefilePathTestRoot = str(self.__makefilePathTestRoot)+'/metadata/project/mmps/includes'
 
 		depfiles=[]
-		bldInfObject = raptor_meta.BldInfFile(mmpTestRoot.Append('top_level.inf'),
+		bldInfObject = raptor.meta.BldInfFile(mmpTestRoot.Append('top_level.inf'),
 										 self.__gnucpp, depfiles=depfiles, log=self.raptor)
 		
 		mmpFiles = bldInfObject.getMMPList(self.ARMV5)
 		mmpdeps = []
-		mmpFile = raptor_meta.MMPFile(mmpFiles['mmpFileList'][0].filename, 
+		mmpFile = raptor.meta.MMPFile(mmpFiles['mmpFileList'][0].filename, 
 										   self.__gnucpp,
 										   bldInfObject,
 									           depfiles=mmpdeps,
@@ -885,8 +885,8 @@ class TestRaptorMeta(unittest.TestCase):
 	
 	
 		mmpContent = mmpFile.getContent(self.ARMV5)
-		mmpBackend = raptor_meta.MMPRaptorBackend(self.raptor, str(mmpFile.filename), str(bldInfObject.filename))
-		mmpParser = mmpparser.MMPParser()
+		mmpBackend = raptor.meta.MMPRaptorBackend(self.raptor, str(mmpFile.filename), str(bldInfObject.filename))
+		mmpParser = raptor.mmpparser.MMPParser()
 		parseresult = None
 		try:
 			parseresult = mmpParser.parse(mmpContent, mmpBackend)
@@ -923,8 +923,8 @@ class TestRaptorMeta(unittest.TestCase):
 				self.nostrictdef = nostrictdef
 				self.platform = platform
 		
-			def test(self, raptor):
-				m = raptor_meta.MMPRaptorBackend(raptor, self.mmpfilename, "")
+			def test(self, build):
+				m = raptor.meta.MMPRaptorBackend(build, self.mmpfilename, "")
 				m.deffile = self.deffilekeyword
 				m.nostrictdef = self.nostrictdef
 				(resolvedDefFile, isSecondaryDefFile) = m.resolveDefFile(self.target, self.platform)
@@ -1039,18 +1039,18 @@ class TestRaptorMeta(unittest.TestCase):
 			self.assertEquals(result, True)
 	
 	def dummyMetaReader(self):
-		"make raptor_meta.MetaReader.__init__ into a none operation"
-		self.savedInit = raptor_meta.MetaReader.__init__
+		"make raptor.meta.MetaReader.__init__ into a none operation"
+		self.savedInit = raptor.meta.MetaReader.__init__
 
 		def DummyMetaReaderInit(self, aRaptor):
 			self._MetaReader__Raptor = aRaptor
 			self.ExportPlatforms = []
 
-		raptor_meta.MetaReader.__init__ = DummyMetaReaderInit
+		raptor.meta.MetaReader.__init__ = DummyMetaReaderInit
 
 	def restoreMetaReader(self):
-		"make raptor_meta.MetaReader.__init__ operational again"
-		raptor_meta.MetaReader.__init__ = self.savedInit
+		"make raptor.meta.MetaReader.__init__ operational again"
+		raptor.meta.MetaReader.__init__ = self.savedInit
 
 	def testApplyOsVariant(self):
 		self.dummyMetaReader()
@@ -1060,16 +1060,16 @@ class TestRaptorMeta(unittest.TestCase):
 			def write(self, text):
 				pass
 				
-		bu = raptor_data.BuildUnit("os_variant", [])
+		bu = raptor.data.BuildUnit("os_variant", [])
 					
 		self.raptor.keepGoing = False
 		
-		metaReader = raptor_meta.MetaReader(self.raptor)
+		metaReader = raptor.meta.MetaReader(self.raptor)
 		metaReader.ApplyOSVariant(bu, ".")
 
 		self.raptor.keepGoing = True
 		self.raptor.out = OutputMock()
-		metaReader = raptor_meta.MetaReader(self.raptor)	
+		metaReader = raptor.meta.MetaReader(self.raptor)	
 		metaReader.ApplyOSVariant(bu, ".")
 
 		self.restoreMetaReader()
@@ -1084,7 +1084,7 @@ class TestRaptorMeta(unittest.TestCase):
 		
 	def testOptionReplace(self):
 		# Test how we resolve known permutations of values given to the .mmp file OPTION_REPLACE keyword
-		mockBackend = raptor_meta.MMPRaptorBackend(self.raptor, "somefile.mmp", "")
+		mockBackend = raptor.meta.MMPRaptorBackend(self.raptor, "somefile.mmp", "")
 		
 		results = mockBackend.resolveOptionReplace('--argA')
 		self.__assertEqualStringList(results, ['--argA<->'])
@@ -1126,7 +1126,7 @@ class TestRaptorMeta(unittest.TestCase):
 		self.dummyMetaReader()
 
 		# Test how we use bld.inf locations to come up with a module-based directory name that's likely to be unique
-		mockBackend = raptor_meta.MetaReader(self.raptor)
+		mockBackend = raptor.meta.MetaReader(self.raptor)
 		
 		resultsDictList = [ {"bldinf":"Z:/src/Romfile/group/tb92/GROUP/bld.inf", 'epocroot':'Z:', "result":"src_romfile_tb92"},
 				    {"bldinf":"/home/src/roMfile/group/tb92/GROUP/bld.inf", 'epocroot':'/home', "result":"src_romfile_tb92"},
@@ -1152,7 +1152,7 @@ class TestRaptorMeta(unittest.TestCase):
 		self.dummyMetaReader()
 
 		# Test how we use bld.inf locations to come up with a module name for target-side .bat files in generated .iby files
-		mockBackend = raptor_meta.MetaReader(self.raptor)
+		mockBackend = raptor.meta.MetaReader(self.raptor)
 		
 		resultsDictList = [ {"bldinf":"Z:/src/Romfile/group/tb92/GROUP/bld.inf", "result":"tb92"},
 				    {"bldinf":"/home/src/roMfile/group/tb92/GROUP/bld.inf", "result":"tb92"},

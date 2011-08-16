@@ -15,7 +15,7 @@
 #
 
 from raptor_tests import AntiTargetSmokeTest
-from raptor_meta import BldInfFile
+from raptor.meta import BldInfFile
 import os
 
 def run():

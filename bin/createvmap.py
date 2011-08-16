@@ -25,8 +25,8 @@ import traceback
 from optparse import OptionParser
 
 # Need to find the raptor utilities.
-sys.path.append(os.path.join(os.environ['SBS_HOME'],"python"))
-from raptor_utilities import expand_command_options
+sys.path.append(os.path.join(os.environ['SBS_HOME']))
+from raptor.utilities import expand_command_options
 
 
 # the script will exit with 0 if there are no errors

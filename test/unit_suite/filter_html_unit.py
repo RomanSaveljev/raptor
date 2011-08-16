@@ -18,10 +18,10 @@ import unittest
 test_data = os.path.join(os.getcwd(),"unit_suite","data","html_filter")
 
 # add the plugins directory to the python path
-sys.path.append(os.path.join(os.environ['SBS_HOME'], "python", "plugins"))
+sys.path.append(os.path.join(os.environ['SBS_HOME'], "raptor", "plugins"))
 # so that we can import the filter module directly
 import filter_html
-import generic_path
+from raptor import generic_path
 
 class Mock(object):
 	'''empty object for attaching arbitrary attributes and functions.'''

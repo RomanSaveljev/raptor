@@ -18,8 +18,8 @@
 # it's armv5_udeb, so we can match against that config).
 
 from raptor_tests import CheckWhatSmokeTest, ReplaceEnvs
-from raptor_meta import MetaReader
-from raptor_utilities import sanitise
+from raptor.meta import MetaReader
+from raptor.utilities import sanitise
 import re
 import os
 

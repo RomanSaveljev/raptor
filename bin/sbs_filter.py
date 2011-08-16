@@ -15,8 +15,10 @@
 # Description:
 #
 
+
 import os
 import sys
+
 import traceback
 
 # intercept the -h option
@@ -25,16 +27,12 @@ if "-h" in sys.argv or "--help" in sys.argv:
 	print("  The log data is read from stdin.")
 	print("  Type 'sbs -h' for a list of sbs options.")
 	sys.exit(0)
-	
-# get the absolute path to this script
-script = os.path.abspath(sys.argv[0])
 
-# add the Raptor python directory to the PYTHONPATH
-sys.path.append(os.path.join(os.path.dirname(script), "..", "python"))
+import sbs_env
 
 # now we should be able to find the raptor modules
-import raptor
-import pluginbox
+import raptor.build
+import raptor.pluginbox
 
 # make sure that HOSTPLATFORM is set
 if not "HOSTPLATFORM" in os.environ:
@@ -46,7 +44,7 @@ if not "HOSTPLATFORM_DIR" in os.environ:
 	sys.exit(1)
 
 # construct a Raptor object from our command-line (less the name of this script)
-the_raptor = raptor.Raptor.CreateCommandlineAnalysis(sys.argv[1:])
+the_raptor = raptor.build.Raptor.CreateCommandlineAnalysis(sys.argv[1:])
 
 # from Raptor.OpenLog()
 try:
@@ -54,8 +52,8 @@ try:
 	if not the_raptor.systemPlugins.isAbsolute():
 		the_raptor.systemPlugins = the_raptor.home.Append(the_raptor.systemPlugins)
 		
-	pbox = pluginbox.PluginBox(str(the_raptor.systemPlugins))
-	raptor_params = raptor.BuildStats(the_raptor)
+	pbox = raptor.pluginbox.PluginBox(str(the_raptor.systemPlugins))
+	raptor_params = raptor.build.BuildStats(the_raptor)
 
 	# Open the requested plugins using the pluginbox
 	the_raptor.out.open(raptor_params, the_raptor.filterList, pbox)

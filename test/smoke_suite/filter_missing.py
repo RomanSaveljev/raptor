@@ -36,11 +36,11 @@ def run():
 	t.name = "filter_crashes"
 	t.usebash = True
 	t.command = "cp -f smoke_suite/test_resources/filter_test/testfilter_exceptions.py " \
-			+ "$SBS_HOME/python/plugins ; " \
+			+ "$SBS_HOME/raptor/plugins ; " \
 			+ "sbs -n --filters=FilterTestCrash,FilterLogFile,FilterTerminal " \
 			+ "-b smoke_suite/test_resources/simple/bld.inf " \
 			+ "-m ${SBSMAKEFILE} -f ${SBSLOGFILE} ; " \
-    		+ "rm -f $SBS_HOME/python/plugins/testfilter_exceptions.py"
+    		+ "rm -f $SBS_HOME/raptor/plugins/testfilter_exceptions.py"
 	t.errors = 0
 	t.returncode = 0
 	t.exceptions = 1

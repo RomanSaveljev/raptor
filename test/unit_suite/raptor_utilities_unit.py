@@ -17,7 +17,7 @@
 #
 
 import os
-import raptor_utilities
+import raptor.utilities
 import sys
 import unittest
 

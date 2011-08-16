@@ -16,7 +16,7 @@
 
 # Unit Test for the Raptor_cli (command line interface) module
 
-import raptor_cli
+import raptor.cli
 import sys
 import unittest
 import os,subprocess
@@ -220,7 +220,7 @@ class TestRaptorCli(unittest.TestCase):
 				'--no-depend-include',
 				'--no-depend-generate']
 		
-		raptor_cli.GetArgs(self,args)
+		raptor.cli.GetArgs(self,args)
 		self.assertEqual(self.RunningQuiet,False)
 		self.assertEqual(self.listconfig[0],'config1')
 		self.assertEqual(self.listconfig[1],'config name with spaces')

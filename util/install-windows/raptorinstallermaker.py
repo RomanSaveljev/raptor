@@ -36,9 +36,9 @@ def generateinstallerversion(sbshome = None):
 	shellenv = os.environ.copy()
 	shellenv["PYTHONPATH"] = os.path.join(sbshome, "python")
 	
-	raptorversioncommand = "python -c \"import raptor_version; print(raptor_version.numericversion())\""
+	raptorversioncommand = "python -c \"import raptor.version; print(raptor.version.numericversion())\""
 	
-	# Raptor version is obtained from raptor_version module's numericversion function.
+	# Raptor version is obtained from raptor.version module's numericversion function.
 	sbs_version_matcher = re.compile(".*(\d+\.\d+\.\d+).*", re.I)
 	
 	# Create Raptor subprocess
