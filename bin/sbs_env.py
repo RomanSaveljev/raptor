@@ -24,15 +24,22 @@ if not 'SBS_HOME' in os.environ:
 	sbh = os.path.abspath(os.path.join(os.path.split(sys.argv[0])[0],".."))
 	os.environ['SBS_HOME'] = sbh
 	if 'SBS_PYTHONPATH' in os.environ:
+		pyp_index = 0
 		if 'PYTHONPATH' in os.environ:
 			pyp = os.environ['PYTHONPATH'].split(os.pathsep)
+			# Try to remember where pythonpath appears in the overall path
+			# Usually it's after all the default paths but we don't 
+			# know where those are:
+			pyp_index = sys.path.index(pyp[0]) 
 
 			# delete the python path from the front of the system path
 			# so that we can replace it with "SBS_PYTHONPATH"
-			pyp_index = sys.path.index(pyp[0])
 			for p in pyp:
-				sys.path.remove(p)
-		
+				try:
+					sys.path.remove(p)
+				except ValueError as e:
+					pass
+
 		# insert SBS_PYTHONPATH at the same point where PYTHONPATH appeared		
 		sys.path[pyp_index:pyp_index] = os.environ['SBS_PYTHONPATH'].split(os.pathsep)
 
@@ -50,6 +57,9 @@ if not 'HOSTPLATFORM' in os.environ: # set platform details if not already done.
 			p = subprocess.Popen(args=[os.path.join(os.environ['SBS_HOME'],"bin", "gethost.sh"),"-e"],stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 			(output,errors) = p.communicate()
 			rc = p.wait()
+
+			if type(output) is not str:
+				output = output.decode()
 		
 			for term in output.split("\n"):
 				try:
@@ -63,6 +73,8 @@ if not 'HOSTPLATFORM' in os.environ: # set platform details if not already done.
 					os.environ[left] = right
 
 		except Exception as e:
+			import traceback
+			traceback.print_exc()
 			print("sbs: error: while determining host platform details - {0}".format(e))
 			sys.exit(1)
 

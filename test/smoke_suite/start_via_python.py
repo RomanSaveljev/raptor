@@ -13,6 +13,7 @@
 #
 # Description: 
 #
+import os
 
 from raptor_tests import SmokeTest
 
@@ -22,7 +23,14 @@ def run():
 	
 	t.name = "start_via_python"
 	t.description =  """Test that we can start up raptor from the python script sbs.py without using a batch file or script"""
-	t.command = "unset SBS_HOME HOSTPLATFORM HOSTPLATFORM_DIR HOSTPLATFORM32_DIR; python ../bin/sbs.py -b smoke_suite/test_resources/simple/bld.inf -c armv5 -n" 
+
+	python = "python"
+	if 'SBS_PYTHON3' in os.environ:
+		python = os.environ['SBS_PYTHON3']
+	elif 'SBS_PYTHON' in os.environ:
+		python = os.environ['SBS_PYTHON']
+		
+	t.command = "unset SBS_HOME HOSTPLATFORM HOSTPLATFORM_DIR HOSTPLATFORM32_DIR; {0} ../bin/sbs.py -b smoke_suite/test_resources/simple/bld.inf -c armv5 -n".format(python)
 	t.warnings = 0
 	t.run()
 	return t
