@@ -30,9 +30,9 @@
 
 import sys
 if sys.version_info[0] == 2:
-	from pyparsing_py2 import *
+	from raptor.pyparsing_py2 import *
 else:
-	from pyparsing_py3 import *
+	from raptor.pyparsing_py3 import *
 
 # For multiline matching we must exclude \n from the list of whitespace
 # characters.  If we don't then Parse Elements like OneOrMore won't stop
