@@ -1357,7 +1357,7 @@ class Raptor(object):
 		oldraptor_dir = str(self.home.Append("python"))
 		sys.path.insert(0,oldraptor_dir)
 		self.pbox.add_plugins(str(oldplugins))
-        sys.path[0:0] = []
+		sys.path[0:0] = []
 
 	# log file open/close
 
