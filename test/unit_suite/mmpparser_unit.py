@@ -135,7 +135,7 @@ class TestMMPParser(unittest.TestCase):
 
 	def testAll(self):
 		tests = [{'name' : "TestFeatures", 'text' :  
-"""ASSPLIBRARY 123 456 789
+r"""ASSPLIBRARY 123 456 789
 LIBRARY  eexe euser
 ALWAYS_BUILD_AS_ARM
 NOEXPORTLIBRARY
@@ -159,17 +159,17 @@ TARGET fred
 TARGETPATH /usr/local
 END
 UID 0x12354 123455
-""", 'mustmatch': r"Set UID3 to 123455"}, \
-				{'name':"TestUnknownStatements", 'text': \
-"""
+""", 'mustmatch': r"Set UID3 to 123455"}, 
+				{'name':"TestUnknownStatements", 'text': 
+r"""
 
 TARGET FRED12345
 SOURCEPATH \usr
 
 
-""", 'mustmatch': r"Remembering self.sourcepath state:"}, \
-				{'name':"PreceedingBlankLines", 'text': \
-"""
+""", 'mustmatch': r"Remembering self.sourcepath state:"}, 
+				{'name':"PreceedingBlankLines", 'text': 
+r"""
 
 ASSPLIBRARY 123 456 789
 LIBRARY  eexe euser
@@ -187,9 +187,9 @@ TARGETPATH /usr/local
 END
 
 
-""", 'mustmatch': r"Set TARGETPATH to /usr/local"}, \
-				{ 'name': "Testvfprvct", 'text': \
-"""
+""", 'mustmatch': r"Set TARGETPATH to /usr/local"}, 
+				{ 'name': "Testvfprvct", 'text': 
+r"""
 targettype dll
 sourcepath .
 source dfprvct2_2.cpp
@@ -208,17 +208,17 @@ armlibs f_t_p.l g_t_p.l
 end
 unpaged
 
-""", 'mustmatch': r"Set switch UNPAGED ON"}, \
-				{ 'name': "TestUSRT", 'text': \
-"""
+""", 'mustmatch': r"Set switch UNPAGED ON"}, 
+				{ 'name': "TestUSRT", 'text': 
+r"""
 TARGET fred
 START ARMCC
 ARMINC 
 ARMRT
 END
 VENDORID 0x70000001
-""", 'mustmatch': r"Set VENDORID to 0x70000001"}, \
-				{ 'name': "TestRESOURCE", 'text': \
+""", 'mustmatch': r"Set VENDORID to 0x70000001"}, 
+				{ 'name': "TestRESOURCE", 'text': 
 """
 TARGET reccaf.dll
 CAPABILITY TrustedUI ProtServ DRM
@@ -237,8 +237,8 @@ SYSTEMINCLUDE /epoc32/include/caf
 SYSTEMINCLUDE /epoc32/include/ecom
 LIBRARY euser.lib apmime.lib estor.lib
 LIBRARY caf.lib efsrv.lib
-""", 'mustmatch': r"Create resource .* of"}, \
-				{ 'name': "TestRESOURCE", 'text': \
+""", 'mustmatch': r"Create resource .* of"}, 
+				{ 'name': "TestRESOURCE", 'text': 
 """
 TARGET cafutils.dll
 CAPABILITY All -Tcb
@@ -274,7 +274,7 @@ LIBRARY apgrfx.lib
 LIBRARY ecom.lib
 LIBRARY apmime.lib
 """, 'mustmatch': r"LIBRARY"},
-				{ 'name': "TestEmptyStringTable", 'text': \
+				{ 'name': "TestEmptyStringTable", 'text': 
 """
 OPTION CW   -w off
 TARGET          testwebbrowser.exe
@@ -292,7 +292,7 @@ END
 SOURCEPATH      ../../httpexampleclient
 SOURCE httpexampleutils.cpp
 """, 'mustmatch': r"End STRINGTABLE OK"},
-				{ 'name': "TestARMINC", 'text': \
+				{ 'name': "TestARMINC", 'text': 
 """
 # 1 "<built-in>"
 # 1 "<command line>"

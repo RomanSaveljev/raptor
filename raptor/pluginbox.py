@@ -20,12 +20,26 @@ import re
 from types import ModuleType
 import sys
 
+class BadPlugin(Exception):
+	def __init__(self, message, filename):
+		self.filename = filename
+		full_message = "failed to load plugin '{0}' - {1}".format(self.filename, message)
+		super(BadPlugin,self).__init__(full_message)
+
 class PluginModule(object):
 	"""Represents a module containing plugin classes """
 	def __init__(self, file):
 		# put raptor module dir in path so that 3rd party plugins don't need to 
 		# all be changed to import "raptor.filter_interface" instead of "import filter_interface"
-		self.module = __import__(file)
+		try:
+			self.module = __import__(file)
+		except SyntaxError as e:
+			if sys.version_info[0] >= 3:
+				raise BadPlugin("Check plugin is python3 compatible or try python2: {0}\n".format(e), file)
+			else:
+				raise BadPlugin(format(str(e)), file)
+		except Exception as e:
+			raise BadPlugin(str(e), file)
 		self.classes = []
 		self.__findclasses(self.module)
 

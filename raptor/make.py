@@ -34,7 +34,7 @@ import raptor.utilities
 import raptor.version
 import raptor.data
 import raptor.build 
-from makefile import *
+from raptor.makefile import *
 
 
 class BadMakeEngineException(Exception):
