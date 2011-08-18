@@ -29,8 +29,10 @@ def run():
 		python = os.environ['SBS_PYTHON3']
 	elif 'SBS_PYTHON' in os.environ:
 		python = os.environ['SBS_PYTHON']
+
+	python = python.replace("\\","/")
 		
-	t.command = "unset SBS_HOME HOSTPLATFORM HOSTPLATFORM_DIR HOSTPLATFORM32_DIR; {0} ../bin/sbs.py -b smoke_suite/test_resources/simple/bld.inf -c armv5 -n".format(python)
+	t.command = r"unset SBS_HOME HOSTPLATFORM HOSTPLATFORM_DIR HOSTPLATFORM32_DIR; {0} ../bin/sbs.py -b smoke_suite/test_resources/simple/bld.inf -c armv5 -n".format(python)
 	t.warnings = 0
 	t.run()
 	return t
