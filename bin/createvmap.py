@@ -87,6 +87,8 @@ def getVmapMacros(aPreInclude, aPreprocessedFile=None, aCPP="cpp", aDefines="", 
 	data = " "
 	while data:
 		data = stream.readline()
+		if not type(data) is str:
+			data = data.decode()
 
 		definedmacro = defineRE.match(data)
 		if definedmacro:
