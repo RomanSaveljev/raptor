@@ -28,6 +28,8 @@ fi
 echo "Raptor packager for Linux"
 export PACKAGER_HOME="$PWD"
 
+export SBS_HOME=$(cd "${0%/*}/../../" && echo $PWD)
+
 echo "SBS_HOME is $SBS_HOME - this is the version that will be packaged."
 
 export FULLVERSION=`$SBS_HOME/bin/sbs -v` # this also generates all the pyc files
@@ -61,7 +63,7 @@ BINARIES=""
 fi
 
 
-   cd $SBS_HOME && find license.txt RELEASE-NOTES.html bin examples lib notes $BINARIES python schema style util |
+   cd $SBS_HOME && find license.txt RELEASE-NOTES.html bin examples lib notes $BINARIES python raptor schema style util |
 	grep -v "$TMPSBS"'/python/\.py$' |
 	grep -v 'flm/test'  |
 	grep -v 'util/build'  | 
