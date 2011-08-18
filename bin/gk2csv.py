@@ -49,7 +49,7 @@ for node in xmldoc.getElementsByTagName('annofile'):
 
 		if build_id == None:
 			build_id = m.group(1)
-			print ("Build: {0}".format(build_id))
+			print("Build: {0}".format(build_id))
 
 		stepname = m.group(2)
 
@@ -60,7 +60,7 @@ for node in xmldoc.getElementsByTagName('annofile'):
 				headlines.append(c.attributes['name'].value)
 
 		if not headered:
-			print ("stepname,{0}".format(",".join(headlines)))
+			print("stepname,{0}".format(",".join(headlines)))
 			headered = True
 		
-		print (",".join(line))
+		print(",".join(line))
