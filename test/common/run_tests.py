@@ -22,6 +22,7 @@ import imp
 import datetime
 import stat
 import traceback
+
 raptor_tests = imp.load_source("raptor_tests", "common/raptor_tests.py")
 
 test_run_start_time = datetime.datetime.now()
@@ -195,6 +196,19 @@ class TestRun(object):
 					for t in sorted(suite_failures):
 						what_failed.write("\t" + t + "\n")
 					
+class TestFile(object):
+	def __init__(self, name, module):
+		self.name = name
+		self.module = module
+		self.ok = True
+		if module == None:
+			self.ok = False
+		self.errormessage=""
+
+class BadTestResult(object):
+	"""Represent a test that failed """
+	def __init__(self):
+		self.result = raptor_tests.SmokeTest.FAIL
 
 class Suite(TestRun):
 	""" A set of tests (.py files) in a directory """
@@ -240,19 +254,25 @@ class Suite(TestRun):
 						or import_name in self.allowable_test_set)
 				if matches_regex and is_allowable:
 					try:
-						self.test_set.append( (import_name,
+						self.test_set.append( TestFile(import_name,
 								imp.load_source(
 									import_name,
 									(raptor_tests.ReplaceEnvs(
 										self.suite_dir + "/" + test)))))
 					except:
-						traceback.print_exc(None, sys.stdout)    # None => all levels
+						# Still create a testfile entry - keeps the numbering
+						# of tests consistent which is a small convenience
+						tf = TestFile(import_name, None)
+						self.test_set.append(tf)
+						tf.errormessage = traceback.format_exc(None)
 	
 		test_number = 0
 		test_total = len(self.test_set)
 		# Run each test, capturing all its details and its results
-		for (name, test) in self.test_set:
+		for test_file in self.test_set:
 			test_number += 1
+
+				
 			# Save start/end times and save in dictionary for TMS
 			start_time = datetime.datetime.now()
 			try:
@@ -268,7 +288,14 @@ class Suite(TestRun):
 				
 				print(test_number_text)
 				
-				test_object = test.run()
+				# Remember tests that could not be loaded
+				# or were bad from the start for some reason
+				if not test_file.ok:
+					test_object = BadTestResult();
+					print(tf.errormessage)
+					print("TEST FAILED\n")
+				else:
+					test_object = test_file.module.run()
 				
 				end_time = datetime.datetime.now()
 				
@@ -282,9 +309,9 @@ class Suite(TestRun):
 				end_milliseconds = \
 						format_milliseconds(end_milliseconds)
 		
-				self.start_times[name] = start_time.strftime("%H:%M:%S:" +
+				self.start_times[test_file.name] = start_time.strftime("%H:%M:%S:" +
 						str(start_milliseconds))
-				self.end_times[name] = end_time.strftime("%H:%M:%S:" +
+				self.end_times[test_file.name] = end_time.strftime("%H:%M:%S:" +
 						str(end_milliseconds))
 				
 				run_time = (end_time - start_time)
@@ -295,12 +322,12 @@ class Suite(TestRun):
 				# Add to pass/fail count and save result to dictionary
 				if test_object.result == raptor_tests.SmokeTest.PASS:
 					self.pass_total += 1
-					self.results[name] = "Passed"
-					self.passed_tests.append(name)
+					self.results[test_file.name] = "Passed"
+					self.passed_tests.append(test_file.name)
 				elif test_object.result == raptor_tests.SmokeTest.FAIL:
 					self.fail_total += 1
-					self.results[name] = "Failed"
-					self.failed_tests.append(name)
+					self.results[test_file.name] = "Failed"
+					self.failed_tests.append(test_file.name)
 				elif test_object.result == raptor_tests.SmokeTest.SKIP:
 					self.skip_total += 1
 				# Clean epocroot after running each test if --clean option is specified
@@ -312,7 +339,7 @@ class Suite(TestRun):
 				print("\nTEST ERROR:")
 				traceback.print_exc(None, sys.stdout)    # None => all levels
 				self.exception_total += 1
-				self.error_tests.append(name)
+				self.error_tests.append(test_file.name)
 
 		end_time_stamp = datetime.datetime.now()
 
