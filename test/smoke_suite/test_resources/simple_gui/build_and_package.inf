@@ -57,25 +57,6 @@ OPTION MAKESIS_ARGS -v
 OPTION DEPEND_FILES epoc32/data/z/resource/apps/HelloWorld.rsc epoc32/data/z/resource/apps/helloworld.mbm
 END
 
-// custom release packaging - uses the optional overrides for default locations
-START EXTENSION utility.createsis
-OPTION PKG_PATH $(EXTENSION_ROOT)/sis
-OPTION SIS_PATH $(EPOCROOT)/epoc32/packaging/helloworld
-#ifdef WINSCW
-OPTION PKG_FILE winscw_urel_custom.pkg
-OPTION SIS_FILE helloworld_winscw_custom.sis
-#else
-OPTION PKG_FILE armv5_urel_custom.pkg
-OPTION SIS_FILE helloworld_armv5_custom.sis
-#endif
-OPTION TARGET_FILE helloworld.exe
-option SEARCH_PATH $(EPOCROOT)/epoc32
-OPTION BUILD_TYPE urel
-OPTION DEPEND_PATH $(EPOCROOT)/epoc32/data/z/resource/apps
-OPTION DEPEND_FILES HelloWorld.rsc helloworld.mbm
-END
-
-
 // stub .sis file
 START EXTENSION utility.createsis
 OPTION PKG_FILE sis/stub.pkg

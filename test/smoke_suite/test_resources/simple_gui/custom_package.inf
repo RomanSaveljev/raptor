@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+PRJ_PLATFORMS
+WINSCW ARMV5
+
+PRJ_EXTENSIONS
+
+// custom release packaging - uses the optional overrides for default locations
+//
+// note: the binaries packaged here are built by build_and_package.inf (which
+// performs its own packaging tests using them).  As MAKESIS seems to have
+// problems packaging the same binaries concurrently, even if for different
+// output .sis files,this custom packaging example test is performed separately
+
+START EXTENSION utility.createsis
+OPTION PKG_PATH $(EXTENSION_ROOT)/sis
+OPTION SIS_PATH $(EPOCROOT)/epoc32/packaging/helloworld
+#ifdef WINSCW
+OPTION PKG_FILE winscw_urel_custom.pkg
+OPTION SIS_FILE helloworld_winscw_custom.sis
+#else
+OPTION PKG_FILE armv5_urel_custom.pkg
+OPTION SIS_FILE helloworld_armv5_custom.sis
+#endif
+OPTION TARGET_FILE helloworld.exe
+option SEARCH_PATH $(EPOCROOT)/epoc32
+OPTION BUILD_TYPE urel
+OPTION DEPEND_PATH $(EPOCROOT)/epoc32/data/z/resource/apps
+OPTION DEPEND_FILES HelloWorld.rsc helloworld.mbm
+END
