@@ -137,7 +137,7 @@ def run():
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/custom_package.inf -c armv5 -c winscw"
 	t.run()
 	
-	t.targets = built_targets
+	t.targets.extend(built_targets)
 	t.clean()
 
 	qmake_call = "$(EPOCROOT)/epoc32/tools/qt/qmake{ext} " + \
