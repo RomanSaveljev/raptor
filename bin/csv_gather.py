@@ -55,7 +55,7 @@ parser.add_option("--totals", default="raptor_totals.csv", help =
 
 # there should not be any leftover_args
 for leftover in leftover_args:
-	sys.stderr.write("warning: unexpected argument '%s'\n" % leftover)
+	sys.stderr.write("warning: unexpected argument '{0}'\n".format(leftover))
 
 def is_raptor_log(path):
 	try:
@@ -70,9 +70,9 @@ def join_dir(filename):
 	return os.path.join(options.directory, filename)
 
 # search the given directory for a list of raptor log files
-logs = filter(is_raptor_log, map(join_dir, os.listdir(options.directory)))
+logs = list(filter(is_raptor_log, list(map(join_dir, os.listdir(options.directory)))))
 
-print "found", len(logs), "raptor log files"
+print("found", len(logs), "raptor log files")
 if len(logs) < 1:
 	sys.exit(0)
 	
@@ -84,7 +84,7 @@ csvs = []
 for i,f in enumerate(logs):
 	tmpfile = tmp_template.format(i)
 	command = cmd_template.format(options.params, tmpfile, f)
-	print command
+	print(command)
 	returncode = subprocess.call(command, shell=True)
 	if returncode != 0:
 		sys.stderr.write("FAILED: {0}\n".format(command))
@@ -93,7 +93,7 @@ for i,f in enumerate(logs):
 	
 # cat all the temporary CSV files together and output the sorted result
 catsort = "cat {0} | sort | uniq > {1}".format(" ".join(csvs), options.output)
-print catsort
+print(catsort)
 				
 returncode = subprocess.call(catsort, shell=True)
 if returncode != 0:
@@ -102,7 +102,7 @@ if returncode != 0:
 
 # run csv_totals on the "big" file to create an easier starting point
 csvtotals = "csv_totals.py < {0} | sort > {1}".format(options.output, options.totals)
-print csvtotals
+print(csvtotals)
 				
 returncode = subprocess.call(csvtotals, shell=True)
 if returncode != 0:

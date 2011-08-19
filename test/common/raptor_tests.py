@@ -295,9 +295,9 @@ class SmokeTest(object):
 			print(string + value)
 		else:
 			if result == SmokeTest.PASS:
-				string += "PASSED"
+				string += "TEST PASSED"
 			elif result == SmokeTest.FAIL:
-				string += "FAILED"
+				string += "TEST FAILED"
 			
 			print(string) 
 	

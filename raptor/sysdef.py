@@ -19,7 +19,7 @@ import os
 import re
 import xml.dom.minidom
 
-import generic_path
+from raptor import generic_path
 
 class SystemModelComponent(generic_path.Path):
 	"""Path sub-class that wraps up a component bld.inf file with

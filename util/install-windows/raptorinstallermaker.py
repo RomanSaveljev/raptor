@@ -34,7 +34,7 @@ zipfile_success = None
 
 def generateinstallerversion(sbshome = None):
 	shellenv = os.environ.copy()
-	shellenv["PYTHONPATH"] = os.path.join(sbshome, "python")
+	shellenv["PYTHONPATH"] = os.path.join(sbshome)
 	
 	raptorversioncommand = "python -c \"import raptor.version; print(raptor.version.numericversion())\""
 	
@@ -164,7 +164,7 @@ def writeZip(filename, sbshome, sbsbvdir, sbscygwindir, sbsmingwdir, sbspythondi
 	sbshome_files = ["RELEASE-NOTES.html"]
 	
 	# Directories in SBS_HOME
-	sbshome_dirs = ["bin", "examples", "lib", "notes", "python", 
+	sbshome_dirs = ["bin", "examples", "lib", "notes", "python", "raptor", 
 				"schema", "style", os.sep.join(["win32", "bin"])]
 	
 	# Win32 support directories
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
 	# For grabbing a copy of nsis:
 	sys.path.append(options.sbshome)
-	from python import urlget
+	from raptor import urlget
 
 	# Create the license file
 	(licensetxtfile,licensetxtname) = writeLicense(win32supportdirs)

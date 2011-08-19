@@ -17,10 +17,11 @@ default_history_size = 10
 
 """ Module for creating/manipulating an "audit trail" of builds """
 
-import makefile
 import os
 import stat
 import json
+
+from raptor import makefile
 
 default_history_size = 10
 

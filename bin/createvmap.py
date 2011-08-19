@@ -87,6 +87,8 @@ def getVmapMacros(aPreInclude, aPreprocessedFile=None, aCPP="cpp", aDefines="", 
 	data = " "
 	while data:
 		data = stream.readline()
+		if not type(data) is str:
+			data = data.decode()
 
 		definedmacro = defineRE.match(data)
 		if definedmacro:
@@ -285,7 +287,7 @@ def main():
 					temp.write(sline)
 				sfile.close()
 			temp.close()
-		except Exception,e:
+		except Exception as e:
 			error("Could not write source files into temporary file %s : %s" % (tempname, str(e)))
 			return 1
 		
@@ -299,7 +301,7 @@ def main():
 								                definelist,
 								                includeslist)
 		debug("Macros extracted:") 
-		for key,values in macro_dictionary.iteritems():
+		for key,values in macro_dictionary.items():
 			debug(key + " " + str(values))
 
 		# if there were no macros then the vmap file will be empty...
@@ -317,7 +319,7 @@ def main():
 		# exit with 0 if OK
 		return exitCode
 
-	except Exception,ex:
+	except Exception as ex:
 		traceback.print_exc()
 		return 1
 

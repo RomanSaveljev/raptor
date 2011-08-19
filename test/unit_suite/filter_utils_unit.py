@@ -17,7 +17,7 @@
 
 
 import unittest
-import filter_utils
+from raptor.plugins import filter_utils
 
 
 testRecipeTemplate = \
