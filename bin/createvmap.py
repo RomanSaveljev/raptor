@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2007-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -25,8 +25,8 @@ import traceback
 from optparse import OptionParser
 
 # Need to find the raptor utilities.
-sys.path.append(os.path.join(os.environ['SBS_HOME'],"python"))
-from raptor_utilities import expand_command_options
+sys.path.append(os.path.join(os.environ['SBS_HOME']))
+from raptor.utilities import expand_command_options
 
 
 # the script will exit with 0 if there are no errors
@@ -87,6 +87,8 @@ def getVmapMacros(aPreInclude, aPreprocessedFile=None, aCPP="cpp", aDefines="", 
 	data = " "
 	while data:
 		data = stream.readline()
+		if not type(data) is str:
+			data = data.decode()
 
 		definedmacro = defineRE.match(data)
 		if definedmacro:
@@ -285,7 +287,7 @@ def main():
 					temp.write(sline)
 				sfile.close()
 			temp.close()
-		except Exception,e:
+		except Exception as e:
 			error("Could not write source files into temporary file %s : %s" % (tempname, str(e)))
 			return 1
 		
@@ -299,7 +301,7 @@ def main():
 								                definelist,
 								                includeslist)
 		debug("Macros extracted:") 
-		for key,values in macro_dictionary.iteritems():
+		for key,values in macro_dictionary.items():
 			debug(key + " " + str(values))
 
 		# if there were no macros then the vmap file will be empty...
@@ -317,7 +319,7 @@ def main():
 		# exit with 0 if OK
 		return exitCode
 
-	except Exception,ex:
+	except Exception as ex:
 		traceback.print_exc()
 		return 1
 

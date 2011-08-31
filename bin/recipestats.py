@@ -18,8 +18,10 @@
 # e.g. total times and so on.
 
 import time
-import __future__
-
+import sys
+import re
+import os
+from optparse import OptionParser # for parsing command line parameters
 
 
 
@@ -71,23 +73,18 @@ class BuildStats(object):
 
 	def recipe_csv(self):
 		s = '"name", "time", "count"\n'
-		l = sorted(self.stats.values(), key= lambda r: r.time, reverse=True)
+		l = sorted(list(self.stats.values()), key= lambda r: r.time, reverse=True)
 		for r in l:
-			s += '"%s",%s,%d\n' % (r.name, str(r.time), r.count)
+			s += '"{0}",{1},{2:d}\n'.format(r.name, str(r.time), r.count)
 		return s
 
 	def hosts_csv(self):
 		s='"host","recipecount"\n'
 		hs = self.hosts
 		for h in sorted(hs.keys()):
-			s += '"%s",%d\n' % (h,hs[h])
+			s += '"{0}",{1:d}\n'.format(h,hs[h])
 		return s
 
-
-import sys
-import re
-import os
-from optparse import OptionParser # for parsing command line parameters
 
 def main():
 	recipe_re = re.compile(".*<recipe name='([^']+)'.*host='([^']+)'.*")
@@ -131,7 +128,7 @@ def main():
 		if pm is not None:
 			if phase is not None:
 				if options.buildhosts_flag:
-					print('"%s"\n' % phase)
+					print('"{0}"\n'.format(phase))
 					print(st.hosts_csv())
 			st.hosts = {}	
 			phase = pm.groups()[0]
@@ -149,11 +146,11 @@ def main():
 				s -= start_time
 
 				continue
-			except ValueError, e:
-				raise Exception("Parse problem: float conversion on these groups: %s\n%s" %(str(tm.groups()), str(e)))
+			except ValueError as e:
+				raise Exception("Parse problem: float conversion on these groups: {0}\n{1}".format(str(tm.groups()), str(e)))
 		else:
 			if l2.find("<time") is not -1:
-				raise Exception("unparsed timing status: %s\n"%l2)
+				raise Exception("unparsed timing status: {0}\n".format(l2))
 
 		sm = status_re.match(l2)
 
@@ -168,7 +165,7 @@ def main():
 		st.add(s, elapsed, rname, status, host, phase)
 
 	if options.buildhosts_flag:
-		print('"%s"\n' % phase)
+		print('"{0}"\n'.format(phase))
 		print(st.hosts_csv())
 	else:
 		print(st.recipe_csv())

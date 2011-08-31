@@ -24,8 +24,8 @@ import subprocess
 import traceback
 from shutil import rmtree
 
-sys.path.append(os.environ["SBS_HOME"]+"/python")
-from raptor_meta import BldInfFile
+sys.path.append(os.environ["SBS_HOME"])
+from raptor.meta import BldInfFile
 
 if 'SMOKETESTLOGS' in os.environ:
 	logDir = os.environ['SMOKETESTLOGS']
@@ -295,9 +295,9 @@ class SmokeTest(object):
 			print(string + value)
 		else:
 			if result == SmokeTest.PASS:
-				string += "PASSED"
+				string += "TEST PASSED"
 			elif result == SmokeTest.FAIL:
-				string += "FAILED"
+				string += "TEST FAILED"
 			
 			print(string) 
 	

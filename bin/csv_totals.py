@@ -35,8 +35,8 @@ import traceback
 
 # we don't expect arguments, so treat any as a call for help
 if len(sys.argv) > 1:
-	print "usage:", sys.argv[0]
-	print """
+	print("usage:", sys.argv[0])
+	print("""
   The input CSV is read from stdin. The expected format is,
 	
     type,component,configuration,"commands and output text"
@@ -44,7 +44,7 @@ if len(sys.argv) > 1:
   The output CSV is written to sdtout. The output format is,
 	
     type,component,configuration,number_of_occurences
-"""
+""")
 	sys.exit(0)
 
 totals = {}
@@ -59,7 +59,7 @@ while line:
 		else:
 			totals[key] = 1
 		
-for key, value in totals.items():
+for key, value in list(totals.items()):
 	sys.stdout.write("{0},{1}\n".format(key, value))
 
 sys.exit(0)

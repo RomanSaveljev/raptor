@@ -115,6 +115,7 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	
 	__LOCAL_PYTHON__=$($m $SBS_HOME/win32/python27/python.exe)
 
+	export PYTHONPATH=$SBS_HOME # location of the raptor package
 	if [ -n "$SBS_PYTHON3" ]; then
 		__PYTHON__=$SBS_PYTHON3
 	elif [ -n "$SBS_PYTHON" ]; then
@@ -122,7 +123,6 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	elif [ -f "$__LOCAL_PYTHON__" ]; then
 		__PYTHON__=$__LOCAL_PYTHON__
 		export SBS_PYTHON=$__PYTHON__
-		export PYTHONPATH=
 		export PYTHONHOME=
 	else
 		__PYTHON__=python.exe
@@ -132,17 +132,16 @@ if [ "$OSTYPE" == "cygwin" ]; then
 	if [ -n "$SBS_PYTHONPATH" ]; then
 		export PYTHONPATH=$SBS_PYTHONPATH
 	fi
-	export PYTHONPATH="$PYTHONPATH;$($m "$SBS_HOME/python")"
 else	
 	if [ -n "$SBS_PYTHON3" ]; then
-			export PYTHONPATH=${SBS_PYTHONPATH:-$PYTHONPATH}:$SBS_HOME/python
+			export PYTHONPATH=${SBS_PYTHONPATH:-$PYTHONPATH}
 			export __PYTHON__=$SBS_PYTHON3
 	elif [ -n "$SBS_PYTHON" ]; then
-			export PYTHONPATH=${SBS_PYTHONPATH:-$PYTHONPATH}:$SBS_HOME/python
+			export PYTHONPATH=${SBS_PYTHONPATH:-$PYTHONPATH}
 			export __PYTHON__=$SBS_PYTHON
 	else
 			PYDIR=python27 # not exported on purpose
-			export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}:$SBS_HOME/python
+			export PYTHONPATH=${SBS_PYTHONPATH:-$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib}
 			PATH=$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/bin:$SBS_HOME/$HOSTPLATFORM_DIR/bin:$PATH
 			LD_LIBRARY_PATH=$SBS_HOME/$HOSTPLATFORM_DIR/$PYDIR/lib:$SBS_HOME/$HOSTPLATFORM_DIR/bv/lib:$LD_LIBRARY_PATH
 

@@ -14,26 +14,27 @@
 # Description: 
 # raptor_api_unit module
 
-import generic_path
-import raptor
-import raptor_api
 import unittest
+
+from raptor import generic_path
+import raptor.build
+import raptor.api
 import raptor_tests
 
 class TestRaptorApi(unittest.TestCase):
 			
 	def testContext(self):
-		api = raptor_api.Context()
+		api = raptor.api.Context()
 		
 	def testContextInitialiser(self):
-		r = raptor.Raptor(dotargets=False)
-		api = raptor_api.Context(r)
+		r = raptor.build.Raptor(dotargets=False)
+		api = raptor.api.Context(r)
 		
 	def testAliases(self):
-		r = raptor.Raptor(dotargets=False)
+		r = raptor.build.Raptor(dotargets=False)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
-		api = raptor_api.Context(r)
+		api = raptor.api.Context(r)
 	
 		aliases = api.getaliases() # type == ""
 		self.failUnlessEqual(len(aliases), 4)
@@ -43,7 +44,7 @@ class TestRaptorApi(unittest.TestCase):
 		aliaslist = [a.name for a in aliases] # verify that the list is sorted
 		self.failUnlessEqual(["alias_A","alias_B","s1","s2"], aliaslist)
 		
-		aliases = api.getaliases(raptor_api.ALL) # ignore type
+		aliases = api.getaliases(raptor.api.ALL) # ignore type
 		self.failUnlessEqual(len(aliases), 6)
 		
 		aliases = api.getaliases("X") # type == "X"
@@ -52,10 +53,10 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(aliases[0].meaning, "a.b.c.d")
 	
 	def testConfig(self):
-		r = raptor.Raptor(dotargets=False)
+		r = raptor.build.Raptor(dotargets=False)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
-		api = raptor_api.Context(r)
+		api = raptor.api.Context(r)
 		
 		if r.filesystem == "unix":
 			path = "/home/raptor/foo/bar"
@@ -126,10 +127,10 @@ class TestRaptorApi(unittest.TestCase):
 		self.failUnlessEqual(config.outputpath, path)
 		
 	def testProducts(self):
-		r = raptor.Raptor(dotargets=False)
+		r = raptor.build.Raptor(dotargets=False)
 		r.cache.Load( generic_path.Join(r.home, "test", "configapi", "api.xml") )
 
-		api = raptor_api.Context(r)
+		api = raptor.api.Context(r)
 		
 		products = api.getproducts() # type == "product"
 		self.failUnlessEqual(len(products), 2)

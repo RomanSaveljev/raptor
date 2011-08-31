@@ -28,9 +28,9 @@ else:
 today = datetime.date.today().isoformat()
 print "DATE", today
 
-# insert the date and changeset into the raptor_version.py file
+# insert the date and changeset into the raptor/version.py file
 
-filename = "../../python/raptor_version.py"
+filename = "../../raptor/version.py"
 lines = []
 try:
 	file = open(filename, "r")
@@ -49,7 +49,7 @@ except IOError, ex:
 finally:
 	file.close()
 
-# ... and write the modified raptor_version.py file
+# ... and write the modified raptor/version.py file
 
 try:
 	file = open(filename, "w")

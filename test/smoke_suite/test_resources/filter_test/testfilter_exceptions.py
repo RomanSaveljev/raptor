@@ -17,10 +17,11 @@
 
 import os
 import sys
-import raptor
-import filter_interface
 
-class FilterTestCrash(filter_interface.Filter):
+import raptor.build
+import raptor.filter_interface
+
+class FilterTestCrash(raptor.filter_interface.Filter):
 
 	def open(self, raptor_instance):
 		"""Open a log file for the various I/O methods to write to."""

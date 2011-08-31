@@ -16,7 +16,7 @@
 
 from raptor_tests import SmokeTest
 from raptor_tests import ReplaceEnvs
-from raptor_meta import BldInfFile
+from raptor.meta import BldInfFile
 
 def run():
 	t = SmokeTest()

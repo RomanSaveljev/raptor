@@ -50,7 +50,7 @@ env_var sbs_env[] =
 	{"HOSTPLATFORM32_DIR", "win32"},
 	{"SBS_HOME", "C:\\build_c\\hg\\raptor"},
 	{"__PYTHON__", "C:\\build_c\\Apps\\Python270\\python.exe"},
-	{"PYTHONPATH", "C:\\build_c\\hg\\raptor\\python"},
+	{"PYTHONPATH", "C:\\build_c\\hg\\raptor\\raptor"},
 	{"__MINGW__", "C:\\build_c\\hg\\win32-support\\mingw"},
 	{"__MOUNTOPTIONS__", "-u"},
 	{"__UMOUNTOPTIONS__", "-u"},

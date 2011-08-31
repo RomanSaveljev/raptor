@@ -15,40 +15,41 @@
 #
 # Unit tests for the raptor module
 
-import raptor
-import raptor_version
-import raptor_meta
-import raptor_utilities
+import os
 import re
 import unittest
-import generic_path
 import tempfile
-import os
+
+import raptor.build
+import raptor.version
+import raptor.meta
+import raptor.utilities
+from raptor import generic_path
 
 class TestRaptor(unittest.TestCase):
 
 	def testConstructor(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 		self.failUnless(r)
 
 
 	def testHome(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 		self.failUnless(r.home)
 		try:
-			r = raptor.Raptor("dirname")
+			r = raptor.build.Raptor("dirname")
 			self.fail() # should have had an exception
-		except raptor.BuildCannotProgressException as e:
+		except raptor.build.BuildCannotProgressException as e:
 			# picked up that dirname doesn't exist
 			pass
 		
 
 	def testVersion(self):
-		self.failUnless(re.match("^\d+\.\d+\.", raptor_version.fullversion()))
+		self.failUnless(re.match("^\d+\.\d+\.", raptor.version.fullversion()))
 
 
 	def testCLISupport(self):
-		r = raptor.Raptor()
+		r = raptor.build.Raptor()
 		r.RunQuietly(True)
 		r.AddConfigName("tom")
 		r.AddConfigName("dick")
@@ -81,8 +82,8 @@ class TestRaptor(unittest.TestCase):
 				'-b', 'smoke_suite/test_resources/simple_gui/Bld.inf',
 				'-b', 'smoke_suite/test_resources/tools2/bld.inf',
 				'-c', 'armv5']
-		null_log_instance = raptor_utilities.NullLog()
-		r = raptor.Raptor(commandline=commandline, logger = null_log_instance)
+		null_log_instance = raptor.utilities.NullLog()
+		r = raptor.build.Raptor(commandline=commandline, logger = null_log_instance)
 		# Note that tools2/bld.inf specifies tools2 as the only supported
 		# platform, so it should not appear in the component list at the end
 		# establish an object cache
@@ -96,7 +97,7 @@ class TestRaptor(unittest.TestCase):
 		
 		specs = []
 		specs.extend(generic_specs)
-		metaReader = raptor_meta.MetaReader(r, buildUnitsToBuild)
+		metaReader = raptor.meta.MetaReader(r, buildUnitsToBuild)
 		specs.extend(metaReader.ReadBldInfFiles(layers[0].children,
 				False))
 
@@ -117,7 +118,7 @@ class TestRaptor(unittest.TestCase):
 
 
 	def setUp(self):
-		self.r = raptor.Raptor()
+		self.r = raptor.build.Raptor()
 		
 		self.cwd = generic_path.CurrentDir()
 		self.isFileReturningFalse = lambda: False

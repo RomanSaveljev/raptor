@@ -14,9 +14,9 @@
 # Description: 
 #
 
-from raptor_tests import SmokeTest
-import generic_path
 import os
+
+from raptor_tests import SmokeTest
 
 def run():
 	t = SmokeTest()

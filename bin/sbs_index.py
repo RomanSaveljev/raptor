@@ -22,8 +22,8 @@ import traceback
 script = os.path.abspath(sys.argv[0])
 bindir = os.path.dirname(script)
 # add the Raptor python and plugins directories to the PYTHONPATH
-sys.path.append(os.path.join(bindir, "..", "python"))
-sys.path.append(os.path.join(bindir, "..", "python", "plugins"))
+sys.path.append(os.path.join(bindir, ".."))
+sys.path.append(os.path.join(bindir, "..","raptor","plugins"))
 
 if len(sys.argv) < 3:
 	sys.stderr.write("""usage: %s input_dir1 [input_dir2...] output_index_file
@@ -71,7 +71,7 @@ for t in totals:
 		break
 	
 # write the header of the index
-import filter_interface
+import raptor.filter_interface as filter_interface
 try:
 	index = open(indexfile, "w")
 	index.write("""<html>
@@ -92,7 +92,7 @@ except:
 	traceback.print_exc()
 	sys.exit(1)
 	
-import csv
+import csv 
 grandtotal = [0 for i in filter_interface.Records.TITLES]
 
 for t in totals:

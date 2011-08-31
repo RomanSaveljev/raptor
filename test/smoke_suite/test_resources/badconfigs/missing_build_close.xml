@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<build xmlns="http://symbian.com/xml/build" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symbian.com/xml/build ../../schema/build/2_0.xsd">
+	<!-- build variants for the gccxml_cc1plus C++ language processor -->
+	<var name="gccxml_base" extends="root">
+		<env name='BMCONV' default="$(EPOCROOT)/epoc32/tools/bmconv$(DOTEXE)" type='tool'/>
+		<set name='CC' value="$(EPOCROOT)/epoc32/tools/gccxml_cc1plus$(DOTEXE)" type='tool'/>
+
+	<var name="gccxml_urel" extends="gccxml_base" host="unknown">
+		<set name='FULLVARIANTPATH' value='gccxml/urel'/>
+		<set name='VARIANTTYPE' value='urel'>
+		</set>
+
+		<append name='CDEFS' value='NDEBUG'/>
+		<append name='CFLAGS' value='-fomit-frame-pointer'/>
+	</var>
+
+

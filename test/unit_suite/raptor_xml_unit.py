@@ -12,15 +12,16 @@
 # Contributors:
 #
 # Description: 
-# raptor_xml_unit module
+# raptor.sysdef_unit module
 # This module tests the identification and parsing of XML metadata files
 #
 
 import os
-import generic_path
-import raptor
-import raptor_xml
 import unittest
+
+import raptor.build
+import raptor.sysdef
+from raptor import generic_path
 
 class TestRaptorXML(unittest.TestCase):
 		
@@ -46,8 +47,8 @@ class TestRaptorXML(unittest.TestCase):
 	def setUp(self):
 		self.__logger = TestRaptorXML.Logger()
 		self.__nullSysDefRoot = generic_path.Path("smoke_suite/test_resources")
-		self.__sysDefRoot = generic_path.Join(os.environ[raptor.env],"test/smoke_suite/test_resources")
-		self.__sysDefFileRoot = generic_path.Join(os.environ[raptor.env], "test/metadata/system")
+		self.__sysDefRoot = generic_path.Join(os.environ[raptor.build.env],"test/smoke_suite/test_resources")
+		self.__sysDefFileRoot = generic_path.Join(os.environ[raptor.build.env], "test/metadata/system")
 		
 	def testSystemDefinitionProcessing(self):
 		# Make formatting neater
@@ -57,7 +58,7 @@ class TestRaptorXML(unittest.TestCase):
 		
 		sysdefs = ["1.4.1", "1.3.1", "1.5.1"]
 		for sysdef in sysdefs:
-			systemModel = raptor_xml.SystemModel(self.__logger,
+			systemModel = raptor.sysdef.SystemModel(self.__logger,
 					generic_path.Join(self.__sysDefFileRoot,
 					"system_definition_" + sysdef + ".xml"), self.__sysDefRoot)
 			self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
@@ -67,19 +68,19 @@ class TestRaptorXML(unittest.TestCase):
 		if 'SOURCEROOT' in os.environ:
 			sourceroot = os.environ['SOURCEROOT']
 		os.environ['SOURCEROOT'] = self.__sysDefRoot.GetLocalString()
-		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__nullSysDefRoot)
+		systemModel = raptor.sysdef.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__nullSysDefRoot)
 		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
 
 		del os.environ["SOURCEROOT"]
-		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__sysDefRoot)
+		systemModel = raptor.sysdef.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__sysDefRoot)
 		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
 		
 		os.environ["SOURCEROOT"] = 'i_am_not_a_valid_path_at_all'
-		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__sysDefRoot)
+		systemModel = raptor.sysdef.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_2.0.0.xml"), self.__sysDefRoot)
 		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
 				
 		del os.environ["SOURCEROOT"]
-		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_3.0.0.xml"), self.__sysDefRoot)
+		systemModel = raptor.sysdef.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_3.0.0.xml"), self.__sysDefRoot)
 		self.__compareFileLists(expectedBldInfs, systemModel.GetAllComponents())
 				
 		# Additionally confirm that layers are returned correctly in a v3 context (where <meta/> and <api/> tags are also present)
@@ -88,7 +89,7 @@ class TestRaptorXML(unittest.TestCase):
 		self.assertEqual("testlayer", layers[0])
 				
 		self.__logger.Clear()
-		systemModel = raptor_xml.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_multi_layers.xml"), self.__sysDefRoot)
+		systemModel = raptor.sysdef.SystemModel(self.__logger, generic_path.Join(self.__sysDefFileRoot, "system_definition_multi_layers.xml"), self.__sysDefRoot)
 		self.assertTrue(len(self.__logger.errors) == 0)
 
 		# Confirm components returned from layers are correct
@@ -148,7 +149,7 @@ from raptor_tests import SmokeTest
 def run():
 	t = SmokeTest()
 	t.id = "999"
-	t.name = "raptor_xml_unit"
+	t.name = "raptor.sysdef_unit"
 
 	tests = unittest.makeSuite(TestRaptorXML)
 	result = unittest.TextTestRunner(verbosity=2).run(tests)

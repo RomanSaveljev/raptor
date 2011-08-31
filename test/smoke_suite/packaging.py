@@ -21,7 +21,7 @@ def run():
 	t = SmokeTest()
 	t.description = "Test the build and package of Raptor built applications using the createsis FLM"
 
-	t.name = "native_package"
+	t.name = "native_package_vanilla"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/build_and_package.inf -c armv5 -c winscw"
 	t.targets = [
 		"$(EPOCROOT)/epoc32/data/z/resource/apps/helloworld.mbm",
@@ -42,8 +42,6 @@ def run():
 		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_armv5_debug.sis",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_winscw.sis",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_winscw_debug.sis",
-		"$(EPOCROOT)/epoc32/packaging/helloworld/helloworld_winscw_custom.sis",
-		"$(EPOCROOT)/epoc32/packaging/helloworld/helloworld_armv5_custom.sis",
 		"$(EPOCROOT)/epoc32/data/z/system/install/helloworld_stub.sis",
 		"$(EPOCROOT)/epoc32/release/winscw/urel/z/system/install/helloworld_stub.sis"
 		]
@@ -126,8 +124,21 @@ def run():
 		"helloworld_stub_sis/winscw/urel/helloworld_stub.sis"
 	])
 	t.run()
+	
+	# back-up the targets to clean later - we want them as input for the next
+	# test without having to re-build the component
+	built_targets = t.targets[:]
+	
+	t.name = "native_package_custom"
+	t.targets = [
+		"$(EPOCROOT)/epoc32/packaging/helloworld/helloworld_winscw_custom.sis",
+		"$(EPOCROOT)/epoc32/packaging/helloworld/helloworld_armv5_custom.sis"
+		]
+	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/custom_package.inf -c armv5 -c winscw"
+	t.run()
+	
+	t.targets.extend(built_targets)
 	t.clean()
-
 
 	qmake_call = "$(EPOCROOT)/epoc32/tools/qt/qmake{ext} " + \
 		"-spec $(EPOCROOT)/epoc32/tools/qt/mkspecs/symbian-sbsv2 " + \

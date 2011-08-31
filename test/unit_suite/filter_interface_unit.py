@@ -16,8 +16,9 @@
 # Unit tests for the filter_interface module
 
 import unittest
-import filter_interface
 import sys
+
+from raptor import filter_interface
 
 # No point testing the Filter interface - it's fully abstract
 

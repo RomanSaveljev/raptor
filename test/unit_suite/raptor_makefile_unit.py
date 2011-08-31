@@ -16,11 +16,12 @@
 # tests flm call generation.
 #
 
-from raptor_makefile import *
 import re
 import unittest
 import os
 import sys
+
+from raptor.makefile import *
 
 epocroot = os.path.abspath(os.environ.get('EPOCROOT')).replace("\\","\/")
 topdir = epocroot+"/epoc32/build/raptor_make_unit/"

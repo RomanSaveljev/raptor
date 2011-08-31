@@ -26,9 +26,9 @@ source $SBS_HOME/bin/sbs_env
 
 export SBS_HOME
 
-# call raptor_start.py with the arguments
+# call sbs.py with the arguments
 
-RAPTOR_START="$SBS_HOME/python/raptor_start.py"
+RAPTOR_START="$SBS_HOME/bin/sbs.py"
 
 if [ -e "$RAPTOR_START" ]; then
 	# run the source version
