@@ -734,10 +734,7 @@ include {0}
 			# Can supply options on the commandline to override default settings.
 			if len(self.build.makeOptions) > 0:
 				for o in self.build.makeOptions:
-					if o.find(";") != -1 or  o.find("\\") != -1:
-						command += "  '{0}'".format(o)
-					else:
-						command += "  {0}".format(o)
+					command += " {0}".format(o)
 
 			# Switch off dependency file including?
 			if self.build.noDependInclude or self.build.noDependGenerate:
