@@ -377,29 +377,29 @@ def run():
 	t.antitargets = []
 	# Each product produces a .vmap file per binary
 	t.mustmatch = [
-		"/epoc32/release/armv5.one/udeb/createstaticdll_variant1.dll.vmap",
-		"/epoc32/release/armv5.one/udeb/createstaticdll_variant2.dll.vmap",
-		"/epoc32/release/armv5.one/udeb/createexe_variant3.exe.vmap",
+		"epoc32.release.armv5\.one.udeb.createstaticdll_variant1\.dll\.vmap",
+		"epoc32.release.armv5\.one.udeb.createstaticdll_variant2\.dll\.vmap",
+		"epoc32.release.armv5\.one.udeb.createexe_variant3\.exe\.vmap",
 
-		"/epoc32/release/armv5.one/urel/createstaticdll_variant1.dll.vmap",
-		"/epoc32/release/armv5.one/urel/createstaticdll_variant2.dll.vmap",
-		"/epoc32/release/armv5.one/urel/createexe_variant3.exe.vmap",
+		"epoc32.release.armv5\.one.urel.createstaticdll_variant1\.dll\.vmap",
+		"epoc32.release.armv5\.one.urel.createstaticdll_variant2\.dll\.vmap",
+		"epoc32.release.armv5\.one.urel.createexe_variant3\.exe\.vmap",
 
-		"/epoc32/release/armv5.two/udeb/createstaticdll_variant1.dll.vmap",
-		"/epoc32/release/armv5.two/udeb/createstaticdll_variant2.dll.vmap",
-		"/epoc32/release/armv5.two/udeb/createexe_variant3.exe.vmap",
+		"epoc32.release.armv5\.two.udeb.createstaticdll_variant1\.dll\.vmap",
+		"epoc32.release.armv5\.two.udeb.createstaticdll_variant2\.dll\.vmap",
+		"epoc32.release.armv5\.two.udeb.createexe_variant3\.exe\.vmap",
 		
-		"/epoc32/release/armv5.two/urel/createstaticdll_variant1.dll.vmap",
-		"/epoc32/release/armv5.two/urel/createstaticdll_variant2.dll.vmap",
-		"/epoc32/release/armv5.two/urel/createexe_variant3.exe.vmap",
+		"epoc32.release.armv5\.two.urel.createstaticdll_variant1\.dll\.vmap",
+		"epoc32.release.armv5\.two.urel.createstaticdll_variant2\.dll\.vmap",
+		"epoc32.release.armv5\.two.urel.createexe_variant3\.exe\.vmap",
 
-		"/epoc32/release/armv5.three/udeb/createstaticdll_variant1.dll.vmap",
-		"/epoc32/release/armv5.three/udeb/createstaticdll_variant2.dll.vmap",
-		"/epoc32/release/armv5.three/udeb/createexe_variant3.exe.vmap",
+		"epoc32.release.armv5\.three.udeb.createstaticdll_variant1\.dll\.vmap",
+		"epoc32.release.armv5\.three.udeb.createstaticdll_variant2\.dll\.vmap",
+		"epoc32.release.armv5\.three.udeb.createexe_variant3\.exe\.vmap",
 		
-		"/epoc32/release/armv5.three/urel/createstaticdll_variant1.dll.vmap",
-		"/epoc32/release/armv5.three/urel/createstaticdll_variant2.dll.vmap",
-		"/epoc32/release/armv5.three/urel/createexe_variant3.exe.vmap",
+		"epoc32.release.armv5\.three.urel.createstaticdll_variant1\.dll\.vmap",
+		"epoc32.release.armv5\.three.urel.createstaticdll_variant2\.dll\.vmap",
+		"epoc32.release.armv5\.three.urel.createexe_variant3\.exe\.vmap",
 		]
 	t.run()
 
