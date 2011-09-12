@@ -111,6 +111,8 @@ Section "Install Raptor" INSTALLRAPTOR
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\lib\*.*
     SetOutPath "$INSTDIR\python"
     File /r /x distribution.policy.s60 /x *.pyc /x *.pydevproject /x *.project ${RAPTOR_LOCATION}\python\*.*
+    SetOutPath "$INSTDIR\raptor"
+    File /r /x distribution.policy.s60 /x *.pyc /x *.pydevproject /x *.project ${RAPTOR_LOCATION}\raptor\*.*
     SetOutPath "$INSTDIR\schema"
     File /r /x distribution.policy.s60 ${RAPTOR_LOCATION}\schema\*.*
     SetOutPath "$INSTDIR\style"
@@ -315,6 +317,7 @@ Section "Uninstall"
     RmDir /r $INSTDIR\examples
     RmDir /r $INSTDIR\lib
     RmDir /r $INSTDIR\python
+    RmDir /r $INSTDIR\raptor
     RmDir /r $INSTDIR\schema
     RmDir /r $INSTDIR\style
     RmDir /r $INSTDIR\win32
