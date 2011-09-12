@@ -465,7 +465,7 @@ $(EXPTARGET): $(DEFFILE) $(POSTLINKER)
 	$(call startrule,expgen) \
 	$(POSTLINKER) \
 	   --definput=$$(call dblquote,$(DEFFILE)) \
-	   --dump=a $(if $(POSTLINKER_SUPPORTS_ASMTYPE),$(POSTLINKER_ASM_OPTION),) \
+	   --dump=a $(POSTLINKER_ASM_OPTION) \
 	   --output=$(call dblquote,$(EXPTARGETASMFILE)) && \
 	$(ASM) $(ASM_FLAGS) $(TARGET_ARCH_OPTION) $(AAPCS_OPTION) $(ASM_OUTPUT_OPTION) $$(call dblquote, $$@) $(EXPTARGETASMFILE)  \
 	$(call endrule,expgen)
@@ -544,7 +544,7 @@ LINKOBJECTS:=$(call relocatefiles,$(INTERMEDIATEPATH),$(SOURCE))
 LINKOBJECTS:=$(foreach FILE,$(LINKOBJECTS),$(basename $(FILE))$(if $(filter $(addprefix %,$(CIAFILEEXTENSIONS)),$(FILE)),_).o)
 
 
-# Set up variables if multifile compilation is being used. 
+# Set up variables if multifile compilation is being used.
 # Files are grouped in separate multifile compilations based on their extension
 # CPP and C files get separate multifile objects and .via files
 # Dependency files don't work when using multifile compilation
@@ -674,7 +674,7 @@ endif
 ifneq ($(FIX_EXPORTS_USING_EXP_FILE),)
   BUILDMARKER_EXPFILE:=$(call sanitise,EXPFILE_$(TARGET).lib.exp)
   ifeq ($(DEFFILE),)
-    ifneq ($(AUTOEXPORTS),)     
+    ifneq ($(AUTOEXPORTS),)
       ifeq ($($(BUILDMARKER_EXPFILE)),)
         $(eval $(call e32link_genlibexpfile,exports))
         $(eval $(BUILDMARKER_EXPFILE):=$(INTERMEDIATEPATH)/$(TARGET).lib.exp)
@@ -748,8 +748,8 @@ endif # if TARGETTYPE lib
 
 
 ## Run trace compiler ##############################################
-# The following variable defines a prereq that source code will 
-# depend on so that tracing happens before compilation.  Must be 
+# The following variable defines a prereq that source code will
+# depend on so that tracing happens before compilation.  Must be
 # blank by default so that if tracing is off then there will be
 # no dependency.  The tracecompiler code will set it if this
 # project actually does depend on trace-generated headers:

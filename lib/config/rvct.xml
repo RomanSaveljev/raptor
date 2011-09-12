@@ -79,7 +79,7 @@
 		<set name="LISTING_OPTION" value="-S"/>
 		<set name="NO_EXCEPTIONS" value="--no_exceptions --no_exceptions_unwind"/>
 		<set name="NO_UNALIGNED_ACCESS" value="$(CC.NO_UNALIGNED_ACCESS)"/>
-		<set name='POSTLINKER_ASM_OPTION' value="--asm=armas"/>
+		<set name='POSTLINKER_ASM_OPTION' value=""/>
 		<set name="PREINCLUDE" value="$(RVCT_PRE_INCLUDE)"/>
 		<set name="PREINCLUDE_OPTION" value="--preinclude"/>
 		<set name="PREPROCESSOR_OPTION" value="-E"/>
@@ -93,7 +93,7 @@
 		<set name="STATIC_LIBS_PATH" value="$(RVCTLIB)/armlib"/>
 		<set name="STDCPP_INCLUDE" value="$(EPOCINCLUDE)/stdapis"/>
 		<set name="STDLIB_OPTION" value="--no_scanlib"/>
-		<set name="SUPPORTS_LINKER_FEEDBACK" value="1"/>		
+		<set name="SUPPORTS_LINKER_FEEDBACK" value="1"/>
 		<set name="SYMBIAN_LD_MESSAGE_OPTION" value="$(LD_WARNINGS_CONTROL_OPTION) $(LD_ERRORS_CONTROL_OPTION)"/>
 		<set name="SYMVER_OPTION" value="--symver_soname"/>
 		<set name="TARGET_RELOCATION_OPTION" value=""/>
