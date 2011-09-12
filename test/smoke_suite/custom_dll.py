@@ -26,10 +26,10 @@ def run():
 	if t.onWindows:
 		OLD_ELF2E32 += ".exe"
 
-	# Commands for using the new (i.e. the one with the --asm option) and old
-	# version of elf2e32.
-	new_cmd = "sbs -b {0} -c {{0}}".format(BLD_INF)
-	old_cmd = "SBS_ELF2E32={0}".format(OLD_ELF2E32) + " " + new_cmd
+	# Command templates for using the new and the old version of elf2e32,
+	# respectively. The new version supports the --asm option.
+	new_cmd = "sbs -b " + BLD_INF + " -c {0}"
+	old_cmd = "SBS_ELF2E32=" + OLD_ELF2E32 + " " + new_cmd
 
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/lib/customdll.dso",
@@ -39,8 +39,10 @@ def run():
 		"$(EPOCROOT)/epoc32/release/armv5/urel/customdll.dll",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/customdll.dll.map"
 		]
+
+	# This ensures that the "expgen" stage is executed for each call to run().
 	t.addbuildtargets(BLD_INF, [
-		"customdll_dll/armv5/customdll{000a0000}.",
+		"customdll_dll/armv5/customdll{000a0000}.s",
 		"customdll_dll/armv5/customdll{000a0000}.exp"])
 
 	t.name = "custom_dll_rvct_new_elf2e32"
