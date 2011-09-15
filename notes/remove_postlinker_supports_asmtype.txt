@@ -5,7 +5,7 @@ In the "expgen" stage, Raptor invokes elf2e32 to generate an assembly file. The
 assembly file is then compiled and linked into the target component.
 
 Originally this only worked for RVCT, because the assembly file was written in
-RVCT's syntax. The Symbian Foundation wanted this to work for GCCE as well, so a new
+RVCT's syntax. The Symbian Foundation wanted it to work for GCCE as well, so a new
 option, --asm=gas|armas, was added to elf2e32. When invoked with --asm=gas, GNU
 assembly syntax is used. When invoked with --asm=armas, RVCT assembly syntax is
 used. The latter is also the default.
@@ -34,6 +34,6 @@ We can get rid of the first fault case by not using --asm for RVCT at all. Then 
 is fine for RVCT. Hence POSTLINKER_SUPPORTS_ASMTYPE isn't needed for RVCT.
 
 We can get rid of the last fault case by always using --asm for GCCE. That leaves
-the combination GCCE + OLD elf2e32, but that is a problem that doesn't have a
+the combination GCCE + old elf2e32, but that is a problem that doesn't have a
 solution. Hence POSTLINKER_SUPPORTS_ASMTYPE isn't useful for GCCE.
 
