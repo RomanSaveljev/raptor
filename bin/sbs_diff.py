@@ -22,8 +22,7 @@ import optparse
 import os
 import sys
 
-# raptor packages are in ../python relative to this script
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "python"))
+import sbs_env
 import allo.diff
 
 parser = optparse.OptionParser(usage = """%prog [options] dir_or_file1 dir_or_file2
