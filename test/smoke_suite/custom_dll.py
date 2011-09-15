@@ -19,17 +19,21 @@ from raptor_tests import SmokeTest
 def run():
 
 	t = SmokeTest()
+	t.description = """Test the 'expgen' stage with different combinations of
+				compiler (RVCT and GCC-E) and elf2e32 version (with and without
+				--asm option)."""
+
 	t.usebash = True
 
-	BLD_INF = "smoke_suite/test_resources/custom_dll/bld.inf"
-	OLD_ELF2E32 = "$(SBS_HOME)/test/smoke_suite/test_resources/custom_dll/elf2e32_old"
+	bld_inf = "smoke_suite/test_resources/custom_dll/bld.inf"
+	old_elf2e32 = "$(SBS_HOME)/test/smoke_suite/test_resources/custom_dll/elf2e32_old"
 	if t.onWindows:
-		OLD_ELF2E32 += ".exe"
+		old_elf2e32 += ".exe"
 
 	# Command templates for using the new and the old version of elf2e32,
 	# respectively. The new version supports the --asm option.
-	new_cmd = "sbs -b " + BLD_INF + " -c {0}"
-	old_cmd = "SBS_ELF2E32=" + OLD_ELF2E32 + " " + new_cmd
+	new_cmd = "sbs -b " + bld_inf + " -c {0}"
+	old_cmd = "SBS_ELF2E32=" + old_elf2e32 + " " + new_cmd
 
 	t.targets = [
 		"$(EPOCROOT)/epoc32/release/armv5/lib/customdll.dso",
@@ -41,7 +45,7 @@ def run():
 		]
 
 	# This ensures that the "expgen" stage is executed for each call to run().
-	t.addbuildtargets(BLD_INF, [
+	t.addbuildtargets(bld_inf, [
 		"customdll_dll/armv5/customdll{000a0000}.s",
 		"customdll_dll/armv5/customdll{000a0000}.exp"])
 
