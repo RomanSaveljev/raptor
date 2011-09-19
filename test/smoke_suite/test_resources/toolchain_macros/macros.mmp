@@ -68,3 +68,7 @@ SOURCE			macros.cpp
 #ifdef GCCE_4_4
 #warning GCCE_4_4
 #endif
+
+#ifdef GCCE_4_5
+#warning GCCE_4_5
+#endif

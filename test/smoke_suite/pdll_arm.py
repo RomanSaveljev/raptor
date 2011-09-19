@@ -89,7 +89,7 @@ def run():
 	t.run()
 	
 	t.name = "pdll_armv7_gcce"
-	t.command = command.format("arm.v7.udeb.gcce4_3_2 -c arm.v7.urel.gcce4_3_2")
+	t.command = command.format("arm.v7.udeb.gcce4_5_1 -c arm.v7.urel.gcce4_3_2")
 	t.targets = [p.replace("{0}","armv7") for p in maintargets]
 	t.addbuildtargets('smoke_suite/test_resources/simple_dll/pbld.inf', [p.format("armv7") for p in buildtargets])
 	t.mustmatch = mustmatch

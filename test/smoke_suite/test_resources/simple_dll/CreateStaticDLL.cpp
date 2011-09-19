@@ -24,7 +24,7 @@
 
 // construct/destruct
 
-#if !defined(__ARMCC_4__) and !defined(__X86__)
+#if !defined(__ARMCC_4__) && !defined(__X86__) && !defined(__GCCE_4_5__)
 extern "C" void __ARM_switch8();
 
 void sbs_test()

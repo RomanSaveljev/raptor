@@ -67,5 +67,9 @@ TInt E32Main()
 #warning __GCCE_4_4__
 #endif
 
+#ifdef __GCCE_4_5__
+#warning __GCCE_4_5__
+#endif
+
 	return 0;
 	}

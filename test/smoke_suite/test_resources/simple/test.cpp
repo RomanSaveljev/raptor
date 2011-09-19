@@ -27,7 +27,8 @@ TInt test5();
 TInt test6();
 
 TInt E32Main()
-{
+	{
+	#ifdef __X86__
 	test1();
 	test2();
 	test3();
@@ -35,4 +36,20 @@ TInt E32Main()
 	test5();
 	test6();
 	return 0;
-}
+	#else
+	try
+		{
+		test1();
+		test2();
+		test3();
+		test4();
+		test5();
+		test6();
+		return 0;
+		}
+	catch (...)
+		{
+		return 1;
+		}
+	#endif
+	}

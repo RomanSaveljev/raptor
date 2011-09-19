@@ -56,7 +56,7 @@ def run():
 
 	t.id = "0097c"
 	t.name = "dll_armv6_gcce"
-	t.command = rootcommand + " -c arm.v6.udeb.gcce4_3_2 -c arm.v6.urel.gcce4_3_2"
+	t.command = rootcommand + " -c arm.v6.udeb.gcce4_5_1 -c arm.v6.urel.gcce4_5_1"
 	t.targets = targets
 	t.antitargets = antitargets
 	t.addbuildtargets("smoke_suite/test_resources/simple_dll/bld.inf", buildtargets)
