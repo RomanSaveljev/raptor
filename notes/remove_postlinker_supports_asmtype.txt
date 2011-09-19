@@ -10,14 +10,14 @@ option, --asm=gas|armas, was added to elf2e32. When invoked with --asm=gas, GNU
 assembly syntax is used. When invoked with --asm=armas, RVCT assembly syntax is
 used. The latter is also the default.
 
-Since this is a new option, Raptor can't assume that it is always available. Unless
-the configuration variable POSTLINKER_SUPPORTS_ASMTYPE is set, Raptor will not
-invoke elf2e32 with the --asm option.
+Since this was a new option, Raptor couldn't assume that it was always available.
+Unless the configuration variable POSTLINKER_SUPPORTS_ASMTYPE was set, Raptor would
+*not* invoke elf2e32 with the --asm option.
 
-It is up to the user (or the people who creates epoc32/sbs_config) to set the
-variable, presumably by creating a new variant. See
-https://bugreports.qt.nokia.com/browse/QTSDK-759 for an example of when people have
-had problems with this.
+It was up to the user (or the people responsible for the content in
+epoc32/sbs_config) to set the variable, presumably by creating a new variant. See
+https://bugreports.qt.nokia.com/browse/QTSDK-759 for an example of when people got
+into trouble with this.
 
 Let "new" be a version of elf2e32 that supports the --asm option and "old" a version
 that doesn't. Then we have the following fault cases for different combinations of
@@ -30,10 +30,11 @@ compiler and elf2e32 version:
       GCCE   |   OLD   | Fails whether --asm is used or not
       GCCE   |   NEW   | --asm not used
 
-We can get rid of the first fault case by not using --asm for RVCT at all. Then all
-is fine for RVCT. Hence POSTLINKER_SUPPORTS_ASMTYPE isn't needed for RVCT.
+We got rid of the first fault case by not using --asm for RVCT at all. Hence
+POSTLINKER_SUPPORTS_ASMTYPE wasn't needed anymore for RVCT.
 
-We can get rid of the last fault case by always using --asm for GCCE. That leaves
-the combination GCCE + old elf2e32, but that is a problem that doesn't have a
-solution. Hence POSTLINKER_SUPPORTS_ASMTYPE isn't useful for GCCE.
+We got rid of the last fault case by always using --asm for GCCE. That leaves the
+combination GCCE + old elf2e32, but that is a problem that doesn't have a solution.
+Hence POSTLINKER_SUPPORTS_ASMTYPE wasn't really useful for GCCE either and could be
+removed.
 

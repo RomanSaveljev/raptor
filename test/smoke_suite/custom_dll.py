@@ -62,4 +62,5 @@ def run():
 	t.run()
 
 	t.name = "custom_dll"
+	t.print_result()
 	return t
