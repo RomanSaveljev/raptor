@@ -21,6 +21,12 @@ SetCompressor /SOLID lzma
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "WinMessages.nsh"
+!include "FileFunc.nsh"
+
+# Enable users to specify command line parameters and enable
+# the installer to process them
+!insertmacro GetParameters
+!insertmacro GetOptions
 
 # Extra plugin includes
 !include "nsDialogs.nsh"
@@ -43,7 +49,7 @@ Var NOENVCHANGES_HWND    # HWND of radio button control for file-only installati
 Var USERONLYINSTALL_STATE # State of user-only radio button
 Var ALLUSERSINSTALL_STATE # State of system radio button
 Var NOENVCHANGES_STATE # State of file-only installation radio button
-Var INSTALL_TYPE # Type of installer ("USR" or "SYS")
+Var INSTALL_TYPE # Type of installer ("USR" or "SYS" or "NO_ENV")
 
 # Custom includes (depend on above variables so much be here)
 !include "raptorinstallerutils.nsh" # Functions and macros for handling environment variables
@@ -93,7 +99,14 @@ Page custom UserOrSysInstall UserOrSysInstallLeave
 
 ######################## .onInit function ########################
 Function .onInit
+  ${If} ${SILENT} 
+    ${GetParameters} $R0
+    ClearErrors
+    ${GetOptions} $R0 /INSTALL_TYPE= $INSTALL_TYPE
+  ${Else}
     StrCpy $INSTDIR "C:\Apps\Raptor"
+  ${EndIf}
+
 FunctionEnd
 
 #################### Sections in the installer ####################
