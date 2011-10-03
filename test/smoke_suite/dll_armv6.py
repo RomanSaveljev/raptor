@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -39,7 +39,6 @@ def run():
 		"createstaticdll_dll/armv6/urel/armv6_specific.o"
 	]
 	
-	t.id = "0097a"
 	t.name = "dll_armv6_rvct"
 	t.command = rootcommand + " -c armv6"
 	t.targets = targets
@@ -47,14 +46,12 @@ def run():
 	t.addbuildtargets("smoke_suite/test_resources/simple_dll/bld.inf", buildtargets)
 	t.run()
 
-	t.id = "0097b"
 	t.name = "dll_armv6_clean"
 	t.command = rootcommand + " -c armv6 clean"
 	t.targets = []
 	t.antitargets = []
 	t.run()
 
-	t.id = "0097c"
 	t.name = "dll_armv6_gcce"
 	t.command = rootcommand + " -c arm.v6.udeb.gcce4_5_1 -c arm.v6.urel.gcce4_5_1"
 	t.targets = targets
@@ -62,7 +59,6 @@ def run():
 	t.addbuildtargets("smoke_suite/test_resources/simple_dll/bld.inf", buildtargets)
 	t.run()
 
-	t.id = "97"
 	t.name = "dll_armv6"
 	t.print_result()
 	return t
