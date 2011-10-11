@@ -35,13 +35,11 @@ def run():
 	rootcommand = "sbs -b smoke_suite/test_resources/toolchain_macros/bld.inf -c arm.v5.urel."
 	macromatch = ": #warning( directive:)? {0}(</warning>)?$"
 
-	count = 0
 	for toolchain in sorted(toolchains.keys()):
 		t.name = rootname.format(toolchain, "clean")
 		t.command = rootcommand + toolchain + " clean"
 		t.mustmatch_singleline = []
 		t.run()
-		count += 1
 
 		t.name = rootname.format(toolchain, "build")
 		t.command = rootcommand + toolchain
@@ -50,7 +48,6 @@ def run():
 			mustmatch.append(macromatch.format(macro))
 		t.mustmatch_singleline = mustmatch
 		t.run()
-		count += 1
 
 	t.name = "toolchain_macros"
 	t.print_result()
