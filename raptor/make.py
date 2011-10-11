@@ -557,8 +557,8 @@ include {0}
 										  k, spec.name))
 						value = ""
 
-				parameters.append((k, value))
 				md5hash.update(value.encode("utf-8"))
+				parameters.append((k, value))
 
 			# parameters required by the interface
 			for p in iface.GetParams(self.build.cache):
