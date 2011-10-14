@@ -1410,8 +1410,13 @@ class ToolSet(object):
 		# The command shell is a critical tool because all the other tools run
 		# within it so we must check for it first. It has to be in the path.
 		# bash 4 is preferred, 3 is accepted
+		
+		# to avoid L10n issues with toolcheck and cygwin use the minimal C locale
+		c_locale_env = os.environ.copy()
+		c_locale_env['LANG'] = 'C'
+		
 		try:
-			p = subprocess.Popen(args = [ToolSet.shell, '--version'], bufsize=1024, shell = False, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True)
+			p = subprocess.Popen(args = [ToolSet.shell, '--version'], bufsize=1024, shell = False, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, env = c_locale_env, universal_newlines = True)
 			shellversion_out, errtxt = p.communicate()
 			if ToolSet.shell_re.search(shellversion_out) == None:
 				self.log.Error("A critical tool, '{0}', did not return the required version '{1}':\n{2}\nPlease check that '{3}' is in the path.".format(ToolSet.shell, ToolSet.shell_version, shellversion_out, ToolSet.shell))
