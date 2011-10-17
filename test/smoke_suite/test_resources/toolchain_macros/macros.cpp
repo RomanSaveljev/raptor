@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -65,6 +65,10 @@ TInt E32Main()
 
 #ifdef __GCCE_4_4__
 #warning __GCCE_4_4__
+#endif
+
+#ifdef __GCCE_4_5__
+#warning __GCCE_4_5__
 #endif
 
 	return 0;
