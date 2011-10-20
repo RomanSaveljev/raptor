@@ -67,7 +67,7 @@
 		<set name="LINKER_DEFAULT_LIBS" value=""/>
 		<set name="LINKER_DEFAULT_LIB_PATHS" value=""/>
 		<set name="LINKER_ENTRY_OPTION" value="--entry"/>
-		<set name='LINKER_FEEDBACK_OPTION' value="$(LINKER_REMOVE_OPTION) --feedback=" />
+		<set name='LINKER_FEEDBACK_OPTION' value="--feedback=" />
 		<set name="LINKER_GROUP_END_OPTION" value=""/>
 		<set name="LINKER_GROUP_START_OPTION" value=""/>
 		<set name="LINKER_INLINE_OPTION" value="--inline"/>
