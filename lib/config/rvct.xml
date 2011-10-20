@@ -67,12 +67,13 @@
 		<set name="LINKER_DEFAULT_LIBS" value=""/>
 		<set name="LINKER_DEFAULT_LIB_PATHS" value=""/>
 		<set name="LINKER_ENTRY_OPTION" value="--entry"/>
-		<set name='LINKER_FEEDBACK_OPTION' value='--remove --feedback=' />
+		<set name='LINKER_FEEDBACK_OPTION' value="$(LINKER_REMOVE_OPTION) --feedback=" />
 		<set name="LINKER_GROUP_END_OPTION" value=""/>
 		<set name="LINKER_GROUP_START_OPTION" value=""/>
 		<set name="LINKER_INLINE_OPTION" value="--inline"/>
 		<set name="LINKER_MISC_FLAGS" value="$(LICENSERETRY_OPTION)"/>
 		<set name="LINKER_NODEBUG_OPTION" value=""/>
+		<set name="LINKER_REMOVE_OPTION" value="--remove"/>
 		<set name="LINKER_SCRIPT_FILE_OPTION" value=""/>
 		<set name="LINKER_SYMBOLS_FILE_OPTION" value="--list"/>
 		<set name="LINKER_SYMBOLS_OPTION" value="--symbols"/>

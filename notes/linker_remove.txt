@@ -1,0 +1,2 @@
+Linker --remove enables removal of unused sections from the ELF binaries.
+This option is enabled by default in the RVCT builds

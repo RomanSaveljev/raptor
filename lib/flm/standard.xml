@@ -152,6 +152,7 @@
 		<param name='LINKER_GROUP_END_OPTION'/>
 		<param name='LINKER_MISC_FLAGS'/>
 		<param name='LINKER_NODEBUG_OPTION'/>
+		<param name='LINKER_REMOVE_OPTION' default=''/>
 		<param name='LINKER_SYMBOLS_FILE_OPTION'/>
 		<param name='LINKER_SYMBOLS_OPTION'/>
 		<param name='LINKERFEEDBACK' default='' />
