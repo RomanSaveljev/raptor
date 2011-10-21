@@ -23,8 +23,8 @@ def run():
 	t.command = "sbs -b smoke_suite/test_resources/simple_dll/bld.inf -c arm.v5.udeb.rvct4_0.linkerfeedback -c arm.v5.urel.rvct4_0.linkerfeedback -f-"
 
 	gen_fdb_match = [
-		".*armlink.*-o.*epoc32/release/armv5/udeb/createstaticdll.dll.sym.*--remove.*--feedback=.*createstaticdll_dll/armv5/udeb/createstaticdll_udeb_feedback.fdb.*",
-		".*armlink.*-o.*epoc32/release/armv5/urel/createstaticdll.dll.sym.*--remove.*--feedback=.*createstaticdll_dll/armv5/urel/createstaticdll_urel_feedback.fdb.*"
+		".*armlink.*-o.*epoc32/release/armv5/udeb/createstaticdll.dll.sym.*--feedback=.*createstaticdll_dll/armv5/udeb/createstaticdll_udeb_feedback.fdb.*",
+		".*armlink.*-o.*epoc32/release/armv5/urel/createstaticdll.dll.sym.*--feedback=.*createstaticdll_dll/armv5/urel/createstaticdll_urel_feedback.fdb.*"
 		]
 	use_fdb_match = [
 		".*armcc.*--feedback=.*createstaticdll_dll/armv5/udeb/createstaticdll_udeb_feedback.fdb.*test/smoke_suite/test_resources/simple_dll/CreateStaticDLL.cpp.*",
