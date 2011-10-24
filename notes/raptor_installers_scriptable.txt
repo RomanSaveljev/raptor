@@ -1,0 +1,36 @@
+Making the Raptor installers scriptable
+
+In order to improve testing of the packaging of Raptor, the Raptor installers 
+need to be able to run unattended in silent mode.
+
+Windows installer:
+
+Some small changes were required to the NSIS code to enable this. 
+Specifically, the installer had to be able to detect the installation type,
+that is whether to set the system path, the user path, or to not update the 
+environment at all.
+
+The installer can now be run in silent mode like this:
+
+sbs-2.XX.YY.exe /S /SD /INSTALL_TYPE=NO_ENV /D=C:\APPS\Raptor
+
+Explanation of the flags:
+
+/S run in silent mode
+/SD accept the default choice in all message dialog boxes  
+/INSTALL_TYPE installation type: valid values are
+              NO_ENV - do not set the PATH
+              USR - add Raptor's bin directory to the current user's PATH
+              SYS - add Raptor's bin directory to the system PATH (all users)
+              This is case sensitive and anything else is an error.
+/D installation directory: does not have to exist, but must be a valid 
+   directory name.
+
+*N.B.*: due to a parsing oddity in NSIS installers, the /D flag must come last 
+otherwise everything following it is used as the installation directory name.
+
+When run from a command prompt (in silent mode or not), sbs-2.XX.YY.exe is 
+launched as a separate process, as it is not a console application. Therefore, 
+the best way to monitor progress of the installer in silent mode is to run it 
+via Python's subprocess.Popen API with shell=False, and to wait on the process 
+to exit. The exit code can also be obtained in this way.
