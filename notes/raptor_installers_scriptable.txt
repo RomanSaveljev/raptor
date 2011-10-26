@@ -1,9 +1,11 @@
 Making the Raptor installers scriptable
+---------------------------------------
 
 In order to improve testing of the packaging of Raptor, the Raptor installers 
-need to be able to run unattended in silent mode.
+need to be able to run unattended in "silent" mode.
 
-Windows installer:
+Windows installer
+-----------------
 
 Some small changes were required to the NSIS code to enable this. 
 Specifically, the installer had to be able to detect the installation type,
@@ -34,3 +36,35 @@ launched as a separate process, as it is not a console application. Therefore,
 the best way to monitor progress of the installer in silent mode is to run it 
 via Python's subprocess.Popen API with shell=False, and to wait on the process 
 to exit. The exit code can also be obtained in this way.
+
+Running in interactive/GUI mode continues to function as before.
+
+Linux installer
+---------------
+
+The Linux installer is created using the makeself.sh script, which packages a 
+shell script and tar archive into a single .run file. The .run file unpacks 
+the tar archive and can then runs a shell script that is embedded in the 
+archive. In the case of Raptor, the embedded script is bin/install_raptor.sh. 
+The double-dash, --, passes following arguments to the embedded script.
+
+Small changes were required to the install_raptor.sh script. As for the 
+Windows installer, the installation directory has to be specified; in addition 
+the script can be run in "silent" mode, i.e. in a non-interactive mode.
+
+The installer can now be run in silent mode like this:
+
+./sbs-2.XX.YY-linux-ARCH-libc2_ZZ.run -- -s -i /my/installation/dir/for/raptor
+
+As the .run file is itself a script, the double-dash, --, is required to pass 
+the "-s -i /my/installation/dir/for/raptor" to the embedded script.
+
+Explanation of the flags:
+
+-s run in silent mode
+-i installation directory; if missing or not given a value the script exits
+   with an error. If used without -s, -i is ignored.
+
+Running in interactive mode continues to function as before and uses the 
+dialog utility.
+
