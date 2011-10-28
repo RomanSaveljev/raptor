@@ -290,7 +290,7 @@ Function DirLeave
 	StrCpy $0 " "
 	${REQuoteMeta} $9 $0 # $9 now contains the meta-quoted version of $0
 	${If} $INSTDIR =~ $9
-		MessageBox MB_OK|MB_ICONSTOP "Please choose a directory without a space in it."
+		MessageBox MB_OK|MB_ICONSTOP "Please choose a directory without a space in it." /SD IDOK
 		Abort
 	${EndIf}
 FunctionEnd

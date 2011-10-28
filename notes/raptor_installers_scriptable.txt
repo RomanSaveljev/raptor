@@ -14,12 +14,11 @@ environment at all.
 
 The installer can now be run in silent mode like this:
 
-sbs-2.XX.YY.exe /S /SD /INSTALL_TYPE=NO_ENV /D=C:\APPS\Raptor
+sbs-2.XX.YY.exe /S /INSTALL_TYPE=NO_ENV /D=C:\APPS\Raptor
 
 Explanation of the flags:
 
 /S run in silent mode
-/SD accept the default choice in all message dialog boxes  
 /INSTALL_TYPE installation type: valid values are
               NO_ENV - do not set the PATH
               USR - add Raptor's bin directory to the current user's PATH

@@ -8,8 +8,8 @@
 #    the -i option is required; if the -i is missing, the script exits
 # -i specifies the installation directory; this is ignored in non-silent mode
 
-# SILENT is the blank environment variable
-export SILENT=$RAPTOR_BLANK_VARIABLE$RAPTOR_BLANK_VARIABLE
+# SILENT is the empty string
+export SILENT=""
 export SYMBIANHOME=/opt/symbian
 
 while getopts si: VARNAME; do
