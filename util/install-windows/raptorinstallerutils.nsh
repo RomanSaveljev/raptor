@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -53,7 +53,7 @@
 		!insertmacro ReadSysEnvVar ${VARNAME} ${RESULT}
 	${Else}
 		# Something has gone wrong!
-		MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)."
+		MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)." /SD IDOK
 	${EndIf}
 !macroend
 
@@ -86,7 +86,7 @@ ${ElseIf} $ALLUSERSINSTALL_STATE == ${BST_CHECKED}
 	!insertmacro ReadSysPath ${OUTPUT}
 ${Else}
 	# Something has gone wrong!
-	MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)."
+	MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)." /SD IDOK
 ${EndIf}
 !macroend
 
@@ -153,7 +153,7 @@ Function WriteEnvVar
 			!insertmacro WriteSysEnvVarExp $0 $1
 		${Else}
 			# Something has gone wrong!
-			MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)."
+			MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)." /SD IDOK
 		${EndIf}
 	${Else} # Normal string env var
 		# Write the env var to the appropriate place
@@ -167,7 +167,7 @@ Function WriteEnvVar
 			!insertmacro WriteSysEnvVar $0 $1
 		${Else}
 			# Something has gone wrong!
-			MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)."
+			MessageBox MB_OK|MB_ICONSTOP "Failed to determine installation type (Current User or All Users)." /SD IDOK
 		${EndIf}
 	${EndIf}
 FunctionEnd

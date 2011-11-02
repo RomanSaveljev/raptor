@@ -1,0 +1,69 @@
+Making the Raptor installers scriptable
+---------------------------------------
+
+In order to improve testing of the packaging of Raptor, the Raptor installers 
+need to be able to run unattended in "silent" mode.
+
+Windows installer
+-----------------
+
+Some small changes were required to the NSIS code to enable this. 
+Specifically, the installer had to be able to detect the installation type,
+that is whether to set the system path, the user path, or to not update the 
+environment at all.
+
+The installer can now be run in silent mode like this:
+
+sbs-2.XX.YY.exe /S /INSTALL_TYPE=NO_ENV /D=C:\APPS\Raptor
+
+Explanation of the flags:
+
+/S run in silent mode
+/INSTALL_TYPE installation type: valid values are
+              NO_ENV - do not set the PATH
+              USR - add Raptor's bin directory to the current user's PATH
+              SYS - add Raptor's bin directory to the system PATH (all users)
+              This is case sensitive and anything else is an error.
+/D installation directory: does not have to exist, but must be a valid 
+   directory name.
+
+*N.B.*: due to a parsing oddity in NSIS installers, the /D flag must come last 
+otherwise everything following it is used as the installation directory name.
+
+When run from a command prompt (in silent mode or not), sbs-2.XX.YY.exe is 
+launched as a separate process, as it is not a console application. Therefore, 
+the best way to monitor progress of the installer in silent mode is to run it 
+via Python's subprocess.Popen API with shell=False, and to wait on the process 
+to exit. The exit code can also be obtained in this way.
+
+Running in interactive/GUI mode continues to function as before.
+
+Linux installer
+---------------
+
+The Linux installer is created using the makeself.sh script, which packages a 
+shell script and tar archive into a single .run file. The .run file unpacks 
+the tar archive and can then runs a shell script that is embedded in the 
+archive. In the case of Raptor, the embedded script is bin/install_raptor.sh. 
+The double-dash, --, passes following arguments to the embedded script.
+
+Small changes were required to the install_raptor.sh script. As for the 
+Windows installer, the installation directory has to be specified; in addition 
+the script can be run in "silent" mode, i.e. in a non-interactive mode.
+
+The installer can now be run in silent mode like this:
+
+./sbs-2.XX.YY-linux-ARCH-libc2_ZZ.run -- -s -i /my/installation/dir/for/raptor
+
+As the .run file is itself a script, the double-dash, --, is required to pass 
+the "-s -i /my/installation/dir/for/raptor" to the embedded script.
+
+Explanation of the flags:
+
+-s run in silent mode
+-i installation directory; if missing or not given a value the script exits
+   with an error. If used without -s, -i is ignored.
+
+Running in interactive mode continues to function as before and uses the 
+dialog utility.
+

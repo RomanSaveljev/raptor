@@ -12,6 +12,7 @@ linux-.*-.*/bin
 linux-.*-.*/bv
 linux-.*-.*/cw_build470msl19
 linux-.*-.*/python27
+linux-.*-.*/python3.*
 linux-.*-.*/share
 linux-.*-.*/info
 linux-.*-.*/man

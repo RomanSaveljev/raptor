@@ -69,8 +69,8 @@ fi
 	grep -v 'util/build'  | 
 	grep -v 'test/epocroot/epoc32/build'  | 
 	grep -v 'pvm'  | 
-	grep -v 'bash'  | 
-	grep -v '.*linux-.*-libc/bin/sh$'  | 
+	grep -v '.*/bash'  | 
+	grep -v 'linux-.*-libc/bin/sh$'  | 
 	grep -v 'install-windows'  | 
 	grep -v '~$'  |  cpio -o --quiet  2>/dev/null 
 ) | ( cd "$TMPSBS" && cpio -i --make-directories  --quiet >/dev/null 2>&1)
