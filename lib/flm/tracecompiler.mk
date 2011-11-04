@@ -140,6 +140,9 @@ $(if $(FLMDEBUG),$(info <debug>PAST GUARD (unique trace) for '$(TRACE_RELEASABLE
 TRACE_PRJNAME_SANITISED:=$(subst .,_,$(TRACE_PRJNAME))
 OLDTC_TRACE_PRJNAME_SANITISED:=$(subst .,_,$(OLDTC_TRACE_PRJNAME))
 
+TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_SANITISED)
+RC:=$(foreach digit,0 1 2 3 4 5 6 7 8 9,$(eval TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_PREFIXED:$(digit)%=_$(digit)%)))
+
 
 JAVA_COMMAND:=$(SBS_JAVATC)
 TRACE_COMPILER_PATH:=$(EPOCROOT)/epoc32/tools
@@ -226,8 +229,6 @@ endif
 endif
 
 ifeq ($(TRACE_VER),new)
-TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_SANITISED)
-RC:=$(foreach digit,0 1 2 3 4 5 6 7 8 9,$(eval TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_PREFIXED:$(digit)%=_$(digit)%)))
 TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(TRACE_PRJNAME_PREFIXED)_0x$(UID_TC)_Dictionary.xml
 AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/$(TRACE_PRJNAME_PREFIXED)_0x$(UID_TC)_TraceDefinitions.h
 else
