@@ -226,8 +226,10 @@ endif
 endif
 
 ifeq ($(TRACE_VER),new)
-TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_Dictionary.xml
-AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/$(TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_TraceDefinitions.h
+TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_SANITISED)
+RC:=$(foreach digit,0 1 2 3 4 5 6 7 8 9,$(eval TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_PREFIXED:$(digit)%=_$(digit)%)))
+TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(TRACE_PRJNAME_PREFIXED)_0x$(UID_TC)_Dictionary.xml
+AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/$(TRACE_PRJNAME_PREFIXED)_0x$(UID_TC)_TraceDefinitions.h
 else
 TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(OLDTC_TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_Dictionary.xml
 AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/internal/symbiantraces/autogen/$(OLDTC_TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_TraceDefinitions.h
