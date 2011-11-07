@@ -71,8 +71,8 @@ def run():
 	t.name = "tracecompiler_whatlog_initnum"
 	t.command = "sbs -b smoke_suite/test_resources/tracecompiler/TC_initnum/group/bld.inf -c armv5.tracecompiler -m ${SBSMAKEFILE} -f ${SBSLOGFILE} && cat ${SBSLOGFILE}"
 	t.targets = [
-		#"$(EPOCROOT)/epoc32/release/armv5/lib/5goldrings.dso",
-		#"$(EPOCROOT)/epoc32/release/armv5/lib/5goldrings{000a0000}.dso",
+		"$(EPOCROOT)/epoc32/release/armv5/lib/5goldrings.dso",
+		"$(EPOCROOT)/epoc32/release/armv5/lib/5goldrings{000a0000}.dso",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/tracecompiler/TC_initnum/traces/5goldrings_dll/fixed_id.definitions",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/tracecompiler/TC_initnum/traces/5goldrings_dll/num_testTraces.h",
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/5goldrings.dll",
