@@ -70,7 +70,6 @@ def run():
 
 	t.name = "tracecompiler_whatlog_initnum"
 	t.command = "sbs -b smoke_suite/test_resources/tracecompiler/TC_initnum/group/bld.inf -c armv5.tracecompiler -m ${SBSMAKEFILE} -f ${SBSLOGFILE} && cat ${SBSLOGFILE}"
-	#TODO: Fix these paths so they refer to _5goldrings
 	t.targets = [
 		#"$(EPOCROOT)/epoc32/release/armv5/lib/5goldrings.dso",
 		#"$(EPOCROOT)/epoc32/release/armv5/lib/5goldrings{000a0000}.dso",
@@ -80,8 +79,8 @@ def run():
 		"$(EPOCROOT)/epoc32/release/armv5/udeb/5goldrings.dll.map",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/5goldrings.dll",
 		"$(EPOCROOT)/epoc32/release/armv5/urel/5goldrings.dll.map",
-		"$(EPOCROOT)/epoc32/ost_dictionaries/5goldrings_dll_0xe800004d_Dictionary.xml",
-		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/5goldrings_dll_0xe800004d_TraceDefinitions.h"
+		"$(EPOCROOT)/epoc32/ost_dictionaries/_5goldrings_dll_0xe800004d_Dictionary.xml",
+		"$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/_5goldrings_dll_0xe800004d_TraceDefinitions.h"
 		]
 
 	t.stdout = [

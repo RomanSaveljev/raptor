@@ -136,12 +136,13 @@ $(TRACE_GUARD):=1
 
 $(if $(FLMDEBUG),$(info <debug>PAST GUARD (unique trace) for '$(TRACE_RELEASABLE_ID)'</debug>))
 # The trace compiler likes to change . into _ so we must do the same in the case of mmps with a name like
-# fred.prd.mmp we want fred_prd
+# fred.prd.mmp we want fred_prd, and if it starts with a number it prefixes it with an underscore, so if
+# we have 3blindmice.mmp we want _3blindmice
 TRACE_PRJNAME_SANITISED:=$(subst .,_,$(TRACE_PRJNAME))
-OLDTC_TRACE_PRJNAME_SANITISED:=$(subst .,_,$(OLDTC_TRACE_PRJNAME))
+RC:=$(foreach digit,0 1 2 3 4 5 6 7 8 9,$(eval TRACE_PRJNAME_SANITISED:=$(TRACE_PRJNAME_SANITISED:$(digit)%=_$(digit)%)))
 
-TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_SANITISED)
-RC:=$(foreach digit,0 1 2 3 4 5 6 7 8 9,$(eval TRACE_PRJNAME_PREFIXED:=$(TRACE_PRJNAME_PREFIXED:$(digit)%=_$(digit)%)))
+OLDTC_TRACE_PRJNAME_SANITISED:=$(subst .,_,$(OLDTC_TRACE_PRJNAME))
+RC:=$(foreach digit,0 1 2 3 4 5 6 7 8 9,$(eval OLDTC_TRACE_PRJNAME_SANITISED:=$(OLDTC_TRACE_PRJNAME_SANITISED:$(digit)%=_$(digit)%)))
 
 
 JAVA_COMMAND:=$(SBS_JAVATC)
@@ -229,8 +230,8 @@ endif
 endif
 
 ifeq ($(TRACE_VER),new)
-TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(TRACE_PRJNAME_PREFIXED)_0x$(UID_TC)_Dictionary.xml
-AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/$(TRACE_PRJNAME_PREFIXED)_0x$(UID_TC)_TraceDefinitions.h
+TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_Dictionary.xml
+AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/platform/symbiantraces/autogen/$(TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_TraceDefinitions.h
 else
 TRACE_DICTIONARY:=$(EPOCROOT)/epoc32/ost_dictionaries/$(OLDTC_TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_Dictionary.xml
 AUTOGEN_HEADER:=$(EPOCROOT)/epoc32/include/internal/symbiantraces/autogen/$(OLDTC_TRACE_PRJNAME_SANITISED)_0x$(UID_TC)_TraceDefinitions.h
