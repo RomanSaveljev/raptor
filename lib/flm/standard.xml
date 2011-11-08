@@ -27,7 +27,6 @@
 		<param name='LISTING_OPTION' default='-S'/>
 		<param name='MMPDEFS' default=''/>
 		<param name='NOCOMPRESSTARGET' default=''/>
-		<param name='POSTLINKER_SUPPORTS_ASMTYPE' default=''/>
 		<param name='POSTLINKER_SUPPORTS_WDP' default=''/>
 		<param name='PAGED' default=''/>
 		<param name='PAGEDCODE_OPTION' default='default'/>
@@ -108,7 +107,7 @@
 		<param name='COMPILER_INTERWORK_DEFINES'/>
 		<param name='COMPILER_SYSTEM_INCLUDE_OPTION'/>
 		<param name='COMPILER_THUMB_DEFINES'/>
-		<param name='C_LANG_OPTION'/>		
+		<param name='C_LANG_OPTION'/>
 		<param name='CPP_LANG_OPTION'/>
 		<param name='CPPFILT'/>
 		<param name='CREATEVMAP'/>
@@ -151,8 +150,9 @@
 		<param name='LINKER_FEEDBACK_OPTION' default=''/>
 		<param name='LINKER_GROUP_START_OPTION'/>
 		<param name='LINKER_GROUP_END_OPTION'/>
-		<param name='LINKER_MISC_FLAGS'/>		
+		<param name='LINKER_MISC_FLAGS'/>
 		<param name='LINKER_NODEBUG_OPTION'/>
+		<param name='LINKER_REMOVE_OPTION' default=''/>
 		<param name='LINKER_SYMBOLS_FILE_OPTION'/>
 		<param name='LINKER_SYMBOLS_OPTION'/>
 		<param name='LINKERFEEDBACK' default='' />
@@ -192,7 +192,7 @@
 		<param name='SHARED_OBJECT_OPTION'/>
 		<param name='SO_NAME_OPTION'/>
 		<param name='SPLIT_OPTION'/>
-		<param name='TREAT_EXES_AS_SHARED'/>		
+		<param name='TREAT_EXES_AS_SHARED'/>
 		<param name='KERNEL_STATIC_RUNTIME_LIB'/>
 		<param name='USE_COMPILATION_COMMAND_FILE' default=''/>
 		<param name='USER_STATIC_RUNTIME_LIB'/>

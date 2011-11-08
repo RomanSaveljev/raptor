@@ -1,0 +1,4 @@
+EXPORTS
+	_ZN9CTestCode10HelloWorldEv @ 1 NONAME
+	_ZN9CTestCode5NewLCER12CConsoleBase @ 2 NONAME
+

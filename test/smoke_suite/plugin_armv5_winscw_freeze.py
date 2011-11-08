@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
@@ -14,19 +14,21 @@
 # Description: 
 #
 
-from raptor_tests import SmokeTest
+from raptor_tests import AntiTargetSmokeTest
 
 def run():
-	t = SmokeTest()
-	t.id = "90"
+	t = AntiTargetSmokeTest()
+	t.usebash = True
+
 	t.name = "plugin_armv5_winscw_freeze"
 	t.description = """Builds several ECOM plugins, with and without explicit DEFFILE statements, confirming
 		the correct FREEZE behaviour in each case.  The correct behaviour for a PLUGIN/PLUGIN3 is
 		indicative of all TARGETTYPEs where the build system defines known exports: FREEZE should do nothing
 		unless an explicit DEFFILE statement is present in the .mmp file.
-		Also confirms default UID2 settings for PLUGIN3 TARGETTYPEs and default resource generation locations
-		for both PLUGIN and PLUGIN3."""
-	t.usebash = True
+		Also confirms:
+		i) default UID2 settings for PLUGIN3 TARGETTYPEs and default resource generation locations
+		   for both PLUGIN and PLUGIN3
+		ii) non-generation of an import library where EXPORTUNFROZEN is used without a DEFFILE statement"""
 	
 	t.command = """
 		sbs -b smoke_suite/test_resources/simple_plugin/bld.inf -c armv5_urel -c winscw_urel CLEAN > /dev/null &&
@@ -46,7 +48,10 @@ def run():
 	
 	t.antitargets = [
 		"smoke_suite/test_resources/simple_plugin/bwins/pluginu.def",
-		"smoke_suite/test_resources/simple_plugin/eabi/pluginu.def"		
+		"smoke_suite/test_resources/simple_plugin/eabi/pluginu.def",
+		"$(EPOCROOT)/epoc32/release/winscw/udeb/plugin4.lib",
+		"$(EPOCROOT)/epoc32/release/armv5/lib/plugin4.dso",
+		"$(EPOCROOT)/epoc32/release/armv5/lib/plugin4{000a0000}.dso"
 		]
 	
 	t.mustmatch = [

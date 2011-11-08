@@ -136,6 +136,19 @@
 		<set name="ARMMACROS.VAR" value="__GCCE_4__ __GCCE_4_4__"/>
 	</var>
 
+	<var name="gcce4_5_1" extends="gcce_base">
+		<env name="SBS_GCCE451BIN" type="toolchainpath" />
+		<set name="GCCEBIN" value="$(SBS_GCCE451BIN)" />
+		<set name="GCCECC" value="$(GCCEBIN)/arm-none-symbianelf-g++$(DOTEXE)" type="tool" versionCommand="$(GCCECC) -dumpversion" versionResult="4.5.1"/>
+		<set name="RUNTIME_LIBS_LIST" value="drtaeabi.dso dfpaeabi.dso"/>
+		<set name="PLATMACROS.VAR" value="GCCE_4 GCCE_4_5"/>
+		<set name="ARMMACROS.VAR" value="__GCCE_4__ __GCCE_4_5__"/>
+		<set name="LINKER_DEFAULT_LIBS" value="-lsupc++ -lgcc -lgcc_eh"/>
+		<set name="KERNEL_STATIC_RUNTIME_LIB" value="ksrt4_0.lib"/>
+		<set name="USER_STATIC_RUNTIME_LIB" value="usrt4_0.lib"/>
+		<set name="USER_STATIC_RUNTIME_LIB_NESTED_EXCEPTIONS" value="usrt_nx_4_0.lib"/>
+	</var>
+
 	<var name="rvct2_2" extends="rvct_base">
 		<env name="RVCT22BIN" type="toolchainpath"/>
 		<env name="RVCT22INC" type="toolchainpath"/>

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2000-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2000-2011 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -24,7 +24,7 @@
 
 // construct/destruct
 
-#if !defined(__ARMCC_4__) and !defined(__X86__)
+#if !defined(__ARMCC_4__) && !defined(__X86__) && !defined(__GCCE_4_5__)
 extern "C" void __ARM_switch8();
 
 void sbs_test()
