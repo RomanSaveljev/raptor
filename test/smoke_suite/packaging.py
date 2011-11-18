@@ -14,12 +14,12 @@
 # Description: 
 # 
 
-from raptor_tests import SmokeTest
+from raptor_tests import AntiTargetSmokeTest
 import os
 
 def run():
-	t = SmokeTest()
-	t.description = "Test the build and package of Raptor built applications using the createsis FLM"
+	t = AntiTargetSmokeTest()
+	t.description = "Test the build, package and clean of Raptor built applications using the createsis FLM"
 
 	t.name = "native_package_vanilla"
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/build_and_package.inf -c armv5 -c winscw"
@@ -38,9 +38,9 @@ def run():
 		"$(EPOCROOT)/epoc32/release/armv5/urel/helloworld.exe.map",
 		"$(EPOCROOT)/epoc32/release/winscw/urel/helloworld.exe",
 		"$(EPOCROOT)/epoc32/release/winscw/urel/helloworld.exe.map",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_armv5.sis",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_armv5.sisx",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_armv5_debug.sis",
-		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_winscw.sis",
+		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_winscw.sisx",
 		"$(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/sis/helloworld_winscw_debug.sis",
 		"$(EPOCROOT)/epoc32/data/z/system/install/helloworld_stub.sis",
 		"$(EPOCROOT)/epoc32/release/winscw/urel/z/system/install/helloworld_stub.sis"
@@ -112,12 +112,12 @@ def run():
 		"HelloWorld_reg_exe/HelloWorld_reg_HelloWorld_reg.rsc.d",
 		"helloworld_armv5_debug_sis/armv5/udeb/armv5_udeb.pkg",
 		"helloworld_armv5_debug_sis/armv5/udeb/helloworld_armv5_debug.sis",
-		"helloworld_armv5_sis/armv5/urel/armv5_urel.pkg",
-		"helloworld_armv5_sis/armv5/urel/helloworld_armv5.sis",
+		"helloworld_armv5_sisx/armv5/urel/armv5_urel.pkg",
+		"helloworld_armv5_sisx/armv5/urel/helloworld_armv5.sis",
 		"helloworld_winscw_debug_sis/winscw/udeb/winscw_udeb.pkg",
 		"helloworld_winscw_debug_sis/winscw/udeb/helloworld_winscw_debug.sis",
-		"helloworld_winscw_sis/winscw/urel/winscw_urel.pkg",
-		"helloworld_winscw_sis/winscw/urel/helloworld_winscw.sis",
+		"helloworld_winscw_sisx/winscw/urel/winscw_urel.pkg",
+		"helloworld_winscw_sisx/winscw/urel/helloworld_winscw.sis",
 		"helloworld_stub_sis/armv5/urel/stub.pkg",
 		"helloworld_stub_sis/armv5/urel/helloworld_stub.sis",
 		"helloworld_stub_sis/winscw/urel/stub.pkg",
@@ -137,8 +137,12 @@ def run():
 	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/custom_package.inf -c armv5 -c winscw"
 	t.run()
 	
-	t.targets.extend(built_targets)
-	t.clean()
+	# confirm clean does as it should, as we know that signsis operation can lead to read-only input files
+	t.name = "native_package_clean"
+	t.command = "sbs -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/build_and_package.inf -b $(SBS_HOME)/test/smoke_suite/test_resources/simple_gui/custom_package.inf -c armv5 -c winscw clean"
+	t.antitargets = built_targets + t.targets
+	t.targets = []
+	t.run()
 
 	qmake_call = "$(EPOCROOT)/epoc32/tools/qt/qmake{ext} " + \
 		"-spec $(EPOCROOT)/epoc32/tools/qt/mkspecs/symbian-sbsv2 " + \
@@ -171,6 +175,7 @@ __ENDOFPATCH__
 	t.name= "qt_package"
 	t.usebash = True
 	t.command = "{qmake} && {patch} {raptor}".format(qmake=qmake_call.format(ext=tool_ext), patch=patch_bldinf, raptor=raptor_call)
+	t.antitargets = []
 	t.targets = [
 		"$(EPOCROOT)/epoc32/data/z/private/10003a3f/import/apps/lottonumberpicker_reg.rsc",
 		"$(EPOCROOT)/epoc32/data/z/resource/apps/lottonumberpicker.rsc",
@@ -240,3 +245,4 @@ __ENDOFPATCH__
 	t.name="packaging"
 	t.print_result()
 	return t
+
