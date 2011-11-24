@@ -42,7 +42,7 @@ char *buffer_append(buffer *b, char *bytes, unsigned int size);
 char *buffer_prepend(buffer *b, char *bytes, unsigned int size);
 char *buffer_makespace(buffer *b, unsigned int size);
 void buffer_usespace(buffer *b, unsigned int nbytes);
-byteblock *buffer_getbytes(buffer *b, int *iterator);
+byteblock *buffer_getbytes(buffer *b, unsigned int *iterator);
 void buffer_free(buffer **b);
 
 #endif
