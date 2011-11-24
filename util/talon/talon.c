@@ -27,8 +27,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -123,7 +125,7 @@ void prependattributes(buffer *b, char *attributes)
 	while (*finish != '\0' && rt < &recipetag[RECIPETAG_STRMAX-1])
 	{
 		*rt = *finish;
-		*rt++; finish++;
+		rt++; finish++;
 	}
 
 	*rt = '\0';
@@ -559,7 +561,7 @@ int main(int argc, char *argv[])
 							"\n<warning>Command line length '%d' exceeds the shell limit on this system of '%d'.  " \
 							"If this recipe is a compile, try using the '.use_compilation_command_file' variant to reduce overall command line length.</warning>", \
 							cl_actual, shell_cl_max);
-						status[WARNING_STRMAX-1] = '\0';
+						warning[WARNING_STRMAX-1] = '\0';
 						}
 				}
 
