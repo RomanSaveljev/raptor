@@ -99,10 +99,10 @@ Example
     START EXTENSION utility.createsis
     #ifdef WINSCW
     OPTION PKG_FILE sis/winscw_urel.pkg
-    OPTION SIS_FILE sis/helloworld_winscw.sis
+    OPTION SIS_FILE sis/helloworld_winscw.sisx
     #else
     OPTION PKG_FILE sis/armv5_urel.pkg
-    OPTION SIS_FILE sis/helloworld_armv5.sis
+    OPTION SIS_FILE sis/helloworld_armv5.sisx
     #endif
     OPTION TARGET_FILE helloworld.exe
     OPTION BUILD_TYPE urel
