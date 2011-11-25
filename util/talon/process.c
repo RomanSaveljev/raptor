@@ -65,7 +65,6 @@ proc *process_run(char executable[], char *args[], int timeout)
 	if (p == NULL)
 		return NULL;
 
-	char *text;
 	int status;
 	int stdout_p[2];
 	int stderr_p[2];
@@ -106,7 +105,6 @@ proc *process_run(char executable[], char *args[], int timeout)
 	struct pollfd pf[2];
 
 	int pv;
-	int have_status = 0;
 	do
 	{
 		pf[0].fd = stdout_p[0];

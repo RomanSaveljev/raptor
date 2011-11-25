@@ -19,6 +19,7 @@
 
 
 #include "sema.h"
+#include "log.h"
 
 // OS specific headers
 #ifdef WIN32

@@ -168,7 +168,7 @@ void buffer_usespace(buffer *b, unsigned int nbytes)
 		last->fill = last->size; /* really an error - no exceptions though. */
 }
 
-byteblock *buffer_getbytes(buffer *b, int *iterator)
+byteblock *buffer_getbytes(buffer *b, unsigned int *iterator)
 {
 	if (!b)
 		return NULL;
