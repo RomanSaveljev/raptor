@@ -1,6 +1,6 @@
 
 The output from tools run by Raptor will typically not be XML, so Raptor wraps
-all tool output in CDATA sections. For example,
+all tool output in CDATA sections. For example:
 
 <![CDATA[
 + python write_my_code.py
@@ -8,7 +8,7 @@ writing MyClass.hxx
 writing MyClass.cpp
 ]]>
 
-The text between "[CDATA[" and "]]" is arbitary, however there are some
+The text between "[CDATA[" and "]]" is arbitrary, however there are some
 characters which are not permitted and will be rejected as bad XML by
 many XML parsers. Therefore Raptor will also translate these invalid
 characters into strings which are valid. For example, control characters
