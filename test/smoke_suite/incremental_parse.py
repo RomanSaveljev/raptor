@@ -134,6 +134,7 @@ def run():
 
 	t.mustmatch = [	
 					"incremental makefile generation: cannot reuse any pre-existing makefiles",
+					"incremental makefile generation: metadata changed: .*simple.simple\.mmp",
 					"compile.*smoke_suite.test_resources.simple.test.cpp.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test1.c\+\+.*\[arm.v5.urel.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test.cia.*\[arm.v5.urel.gcce4_4_1\]",
@@ -156,6 +157,7 @@ def run():
 
 	t.mustmatch = [	
 					"incremental makefile generation: cannot reuse any pre-existing makefiles",
+					"incremental makefile generation: no metadata was newer than the makefiles",
 					"compile.*smoke_suite.test_resources.simple.test.cpp.*\[arm.v5.udeb.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test1.c\+\+.*\[arm.v5.udeb.gcce4_4_1\]",
 					"compile.*smoke_suite.test_resources.simple.test.cia.*\[arm.v5.udeb.gcce4_4_1\]",

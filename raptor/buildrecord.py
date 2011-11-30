@@ -13,13 +13,12 @@
 #
 # Description:
 
-default_history_size = 10
-
 """ Module for creating/manipulating an "audit trail" of builds """
 
 import os
 import stat
 import json
+import time
 
 from raptor import makefile
 
@@ -49,11 +48,11 @@ class BuildRecord(object):
 	depends on (e.g. the bld.infs and mmps that correspond to that makefileset).
 	"""
 	
-	stored_attrs = ['commandline', 'environment', 'topmakefilename','logfilename']
+	stored_attrs = ['commandline', 'environment', 'topmakefilename','logfilename', 'timing']
 	sensed_environment_variables = ["EPOCROOT","PATH"]
 	history_size = default_history_size
 	parsefails = []
-	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None, logfilename='-'):
+	def __init__(self, commandline=None, environment=None, topmakefilename=None, makefilesets=None, timing=None, logfilename='-'):
 		""" 	Create a new record of a build that is about to happen (in which case the default parameters
 			may be used) or a build that is complete.  Parameters must all be strings. 
 		"""
@@ -66,7 +65,11 @@ class BuildRecord(object):
 		self.makefilesets=makefilesets #  an array of makefile.BaseMakefileset Object
 		self.filename = self.topmakefilename + ".buildrecord"
 		self.reused = False
-		self.new_metadata = [] # record what was out of date
+		self.new_metadata = set() # record what was out of date
+		if timing != None:
+			self.timing = timing
+		else:
+			self.timing = {'start' : time.time(), 'runtime' : 0 }
 
 	def to_file(self):
 		""" Write out the build record so that we can find it in future builds"""
@@ -231,9 +234,28 @@ class BuildRecord(object):
 				newbr.makefilesets = oldbr.makefilesets
 				newbr.uptodate = True
 				newbr.reused = True
+
 		return newbr
 
-	def check_uptodate(self,triggers=[]):
+	def build_start(self,stime=None):
+		""" Record timing for the start of the build, allow earlier 
+			time to be used to include setup before BuildRecord could be created"""
+		if stime is not None:
+			self.timing['start'] = stime
+		else: 
+			self.timing['start'] = time.time()
+			
+	def build_end(self,stime=None):
+		"""Before the build finishes we can record timing information"""
+		if stime is not None:
+			end = stime
+		else:
+			end = time.time()
+
+		self.timing['runtime'] = end - self.timing['start']
+		
+
+	def check_uptodate(self,triggers = None):
 		""" 
 			Return False if any of the metadata is out of date.
 
@@ -254,6 +276,7 @@ class BuildRecord(object):
 			# No exception so all must be up-to-date
 			return True
 		except makefile.OutOfDateException as e:
-			triggers.extend(e.items)
+			if triggers is not None:
+				triggers.update(e.items)
 
 		return False

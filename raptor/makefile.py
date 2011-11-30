@@ -323,7 +323,7 @@ class BaseMakefileSet(object):
 			makefilestat = os.stat(makefile)
 			makefile_mtime = makefilestat[stat.ST_MTIME]
 		except OSError as e:
-			o = OutOfDateException(message_template.format(e.filename,items=[e.filename]))
+			o = OutOfDateException(message_template.format(e.filename),items=[e.filename])
 			raise o
 
 		try:
@@ -335,7 +335,7 @@ class BaseMakefileSet(object):
 						deptime = depstat[stat.ST_MTIME]
 
 						if deptime > makefile_mtime:
-							o = OutOfDateException(message_template.format(depfile,items=[depfile]))
+							o = OutOfDateException(message_template.format(depfile),items=[depfile])
 							raise o
 
 					if l.startswith(BaseMakefileSet.include_prefix):
@@ -356,11 +356,11 @@ class BaseMakefileSet(object):
 									deptime = depstat[stat.ST_MTIME]
 
 									if deptime > makefile_mtime:
-										o = OutOfDateException(message_template.format(depfile,items=[depfile]))
+										o = OutOfDateException(message_template.format(depfile),items=[depfile])
 										raise o
 
 		except IOError as e:
-			o = OutOfDateException(message_template.format(e.filename,items=[e.filename]))
+			o = OutOfDateException(message_template.format(e.filename),items=[e.filename])
 			raise o
 
 
