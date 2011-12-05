@@ -175,7 +175,7 @@
 		<param name='PREPROCESSOR_OPTION'/>
 		<param name='RANSLEEP'/>
 		<param name='RELEASEPATH'/>
-		<param name='REMOVE_UNUSED_SECTIONS' />
+		<param name='REMOVE_UNUSED_SECTIONS' default=''/>
 		<param name='RESOLVED_DEFFILE'/>
 		<param name='RESOLVED_DEFFILE_SECONDARY'/>
 		<param name='RUNTIME_LIBS_LIST'/>
