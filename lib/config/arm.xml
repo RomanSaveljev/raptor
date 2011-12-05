@@ -75,6 +75,7 @@
 		<set name="POSTLINKER_COMPRESSION_DEFAULT" value="inflate"/>
 		<set name="POSTLINKER_FPU_MAPPING" value="softvfp>softvfp vfpv2>vfpv2 softvfp+vfpv2>vfpv2 softvfp+vfpv3>vfpv3"/>
 		<set name="RELEASEPATH" value="$(EPOCROOT)/epoc32/release"/>
+		<set name="REMOVE_UNUSED_SECTIONS" value=""/>
 		<set name="RESOLVED_DEFFILE" value=""/>
 		<set name="RESOLVED_DEFFILE_SECONDARY" value=""/>
 		<set name="RUNTIME_LIBS_PATH" value="$(EPOCROOT)/epoc32/release/armv5/lib"/>

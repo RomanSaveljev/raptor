@@ -1,2 +1,7 @@
-Linker --remove enables removal of unused sections from the ELF binaries.
-This option is enabled by default in the RVCT builds
+Linker --remove enables removal of unused sections from ELF binaries.
+This option was enabled by default in the RVCT builds in 2.17.3 but as of
+2.17.4 it has been disabled temporarily as some DLLs have reported runtime
+problems with it enabled.  The "remove_unused_sections" variant is available
+to switch it back on again e.g. via the apply keyword in an mmp ("apply
+remove_unused_sections") or added to the configuration name on the commandline
+(e.g. -c armv5.generic.remove_unused_sections").

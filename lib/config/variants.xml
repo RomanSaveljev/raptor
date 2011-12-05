@@ -324,4 +324,9 @@
 	<var name="use_compilation_command_file">
 		<set name="USE_COMPILATION_COMMAND_FILE" value="TRUE"/>
 	</var>
+
+	<var name='remove_unused_sections'>
+		<!-- this rvct option causes the linker to remove unused input sections, reducing symbol file size -->
+		<set name="REMOVE_UNUSED_SECTIONS" value="TRUE"/>
+	</var>
 </build>
