@@ -20,7 +20,7 @@
 # both of these are done automatically by the installer builder.
 
 name = 'sbs' # Raptor's name
-version=(2,17,4,"ISODATE","symbian build system","CHANGESET")
+version=(2,17,4,"2011-12-06","symbian build system","e46d01bfb29b")
 
 def numericversion():
 	"""Raptor version string"""

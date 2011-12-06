@@ -299,6 +299,7 @@ if __name__ == "__main__":
 					urlget.get_http(url,nsis_zip)
 					got_zip = True
 					print("Download ok")
+					break # no need to download the next one
 				except Exception,e:
 					print("WARNING: couldn't get {0} from {1}: {2}".format(nsis_zip, url, str(e)))
 					continue
