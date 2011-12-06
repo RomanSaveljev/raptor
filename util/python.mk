@@ -27,8 +27,7 @@ all:: python$(RAPTOR_PYTHON_DIRVERSION)
 
 python:: $(RAPTOR_PYTHON_DIRVERSION)
 	
-$(PYTHON_TAR):
-	wget $(PYTHON_TAR_URL) -O $(PYTHON_TAR)
+$(call fetch_gbzip,$(PYTHON_TAR),$(PYTHON_TAR_URL))
 	
 $(PYINSTALLROOT)/bin/python: $(PYTHON_TAR) 
 	rm -rf $(PYTHON_SOURCEDIR) && \

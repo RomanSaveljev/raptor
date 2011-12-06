@@ -23,7 +23,7 @@ RAPTOR_DIALOG_VER:=1.1-20080819
 DIALOG_SOURCEDIR:=$(OUTPUTPATH)/dialog-$(RAPTOR_DIALOG_VER)
 DIALOG_TAR:=$(SBS_HOME)/util/ext/dialog-$(RAPTOR_DIALOG_VER).tar.gz
 
-DIALOG_TAR_URL:=http://projects.developer.nokia.com/raptor/files/dialog-$(RAPTOR_DIALOG_VER).tar.gz
+DIALOG_TAR_URL:=http://projects.developer.nokia.com/raptor/files/dialog-$(RAPTOR_DIALOG_VER).tar.gz http://rene.europe.nokia.com/~raptorbot/files/dialog-$(RAPTOR_DIALOG_VER).tar.gz
 
 
 define b_dialog
@@ -44,12 +44,7 @@ $(INSTALLROOT)/bin/dialog: $(DIALOG_TAR)
 	$(MAKE) -j8 && $(MAKE) install \
 	)
 
-$(DIALOG_TAR):
-	for url in $(DIALOG_TAR_URL); do \
-    	wget $(DIALOG_TAR_URL) -O $(DIALOG_TAR); \
-    	if [ $$$$? -eq 0 ]; then break; fi ;\
-	done
-
+$(call fetch_gbzip,$(DIALOG_TAR),$(DIALOG_TAR_URL))
 
 endef
 

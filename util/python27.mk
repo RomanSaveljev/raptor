@@ -25,6 +25,6 @@ RAPTOR_PYTHON_VER:=2.7.2
 RAPTOR_PYTHON_DIRVERSION:=$(subst .,,$(RAPTOR_PYTHON_VER))
 PYTHON_SOURCEDIR:=$(OUTPUTPATH)/Python-$(RAPTOR_PYTHON_VER)
 PYTHON_TAR:=$(SBS_HOME)/util/ext/Python-$(RAPTOR_PYTHON_VER).tar.bz2
-PYTHON_TAR_URL:=http://www.python.org/ftp/python/$(RAPTOR_PYTHON_VER)/Python-$(RAPTOR_PYTHON_VER).tar.bz2
+PYTHON_TAR_URL:=http://rene.europe.nokia.com/~raptorbot/files/$(RAPTOR_PYTHON_VER)/Python-$(RAPTOR_PYTHON_VER).tar.bz2  http://www.python.org/ftp/python/$(RAPTOR_PYTHON_VER)/Python-$(RAPTOR_PYTHON_VER).tar.bz2
 PYINSTALLROOT:=$(INSTALLROOT)/python27
 $(eval $(b_python))

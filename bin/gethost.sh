@@ -27,14 +27,25 @@ getopts de  OPT
 
 if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 	ARCH=$(uname -i)
-	# Find the libce binary and use a regular expression to slice off the major and minor version numbers
+	# Find the libc binary and use a regular expression to slice
+	# off the major and minor version numbers
 	# e.g /lib/libc-2.12.1.so  => libc2_12
-	if [ -d /lib/*-linux-gnu ]; then
-		LIBCPAT='/lib/*-linux-gnu/libc-*'
-	else
-		LIBCPAT='/lib/libc-*'
+
+	# if 32 and 64 bit architectures are present then libc is usually
+	# the same either way so pick one, in this case the last. If only
+	# 1 architecture is present then this still works. 
+	_clibs=($(echo /lib/*-linux-gnu/libc-*)) # Make an array
+    LIBCPAT=${_clibs[${#_clibs[*]}-1]} # Arbitrarily select last item
+
+
+	# Some systems have a simpler convention and we can 
+	#  Just look at the 32-bit libc to get a version
+	if [ ! -f "$LIBCPAT" ]; then
+		LIBCPAT=$(echo /lib/libc-*)
 	fi
-	LIBC=$(echo $LIBCPAT | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
+
+	# Get the libc major and minor version numbers
+	LIBC=$(echo "$LIBCPAT" | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
 	HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 
 	# The 32-bit platform is often compatible in the sense that

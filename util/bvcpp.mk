@@ -39,13 +39,7 @@ $(INSTALLROOT)/bv/bin/cpp: $(BVCPP_TAR)
 	tar -xzf $(BVCPP_TAR)&& touch $$@ ; else \
 	echo "Cannot find a prepackaged binary variation capabale CPP.  GCC 4.4 is usually sufficient - set SBS_BVCPP to point to it"; fi
 
-
-$(BVCPP_TAR):
-	-for url in $(BVCPP_TAR_URL); do \
-	    wget $(BVCPP_TAR_URL) -O $(BVCPP_TAR);  \
-	    if [ $$$$? -eq 0 ]; then break; else rm $(BVCPP_TAR); fi ; \
-	done
-
+$(call fetch_gbzip,$(BVCPP_TAR),$(BVCPP_TAR_URL))
 
 endef
 
