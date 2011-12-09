@@ -22,8 +22,7 @@ import traceback
 script = os.path.abspath(sys.argv[0])
 bindir = os.path.dirname(script)
 # add the Raptor python and plugins directories to the PYTHONPATH
-sys.path.append(os.path.join(bindir, ".."))
-sys.path.append(os.path.join(bindir, "..","raptor","plugins"))
+sys.path[0:0]=[os.path.join(bindir, ".."),os.path.join(bindir, "..","raptor","plugins")]
 
 if len(sys.argv) < 3:
 	sys.stderr.write("""usage: %s input_dir1 [input_dir2...] output_index_file

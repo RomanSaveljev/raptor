@@ -11,6 +11,7 @@
 
 <h3>Defect Fixes</h3>
 <ul>
+<li>Make sbs_index.py resistant to strange PYTHONPATH settings that cause the exception "ImportError: No module named version"</li>
 <li>
 Disable "unused sections removal" temporarily for RVCT since some Symbian DLL's have reported runtime failures with the switch enabled. A remove_unused_sections variant has been introduced instead to make the feature switchable.
 </li>
