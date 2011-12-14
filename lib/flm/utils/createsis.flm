@@ -67,8 +67,11 @@ endif
 
 BUILD_DIR=$(OUTPUTPATH)/$(notdir $(subst .,_,$(SIS_FILE)))/$(VARIANTPLATFORM)/$(VARIANTTYPE)
 PROCESSED_PKG_FILE_TEMP_ABS:=$(if $(PKG_FILE),$(BUILD_DIR)/$(notdir $(PKG_FILE)),)
-UNSIGNED_SIS_FILE_TEMP_ABS:=$(if $(SIS_FILE),$(BUILD_DIR)/$(notdir $(SIS_FILE)),)
 
+# makesis doesn't like generating files without a .sis extension
+# we ensure that the intermediate file it is asked to generate complies, whilst honouring whatever
+# is specified for SIS_FILE in the final sign/copy to the published location
+UNSIGNED_SIS_FILE_TEMP_ABS:=$(if $(SIS_FILE),$(BUILD_DIR)/$(basename $(notdir $(SIS_FILE))).sis,)
 
 ifneq ($(FLMDEBUG),)
 $(info <debug>createsis.flm: PKG_FILE_ABS=$(PKG_FILE_ABS)</debug>)
@@ -107,9 +110,11 @@ $(UNSIGNED_SIS_FILE_TEMP_ABS): $(PROCESSED_PKG_FILE_TEMP_ABS) $(DEPEND_FILES_ABS
 	$(call endrule,makesis)
 	
 ifneq ($(CERTIFICATE_FILE_ABS),)
+# Ensure we remove any potential "read-onlyness" added by signsis to the input .sis file
 $(SIS_FILE_ABS): $(UNSIGNED_SIS_FILE_TEMP_ABS) $(CERTIFICATE_FILE_ABS) $(PRIVATE_KEY_FILE_ABS)
 	$(call startrule,signsis) \
-	$(SIGNSIS) $(SIGNSIS_ARGS) $$< $$@ $(CERTIFICATE_FILE_ABS) $(PRIVATE_KEY_FILE_ABS) $(PRIVATE_KEY_PASSPHRASE) \
+	$(SIGNSIS) $(SIGNSIS_ARGS) $$< $$@ $(CERTIFICATE_FILE_ABS) $(PRIVATE_KEY_FILE_ABS) $(PRIVATE_KEY_PASSPHRASE) && \
+	$(GNUCHMOD) a+w $(UNSIGNED_SIS_FILE_TEMP_ABS) \
 	$(call endrule,signsis)
 else
 $(SIS_FILE_ABS): $(UNSIGNED_SIS_FILE_TEMP_ABS)
@@ -125,3 +130,4 @@ ifeq ($(call lowercase,$(BUILD_TYPE)),$(VARIANTTYPE))
   $(call raptor_release,$(SIS_FILE_ABS))
   $(call raptor_clean,$(PROCESSED_PKG_FILE_TEMP_ABS) $(UNSIGNED_SIS_FILE_TEMP_ABS) $(SIS_FILE_ABS))
 endif
+

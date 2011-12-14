@@ -72,6 +72,16 @@ referenced by the record can be reused.
 
 Build record files are written in JSON format.
 
+Performance and Timing Data from Build Records
+-----------------------------------------------
+The Build Record (as of 2.17.4) also records the start time, end time and
+running time of the build in the JSON "timing" element.  The start and end
+times are decimal fractions of "seconds" from Python's time.time() method
+and the run time (end-start) is similarly a decimal fraction in seconds.
+
+This provides an easy way to collect performance data over a number of builds
+- particularly from users who have been experiencing problems with slow builds
+
 
 Example Demonstrating incremental Parsing Use Cases
 ----------------------------------------------------

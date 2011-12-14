@@ -37,6 +37,13 @@ def cat(input_list, output):
 			with open(input, "rb") as fin:
 				fout.writelines(fin)
 
+def linecount(input):
+	lines = 0
+	with open(input, "rb") as fin:
+		for line in fin:
+			lines += 1
+	return lines
+	
 def merge(*iterables):
     for element in heapq.merge(*iterables):
         yield element

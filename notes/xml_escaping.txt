@@ -1,6 +1,6 @@
 
 The output from tools run by Raptor will typically not be XML, so Raptor wraps
-all tool output in CDATA sections. For example,
+all tool output in CDATA sections. For example:
 
 <![CDATA[
 + python write_my_code.py
@@ -8,12 +8,12 @@ writing MyClass.hxx
 writing MyClass.cpp
 ]]>
 
-The text between "[CDATA[" and "]]" is arbitary, however there are some
+The text between "[CDATA[" and "]]" is arbitrary, however there are some
 characters which are not permitted and will be rejected as bad XML by
 many XML parsers. Therefore Raptor will also translate these invalid
 characters into strings which are valid. For example, control characters
-in the ASCII range 0-31 are translated into "^@", "^A", "^B" etc. (except
-for CTRL-I, CTRL-J and CTRL-M which are allowed).
+in the ASCII range 0-31 are translated into "&#x00;", "&#x01;", "&#x02" etc.
+(except for CTRL-I, CTRL-J and CTRL-M which are allowed).
 
 In general, tools should not be writing non-printable characters to stdout
 and stderr anyway. But if they do, then at least you will see something
@@ -21,6 +21,6 @@ sensible in the Raptor logs. For example,
 
 <![CDATA[
 + python hack_my_code.py
-error: don't hack it you ^F^O^O^L.
+error: don't hack it you &#xff;
 ]]>
 

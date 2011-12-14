@@ -19,6 +19,7 @@
 
 
 #include "sema.h"
+#include "log.h"
 
 // OS specific headers
 #ifdef WIN32
@@ -91,10 +92,10 @@ int sema_wait(sbs_semaphore *s)
     
     /* wait for the semaphore to be free [timeout if it takes too long] */
  	int timedOutFlag = 0;
-	int semcount = 0;
 	#ifdef WIN32
  		timedOutFlag = (WaitForSingleObject(s->handle, s->timeout) != WAIT_OBJECT_0);
 	#else
+		int semcount = 0;
 
 		sem_getvalue(s->handle, &semcount);
       		debug("sema: count before wait: %d\n", semcount);
