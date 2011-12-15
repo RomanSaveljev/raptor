@@ -27,8 +27,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -123,7 +125,7 @@ void prependattributes(buffer *b, char *attributes)
 	while (*finish != '\0' && rt < &recipetag[RECIPETAG_STRMAX-1])
 	{
 		*rt = *finish;
-		*rt++; finish++;
+		rt++; finish++;
 	}
 
 	*rt = '\0';
@@ -559,7 +561,7 @@ int main(int argc, char *argv[])
 							"\n<warning>Command line length '%d' exceeds the shell limit on this system of '%d'.  " \
 							"If this recipe is a compile, try using the '.use_compilation_command_file' variant to reduce overall command line length.</warning>", \
 							cl_actual, shell_cl_max);
-						status[WARNING_STRMAX-1] = '\0';
+						warning[WARNING_STRMAX-1] = '\0';
 						}
 				}
 
@@ -593,7 +595,7 @@ int main(int argc, char *argv[])
 			unsigned int iterator = 0;
 			unsigned int written = 0;
 			byteblock *bb;
-			char sub[2] = "^@";
+			char sub[7] = "&#x00;";
 			
 			if (descramble)	
 				sema_wait(&talon_sem);
@@ -604,7 +606,7 @@ int main(int argc, char *argv[])
 					
 				if (dotagging)
 				{
-					/* the output is XML so we must replace any CTRL-characters */
+					/* the output is XML so we must replace any non-printable characters */
 					char *ptr = &bb->byte0;
 					char *end = ptr + bb->fill;
 
@@ -612,17 +614,17 @@ int main(int argc, char *argv[])
 					
 					while (ptr < end)
 					{
-						if (*ptr >= 0 && *ptr < 32 && *ptr != 9 && *ptr != 10 && *ptr != 13)
+						if ((*ptr < 32 || *ptr > 126) && *ptr != 9 && *ptr != 10 && *ptr != 13)
 						{
-							/* output any unwritten characters before this CTRL */
+							/* output any unwritten characters before this non-printable */
 							if (ptr > start)
 								write(STDOUT_FILENO, start, ptr - start);
 							
-							/* 0->@, 1->A, 2->B etc. */
-							sub[1] = *ptr + 64;
+							/* 0->&#x00; 1->&#x01; ... 255->&#xff; */
+							sprintf(sub, "&#x%02x;", (unsigned char)*ptr);
 							
-							/* output the modified CTRL character */
-							write(STDOUT_FILENO, sub, 2);
+							/* output the modified non-printable character */
+							write(STDOUT_FILENO, sub, 6);
 							start = ptr + 1;
 						}
 						ptr++;

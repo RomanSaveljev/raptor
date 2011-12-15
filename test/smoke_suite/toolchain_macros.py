@@ -33,7 +33,7 @@ def run():
 
 	rootname = "toolchain_macros_armv5_{0}_{1}"
 	rootcommand = "sbs -b smoke_suite/test_resources/toolchain_macros/bld.inf -c arm.v5.urel."
-	macromatch = ": #warning( directive:)? {0}(</warning>)?$"
+	macromatch = ": #warning( directive:)? {0}( \[-Wcpp\])?(</warning>)?$"
 
 	for toolchain in sorted(toolchains.keys()):
 		t.name = rootname.format(toolchain, "clean")

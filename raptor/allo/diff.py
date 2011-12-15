@@ -106,7 +106,7 @@ class DiffableLog(object):
 		# sort the big .csv file
 		csv_sort = csv_cat + ".sort"
 		if new_csv_files or not os.path.isfile(csv_sort):
-			allo.utils.sort(csv_cat, csv_sort)
+			allo.utils.sort(csv_cat, csv_sort, allo.utils.linecount(csv_cat))
 		
 		# remove duplicate lines from the big .csv file
 		self.csv = csv_sort + ".uniq"

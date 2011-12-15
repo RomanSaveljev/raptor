@@ -1326,10 +1326,10 @@ class Raptor(object):
 		if self.quiet:
 			return
 
-		self.endtime = time.time()
-		self.runtime = int(0.5 + self.endtime - self.starttime)
-		self.raptor_params.runtime = self.runtime
-		self.Info("Run time {0} seconds".format(self.runtime))
+		# Allow filters access to the build duration or "run time"
+		self.raptor_params.runtime = int(0.5 + self.build_record.timing['runtime'])
+
+		self.Info("Run time {0} seconds".format(self.raptor_params.runtime))
 
 	def AssertBuildOK(self):
 		"""Raise a BuildCannotProgressException if no further processing is required
@@ -1430,7 +1430,7 @@ class Raptor(object):
 				self.out.write(timing.Timing.start_string(object_type = object_type,
 						task = task, key = key))
 			except Exception as exception:
-				self.Error(exception.Text, function = "InfoStartTime")
+				self.Error(exception.message, function = "InfoStartTime")
 
 	def InfoEndTime(self, object_type, task, key):
 		if self.timing:
@@ -1600,15 +1600,16 @@ class Raptor(object):
 			if self.incremental_parsing:
 				self.build_record = BuildRecord.from_old(adir = str(self.topMakefile.Dir()), commandline=" ".join(self.args), environment = environment, topmakefile = str(makefile), logfilename = str(self.logFileName))
 				must_create_makefiles = not self.build_record.reused
-				if must_create_makefiles:
-					if len(self.build_record.new_metadata) > 0:
-						self.Info("incremental makefile generation: out of date items:  {0}".format("  ".join(set(self.build_record.new_metadata))))
 			else:
 				self.build_record = BuildRecord(commandline=" ".join(self.args), environment = environment, topmakefilename = str(makefile), logfilename=str(self.logFileName), makefilesets=[])
 
 			if must_create_makefiles:
 				if self.incremental_parsing:
 					self.Info("incremental makefile generation: cannot reuse any pre-existing makefiles")
+					if len(self.build_record.new_metadata) > 0:
+						self.Info("incremental makefile generation: metadata changed: {0}".format("  ".join(self.build_record.new_metadata)))
+					else:
+						self.Info("incremental makefile generation: no metadata was newer than the makefiles")
 
 				# find out what components to build, and in what way
 				layers = []
@@ -1666,19 +1667,24 @@ class Raptor(object):
 
 				self.build_record = BuildRecord(commandline=" ".join(self.args), environment=environment, topmakefilename=str(makefile), logfilename=str(self.logFileName), makefilesets=[])
 
+				self.build_record.build_start(self.starttime)
 				for l in layers:
 					# create specs for a specific group of components
 					try:
 						l.realise(self)
 					except raptor.make.CannotWriteMakefileException as e:
 						pass # make will report these errors itself
-						
+
+				# Record the end of the build						
+				self.build_record.build_end()
+
 				try:
 					self.build_record.to_file()
 				except Exception as e:
 					self.Info("Couldn't write build record file: {0}".format(str(e)))
 
 			else: 
+				self.build_record.build_start(self.starttime)
 				# Reusing old makefiles
 				for makefileset in self.build_record.makefilesets:
 					self.InfoStartTime(object_type = "makefileset", task = "build",
@@ -1686,6 +1692,7 @@ class Raptor(object):
 					result = self.Make(makefileset)
 					self.InfoEndTime(object_type = "makefileset", task = "build",
 							key = makefileset.metadepsfilename)
+					self.build_record.build_end()
 				
 
 		except BuildCannotProgressException as b:

@@ -44,7 +44,7 @@ class HostPlatform(object):
 	""" List the host platforms on which we can build.  Allow configuration
  	    files to specify different information based on that.
 	"""
-	hostplatforms = ["win32", "win64", "linux2","linux3"]
+	hostplatforms = ["win32", "win64", "linux2", "linux3"]
 	hostplatform = sys.platform
 
 	@classmethod

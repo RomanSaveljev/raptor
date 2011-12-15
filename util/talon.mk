@@ -38,6 +38,7 @@ linux_PTHREADLIBS:=-lpthread
 LDFLAGS:=$(linux_PTHREADLIBS) -lrt
 endif
 
+CFLAGS:=$(CFLAGS) -Wall
 
 SOURCEDIR:=$(subst \,/,$(SBS_HOME))/util/talon
 

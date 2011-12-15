@@ -125,7 +125,7 @@ DWORD readpipe_thread(void *param)
 
 	while (1)
 	{
-		DWORD  waitres = WaitForSingleObject(io_ops->semaphore, INFINITE);
+		WaitForSingleObject(io_ops->semaphore, INFINITE);
 		iopipe_op = io_ops->last;
 
 		DEBUG(("readpipe_thread: pre-ReadFile%d: %d \n", iopipe_op->id, iopipe_op->nbytes));
@@ -140,8 +140,6 @@ DWORD readpipe_thread(void *param)
 proc *process_run(char executable[], char *args[], int timeout)
 {
 	proc *retval = NULL;
-	char *text;
-	int status;
 	tl_stream stdout_p;
 	tl_stream stdin_p;
 	SECURITY_ATTRIBUTES saAttr; 
@@ -291,9 +289,6 @@ proc *process_run(char executable[], char *args[], int timeout)
 		p->causeofdeath = PROC_SOMEODDDEATH;
 		RETURN(p);
 	}
-
-	int have_status = 0;
-
 
 	DEBUG(("Closing Handles. \n"));
 	if (!CloseHandle(stdout_p.write)) 
