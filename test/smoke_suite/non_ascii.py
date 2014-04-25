@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*- This line *must* be on the first line of the file!
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2014 Microsoft Mobile and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of the License "Eclipse Public License v1.0"
