@@ -46,7 +46,6 @@ if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 
 	# Get the libc major and minor version numbers
 	LIBC=$(echo "$LIBCPAT" | sed -r 's#.*/libc-([0-9]*)\.([0-9]*)(\.([0-9]*))?.so#libc\1_\2#')
-	HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 
 	# The 32-bit platform is often compatible in the sense that
 	# a) 32-bit programs can run on the 64-bit OS.
@@ -59,6 +58,7 @@ if [[ "${OSTYPE}" =~ "linux" || "${HOSTPLATFORM}" =~ "linux" ]]; then
 		ARCH=$(uname -m)
 	fi
 
+	HOSTPLATFORM="linux ${ARCH} ${LIBC}"
 	HOSTPLATFORM_DIR="linux-${ARCH}-${LIBC}"
 	HOSTPLATFORM32_DIR="linux-${ARCH32}-${LIBC}"
 	
