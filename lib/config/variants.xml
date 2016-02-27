@@ -237,7 +237,7 @@
 	<var name="gccx86" extends="gccx86_base">
 		<env name="SBS_GCCX86BIN" type="toolchainpath" />
 		<set name="GCCX86BIN" value="$(SBS_GCCX86BIN)" />
-		<set name="GCCX86CC" value="$(GCCX86BIN)/g++$(DOTEXE)" type="tool" versionCommand="$(GCCX86CC) -dumpversion" versionResult="3\.4\.5"/>
+		<set name="GCCX86CC" value="$(GCCX86BIN)/g++$(DOTEXE)" type="tool" versionCommand="$(GCCX86CC) -dumpversion" versionResult="4\.9\.2"/>
 		<set name="RUNTIME_LIBS_LIST" value=""/>
 	</var>
 
